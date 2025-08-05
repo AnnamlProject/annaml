@@ -100,7 +100,7 @@
                                             Departments
                                         </a>
                                     @elseif ($currentDept === '-' || is_null($currentDept))
-                                        <a href="{{ route('setting.edit') }}"
+                                        <a href="{{ route('setting_departement.edit') }}"
                                             class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                             Departments
                                         </a>

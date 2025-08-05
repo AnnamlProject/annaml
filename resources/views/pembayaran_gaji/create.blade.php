@@ -1,0 +1,205 @@
+@extends('layouts.app')
+@section('content')
+
+    <div class="py-10">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-md rounded-lg p-6 space-y-6">
+                <form method="POST" enctype="multipart/form-data"
+                    action="{{ isset($data) ? route('komponen_penghasilan.update', $data->id) : route('pembayaran_gaji.store') }}">
+                    @csrf
+                    @if (isset($data))
+                        @method('PUT')
+                    @endif
+
+                    {{-- Error Validation --}}
+                    @if ($errors->any())
+                        <div class="bg-red-100 text-red-700 p-4 rounded-md">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="p-4 bg-red-100 text-red-700 rounded-md">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    {{-- Karyawan --}}
+                    <div>
+                        <label
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Karyawan</label>
+                        <select id="kode_karyawan_id" name="kode_karyawan"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                            required>
+                            <option value="">-- Pilih Karyawan --</option>
+                            @foreach ($karyawan as $level)
+                                <option value="{{ $level->id }}"
+                                    {{ old('kode_karyawan', $data->kode_karyawan ?? '') == $level->id ? 'selected' : '' }}>
+                                    {{ $level->nama_karyawan }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Tanggal --}}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Periode
+                                Awal</label>
+                            <input type="date" name="periode_awal"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('periode_awal', $data->periode_awal ?? '') }}">
+                        </div>
+                        <div>
+                            <label
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Periode
+                                Akhir</label>
+                            <input type="date" name="periode_akhir"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('periode_akhir', $data->periode_akhir ?? '') }}">
+                        </div>
+                        <div>
+                            <label
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Tanggal
+                                Pembayaran</label>
+                            <input type="date" name="tanggal_pembayaran"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ old('tanggal_pembayaran', $data->tanggal_pembayaran ?? '') }}">
+                        </div>
+                    </div>
+
+                    {{-- Komponen --}}
+                    <div id="komponenContainer" class="mt-8 hidden">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Komponen Penghasilan</h3>
+                        <div id="komponenTable"></div>
+                    </div>
+
+                    {{-- Tombol --}}
+                    <div class="flex justify-between pt-6">
+                        <button type="submit"
+                            class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition">
+                            {{ isset($data) ? 'Update' : 'Simpan' }}
+                        </button>
+                        <a href="{{ route('pembayaran_gaji.index') }}"
+                            class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
+                            Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const karyawanSelect = document.getElementById('kode_karyawan_id');
+        const komponenContainer = document.getElementById('komponenContainer');
+        const komponenTable = document.getElementById('komponenTable');
+
+        karyawanSelect.addEventListener('change', function() {
+            const karyawanId = this.value;
+            komponenTable.innerHTML = '';
+            komponenContainer.classList.add('hidden');
+
+            if (!karyawanId) return;
+
+            fetch(`/get-pembayaran-gaji-by-karyawan/${karyawanId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        komponenTable.innerHTML =
+                            '<p class="text-red-500 mt-4">Tidak ada komposisi gaji ditemukan untuk karyawan ini.</p>';
+                        return;
+                    }
+
+                    let tableHTML = `
+                        <table class="min-w-full table-auto border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100 text-left">
+                                    <th class="px-4 py-2 border">Nama Komponen</th>
+                                    <th class="px-4 py-2 border">Tipe</th>
+                                    <th class="px-4 py-2 border">Periode</th>
+                                    <th class="px-4 py-2 border">Nilai</th>
+                                    <th class="px-4 py-2 border">Jumlah Hari</th>
+                                    <th class="px-4 py-2 border">Potongan</th>
+                                    <th class="px-4 py-2 border">Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.forEach((item, index) => {
+                        tableHTML += `
+                            <tr>
+                                <td class="px-4 py-2 border">
+                                    ${item.nama_komponen}
+                                    <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
+                                </td>
+                                <td class="px-4 py-2 border">${item.tipe || '-'}</td>
+                                <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1" data-index="${index}" value="${item.nilai || 0}">
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1" data-index="${index}" value="${item.jumlah_hari || 0}">
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1" data-index="${index}" value="${item.potongan || 0}">
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="text" name="komponen[${index}][total]" class="total border rounded w-full p-1 bg-gray-100" data-index="${index}" value="0" readonly>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += '</tbody></table>';
+                    komponenTable.innerHTML = tableHTML;
+                    komponenContainer.classList.remove('hidden');
+
+                    // Fungsi untuk menghitung total
+                    function updateTotal(index) {
+                        const nilai = parseFloat(document.querySelector(
+                            `input[name="komponen[${index}][nilai]"]`).value) || 0;
+                        const jumlahHari = parseFloat(document.querySelector(
+                            `input[name="komponen[${index}][jumlah_hari]"]`).value) || 0;
+                        const potongan = parseFloat(document.querySelector(
+                            `input[name="komponen[${index}][potongan]"]`).value) || 0;
+
+                        const totalNilai = nilai * jumlahHari;
+                        const totalPotongan = potongan * jumlahHari;
+                        const total = totalNilai + totalPotongan;
+
+                        const totalInput = document.querySelector(
+                            `input[name="komponen[${index}][total]"]`);
+                        if (totalInput) totalInput.value = total.toFixed(2);
+                    }
+
+                    // Tambahkan event listener untuk tiap input
+                    data.forEach((_, index) => {
+                        ['nilai', 'jumlah_hari', 'potongan'].forEach(field => {
+                            const selector =
+                                `input[name="komponen[${index}][${field}]"]`;
+                            const input = document.querySelector(selector);
+                            if (input) {
+                                input.addEventListener('input', () => updateTotal(
+                                    index));
+                                updateTotal(index); // Hitung nilai awal
+                            }
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.error('Error saat mengambil data:', err);
+                    komponenTable.innerHTML =
+                        '<p class="text-red-500 mt-4">Terjadi kesalahan saat memuat data komponen.</p>';
+                });
+        });
+    });
+</script>

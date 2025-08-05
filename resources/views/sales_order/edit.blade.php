@@ -1,0 +1,176 @@
+@extends('layouts.app')
+
+@section('content')
+    <div class="py-10">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white p-8 shadow-xl rounded-xl">
+                <form method="POST" action="{{ route('sales_order.update', $salesOrder->id) }}">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Payment Method</label>
+                            <select name="jenis_pembayaran_id" required class="w-full border-gray-300 rounded-md shadow-sm">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($jenis_pembayaran as $jenis)
+                                    <option value="{{ $jenis->id }}"
+                                        {{ $salesOrder->jenis_pembayaran_id == $jenis->id ? 'selected' : '' }}>
+                                        {{ $jenis->nama_jenis }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Customer</label>
+                            <select name="customer_id" required class="w-full border-gray-300 rounded-md shadow-sm">
+                                @foreach ($customers as $cust)
+                                    <option value="{{ $cust->id }}"
+                                        {{ $salesOrder->customer_id == $cust->id ? 'selected' : '' }}>
+                                        {{ $cust->nama_customers }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="font-medium text-gray-700 block mb-1">Shipping Address</label>
+                            <textarea name="shipping_address" rows="2" class="w-full border-gray-300 rounded-md shadow-sm">{{ $salesOrder->shipping_address }}</textarea>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Order Number</label>
+                            <input type="text" name="order_number" class="w-full border-gray-300 rounded-md shadow-sm"
+                                value="{{ $salesOrder->order_number }}" required>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Date Order</label>
+                            <input type="date" name="date_order" class="w-full border-gray-300 rounded-md shadow-sm"
+                                value="{{ $salesOrder->date_order }}" required>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Shipping Date</label>
+                            <input type="date" name="shipping_date" class="w-full border-gray-300 rounded-md shadow-sm"
+                                value="{{ $salesOrder->shipping_date }}" required>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Sales Person</label>
+                            <select name="employee_id" class="w-full border-gray-300 rounded-md shadow-sm" required>
+                                @foreach ($employees as $emp)
+                                    <option value="{{ $emp->id }}"
+                                        {{ $salesOrder->employee_id == $emp->id ? 'selected' : '' }}>
+                                        {{ $emp->nama_karyawan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- TABEL ITEM --}}
+                    <div class="mt-8">
+                        <h3 class="font-semibold text-lg mb-2">🛒 Order Items</h3>
+                        <div class="overflow-auto">
+                            <table class="w-full border text-sm text-left shadow-md">
+                                <thead class="bg-blue-100 text-gray-700">
+                                    <tr>
+                                        <th class="p-2">Item</th>
+                                        <th>Qty</th>
+                                        <th>Order</th>
+                                        <th>Back Order</th>
+                                        <th>Unit</th>
+                                        <th>Description</th>
+                                        <th>Base Price</th>
+                                        <th>Discount</th>
+                                        <th>Price</th>
+                                        <th>Amount</th>
+                                        <th>Tax</th>
+                                        <th>Account</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="item-table-body">
+                                    @foreach ($salesOrder->details as $i => $detail)
+                                        <tr class="bg-white even:bg-gray-50 border-b">
+                                            <td><input type="hidden" name="items[{{ $i }}][item_id]"
+                                                    class="w-full border rounded" value="{{ $detail->item_id }}">
+                                                <input type="text" class="w-full border rounded"
+                                                    value="{{ $detail->item_description }}">
+                                            </td>
+                                            <td><input type="number" name="items[{{ $i }}][quantity]"
+                                                    class="w-full border rounded" value="{{ $detail->quantity }}"></td>
+                                            <td><input type="number" name="items[{{ $i }}][order]"
+                                                    class="w-full border rounded" value="{{ $detail->order }}"></td>
+                                            <td><input type="number" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][back_order]"
+                                                    value="{{ $detail->back_order }}"></td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][unit]" value="{{ $detail->unit }}">
+                                            </td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][description]"
+                                                    value="{{ $detail->item_description }}"></td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][base_price]"
+                                                    value="{{ $detail->base_price }}"></td>
+                                            <td><input type="number" class="w-full border rounded"
+                                                    name="items[{{ $i }}][discount]"
+                                                    value="{{ $detail->discount }}"></td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][price]" value="{{ $detail->price }}">
+                                            </td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][amount]"
+                                                    value="{{ $detail->amount }}"></td>
+                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    name="items[{{ $i }}][tax]" value="{{ $detail->tax }}">
+                                            </td>
+                                            <td>
+                                                <input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    value="{{ optional($detail->account)->nama_akun }}">
+                                                <input type="hidden" name="items[{{ $i }}][account]"
+                                                    value="{{ $detail->account_id }}">
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="remove-row text-red-500 font-bold"
+                                                    data-index="{{ $i }}">×</button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Info Tambahan --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Freight</label>
+                            <input type="text" name="freight" class="w-full border-gray-300 rounded-md shadow-sm"
+                                value="{{ $salesOrder->freight }}">
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Early Payment Terms</label>
+                            <input type="text" name="early_payment_terms"
+                                class="w-full border-gray-300 rounded-md shadow-sm"
+                                value="{{ $salesOrder->early_payment_terms }}">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="font-medium text-gray-700 block mb-1">Messages</label>
+                            <textarea name="messages" rows="3" class="w-full border-gray-300 rounded-md shadow-sm">{{ $salesOrder->messages }}</textarea>
+                        </div>
+                    </div>
+
+                    {{-- Tombol --}}
+                    <div class="mt-8 flex justify-start space-x-4">
+                        <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
+                            💾 Update
+                        </button>
+                        <a href="{{ route('sales_order.index') }}"
+                            class="px-6 py-2 bg-gray-300 rounded-lg shadow hover:bg-gray-400 transition">
+                            ❌ Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection

@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Perusahaan;
+use App\Vendors;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+
+class VendorsController extends Controller
+{
+    //
+    public function index(): View
+    {
+        $vendors = Vendors::latest()->paginate(5);
+
+        return view('vendors.index', compact('vendors'));
+    }
+    public function create(): View
+    {
+        return  view('vendors.create');
+    }
+    private function generateKodeVendors()
+    {
+        $last = \App\Vendors::orderBy('kd_vendor', 'desc')->first();
+
+        if ($last && preg_match('/VEN-(\d+)/', $last->kd_vendor, $matches)) {
+            $number = (int) $matches[1] + 1;
+        } else {
+            $number = 1;
+        }
+
+        return 'VEN-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            // Hapus 'required' karena bisa auto-generate
+            'kd_vendor' => 'nullable|string|max:255',
+            'nama_vendors' => 'nullable|string|max:20',
+            'contact_person' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'telepon' => 'nullable|string|max:20',
+            'email' => 'nullable|string|max:255',
+            'payment_terms' => 'nullable|string|max:20'
+        ]);
+
+        // Kalau kosong (auto generate), buat kode otomatis
+        if (empty($validated['kd_vendor'])) {
+            $validated['kd_vendor'] = $this->generateKodeVendors();
+        }
+
+        Vendors::create($validated);
+
+        return redirect()->route('vendors.index')->with('success', 'Vendors created successfully.');
+    }
+    public function show($kd_vendor)
+    {
+        $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
+        return view('vendors.show', compact('vendors'));
+    }
+    public function edit($kd_vendor)
+    {
+        $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
+        return view('vendors.edit', compact('vendors'));
+    }
+    public function update(Request $request, $kd_vendor)
+    {
+        $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
+        $validated = $request->validate([
+            'kd_vendors' => 'nullable|string|max:255',
+            'nama_vendors' => 'nullable|string|max:20',
+            'contact_person' => 'nullable|string|max:255',
+            'alamat' => 'nullable|string',
+            'telepon' => 'nullable|string|max:20',
+            'email' => 'nullable|string|max:255',
+            'payment_terms' => 'nullable|string|max:20'
+        ]);
+
+        $vendors->update($validated);
+
+        return redirect()->route('vendors.index')->with('success', 'Vendors updated successfully.');
+    }
+    public function destroy($kd_vendor): RedirectResponse
+    {
+        //get post by ID
+        $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
+
+        //delete post
+        $vendors->delete();
+
+        //redirect to index
+        return redirect()->route('vendors.index')->with('success', 'vendors deleted successfully.');
+    }
+}

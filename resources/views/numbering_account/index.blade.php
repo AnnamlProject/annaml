@@ -1,0 +1,132 @@
+@extends('layouts.app')
+
+
+@section('content')
+    <div class="py-10">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Main Card -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
+                <!-- Sticky Card Header -->
+                <div
+                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
+                bg-gradient-to-r from-indigo-500 to-blue-600 
+                flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <i class="fas fa-list mr-3 text-white text-xl"></i>
+                        Numbering Account List
+                    </h3>
+                    <a href="{{ route('numbering_account.create') }}"
+                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                        <i class="fas fa-plus mr-2"></i> Add Numbering Account
+                    </a>
+                </div>
+
+                <!-- Table Container -->
+                <div class="relative w-full overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
+                    <table class="min-w-max w-full divide-y divide-gray-200 text-base">
+                        <thead class="bg-gray-100 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">#</th>
+                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nama Grup</th>
+                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Jumlah Digit</th>
+                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nomor Akun Awal</th>
+                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nomor Akun Akhir</th>
+                                <th class="px-6 py-4 text-right font-medium text-gray-600 uppercase">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($numberingAccount as $numberingAccounts)
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 text-gray-700">{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-4 font-semibold text-gray-900">
+                                        {{ $numberingAccounts->nama_grup }}
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-800">
+                                        {{ $numberingAccounts->jumlah_digit }}
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                        {{ $numberingAccounts->nomor_akun_awal }}
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                        {{ $numberingAccounts->nomor_akun_akhir }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex justify-end space-x-3">
+                                            <a href="{{ route('numbering_account.show', $numberingAccounts->id) }}"
+                                                class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="px-6 py-16 text-center">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <i class="fas fa-box-open text-5xl mb-4"></i>
+                                            <p class="text-xl font-semibold text-gray-500">No numbering account found</p>
+                                            <a href="{{ route('numbering_account.create') }}"
+                                                class="mt-6 inline-flex items-center px-5 py-3 bg-indigo-600 text-white text-lg rounded-lg hover:bg-indigo-700 transition">
+                                                <i class="fas fa-plus mr-3"></i> Create First Numbering Account
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-5 bg-gray-50 border-t border-gray-100 flex justify-center">
+                    {{ $numberingAccount->links() }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        /* Improved sticky header implementation */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Table header sticky positioning */
+        table thead {
+            position: sticky;
+            top: 68px;
+            /* Height of the sticky-header */
+            z-index: 10;
+        }
+
+        /* Beautiful scrollbar */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Smooth transitions */
+        tr {
+            transition: background-color 0.2s ease;
+        }
+    </style>
+@endsection

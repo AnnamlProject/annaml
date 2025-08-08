@@ -61,7 +61,7 @@
 <body class="font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
 
     {{-- Loading Overlay --}}
-    <div id="loading-overlay"
+    {{-- <div id="loading-overlay"
         class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-md z-50 flex items-center justify-center hidden">
         <div class="flex flex-col items-center space-y-4 animate-pulse">
             <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -74,7 +74,7 @@
             </svg>
             <p class="text-gray-600 font-medium">Mohon tunggu...</p>
         </div>
-    </div>
+    </div> --}}
 
     {{-- Navbar --}}
 

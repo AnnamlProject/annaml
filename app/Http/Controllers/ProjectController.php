@@ -71,6 +71,14 @@ class ProjectController extends Controller
 
         return redirect()->route('project.index')->with('success', 'Data berhasil diperbarui.');
     }
+    public function destroy($id)
+    {
+        $data = Project::findOrFail($id);
+
+        $data->delete();
+
+        return redirect()->route('project.index')->with('success', ' Data Berhasil Dihapus.');
+    }
 
     public function projectView(Request $request)
     {

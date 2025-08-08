@@ -155,7 +155,8 @@
                 <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
             </h3>
             <div class="space-y-3 text-sm text-gray-700">
-                <a href="" download class="block hover:bg-gray-50 p-2 rounded-lg">
+                <a href="{{ asset('template/template_import_klasifikasi_akun.xlsx') }}" download
+                    class="block hover:bg-gray-50 p-2 rounded-lg">
                     <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                 </a>
                 <a href="{{ route('export.klasifikasiAkun') }}" class="block hover:bg-gray-50 p-2 rounded-lg">

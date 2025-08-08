@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Genharum</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{{ asset('image/favicon/favicon.ico') }}">
 

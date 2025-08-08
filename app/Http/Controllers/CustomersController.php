@@ -87,10 +87,10 @@ class CustomersController extends Controller
 
         return redirect()->route('customers.index')->with('success', 'Customers updated successfully.');
     }
-    public function destroy($kd_customers): RedirectResponse
+    public function destroy($id): RedirectResponse
     {
         //get post by ID
-        $customers = Customers::where('kd_customers', $kd_customers)->firstOrFail();
+        $customers = Customers::findOrFail($id);
 
         //delete post
         $customers->delete();

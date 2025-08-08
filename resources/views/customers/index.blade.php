@@ -13,10 +13,16 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Customers
                     </h3>
-                    <a href="{{ route('customers.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Customers
-                    </a>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-file-export text-blue-500 mr-2"></i> File
+                        </button>
+                        <a href="{{ route('customers.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Customers
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -169,14 +175,15 @@
                         <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
                     </h3>
                     <div class="space-y-3 text-sm text-gray-700">
-                        <a href="{{ asset('template/template_customers_import.xlsx') }}" download
+                        <a href="{{ asset('template/template_import_customers.xlsx') }}" download
                             class="block hover:bg-gray-50 p-2 rounded-lg">
                             <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                         </a>
-                        <a href="" class="block hover:bg-gray-50 p-2 rounded-lg">
+                        <a href="{{ route('export.customers') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
                             <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
                         </a>
-                        <form action="" method="POST" enctype="multipart/form-data" class="space-y-2">
+                        <form action="{{ route('import.customers') }}" method="POST" enctype="multipart/form-data"
+                            class="space-y-2">
                             @csrf
                             <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
                             <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1"

@@ -1,5 +1,21 @@
 @extends('layouts.app')
 @section('content')
+
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="py-10">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Card -->
@@ -13,10 +29,18 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Income Statement List
                     </h3>
-                    <a href="{{ route('komponen_penghasilan.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Income Statement
-                    </a>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-file-export text-blue-500 mr-2"></i> File
+                        </button>
+                        <a href="{{ route('komponen_penghasilan.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Income Statement
+                        </a>
+                    </div>
+
                 </div>
             </div>
             <!-- Filter Panel -->
@@ -127,10 +151,11 @@
                     class="block hover:bg-gray-50 p-2 rounded-lg">
                     <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                 </a>
-                <a href="" class="block hover:bg-gray-50 p-2 rounded-lg">
+                <a href="{{ route('export.KomponenPenghasilan') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
                     <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
                 </a>
-                <form action="" method="POST" enctype="multipart/form-data" class="space-y-2">
+                <form action="{{ route('import.KomponenPenghasilan') }}" method="POST" enctype="multipart/form-data"
+                    class="space-y-2">
                     @csrf
                     <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
                     <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>

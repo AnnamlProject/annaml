@@ -82,10 +82,10 @@ class VendorsController extends Controller
 
         return redirect()->route('vendors.index')->with('success', 'Vendors updated successfully.');
     }
-    public function destroy($kd_vendor): RedirectResponse
+    public function destroy($id): RedirectResponse
     {
         //get post by ID
-        $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
+        $vendors = Vendors::findOrFail($id);
 
         //delete post
         $vendors->delete();

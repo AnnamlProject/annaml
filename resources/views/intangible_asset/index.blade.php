@@ -1,5 +1,25 @@
 @extends('layouts.app')
 @section('content')
+
+
+    @if (session('errors_import'))
+        <div class="alert alert-danger">
+            <strong>Beberapa baris gagal diimport:</strong>
+            <ul>
+                @foreach (session('errors_import') as $error)
+                    <li>Baris {{ $error['baris'] }}:
+                        <ul>
+                            @foreach ($error as $field => $message)
+                                @if ($field != 'baris' && $message)
+                                    <li>{{ $message }}</li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="py-10">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Card -->
@@ -13,10 +33,18 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Intangible Asset
                     </h3>
-                    <a href="{{ route('intangible_asset.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Intangible Asset
-                    </a>
+                    <div class="flex flex-wrap gap-2">
+                        <!-- File Button -->
+                        <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-file-export text-blue-500 mr-2"></i> File
+                        </button>
+                        <a href="{{ route('intangible_asset.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Intangible Asset
+                        </a>
+                    </div>
+
                 </div>
                 <div class="relative overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -110,6 +138,53 @@
             </div>
         </div>
     </div>
+
+    <!-- File Modal -->
+    <div id="fileModal"
+        class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
+            </h3>
+            <div class="space-y-3 text-sm text-gray-700">
+                <a href="{{ asset('template/template_import_intangible.xlsx') }}" download
+                    class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
+                </a>
+                <a href="{{ route('export.IntangibleAsset') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-blue-500"></i> Export Project
+                </a>
+                <form action="{{ route('import.IntangibleAsset') }}" method="POST" enctype="multipart/form-data"
+                    class="space-y-2">
+                    @csrf
+                    <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
+                    <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>
+                    <button type="submit" class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
+                        <i class="fas fa-file-upload mr-1"></i> Import
+                    </button>
+                </form>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="document.getElementById('fileModal').classList.add('hidden')"
+                    class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS for dropdown toggle -->
+    <script>
+        document.getElementById('menu-button').addEventListener('click', function() {
+            document.getElementById('dropdown-menu').classList.toggle('hidden');
+        });
+
+        window.addEventListener('click', function(e) {
+            const button = document.getElementById('menu-button');
+            const menu = document.getElementById('dropdown-menu');
+            if (!button.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
 
     <style>
         .sticky-header {

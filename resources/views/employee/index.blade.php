@@ -1,6 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
+
+    @if (session('errors_import'))
+        <div class="alert alert-danger">
+            <strong>Beberapa baris gagal diimport:</strong>
+            <ul>
+                @foreach (session('errors_import') as $error)
+                    <li>Baris {{ $error['baris'] }}:
+                        <ul>
+                            @foreach ($error as $field => $message)
+                                @if ($field != 'baris' && $message)
+                                    <li>{{ $message }}</li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
@@ -316,14 +335,15 @@
                             <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
                         </h3>
                         <div class="space-y-3 text-sm text-gray-700">
-                            <a href="{{ asset('template/template_employee_import.xlsx') }}" download
+                            <a href="{{ asset('template/template_import_employee.xlsx') }}" download
                                 class="block hover:bg-gray-50 p-2 rounded-lg">
                                 <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                             </a>
-                            <a href="" class="block hover:bg-gray-50 p-2 rounded-lg">
+                            <a href="{{ route('export.Employee') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
                                 <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
                             </a>
-                            <form action="" method="POST" enctype="multipart/form-data" class="space-y-2">
+                            <form action="{{ route('import.Employee') }}" method="POST" enctype="multipart/form-data"
+                                class="space-y-2">
                                 @csrf
                                 <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
                                 <input type="file" name="file"

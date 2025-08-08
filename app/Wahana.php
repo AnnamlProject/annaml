@@ -1,0 +1,23 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Wahana extends Model
+{
+    //
+    protected $fillable = [
+        'unit_kerja_id',
+        'kode_wahana',
+        'nama_wahana',
+        'status',
+        'kapasitas',
+        'kategori'
+    ];
+
+    public function UnitKerja()
+    {
+        return $this->belongsTo(UnitKerja::class);
+    }
+}

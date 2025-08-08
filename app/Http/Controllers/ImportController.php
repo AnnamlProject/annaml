@@ -5,10 +5,21 @@ namespace App\Http\Controllers;
 use App\Imports\ChartOfAccountImport;
 use App\Imports\CustomersImport;
 use App\Imports\DepartemenImport;
+use App\Imports\EmployeeImport;
+use App\Imports\IntangibleAssetImport;
+use App\Imports\ItemsImport;
 use App\Imports\JournalEntryImport;
 use App\Imports\KlasifikasiAkunImport;
+use App\Imports\KomponenPenghasilanImport;
+use App\Imports\ProjectImport;
+use App\Imports\PtkpImport;
+use App\Imports\TangibleAssetImport;
+use App\Imports\VendorsImport;
+use App\Imports\WahanaImport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Validators\ValidationException as ExcelValidationException;
 
 class ImportController extends Controller
 {
@@ -77,6 +88,108 @@ class ImportController extends Controller
             return back()->with('success', 'Semua data berhasil diimport dan seimbang.');
         } catch (\Exception $e) {
             return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+    public function importItems(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new ItemsImport, $request->file('file'));
+
+        return back()->with('success', 'Data Items akun berhasil diimpor.');
+    }
+    public function ImportVendors(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new VendorsImport, $request->file('file'));
+
+        return back()->with('success', 'Data Vendors akun berhasil diimpor.');
+    }
+    public function importPtkp(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new PtkpImport, $request->file('file'));
+
+        return back()->with('success', 'Data PTKP berhasil diimpor.');
+    }
+
+    public function importWahana(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new WahanaImport, $request->file('file'));
+
+            return back()->with('success', 'Data wahana berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
+    }
+    public function importEmployee(Request $request)
+    {
+        $import = new EmployeeImport;
+        Excel::import($import, $request->file('file'));
+
+        if (!empty($import->errors)) {
+            return back()->with('errors_import', $import->errors);
+        }
+
+        return back()->with('success', 'Import berhasil tanpa error.');
+    }
+    public function importTangibleAsset(Request $request)
+    {
+        $import = new TangibleAssetImport;
+        Excel::import($import, $request->file('file'));
+
+        if (!empty($import->errors)) {
+            return back()->with('errors_import', $import->errors);
+        }
+
+        return back()->with('success', 'Import berhasil tanpa error.');
+    }
+    public function importIntangibleAsset(Request $request)
+    {
+        $import = new IntangibleAssetImport;
+        Excel::import($import, $request->file('file'));
+
+        if (!empty($import->errors)) {
+            return back()->with('errors_import', $import->errors);
+        }
+
+        return back()->with('success', 'Import berhasil tanpa error.');
+    }
+    public function importProject(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new ProjectImport, $request->file('file'));
+
+        return back()->with('success', 'Data project  berhasil diimpor.');
+    }
+    public function importKomponenPenghasilan(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new KomponenPenghasilanImport, $request->file('file'));
+
+            return back()->with('success', 'Data Komponen Penghasilan berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
         }
     }
 }

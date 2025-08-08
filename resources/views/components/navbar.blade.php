@@ -148,6 +148,13 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Department
                                         Accounts List</a>
                                 </div>
+
+                                <a href="{{ route('users.index') }}"
+                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                    Users & Roles </a>
+                                <a href="{{ route('permissions.index') }}"
+                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                    Permissions </a>
                             </div>
                         </div>
                     </div>
@@ -561,6 +568,17 @@
                                     <a href="{{ route('unit_kerja.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
                                     </a>
+                                    <a href="{{ route('wahana.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana
+                                    </a>
+                                    <a href="{{ route('target_wahana.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
+                                        Wahana
+                                    </a>
+                                    <a href="{{ route('jenis_hari.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jenis
+                                        Hari
+                                    </a>
                                     <a href="{{ route('jabatan.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
                                     </a>
@@ -609,7 +627,11 @@
                                     @mouseenter="subOpen = true" @mouseleave="subOpen = false">
                                     <a href="{{ route('pembayaran_gaji.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                        Salary Calculations
+                                        Salary Calculations Staff
+                                    </a>
+                                    <a href="{{ route('pembayaran_gaji_nonstaff.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                        Salary Calculations Non Staff
                                     </a>
                                     <a href="{{ route('report.klasifikasi') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">

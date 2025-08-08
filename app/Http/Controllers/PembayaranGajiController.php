@@ -24,7 +24,9 @@ class PembayaranGajiController extends Controller
     }
     public function create()
     {
-        $karyawan = Employee::all();
+        $karyawan = Employee::whereHas('levelKaryawan', function ($query) {
+            $query->where('nama_level', '=', 'STAFF');
+        })->get();
         return view('pembayaran_gaji.create', compact('karyawan'));
     }
     public function getKomposisiGajiByKaryawan($id)
@@ -113,7 +115,9 @@ class PembayaranGajiController extends Controller
         $pembayaran = PembayaranGaji::findOrFail($id);
 
         // Ambil semua karyawan untuk dropdown
-        $karyawan = Employee::all();
+        $karyawan = Employee::whereHas('levelKaryawan', function ($query) {
+            $query->where('nama_level', '=', 'STAFF');
+        })->get();
 
         // Ambil detail komponen penghasilan yang terkait
         $details = PembayaranGajiDetail::where('kode_pembayaran_id', $id)

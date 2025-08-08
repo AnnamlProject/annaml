@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use App\KlasifikasiAkun;
 use App\NumberingAccount;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class chartOfAccountController extends Controller
+class ChartOfAccountController extends Controller
 {
     //
     public function index(Request $request)

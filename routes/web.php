@@ -74,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/export/klasifikasiAkun', [ExportController::class, 'exportklasifikasiAkun'])->name('export.klasifikasiAkun');
     Route::post('/import/klasifikasiAkun', [ImportController::class, 'importklasifikasiAkun'])->name('import.klasifikasiAkun');
 
-    Route::resource('/chartOfAccount', 'chartOfAccountController');
+    Route::resource('/chartOfAccount', 'ChartOfAccountController');
     // export dan import chart of account
     Route::get('/export/charofaccount', [ExportController::class, 'exportchartOfAccount'])->name('export.chartOfAccount');
     Route::post('/import/chartofaccount', [ImportController::class, 'importchartOfAccount'])->name('import.chartOfAccount');

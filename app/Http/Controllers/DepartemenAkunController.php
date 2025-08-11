@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use Illuminate\Http\Request;
 
 class DepartemenAkunController extends Controller

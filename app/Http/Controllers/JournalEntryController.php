@@ -23,6 +23,56 @@ class JournalEntryController extends Controller
         $departemenAkun = DepartemenAkun::all();
         return view('journal_entry.create', compact('departemenAkun'));
     }
+    public function getAutoData(Request $request)
+    {
+        $tanggal = $request->get('tanggal');
+        $kodeAkun = $request->get('kode_akun');
+
+        $periode = DB::table('start_new_years')->where('status', 'Aktif')->first();
+
+        if ($periode && $tanggal) {
+            $tahun = $periode->tahun;
+
+            // Cek kalau tanggal == akhir periode
+            if ($tanggal == $periode->akhir_periode) {
+                $query = DB::table('journal_entry_details as d')
+                    ->join('journal_entries as j', 'd.journal_entry_id', '=', 'j.id')
+                    ->whereYear('j.tanggal', $tahun);
+
+                if ($kodeAkun) {
+                    $result = $query
+                        ->where('d.kode_akun', $kodeAkun)
+                        ->select(
+                            'd.kode_akun',
+                            DB::raw('SUM(d.debits) as total_debit'),
+                            DB::raw('SUM(d.credits) as total_credit')
+                        )
+                        ->groupBy('d.kode_akun')
+                        ->first();
+
+                    return response()->json([
+                        'success' => true,
+                        'total_debit' => $result->total_debit ?? 0,
+                        'total_credit' => $result->total_credit ?? 0
+                    ]);
+                }
+
+                // Kalau tanpa kode_akun → kirim semua
+                $entries = $query
+                    ->select(
+                        'd.kode_akun',
+                        DB::raw('SUM(d.debits) as total_debit'),
+                        DB::raw('SUM(d.credits) as total_credit')
+                    )
+                    ->groupBy('d.kode_akun')
+                    ->get();
+
+                return response()->json(['entries' => $entries]);
+            }
+        }
+    }
+
+
     public function store(Request $request)
     {
 

@@ -35,9 +35,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-                            <input type="date" name="tanggal" class="w-full rounded-md border border-gray-300 px-3 py-2"
-                                value="{{ old('tanggal') }}" required>
+                            <input type="date" name="tanggal" id="tanggal"
+                                class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('tanggal') }}"
+                                required>
                         </div>
+
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Comment</label>
                             <input type="text" name="comment" class="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -58,7 +60,7 @@
                                 </tr>
                             </thead>
                             <tbody id="item-table-body" class="bg-white">
-                                <!-- Baris dinamis dari JS -->
+
                             </tbody>
                         </table>
                     </div>
@@ -114,20 +116,32 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- JS for dropdown toggle -->
     <script>
-        document.getElementById('menu-button').addEventListener('click', function() {
-            document.getElementById('dropdown-menu').classList.toggle('hidden');
+        // Ambil data saat ganti tanggal untuk preview list
+        $('#tanggal').on('change', function() {
+            let tanggal = $(this).val();
+
+            $.ajax({
+                url: '/journal-entry/auto-data',
+                type: 'GET',
+                data: {
+                    tanggal: tanggal
+                },
+                success: function(res) {
+                    if (res.entries.length > 0) {
+                        let html = '<ul>';
+                        res.entries.forEach(e => {
+                            html +=
+                                `<li>Account: ${e.kode_akun}, Debit: ${e.total_debit}, Credit: ${e.total_credit}</li>`;
+                        });
+                        html += '</ul>';
+                        $('#result').html(html);
+                    } else {
+                        $('#result').html('<p>Tidak ada data untuk tanggal ini</p>');
+                    }
+                }
+            });
         });
 
-        window.addEventListener('click', function(e) {
-            const button = document.getElementById('menu-button');
-            const menu = document.getElementById('dropdown-menu');
-            if (!button.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-    </script>
-
-    <script>
         let rowIndex = 0;
 
         function generateRow(index) {
@@ -139,10 +153,10 @@
             <td class="border px-2 py-1">
                 <input type="hidden" name="items[${index}][kode_akun]" class="kode_akun-${index}" />
                 <input type="hidden" name="items[${index}][departemen_akun_id]" class="departemen-akun-${index}" />
-                <input type="text" name="items[${index}][debits]" class="money-input w-full border rounded px-2 py-1 text-right" inputmode="numeric" />
+                <input type="text" name="items[${index}][debits]" class="money-input w-full border rounded px-2 py-1 text-right debit-${index}" inputmode="numeric" />
             </td>
             <td class="border px-2 py-1">
-                <input type="text" name="items[${index}][credits]" class="money-input w-full border rounded px-2 py-1 text-right" inputmode="numeric" />
+                <input type="text" name="items[${index}][credits]" class="money-input w-full border rounded px-2 py-1 text-right credit-${index}" inputmode="numeric" />
             </td>
             <td class="border px-2 py-1">
                 <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
@@ -167,7 +181,6 @@
                         let results = [];
 
                         data.forEach(item => {
-                            // Akun utama (tanpa departemen)
                             results.push({
                                 id: item.id,
                                 text: `${item.kode_akun} - ${item.nama_akun}`,
@@ -175,11 +188,10 @@
                                 departemen_akun_id: null
                             });
 
-                            // Akun dengan departemen
                             if (item.daftar_departemen && item.daftar_departemen.length > 0) {
                                 item.daftar_departemen.forEach(dept => {
                                     results.push({
-                                        id: `d-${dept.id}`, // id unik biar tidak bentrok
+                                        id: `d-${dept.id}`,
                                         text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
                                         kode_akun: item.kode_akun,
                                         departemen_akun_id: dept.id,
@@ -193,22 +205,37 @@
                             results
                         };
                     },
-
                     cache: true
                 },
                 templateResult: function(data) {
-                    return data.text; // cukup tampilkan text biasa
+                    return data.text;
                 }
             }).on('select2:select', function(e) {
                 const data = e.params.data;
                 $(`.kode_akun-${index}`).val(data.kode_akun);
+                $(`.departemen-akun-${index}`).val(data.departemen_akun_id ?? '');
 
-                // Simpan departemen_akun_id kalau ada
-                const departemenAkunId = data.departemen_akun_id ?? '';
-                $(`.departemen-akun-${index}`).val(departemenAkunId);
+                // Ambil data debit & credit dari server berdasarkan tanggal
+                $.ajax({
+                    url: '/journal-entry/auto-data',
+                    type: 'GET',
+                    data: {
+                        tanggal: $('#tanggal').val()
+                    },
+                    success: function(res) {
+                        if (res.entries && res.entries.length > 0) {
+                            const found = res.entries.find(item => item.kode_akun === data.kode_akun);
+                            if (found) {
+                                $(`.debit-${index}`).val(new Intl.NumberFormat('id-ID').format(found
+                                    .total_debit || 0));
+                                $(`.credit-${index}`).val(new Intl.NumberFormat('id-ID').format(found
+                                    .total_credit || 0));
+                            }
+                        }
+                    }
+                });
             });
         }
-
 
         function addRow() {
             const newRow = generateRow(rowIndex);

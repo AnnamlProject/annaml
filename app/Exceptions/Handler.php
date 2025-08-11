@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -50,6 +51,15 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof HttpExceptionInterface) {
+            $statusCode = $exception->getStatusCode();
+
+            // Misal semua error diarahkan ke 505.blade.php
+            if (in_array($statusCode, [404, 500, 503])) {
+                return response()->view('errors.505', [], $statusCode);
+            }
+        }
+
         return parent::render($request, $exception);
     }
 }

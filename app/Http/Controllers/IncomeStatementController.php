@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use App\Departemen;
 use App\Departement;
 use App\JournalEntryDetail;

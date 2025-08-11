@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 

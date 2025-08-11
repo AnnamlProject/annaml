@@ -9,9 +9,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+
 
 class JournalEntryImport implements ToCollection, WithHeadingRow
 {
@@ -47,7 +48,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
             $journalEntry = JournalEntry::create([
                 'source'  => $source,
-                'tanggal' => $tanggal,
+                'tanggal' => $this->transformDate($tanggal),
                 'comment' => $comment,
             ]);
 
@@ -78,5 +79,17 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
     public function getSkippedGroups()
     {
         return $this->skippedGroups;
+    }
+    private function transformDate($value)
+    {
+        try {
+            if (is_numeric($value)) {
+                return Date::excelToDateTimeObject($value)->format('Y-m-d');
+            }
+
+            return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

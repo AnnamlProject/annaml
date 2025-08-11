@@ -93,6 +93,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/Departemen', [ImportController::class, 'importDepartemen'])->name('import.Departemen');
 
     // journal entry menu
+    Route::get('/journal-entry/auto-data', [JournalEntryController::class, 'getAutoData']);
+
     Route::get('view_journal_entry', [JournalEntryController::class, 'journalEntryShow'])->name('journal_entry.view_journal_entry');
     Route::get('view_journal_entry/result', [JournalEntryController::class, 'journalEntryView'])->name('journal_entry.view_journal_entry_result');
     // Tampilkan form kosong

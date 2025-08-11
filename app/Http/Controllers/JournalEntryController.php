@@ -75,9 +75,6 @@ class JournalEntryController extends Controller
 
     public function store(Request $request)
     {
-
-        // dd($request->all());
-
         // Bersihkan dan filter input
         $cleanedItems = collect($request->items)->filter(function ($item) {
             return isset($item['kode_akun']) && $item['kode_akun'] !== '';
@@ -93,7 +90,7 @@ class JournalEntryController extends Controller
 
         // Validasi
         $request->validate([
-            'source' => 'required|string',
+            'source' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'comment' => 'nullable|string',
             'items' => 'required|array|min:1',
@@ -103,6 +100,20 @@ class JournalEntryController extends Controller
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
         ]);
+
+        // Hitung total debit & kredit
+        $totalDebit = collect($cleanedItems)->sum(function ($item) {
+            return (float) $item['debits'];
+        });
+
+        $totalKredit = collect($cleanedItems)->sum(function ($item) {
+            return (float) $item['credits'];
+        });
+
+        // Cek kesamaan debit dan kredit
+        if ($totalDebit != $totalKredit) {
+            return back()->withInput()->with('error', 'Total Debit (' . number_format($totalDebit, 0, ',', '.') . ') dan Total Kredit (' . number_format($totalKredit, 0, ',', '.') . ') harus sama!');
+        }
 
         // Simpan ke database
         DB::beginTransaction();
@@ -132,6 +143,7 @@ class JournalEntryController extends Controller
             return back()->withInput()->with('error', 'Gagal menyimpan journal entry: ' . $e->getMessage());
         }
     }
+
     public function show($id)
     {
         $journal = JournalEntry::with(['details.chartOfAccount'])->findOrFail($id);
@@ -235,7 +247,7 @@ class JournalEntryController extends Controller
 
         // Validasi
         $request->validate([
-            'source' => 'required|string',
+            'source' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'comment' => 'nullable|string',
             'items' => 'required|array|min:1',

@@ -62,6 +62,13 @@
                             <tbody id="item-table-body" class="bg-white">
 
                             </tbody>
+                            <tfoot class="bg-gray-50 font-semibold">
+                                <tr>
+                                    <td class="border px-4 py-2 text-right">TOTAL</td>
+                                    <td class="border px-4 py-2 text-right" id="total-debit"></td>
+                                    <td class="border px-4 py-2 text-right" id="total-credit"></td>
+                                    <td colspan="2" class="border"></td>
+                                </tr>
                         </table>
                     </div>
 
@@ -255,6 +262,32 @@
                 input.value = raw === '' ? '' : parseFloat(raw);
             });
         }
+
+        function updateTotals() {
+            let totalDebit = 0;
+            let totalCredit = 0;
+
+            document.querySelectorAll('input[name^="items"][name$="[debits]"]').forEach(input => {
+                let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                totalDebit += val;
+            });
+
+            document.querySelectorAll('input[name^="items"][name$="[credits]"]').forEach(input => {
+                let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                totalCredit += val;
+            });
+
+            document.getElementById('total-debit').textContent = new Intl.NumberFormat('id-ID').format(totalDebit);
+            document.getElementById('total-credit').textContent = new Intl.NumberFormat('id-ID').format(totalCredit);
+        }
+
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('money-input')) {
+                formatNumberInput(e.target);
+                updateTotals();
+            }
+        });
+
 
         $(document).ready(function() {
             for (let i = 0; i < 30; i++) addRow();

@@ -48,11 +48,10 @@
                             <select name="status" id="status" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
-                                <option value="Aktif" {{ old('status', $data->status) == 'Aktif' ? 'selected' : '' }}>
-                                    Aktif</option>
-                                <option value="Non Aktif"
-                                    {{ old('status', $data->status) == 'Non Aktif' ? 'selected' : '' }}>
-                                    Non Aktif</option>
+                                <option value="Opening" {{ old('status', $data->status) == 'Opening' ? 'selected' : '' }}>
+                                    Opening</option>
+                                <option value="Closing" {{ old('status', $data->status) == 'Closing' ? 'selected' : '' }}>
+                                    Closing</option>
                             </select>
                         </div>
 

@@ -41,12 +41,12 @@
 
                         <!-- Jenis -->
                         <div class="mb-4">
-                            <label for="status" class="block text-gray-700 font-medium mb-1">status Aset</label>
+                            <label for="status" class="block text-gray-700 font-medium mb-1">Status</label>
                             <select name="status" id="status" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
-                                <option value="Aktif">Aktif</option>
-                                <option value="Non Aktif">Non Aktif</option>
+                                <option value="Opening">Opening</option>
+                                <option value="Closing">Closing</option>
                             </select>
                             @error('status')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>

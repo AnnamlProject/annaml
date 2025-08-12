@@ -16,7 +16,7 @@ class DepartemenAkunController extends Controller
                     ->orWhere('nama_akun', 'like', '%' . $request->q . '%');
             })
             // Filter agar tidak menampilkan akun tipe Header/Sub/Tipe Akun
-            ->whereNotIn('level_akun', ['HEADER', 'GROUP ACCOUNT', 'Level Akun'])
+            ->whereNotIn('level_akun', ['HEADER', 'GROUP ACCOUNT', 'X', 'Level Akun'])
             ->get();
 
         return response()->json($items->map(function ($item) {

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\chartOfAccount as AppChartOfAccount;
 use App\JournalEntry;
 use App\JournalEntryDetail;
 use Maatwebsite\Excel\Row;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
+use App\ChartOfAccount;
 
 class JournalEntryImport implements ToCollection, WithHeadingRow
 {
@@ -21,29 +23,54 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
-        // 1. Kelompokkan berdasarkan source|tanggal|comment
         foreach ($rows as $row) {
             $key = $row['source'] . '|' . $row['tanggal'] . '|' . ($row['comment_transaksi'] ?? '');
             $this->grouped[$key][] = $row;
         }
 
-        // 2. Proses tiap group
         foreach ($this->grouped as $key => $groupRows) {
             $totalDebit = 0;
             $totalKredit = 0;
+            $invalidKodeAkun = false;
 
             foreach ($groupRows as $row) {
+                // ✅ Validasi kode akun
+                if (!chartOfAccount::where('kode_akun', $row['kode_akun'])->exists()) {
+                    $invalidKodeAkun = true;
+                }
+
                 $totalDebit += (float) ($row['debit'] ?? 0);
                 $totalKredit += (float) ($row['kredit'] ?? 0);
             }
 
-            // 3. Cek keseimbangan
-            if (round($totalDebit, 2) !== round($totalKredit, 2)) {
-                $this->skippedGroups[] = $key;
+            // ✅ Cek kode akun tidak ditemukan
+            if ($invalidKodeAkun) {
+                $this->skippedGroups[] = [
+                    'key' => $key,
+                    'reason' => 'Kode akun tidak sesuai dengan account yang tersedia.'
+                ];
                 continue;
             }
 
-            // 4. Simpan jika balance
+            // ✅ Cek hanya 1 baris & debit/kredit kosong
+            if (count($groupRows) === 1 && ($totalDebit == 0 || $totalKredit == 0)) {
+                $this->skippedGroups[] = [
+                    'key' => $key,
+                    'reason' => 'Hanya 1 baris dan tidak ada debit atau kredit.'
+                ];
+                continue;
+            }
+
+            // ✅ Cek balance
+            if (round($totalDebit, 2) !== round($totalKredit, 2)) {
+                $this->skippedGroups[] = [
+                    'key' => $key,
+                    'reason' => 'Total debit dan kredit tidak balance.'
+                ];
+                continue;
+            }
+
+            // ✅ Simpan jika semua valid
             [$source, $tanggal, $comment] = explode('|', $key);
 
             $journalEntry = JournalEntry::create([
@@ -63,11 +90,11 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
             }
         }
 
-        // 5. Kirim notifikasi ke session kalau ada yang dilewati
+        // ✅ Pesan error ke session
         if (count($this->skippedGroups) > 0) {
-            $pesan = 'Beberapa transaksi dilewati karena tidak balance: <br><ul>';
+            $pesan = 'Beberapa transaksi dilewati: <br><ul>';
             foreach ($this->skippedGroups as $group) {
-                $pesan .= "<li>$group</li>";
+                $pesan .= "<li><b>{$group['key']}</b> - {$group['reason']}</li>";
             }
             $pesan .= '</ul>';
 
@@ -76,10 +103,12 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
             Session::flash('success', 'Semua data berhasil diimport dan seimbang.');
         }
     }
+
     public function getSkippedGroups()
     {
         return $this->skippedGroups;
     }
+
     private function transformDate($value)
     {
         try {

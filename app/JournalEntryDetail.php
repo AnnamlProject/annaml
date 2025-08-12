@@ -15,6 +15,39 @@ class JournalEntryDetail extends Model
         'comment',
         'kode_akun'
     ];
+
+    protected static function booted()
+    {
+        // Trigger ketika data diubah atau dibuat
+        static::saved(function ($detail) {
+            self::handleStartNewYear($detail);
+        });
+
+        // Trigger ketika data dihapus
+        static::deleted(function ($detail) {
+            self::handleStartNewYear($detail);
+        });
+    }
+
+    protected static function handleStartNewYear($detail)
+    {
+        // Ambil tahun transaksi
+        $tahunTransaksi = \Carbon\Carbon::parse($detail->journalEntry->tanggal)->format('Y');
+
+
+        // Tahun aktif sekarang
+        $tahunSekarang = now()->format('Y');
+
+        // Kalau transaksinya bukan tahun sebelumnya, tidak perlu update
+        if ($tahunTransaksi != $tahunSekarang - 1) {
+            return;
+        }
+
+        // Panggil service untuk update jurnal awal tahun
+        app(\App\Services\StartNewYearService::class)
+            ->updateLabaTahunBerjalan($tahunTransaksi);
+    }
+
     // Relasi: setiap detail milik satu journal entry
     public function journalEntry()
     {

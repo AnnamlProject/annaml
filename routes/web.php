@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartemenAkunController;
@@ -230,6 +231,12 @@ Route::middleware(['auth'])->group(function () {
 
     // maintenance menu
     Route::resource('start_new_year', 'StartNewYearController');
+
+    Route::prefix('accounting')->name('accounting.')->group(function () {
+        Route::get('/start-new-year', [AccountingController::class, 'showStartNewYear'])->name('start_new_year');
+        Route::post('/start-new-year', [AccountingController::class, 'startNewYearProcess'])->name('start_new_year_proses');
+    });
+
 
     // end maintenance menu
 

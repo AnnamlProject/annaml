@@ -52,7 +52,7 @@
                             <select name="level_akun"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
-                                @foreach (['Header', 'Grup Account', 'Account', 'Sub Account'] as $level)
+                                @foreach (['Header', 'Grup Account', 'Account', 'Sub Account', 'X'] as $level)
                                     <option value="{{ $level }}"
                                         {{ old('level_akun', $chartOfAccounts->level_akun) == $level ? 'selected' : '' }}>
                                         {{ ucfirst($level) }}

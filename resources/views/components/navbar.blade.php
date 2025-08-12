@@ -931,6 +931,11 @@
                             x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
                             class="absolute right-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
                             <a href="{{ route('start_new_year.index') }}"
+                                class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Periode
+                                Buku
+
+                            </a>
+                            <a href="{{ route('accounting.start_new_year') }}"
                                 class="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Start
                                 New Year
                             </a>

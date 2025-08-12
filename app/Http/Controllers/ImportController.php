@@ -76,9 +76,9 @@ class ImportController extends Controller
             $skipped = $importer->getSkippedGroups();
 
             if (count($skipped) > 0) {
-                $pesan = 'Beberapa transaksi dilewati karena tidak balance: <br><ul>';
+                $pesan = 'Terjadi Kesalahan: <br><ul>';
                 foreach ($skipped as $group) {
-                    $pesan .= "<li>$group</li>";
+                    $pesan .= "<li><b>{$group['key']}</b> - {$group['reason']}</li>";
                 }
                 $pesan .= '</ul>';
 

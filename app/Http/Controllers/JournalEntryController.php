@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DepartemenAkun;
 use App\JournalEntry;
 use App\JournalEntryDetail;
+use App\StartNewYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,55 +22,129 @@ class JournalEntryController extends Controller
     public function create()
     {
         $departemenAkun = DepartemenAkun::all();
-        return view('journal_entry.create', compact('departemenAkun'));
+        $periodeBuku = StartNewYear::all();
+        return view('journal_entry.create', compact('departemenAkun', 'periodeBuku'));
     }
     public function getAutoData(Request $request)
     {
         $tanggal = $request->get('tanggal');
         $kodeAkun = $request->get('kode_akun');
 
-        $periode = DB::table('start_new_years')->where('status', 'Aktif')->first();
+        $periode = DB::table('start_new_years')->where('status', 'Opening')->first();
 
-        if ($periode && $tanggal) {
-            $tahun = $periode->tahun;
-
-            // Cek kalau tanggal == akhir periode
-            if ($tanggal == $periode->akhir_periode) {
-                $query = DB::table('journal_entry_details as d')
-                    ->join('journal_entries as j', 'd.journal_entry_id', '=', 'j.id')
-                    ->whereYear('j.tanggal', $tahun);
-
-                if ($kodeAkun) {
-                    $result = $query
-                        ->where('d.kode_akun', $kodeAkun)
-                        ->select(
-                            'd.kode_akun',
-                            DB::raw('SUM(d.debits) as total_debit'),
-                            DB::raw('SUM(d.credits) as total_credit')
-                        )
-                        ->groupBy('d.kode_akun')
-                        ->first();
-
-                    return response()->json([
-                        'success' => true,
-                        'total_debit' => $result->total_debit ?? 0,
-                        'total_credit' => $result->total_credit ?? 0
-                    ]);
-                }
-
-                // Kalau tanpa kode_akun → kirim semua
-                $entries = $query
-                    ->select(
-                        'd.kode_akun',
-                        DB::raw('SUM(d.debits) as total_debit'),
-                        DB::raw('SUM(d.credits) as total_credit')
-                    )
-                    ->groupBy('d.kode_akun')
-                    ->get();
-
-                return response()->json(['entries' => $entries]);
-            }
+        // Kalau periode aktif tidak ada
+        if (!$periode || !$tanggal) {
+            return response()->json(['success' => false]);
         }
+
+        $tahun = $periode->tahun;
+
+        // Kalau tanggal bukan akhir periode → langsung return tanpa entries
+        if ($tanggal != $periode->akhir_periode) {
+            return response()->json(['success' => false]);
+        }
+
+        // Query dasar
+        $query = DB::table('journal_entry_details as d')
+            ->join('journal_entries as j', 'd.journal_entry_id', '=', 'j.id')
+            ->whereYear('j.tanggal', $tahun);
+
+        if ($kodeAkun) {
+            $result = $query
+                ->where('d.kode_akun', $kodeAkun)
+                ->select(
+                    'd.kode_akun',
+                    DB::raw('SUM(d.debits) as total_debit'),
+                    DB::raw('SUM(d.credits) as total_credit')
+                )
+                ->groupBy('d.kode_akun')
+                ->first();
+
+            if (!$result) {
+                return response()->json([
+                    'success' => true,
+                    'total_debit' => 0,
+                    'total_credit' => 0
+                ]);
+            }
+
+            $tipeAkun = DB::table('chart_of_accounts')
+                ->where('kode_akun', $kodeAkun)
+                ->value('tipe_akun');
+
+            if (in_array($tipeAkun, ['Pendapatan', 'Beban'])) {
+                $debitAkhir = $result->total_credit ?? 0;
+                $creditAkhir = $result->total_debit ?? 0;
+            } else {
+                $debitAkhir = $result->total_debit ?? 0;
+                $creditAkhir = $result->total_credit ?? 0;
+            }
+
+            return response()->json([
+                'success' => true,
+                'total_debit' => $debitAkhir,
+                'total_credit' => $creditAkhir
+            ]);
+        }
+
+        // Ambil hanya akun Pendapatan dan Beban
+        $entries = $query
+            ->join('chart_of_accounts as coa', 'd.kode_akun', '=', 'coa.kode_akun')
+            ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban']) // 🔹 filter di sini
+            ->select(
+                'd.kode_akun',
+                'coa.nama_akun',
+                'coa.tipe_akun',
+                DB::raw('SUM(d.debits) as total_debit'),
+                DB::raw('SUM(d.credits) as total_credit')
+            )
+            ->groupBy('d.kode_akun', 'coa.nama_akun', 'coa.tipe_akun')
+            ->get();
+
+
+        // Balikkan untuk Pendapatan dan Beban
+        $entries = $entries->map(function ($item) {
+            $tipeAkun = DB::table('chart_of_accounts')
+                ->where('kode_akun', $item->kode_akun)
+                ->value('tipe_akun');
+
+            if (in_array($tipeAkun, ['Pendapatan', 'Beban'])) {
+                $tmp = $item->total_debit;
+                $item->total_debit = $item->total_credit;
+                $item->total_credit = $tmp;
+            }
+            return $item;
+        });
+
+        $totalDebit = $entries->sum('total_debit');
+        $totalCredit = $entries->sum('total_credit');
+
+        if ($totalDebit > $totalCredit) {
+            $debitAkhir = 0;
+            $creditAkhir = $totalDebit - $totalCredit;
+        } elseif ($totalCredit > $totalDebit) {
+            $debitAkhir = $totalCredit - $totalDebit;
+            $creditAkhir = 0;
+        } else {
+            $debitAkhir = 0;
+            $creditAkhir = 0;
+        }
+
+        $akunLaba = DB::table('chart_of_accounts')->where('level_akun', 'X')->first();
+
+        if ($akunLaba) {
+            $entries->push((object)[
+                'kode_akun' => $akunLaba->kode_akun,
+                'nama_akun' => $akunLaba->nama_akun,
+                'total_debit' => $debitAkhir,
+                'total_credit' => $creditAkhir
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'entries' => $entries
+        ]);
     }
 
 

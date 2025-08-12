@@ -27,25 +27,45 @@
 
 
                     <!-- Form Inputs -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 text-base">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 text-base">
+                        <!-- Periode Buku -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Source</label>
-                            <input type="text" name="source" class="w-full rounded-md border border-gray-300 px-3 py-2"
-                                value="{{ old('source') }}" required>
+                            <label for="unit_kerja_id" class="block text-sm font-semibold text-gray-700 mb-1">Periode
+                                Buku</label>
+                            <select name="unit_kerja_id[]" id="unit_kerja_id"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($periodeBuku as $g)
+                                    <option value="{{ $g->id }}" data-tahun="{{ $g->tahun }}">{{ $g->tahun }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
+
+                        <!-- Source -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
+                            <label for="source" class="block text-sm font-semibold text-gray-700 mb-1">Source</label>
+                            <input type="text" name="source" id="source"
+                                class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('source') }}"
+                                required>
+                        </div>
+
+                        <!-- Date -->
+                        <div>
+                            <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
                             <input type="date" name="tanggal" id="tanggal"
                                 class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('tanggal') }}"
                                 required>
                         </div>
 
+                        <!-- Comment -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Comment</label>
-                            <input type="text" name="comment" class="w-full rounded-md border border-gray-300 px-3 py-2"
-                                value="{{ old('comment') }}">
+                            <label for="comment" class="block text-sm font-semibold text-gray-700 mb-1">Comment</label>
+                            <input type="text" name="comment" id="comment"
+                                class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('comment') }}">
                         </div>
                     </div>
+
 
                     <!-- Table -->
                     <div class="overflow-x-auto overflow-y-auto max-h-[450px] mb-6 border rounded">
@@ -74,10 +94,11 @@
 
                     <!-- Tombol Submit -->
                     <div class="mt-6 flex justify-end gap-4">
-                        <a href="{{ route('journal_entry.index') }}"
+                        <a href="{{ route('journal_entry.index') }}" onclick="return confirmCancel(event)"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
                             Batal
                         </a>
+
                         <button type="submit"
                             class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium rounded-md">
                             Simpan
@@ -112,8 +133,6 @@
         </div>
     </div>
 
-
-
 @endsection
 
 @push('scripts')
@@ -121,194 +140,263 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const periodeSelect = document.getElementById('unit_kerja_id');
+            const tanggalInput = document.getElementById('tanggal');
+
+            periodeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const tahun = selectedOption.getAttribute('data-tahun');
+
+                if (tahun) {
+                    tanggalInput.min = `${tahun}-01-01`;
+                    tanggalInput.max = `${tahun}-12-31`;
+                    tanggalInput.value = ''; // reset tanggal supaya tidak di luar range
+                } else {
+                    tanggalInput.min = '';
+                    tanggalInput.max = '';
+                }
+            });
+        });
+    </script>
+
     <!-- JS for dropdown toggle -->
     <script>
-        // Ambil data saat ganti tanggal untuk preview list
-        $('#tanggal').on('change', function() {
-            let tanggal = $(this).val();
+        $(document).ready(function() {
+            let rowIndex = 0;
 
-            $.ajax({
-                url: '/journal-entry/auto-data',
-                type: 'GET',
-                data: {
-                    tanggal: tanggal
-                },
-                success: function(res) {
-                    if (res.entries.length > 0) {
-                        let html = '<ul>';
-                        res.entries.forEach(e => {
-                            html +=
-                                `<li>Account: ${e.kode_akun}, Debit: ${e.total_debit}, Credit: ${e.total_credit}</li>`;
-                        });
-                        html += '</ul>';
-                        $('#result').html(html);
-                    } else {
-                        $('#result').html('<p>Tidak ada data untuk tanggal ini</p>');
-                    }
-                }
-            });
-        });
-
-        let rowIndex = 0;
-
-        function generateRow(index) {
-            return `
+            function generateRow(index) {
+                return `
         <tr class="item-row" data-index="${index}">
-            <td class="border px-2 py-1">
-                <select class="item-select w-full border rounded" data-index="${index}"></select>
-            </td>
-            <td class="border px-2 py-1">
-                <input type="hidden" name="items[${index}][kode_akun]" class="kode_akun-${index}" />
-                <input type="hidden" name="items[${index}][departemen_akun_id]" class="departemen-akun-${index}" />
-                <input type="text" name="items[${index}][debits]" class="money-input w-full border rounded px-2 py-1 text-right debit-${index}" inputmode="numeric" />
-            </td>
-            <td class="border px-2 py-1">
-                <input type="text" name="items[${index}][credits]" class="money-input w-full border rounded px-2 py-1 text-right credit-${index}" inputmode="numeric" />
-            </td>
-            <td class="border px-2 py-1">
-                <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
-            </td>
-            <td class="border px-2 py-1 text-center">
-                <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
-            </td>
-        </tr>`;
-        }
+          <td class="border px-2 py-1">
+            <select class="item-select w-full border rounded" data-index="${index}"></select>
+          </td>
+          <td class="border px-2 py-1">
+            <input type="hidden" name="items[${index}][kode_akun]" class="kode_akun-${index}" />
+            <input type="hidden" name="items[${index}][departemen_akun_id]" class="departemen-akun-${index}" />
+            <input type="text" name="items[${index}][debits]" class="money-input w-full border rounded px-2 py-1 text-right debit-${index}" inputmode="numeric" />
+          </td>
+          <td class="border px-2 py-1">
+            <input type="text" name="items[${index}][credits]" class="money-input w-full border rounded px-2 py-1 text-right credit-${index}" inputmode="numeric" />
+          </td>
+          <td class="border px-2 py-1">
+            <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
+          </td>
+          <td class="border px-2 py-1 text-center">
+            <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
+          </td>
+        </tr>
+      `;
+            }
 
-        function attachSelect2(index) {
-            $(`select[data-index="${index}"]`).select2({
-                placeholder: 'Cari Akun...',
-                ajax: {
-                    url: '/search-account',
-                    dataType: 'json',
-                    delay: 250,
-                    data: params => ({
-                        q: params.term
-                    }),
-                    processResults: data => {
-                        let results = [];
+            function addRowWithData(data = null) {
+                const newRow = generateRow(rowIndex);
+                $('#item-table-body').append(newRow);
+                attachSelect2(rowIndex);
 
-                        data.forEach(item => {
-                            results.push({
-                                id: item.id,
-                                text: `${item.kode_akun} - ${item.nama_akun}`,
-                                kode_akun: item.kode_akun,
-                                departemen_akun_id: null
-                            });
+                if (data) {
+                    const select = $(`select[data-index="${rowIndex}"]`);
+                    const optionText = data.kode_akun + ' - ' + (data.nama_akun || '');
+                    const option = new Option(optionText, data.kode_akun, true, true);
+                    select.append(option).trigger('change.select2');
 
-                            if (item.daftar_departemen && item.daftar_departemen.length > 0) {
-                                item.daftar_departemen.forEach(dept => {
-                                    results.push({
-                                        id: `d-${dept.id}`,
-                                        text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
-                                        kode_akun: item.kode_akun,
-                                        departemen_akun_id: dept.id,
-                                        deskripsi_departemen: dept.deskripsi
-                                    });
-                                });
-                            }
-                        });
-
-                        return {
-                            results
-                        };
-                    },
-                    cache: true
-                },
-                templateResult: function(data) {
-                    return data.text;
+                    $(`.kode_akun-${rowIndex}`).val(data.kode_akun);
+                    $(`.debit-${rowIndex}`).val(new Intl.NumberFormat('id-ID').format(data.total_debit || 0));
+                    $(`.credit-${rowIndex}`).val(new Intl.NumberFormat('id-ID').format(data.total_credit || 0));
                 }
-            }).on('select2:select', function(e) {
-                const data = e.params.data;
-                $(`.kode_akun-${index}`).val(data.kode_akun);
-                $(`.departemen-akun-${index}`).val(data.departemen_akun_id ?? '');
 
-                // Ambil data debit & credit dari server berdasarkan tanggal
-                $.ajax({
-                    url: '/journal-entry/auto-data',
-                    type: 'GET',
-                    data: {
-                        tanggal: $('#tanggal').val()
-                    },
-                    success: function(res) {
-                        if (res.entries && res.entries.length > 0) {
-                            const found = res.entries.find(item => item.kode_akun === data.kode_akun);
-                            if (found) {
-                                $(`.debit-${index}`).val(new Intl.NumberFormat('id-ID').format(found
-                                    .total_debit || 0));
-                                $(`.credit-${index}`).val(new Intl.NumberFormat('id-ID').format(found
-                                    .total_credit || 0));
-                            }
-                        }
-                    }
-                });
-            });
-        }
-
-        function addRow() {
-            const newRow = generateRow(rowIndex);
-            $('#item-table-body').append(newRow);
-            attachSelect2(rowIndex);
-            rowIndex++;
-        }
-
-        function formatNumberInput(input) {
-            const raw = input.value.replace(/[^0-9]/g, '');
-            input.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
-        }
-
-        function unformatAllCurrencyInputs() {
-            document.querySelectorAll('.money-input').forEach(input => {
-                const raw = input.value.replace(/\./g, '');
-                input.value = raw === '' ? '' : parseFloat(raw);
-            });
-        }
-
-        function updateTotals() {
-            let totalDebit = 0;
-            let totalCredit = 0;
-
-            document.querySelectorAll('input[name^="items"][name$="[debits]"]').forEach(input => {
-                let val = parseFloat(input.value.replace(/\./g, '')) || 0;
-                totalDebit += val;
-            });
-
-            document.querySelectorAll('input[name^="items"][name$="[credits]"]').forEach(input => {
-                let val = parseFloat(input.value.replace(/\./g, '')) || 0;
-                totalCredit += val;
-            });
-
-            document.getElementById('total-debit').textContent = new Intl.NumberFormat('id-ID').format(totalDebit);
-            document.getElementById('total-credit').textContent = new Intl.NumberFormat('id-ID').format(totalCredit);
-        }
-
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('money-input')) {
-                formatNumberInput(e.target);
+                rowIndex++;
                 updateTotals();
             }
-        });
 
+            function attachSelect2(index) {
+                $(`select[data-index="${index}"]`).select2({
+                    placeholder: 'Cari Akun...',
+                    ajax: {
+                        url: '/search-account',
+                        dataType: 'json',
+                        delay: 250,
+                        data: params => ({
+                            q: params.term
+                        }),
+                        processResults: data => {
+                            let results = [];
+                            data.forEach(item => {
+                                results.push({
+                                    id: item.id,
+                                    text: `${item.kode_akun} - ${item.nama_akun}`,
+                                    kode_akun: item.kode_akun,
+                                    departemen_akun_id: null
+                                });
 
-        $(document).ready(function() {
-            for (let i = 0; i < 30; i++) addRow();
+                                if (item.daftar_departemen && item.daftar_departemen.length >
+                                    0) {
+                                    item.daftar_departemen.forEach(dept => {
+                                        results.push({
+                                            id: `d-${dept.id}`,
+                                            text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
+                                            kode_akun: item.kode_akun,
+                                            departemen_akun_id: dept.id,
+                                            deskripsi_departemen: dept.deskripsi
+                                        });
+                                    });
+                                }
+                            });
+                            return {
+                                results
+                            };
+                        },
+                        cache: true
+                    },
+                    templateResult: data => data.text
+                }).on('select2:select', function(e) {
+                    const data = e.params.data;
+                    $(`.kode_akun-${index}`).val(data.kode_akun);
+                    $(`.departemen-akun-${index}`).val(data.departemen_akun_id ?? '');
 
-            $('#add-row').on('click', function() {
-                addRow();
+                    $.ajax({
+                        url: '/journal-entry/auto-data',
+                        type: 'GET',
+                        data: {
+                            tanggal: $('#tanggal').val(),
+                            kode_akun: data.kode_akun
+                        },
+                        success: function(res) {
+                            if (res.success) {
+                                $(`.debit-${index}`).val(new Intl.NumberFormat('id-ID').format(
+                                    res.total_debit || 0));
+                                $(`.credit-${index}`).val(new Intl.NumberFormat('id-ID').format(
+                                    res.total_credit || 0));
+                                updateTotals();
+                            }
+                        }
+                    });
+                });
+            }
+
+            function formatNumberInput(input) {
+                const raw = input.value.replace(/[^0-9]/g, '');
+                input.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
+            }
+
+            function unformatAllCurrencyInputs() {
+                document.querySelectorAll('.money-input').forEach(input => {
+                    const raw = input.value.replace(/\./g, '');
+                    input.value = raw === '' ? '' : parseFloat(raw);
+                });
+            }
+
+            function updateTotals() {
+                let totalDebit = 0;
+                let totalCredit = 0;
+
+                document.querySelectorAll('input[name^="items"][name$="[debits]"]').forEach(input => {
+                    let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                    totalDebit += val;
+                });
+
+                document.querySelectorAll('input[name^="items"][name$="[credits]"]').forEach(input => {
+                    let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                    totalCredit += val;
+                });
+
+                $('#total-debit').text(new Intl.NumberFormat('id-ID').format(totalDebit));
+                $('#total-credit').text(new Intl.NumberFormat('id-ID').format(totalCredit));
+            }
+
+            $(document).on('input', '.money-input', function() {
+                formatNumberInput(this);
+                updateTotals();
             });
 
             $(document).on('click', '.remove-row', function() {
                 const index = $(this).data('index');
                 $(`tr[data-index="${index}"]`).remove();
+                updateTotals();
             });
 
-            document.addEventListener('input', function(e) {
-                if (e.target.classList.contains('money-input')) {
-                    formatNumberInput(e.target);
+            // Perubahan penting: hanya refresh tabel kalau success = true
+            $('#tanggal').on('change', function() {
+                let tanggal = $(this).val();
+
+                $.ajax({
+                    url: '/journal-entry/auto-data',
+                    type: 'GET',
+                    data: {
+                        tanggal
+                    },
+                    success: function(res) {
+                        if (res.success && res.entries && res.entries.length > 0) {
+                            $('#item-table-body').empty();
+                            rowIndex = 0;
+                            res.entries.forEach(e => addRowWithData(e));
+                            updateTotals();
+                        }
+                        // kalau success = false → tabel tetap, tidak dihapus
+                    }
+                });
+            });
+
+            window.confirmCancel = function(event) {
+                event.preventDefault();
+                let isFilled = false;
+                $('#journal-entry-form input[type="text"], #journal-entry-form input[type="date"]').each(
+                    function() {
+                        if ($(this).val().trim() !== '') isFilled = true;
+                    });
+
+                if (isFilled) {
+                    Swal.fire({
+                        title: 'Yakin batal?',
+                        text: "Data yang sudah diisi akan hilang.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, Batal',
+                        cancelButtonText: 'Tidak'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ route('journal_entry.index') }}";
+                        }
+                    });
+                } else {
+                    window.location.href = "{{ route('journal_entry.index') }}";
+                }
+            }
+
+            $('#journal-entry-form').on('submit', function(e) {
+                unformatAllCurrencyInputs();
+                let totalDebit = 0,
+                    totalCredit = 0;
+
+                $(this).find('input[name^="items"][name$="[debits]"]').each(function() {
+                    totalDebit += parseFloat($(this).val()) || 0;
+                });
+                $(this).find('input[name^="items"][name$="[credits]"]').each(function() {
+                    totalCredit += parseFloat($(this).val()) || 0;
+                });
+
+                if (totalDebit === 0 || totalCredit === 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validasi Gagal',
+                        text: 'Debit dan Credit harus ada, tidak boleh hanya salah satu.',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
 
-            document.getElementById('journal-entry-form').addEventListener('submit', function() {
-                unformatAllCurrencyInputs();
+            for (let i = 0; i < 30; i++) {
+                addRowWithData();
+            }
+
+            $('#add-row').on('click', function() {
+                addRowWithData();
             });
         });
     </script>

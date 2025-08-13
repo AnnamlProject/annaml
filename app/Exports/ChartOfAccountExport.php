@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithHeadings;

@@ -24,6 +24,7 @@ class AccountingController extends Controller
         }
 
         $tahun = $periodeAktif->tahun;
+        $tanggalPenutupan = $periodeAktif->akhir_periode; // gunakan tanggal akhir periode sebagai tanggal jurnal penutupan
 
         // Ambil data jurnal detail tahun berjalan
         $query = DB::table('journal_entry_details as d')
@@ -32,7 +33,7 @@ class AccountingController extends Controller
 
         $entries = $query
             ->join('chart_of_accounts as coa', 'd.kode_akun', '=', 'coa.kode_akun')
-            ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban']) // 🔹 hanya akun nominal
+            ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban']) // hanya akun nominal
             ->select(
                 'd.kode_akun',
                 'coa.nama_akun',
@@ -82,7 +83,7 @@ class AccountingController extends Controller
             // 1. Jurnal penutup pendapatan & beban ke Laba Tahun Berjalan
             $closingJournalId = DB::table('journal_entries')->insertGetId([
                 'source' => 'start_new_year',
-                'tanggal' => now()->toDateString(),
+                'tanggal' => $tanggalPenutupan,
                 'comment' => 'Start New Year - Penutupan Buku',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -129,7 +130,7 @@ class AccountingController extends Controller
             // 2. Pindahkan Laba Tahun Berjalan ke Laba Ditahan
             $transferJournalId = DB::table('journal_entries')->insertGetId([
                 'source' => 'start_new_year',
-                'tanggal' => now()->toDateString(),
+                'tanggal' => $tanggalPenutupan,
                 'comment' => 'Pemindahan Laba Tahun Berjalan ke Laba Ditahan',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -187,10 +188,14 @@ class AccountingController extends Controller
                 ->update(['status' => 'Closing']);
 
             // 4. Buat periode baru
+            // Awal periode baru adalah hari setelah akhir periode lama
+            $awalPeriodeBaru = date('Y-m-d', strtotime($tanggalPenutupan . ' +1 day'));
+            $akhirPeriodeBaru = date('Y-m-d', strtotime($awalPeriodeBaru . ' +1 year -1 day')); // 1 tahun -1 hari
+
             DB::table('start_new_years')->insert([
                 'tahun' => $tahun + 1,
-                'awal_periode' => now()->addDay()->toDateString(),
-                'akhir_periode' => now()->addYear()->toDateString(),
+                'awal_periode' => $awalPeriodeBaru,
+                'akhir_periode' => $akhirPeriodeBaru,
                 'status' => 'Opening',
                 'created_at' => now(),
                 'updated_at' => now(),

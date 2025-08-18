@@ -13,7 +13,7 @@ class TrialBalanceController extends Controller
     {
         return view('trial_balance.filter_trial_balance');
     }
-    public function trialBalanceReport(Request $request)
+  public function trialBalanceReport(Request $request)
     {
         $tanggalAkhir = $request->end_date;
 

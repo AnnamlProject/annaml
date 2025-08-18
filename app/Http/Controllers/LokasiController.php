@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\lokasi;
+use App\Lokasi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +20,7 @@ class LokasiController extends Controller
     }
     private function generateKodeAsset()
     {
-        $last = \App\lokasi::orderBy('kode_lokasi', 'desc')->first();
+        $last = \App\Lokasi::orderBy('kode_lokasi', 'desc')->first();
 
         if ($last && preg_match('/LOK-(\d+)/', $last->kode_lokasi, $matches)) {
             $number = (int) $matches[1] + 1;

@@ -24,33 +24,50 @@
         }
     @endphp
 
-    <div class="relative w-full h-[85vh] flex items-center justify-center text-center text-white overflow-hidden">
+
+    <div class="relative w-full h-[85vh] flex items-start justify-end text-right text-white overflow-hidden p-8">
         <!-- Background -->
         <img src="{{ asset($bgImage) }}" alt="Background"
             class="absolute inset-0 w-full h-full object-cover object-center animate-zoomBg will-change-transform" />
 
         <!-- Overlay gradasi -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-sky-500/80"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-sky-600/80"></div>
 
         <!-- Partikel -->
         <div class="absolute inset-0 pointer-events-none">
             @for ($i = 0; $i < 30; $i++)
                 <span class="absolute w-1 h-1 bg-white rounded-full opacity-70 animate-twinkle"
-                    style="top: {{ rand(0, 100) }}%; left: {{ rand(0, 100) }}%; animation-delay: {{ rand(0, 5) }}s;"></span>
+                    style="
+                    top: {{ rand(0, 100) }}%; 
+                    left: {{ rand(0, 100) }}%; 
+                    animation-delay: {{ rand(0, 5) }}s;
+                "></span>
             @endfor
         </div>
 
         <!-- Konten -->
-        <div class="relative px-6 max-w-2xl animate-textReveal z-10">
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 drop-shadow-xl">
+        <div class="relative max-w-xl z-10">
+            <!-- Greeting -->
+            <h1
+                class="text-2xl md:text-4xl font-extrabold mb-4 drop-shadow-2xl 
+       bg-clip-text text-transparent 
+       bg-gradient-to-r from-sky-300 via-cyan-400 to-blue-500 
+       animate-fadeInUp">
                 {{ $greeting }}
             </h1>
-            <p class="text-lg md:text-xl mb-6 text-gray-200 drop-shadow-md">
-                {{ $tagline }}
+
+            <p class="text-sm md:text-base mb-6 text-gray-200 drop-shadow-md 
+      animate-fadeIn delay-300">
+                <span class="px-2 py-1 rounded-lg backdrop-blur-sm">
+                    {{ $tagline }}
+                </span>
             </p>
+
 
         </div>
     </div>
+
+
 
     <style>
         @keyframes fadeSlide {

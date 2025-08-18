@@ -1,0 +1,43 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class SalesInvoice extends Model
+{
+    //
+    protected $fillable = [
+        'invoice_number',
+        'invoice_date',
+        'sales_order_id',
+        'customers_id',
+        'jenis_pembayaran_id',
+        'shipping_address',
+        'shipping_date',
+        'sales_person_id',
+        'freight',
+        'early_payment_terms',
+        'messages'
+    ];
+    public function jenisPembayaran()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customers::class, 'customers_id');
+    }
+    public function salesPerson()
+    {
+        return $this->belongsTo(Employee::class, 'sales_person_id');
+    }
+    public function details()
+    {
+        return $this->hasMany(SalesInvoiceDetail::class, 'sales_invoice_id');
+    }
+    public function salesOrder()
+    {
+        return $this->belongsTo(SalesOrder::class);
+    }
+}

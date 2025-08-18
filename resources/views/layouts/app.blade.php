@@ -58,7 +58,7 @@
     </style>
 </head>
 
-<body class="font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
+<body class="m-0  p-0 font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
 
     {{-- Loading Overlay --}}
     {{-- <div id="loading-overlay"
@@ -82,7 +82,7 @@
 
 
     {{-- Main Content --}}
-    <main class="p-6">
+    <main class="m-0 p-0">
         @yield('content')
     </main>
 

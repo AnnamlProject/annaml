@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use App\Customers;
 use App\Employee;
 use App\Item;

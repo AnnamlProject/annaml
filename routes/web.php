@@ -8,6 +8,7 @@ use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IncomeStatementController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\KomposisiGajiController;
 use App\Http\Controllers\ReportController;
@@ -18,8 +19,10 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PembayaranGajiController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\SalesInvoiceController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -147,15 +150,36 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/customers', [ImportController::class, 'importcustomers'])->name('import.customers');
 
     Route::resource('sales_order', 'SalesOrderController');
+    Route::resource('sales_invoice', 'SalesInvoiceController');
+    Route::get('/sales_invoice/get-items/{salesOrderId}', [SalesInvoiceController::class, 'getItemsFromSalesOrder']);
+    Route::resource('sales_deposits', 'SalesDepositController');
+    Route::resource('receipts', 'ReceiptsController');
+
+
 
     // end sales menu
 
     // purchases menu
+    Route::resource('linkedAccountPurchases', 'LinkedAccountPurchasesControlller');
+    Route::resource('purchases_options', 'PurchasesOptionsController');
+
 
     Route::resource('vendors', 'VendorsController');
     // export dan import items
     Route::get('/export/vendors', [ExportController::class, 'exportVendors'])->name('export.vendors');
     Route::post('/import/vendors', [ImportController::class, 'ImportVendors'])->name('import.vendors');
+
+    // purchase order
+    Route::resource('purchase_order', 'PurchaseOrderController');
+    Route::get('/search-item', [ItemController::class, 'search']);
+
+    // purchase invoice
+    Route::resource('purchase_invoice', 'PurchaseInvoiceController');
+    Route::get('/purchase_invoice/get-items/{purchaseOrderId}', [PurchaseInvoiceController::class, 'getItemsFromPurchaseOrder']);
+
+
+    // payment
+    Route::resource('payment', 'PaymentController');
 
 
     // end purchases menu

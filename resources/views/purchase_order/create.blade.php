@@ -1,14 +1,12 @@
 @extends('layouts.app')
-
 @section('content')
-
-    <div class="py-10">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="py-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 <form method="POST"
-                    action="{{ isset($sales_order) ? route('sales_order.update', $sales_order->id) : route('sales_order.store') }}">
+                    action="{{ isset($purchase_order) ? route('purchase_order.update', $purchase_order->id) : route('purchase_order.store') }}">
                     @csrf
-                    @if (isset($sales_order))
+                    @if (isset($purchase_order))
                         @method('PUT')
                     @endif
 
@@ -24,7 +22,8 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        <!-- Nama sales_order_asset -->
+                        <!-- Nama purchase_order_asset -->
+
                         <div class="mb-4">
                             <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
                             </label>
@@ -34,7 +33,7 @@
                                 <option value="">-- Customers--</option>
                                 @foreach ($customer as $level)
                                     <option value="{{ $level->id }}"
-                                        {{ old('customer_id', $sales_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
+                                        {{ old('customer_id', $purchase_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
                                         {{ $level->nama_customers }}
                                     </option>
                                 @endforeach
@@ -43,7 +42,6 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-
                         <div class="mb-4">
                             <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
                             </label>
@@ -53,7 +51,7 @@
                                 <option value="">-- Payment Method--</option>
                                 @foreach ($jenis_pembayaran as $level)
                                     <option value="{{ $level->id }}"
-                                        {{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
+                                        {{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
                                         {{ $level->nama_jenis }}
                                     </option>
                                 @endforeach
@@ -62,12 +60,13 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <!-- deskripsi sales_order_asset -->
+
+                        <!-- deskripsi purchase_order_asset -->
                         <div class="mb-4 md:col-span-2">
                             <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
                                 Address</label>
                             <textarea id="shipping_address" name="shipping_address" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $sales_order->shipping_address ?? '') }}</textarea>
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_order->shipping_address ?? '') }}</textarea>
                             @error('shipping_address')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
@@ -76,7 +75,7 @@
                             <label for="order_number" class="block text-gray-700 font-medium mb-1">Order Number
                             </label>
                             <input type="text" id="name" name="order_number" required
-                                value="{{ old('order_number', $sales_order->order_number ?? '') }}"
+                                value="{{ old('order_number', $purchase_order->order_number ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('order_number')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -86,7 +85,7 @@
                             <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order
                             </label>
                             <input type="date" id="name" name="date_order" required
-                                value="{{ old('date_order', $sales_order->date_order ?? '') }}"
+                                value="{{ old('date_order', $purchase_order->date_order ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('date_order')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -96,27 +95,9 @@
                             <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
                             </label>
                             <input type="date" id="name" name="shipping_date" required
-                                value="{{ old('shipping_date', $sales_order->shipping_date ?? '') }}"
+                                value="{{ old('shipping_date', $purchase_order->shipping_date ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('shipping_date')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="Employee" class="block text-gray-700 font-medium mb-1">Employee
-                            </label>
-                            <select name="sales_person_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Employee--</option>
-                                @foreach ($employee as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('employee_id', $sales_order->employee_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_karyawan }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('employee_id')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
@@ -136,17 +117,18 @@
                                         <th class="border px-4 py-2 w-28 text-center">Back Order</th>
                                         <th class="border px-4 py-2 w-28">Unit</th>
                                         <th class="border px-4 py-2 w-64">Item Desription</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Base Price</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Discount</th>
                                         <th class="border px-4 py-2 w-32 text-right">Price</th>
-                                        <th class="border px-4 py-2 w-36 text-right">Amount</th>
                                         <th class="border px-4 py-2 w-32 text-right">Tax</th>
+                                        <th class="border px-4 py-2 w-32 text-right">Tax Amount</th>
+                                        <th class="border px-4 py-2 w-36 text-right">Amount</th>
                                         <th class="border px-4 py-2 w-40">Account</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item-table-body" class="bg-white">
                                     <!-- Baris dinamis dari JS akan dimasukkan di sini -->
                                 </tbody>
+
+
                             </table>
                         </div>
 
@@ -162,7 +144,7 @@
                             <label for="freight" class="block text-gray-700 font-medium mb-1">Freight
                             </label>
                             <input type="number" id="name" name="freight" required
-                                value="{{ old('freight', $sales_order->freight ?? '') }}"
+                                value="{{ old('freight', $purchase_order->freight ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('freight')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -173,7 +155,7 @@
                                 Payments Terms
                             </label>
                             <input type="text" id="name" name="early_payment_terms" required
-                                value="{{ old('early_payment_terms', $sales_order->early_payment_terms ?? '') }}"
+                                value="{{ old('early_payment_terms', $purchase_order->early_payment_terms ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('early_payment_terms')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -183,19 +165,23 @@
                             <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
                             </label>
                             <textarea id="messages" name="messages" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $sales_order->messages ?? '') }}</textarea>
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $purchase_order->messages ?? '') }}</textarea>
                             @error('messages')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
+
+
+
+
                     <!-- Buttons -->
                     <div class="mt-6 flex space-x-4">
                         <button type="submit"
                             class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($sales_order) ? 'Update' : 'Create' }}
+                            {{ isset($purchase_order) ? 'Update' : 'Create' }}
                         </button>
-                        <a href="{{ route('sales_order.index') }}"
+                        <a href="{{ route('purchase_order.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
@@ -224,13 +210,12 @@
             <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded"  /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded"  /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][base_price]" class="base-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][discount]" class="disc-${index} w-full border rounded" value="0" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded"  /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="purchase-${index} w-full border rounded"  /></td>
+            <td class="border px-2 py-1"><input type="number" name="items[${index}][tax]" class="tax-${index} w-full border rounded" value="0" /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border rounded" /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax]" class="tax-${index} w-full border rounded"  /></td>
             <td class="border px-2 py-1">
-                <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}"  />
+                <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
                 <input type="hidden" name="items[${index}][account]" class="account-id-${index}" />
             </td>
             <td class="border px-2 py-1 text-center">
@@ -255,10 +240,11 @@
                             text: `${item.item_number} - ${item.item_name}`,
                             item_name: item.item_name,
                             unit: item.unit,
-                            base_price: item.base_price,
+                            purchase_price: item.purchase_price,
                             tax_rate: item.tax_rate,
                             account_id: item.account_id,
-                            account_name: item.account_name
+                            account_name: item.account_name,
+                            stock_quantity: item.stock_quantity // ✅ tambahkan ini
                         }))
                     }),
                     cache: true
@@ -267,10 +253,11 @@
                 const data = e.params.data;
                 $(`.desc-${index}`).val(data.item_name);
                 $(`.unit-${index}`).val(data.unit);
-                $(`.base-${index}`).val(data.base_price);
+                $(`.purchase-${index}`).val(data.purchase_price);
                 $(`.tax-${index}`).val(data.tax_rate + '%');
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
+                $(`.qty-${index}`).val(data.stock_quantity);
 
                 calculateAmount(index);
             });

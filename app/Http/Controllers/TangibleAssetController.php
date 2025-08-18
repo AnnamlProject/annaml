@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\KategoriAsset;
-use App\lokasi;
+use App\Lokasi;
 use App\MasaManfaat;
 use App\MetodePenyusutan;
 use App\TangibleAsset;

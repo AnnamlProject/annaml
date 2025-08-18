@@ -13,9 +13,8 @@ class TrialBalanceController extends Controller
     {
         return view('trial_balance.filter_trial_balance');
     }
-    public function trialBalanceReport(Request $request)
+  public function trialBalanceReport(Request $request)
     {
-
         $tanggalAkhir = $request->end_date;
 
         // Ambil semua akun dari chart of accounts
@@ -35,23 +34,37 @@ class TrialBalanceController extends Controller
             $totalDebit = $entries->sum('debits');
             $totalKredit = $entries->sum('credits');
 
-            // Tentukan tipe akun (debit/kredit normal)
             $tipe = strtolower($account->tipe_akun);
 
-            if (in_array($tipe, ['kewajiban', 'ekuitas', 'pendapatan'])) {
-                $saldo = $totalKredit - $totalDebit; // Saldo normal kredit
+            $saldo_debit = 0;
+            $saldo_kredit = 0;
+
+            if (in_array($tipe, ['kewajiban', 'Ekuitas', 'Pendapatan'])) {
+                // saldo normal kredit
+                $saldo = $totalKredit - $totalDebit;
+                if ($saldo > 0) {
+                    $saldo_kredit = $saldo;
+                } else {
+                    $saldo_debit = abs($saldo);
+                }
             } else {
-                $saldo = $totalDebit - $totalKredit; // Saldo normal debit
+                // saldo normal debit
+                $saldo = $totalDebit - $totalKredit;
+                if ($saldo > 0) {
+                    $saldo_debit = $saldo;
+                } else {
+                    $saldo_kredit = abs($saldo);
+                }
             }
 
-            // Masukkan ke dalam array hasil jika saldonya tidak 0
-            if ($saldo != 0) {
+            // Masukkan ke hasil jika saldo ada (debit/kredit)
+            if ($saldo_debit != 0 || $saldo_kredit != 0) {
                 $trialBalances[] = [
                     'kode_akun' => $account->kode_akun,
                     'nama_akun' => $account->nama_akun,
                     'tipe_akun' => $account->tipe_akun,
-                    'saldo_debit' => $saldo > 0 && !in_array($tipe, ['kewajiban', 'ekuitas', 'pendapatan']) ? $saldo : 0,
-                    'saldo_kredit' => $saldo > 0 && in_array($tipe, ['kewajiban', 'ekuitas', 'pendapatan']) ? $saldo : ($saldo < 0 ? abs($saldo) : 0),
+                    'saldo_debit' => $saldo_debit,
+                    'saldo_kredit' => $saldo_kredit,
                 ];
             }
         }

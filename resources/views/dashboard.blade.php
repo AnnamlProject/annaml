@@ -25,12 +25,11 @@
     @endphp
 
 
-    <div class="relative w-full h-[85vh] flex items-start justify-end text-right text-white overflow-hidden p-8">
-        <!-- Background -->
-        <img src="{{ asset($bgImage) }}" alt="Background"
-            class="absolute inset-0 w-full h-full object-cover object-center animate-zoomBg will-change-transform" />
+    <div class="relative w-full h-screen flex items-start justify-end text-right text-white overflow-hidden p-0 pt-16"
+        style="background-image: url('{{ asset($bgImage) }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
 
-        <!-- Overlay gradasi -->
+
+        <!-- Overlay -->
         <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-sky-600/80"></div>
 
         <!-- Partikel -->
@@ -47,27 +46,21 @@
 
         <!-- Konten -->
         <div class="relative max-w-xl z-10">
-            <!-- Greeting -->
             <h1
-                class="text-2xl md:text-4xl font-extrabold mb-4 drop-shadow-2xl 
-       bg-clip-text text-transparent 
-       bg-gradient-to-r from-sky-300 via-cyan-400 to-blue-500 
-       animate-fadeInUp">
+                class="text-2xl md:text-2xl font-extrabold mb-4 drop-shadow-2xl 
+            bg-clip-text text-transparent 
+            bg-gradient-to-r from-sky-300 via-cyan-400 to-blue-500 
+            animate-fadeInUp">
                 {{ $greeting }}
             </h1>
 
-            <p class="text-sm md:text-base mb-6 text-gray-200 drop-shadow-md 
-      animate-fadeIn delay-300">
+            <p class="text-sm md:text-sm mb-6 text-gray-200 drop-shadow-md animate-fadeIn delay-300">
                 <span class="px-2 py-1 rounded-lg backdrop-blur-sm">
                     {{ $tagline }}
                 </span>
             </p>
-
-
         </div>
     </div>
-
-
 
     <style>
         @keyframes fadeSlide {

@@ -58,7 +58,7 @@
     </style>
 </head>
 
-<body class="m-0  p-0 font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
+<body class="m-0 p-0 font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
 
     {{-- Loading Overlay --}}
     {{-- <div id="loading-overlay"
@@ -78,7 +78,7 @@
 
     {{-- Navbar --}}
 
-    @include('components.navbar');
+    @include('components.navbar')
 
 
     {{-- Main Content --}}

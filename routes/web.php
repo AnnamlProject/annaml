@@ -264,4 +264,8 @@ Route::middleware(['auth'])->group(function () {
 
     // end maintenance menu
 
+    // taxes menu
+    Route::resource('taxes', 'TaxesController');
+
+    // end taxes menu
 });

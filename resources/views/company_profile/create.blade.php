@@ -152,7 +152,27 @@
                             @enderror
                         </div>
                         <div class="mb-4">
-                            <label for="nib" class="block text-gray-700 font-medium mb-1">Nib
+                            <label for="skkemenkumhan" class="block text-gray-700 font-medium mb-1">SKKEMENKUMHAN
+                            </label>
+                            <input type="file" id="name" name="skkemenkumhan" accept="application/pdf" required
+                                value="{{ old('skkemenkumhan', $company_profile->skkemenkumhan ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('skkemenkumhan')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="bnri" class="block text-gray-700 font-medium mb-1">BNRI
+                            </label>
+                            <input type="file" id="name" name="bnri" accept="application/pdf" required
+                                value="{{ old('bnri', $company_profile->bnri ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('bnri')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="nib" class="block text-gray-700 font-medium mb-1">NIB
 
 
                             </label>
@@ -160,6 +180,64 @@
                                 value="{{ old('nib', $company_profile->nib ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @error('nib')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="npwp_perusahaan" class="block text-gray-700 font-medium mb-1">NPWP Perusahaan
+
+
+                            </label>
+                            <input type="file" id="name" name="npwp_perusahaan" accept="application/pdf"
+                                required value="{{ old('npwp_perusahaan', $company_profile->npwp_perusahaan ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('npwp_perusahaan')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="sppl" class="block text-gray-700 font-medium mb-1">SPPL
+
+
+                            </label>
+                            <input type="file" id="name" name="sppl" accept="application/pdf" required
+                                value="{{ old('sppl', $company_profile->sppl ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('sppl')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="sptataruang" class="block text-gray-700 font-medium mb-1">SPTATARUANG
+
+                            </label>
+                            <input type="file" id="name" name="sptataruang" accept="application/pdf" required
+                                value="{{ old('sptataruang', $company_profile->sptataruang ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('sptataruang')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="ktp_pemegang_saham" class="block text-gray-700 font-medium mb-1">KTP Pemegang
+                                Saham
+
+                            </label>
+                            <input type="file" id="name" name="ktp_pemegang_saham" accept="application/pdf"
+                                required
+                                value="{{ old('ktp_pemegang_saham', $company_profile->ktp_pemegang_saham ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('ktp_pemegang_saham')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="mb-4">
+                            <label for="K3L" class="block text-gray-700 font-medium mb-1">K3L
+                            </label>
+                            <input type="file" id="name" name="K3L" accept="application/pdf" required
+                                value="{{ old('K3L', $company_profile->K3L ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('K3L')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>

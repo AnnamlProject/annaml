@@ -16,9 +16,9 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex md:items-center md:space-x-8">
                     <!-- Setup Dropdown -->
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Setup
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -28,6 +28,7 @@
                                     d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
+
 
                         <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
@@ -162,9 +163,9 @@
                     </div>
 
                     <!-- Sales Dropdown -->
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Sales
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -324,9 +325,9 @@
                     </div>
 
                     {{-- Purchases dropdown --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Purchases
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -417,9 +418,9 @@
                     </div>
 
                     {{-- inventory dropdown --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Inventory
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -449,9 +450,9 @@
                     </div>
 
                     {{-- budgeting dropdown --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Budgeting
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -495,9 +496,9 @@
                     </div>
 
                     {{-- payroll dropdown --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Payroll
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -615,9 +616,9 @@
                     </div>
 
                     {{-- asset --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Asset
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -722,9 +723,9 @@
                     </div>
 
                     {{-- project dropdown --}}
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Project
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -783,9 +784,9 @@
                     </div>
 
                     <!-- Journal Entry Dropdown -->
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
                             Journal Entry
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
@@ -844,7 +845,7 @@
                     </div>
 
                     <!-- Report Dropdown -->
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -880,7 +881,7 @@
                     </div>
 
                     <!-- Maintenance Dropdown -->
-                    <div class="relative ml-3" x-data="{ open: false }">
+                    <div class="relative ml-2" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -915,6 +916,11 @@
                                 Activity
                             </a>
                         </div>
+                    </div>
+                    <div class="relative ml-2">
+                        <a href="{{ route('taxes.index') }}"
+                            class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md">Taxes
+                        </a>
                     </div>
                 </div>
 

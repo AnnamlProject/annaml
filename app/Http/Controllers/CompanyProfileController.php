@@ -38,9 +38,16 @@ class CompanyProfileController extends Controller
             'logo'     => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
 
             // validasi legal dokumen
-            'akte_pendirian' => 'nullable|mimes:pdf|max:2048',
-            'akte_perubahan_terakhir' => 'nullable|mimes:pdf|max:2048',
-            'nib' => 'nullable|mimes:pdf|max:2048',
+            'nib'                     => 'nullable|mimes:pdf|max:2048',
+            'akte_pendirian'          => 'nullable|mimes:pdf|max:2048',
+            'akta_perubahan_terakhir' => 'nullable|mimes:pdf|max:2048',
+            'bnri'                     => 'nullable|mimes:pdf|max:2048',
+            'npwp_perusahaan'          => 'nullable|mimes:pdf|max:2048',
+            'sppl' => 'nullable|mimes:pdf|max:2048',
+            'sptataruang'                     => 'nullable|mimes:pdf|max:2048',
+            'ktp_pemegang_saham'          => 'nullable|mimes:pdf|max:2048',
+            'k3l' => 'nullable|mimes:pdf|max:2048',
+            'skkemenkumhan' => 'nullable|mimes:pdf|max:2048',
         ]);
 
         // upload logo jika ada
@@ -69,8 +76,15 @@ class CompanyProfileController extends Controller
         // simpan dokumen legal jika ada
         $dokumens = [
             'akte_pendirian' => 'Akte Pendirian',
-            'akte_perubahan_terakhir' => 'Akta Perubahan Terakhir',
+            'akte_perubahan_terakhir' => 'Akte Perubahan Terakhir',
             'nib' => 'NIB',
+            'skkemenkumhan' => 'SKKEMENKUMHAN',
+            'bnri' => 'BNRI',
+            'npwp_perusahaan' => 'NPWP Perusahaan',
+            'sppl' => 'SPPL',
+            'sptataruang' => 'SPTATARUANG',
+            'ktp_pemegang_saham' => 'KTP Pemegang Saham',
+            'k3l' => 'K3L'
         ];
 
         foreach ($dokumens as $fieldName => $jenisDokumen) {
@@ -123,6 +137,13 @@ class CompanyProfileController extends Controller
             'nib'                     => 'nullable|mimes:pdf|max:2048',
             'akte_pendirian'          => 'nullable|mimes:pdf|max:2048',
             'akta_perubahan_terakhir' => 'nullable|mimes:pdf|max:2048',
+            'bnri'                     => 'nullable|mimes:pdf|max:2048',
+            'npwp_perusahaan'          => 'nullable|mimes:pdf|max:2048',
+            'sppl' => 'nullable|mimes:pdf|max:2048',
+            'sptataruang'                     => 'nullable|mimes:pdf|max:2048',
+            'ktp_pemegang_saham'          => 'nullable|mimes:pdf|max:2048',
+            'k3l' => 'nullable|mimes:pdf|max:2048',
+            'skkemenkumhan' => 'nullable|mimes:pdf|max:2048',
         ]);
 
         $informasiPerusahaan = CompanyProfile::findOrFail($id);
@@ -156,9 +177,16 @@ class CompanyProfileController extends Controller
 
         // mapping dokumen legal
         $dokumens = [
-            'nib' => 'NIB',
             'akte_pendirian' => 'Akte Pendirian',
-            'akta_perubahan_terakhir' => 'Akta Perubahan Terakhir',
+            'akte_perubahan_terakhir' => 'Akte Perubahan Terakhir',
+            'nib' => 'NIB',
+            'skkemenkumhan' => 'SKKEMENKUMHAN',
+            'bnri' => 'BNRI',
+            'npwp_perusahaan' => 'NPWP Perusahaan',
+            'sppl' => 'SPPL',
+            'sptataruang' => 'SPTATARUANG',
+            'ktp_pemegang_saham' => 'KTP Pemegang Saham',
+            'k3l' => 'K3L'
         ];
 
         foreach ($dokumens as $field => $jenisDokumen) {

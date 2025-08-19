@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="py-10">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
                 <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
                     <li><a href="#company_data" class="tab-link">Company Data</a></li>
@@ -144,16 +144,42 @@
 
                         <div class="mb-3">
                             <label class="block font-medium">Akte Perubahan Terakhir</label>
-                            @if ($documents->has('Akta Perubahan Terakhir'))
+                            @if ($documents->has('Akte Perubahan Terakhir'))
                                 <p class="text-sm mb-1">
                                     📄 <a
-                                        href="{{ asset('storage/' . $documents['Akta Perubahan Terakhir']->file_path) }}"
+                                        href="{{ asset('storage/' . $documents['Akte Perubahan Terakhir']->file_path) }}"
                                         target="_blank" class="text-blue-600 underline">Lihat</a>
-                                    | <a href="{{ asset('storage/' . $documents['Akta Perubahan Terakhir']->file_path) }}"
+                                    | <a href="{{ asset('storage/' . $documents['Akte Perubahan Terakhir']->file_path) }}"
                                         download class="text-green-600 underline">Download</a>
                                 </p>
                             @endif
                             <input type="file" name="akta_perubahan_terakhir" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">SKKEMENKUMHAN</label>
+                            @if ($documents->has('SKKEMENKUMHAN'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['SKKEMENKUMHAN']->file_path) }}"
+                                        target="_blank" class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['SKKEMENKUMHAN']->file_path) }}" download
+                                        class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="skkemenkumhan" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">BNRI</label>
+                            @if ($documents->has('BNRI'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['BNRI']->file_path) }}" target="_blank"
+                                        class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['BNRI']->file_path) }}" download
+                                        class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="bnri" accept="application/pdf"
                                 class="w-full border px-3 py-2 rounded">
                         </div>
                         <div class="mb-3">
@@ -167,6 +193,58 @@
                                 </p>
                             @endif
                             <input type="file" name="nib" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">NPWP Perusahaan</label>
+                            @if ($documents->has('NPWP Perusahaan'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['NPWP Perusahaan']->file_path) }}"
+                                        target="_blank" class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['NPWP Perusahaan']->file_path) }}"
+                                        download class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="npwp_perusahaan" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">SPPL</label>
+                            @if ($documents->has('SPPL'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['SPPL']->file_path) }}" target="_blank"
+                                        class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['SPPL']->file_path) }}" download
+                                        class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="sppl" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">KTP Pemegang Saham</label>
+                            @if ($documents->has('KTP Pemegang Saham'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['KTP Pemegang Saham']->file_path) }}"
+                                        target="_blank" class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['KTP Pemegang Saham']->file_path) }}"
+                                        download class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="ktp_pemegang_saham" accept="application/pdf"
+                                class="w-full border px-3 py-2 rounded">
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-medium">K3L</label>
+                            @if ($documents->has('K3L'))
+                                <p class="text-sm mb-1">
+                                    📄 <a href="{{ asset('storage/' . $documents['K3L']->file_path) }}" target="_blank"
+                                        class="text-blue-600 underline">Lihat</a>
+                                    | <a href="{{ asset('storage/' . $documents['K3L']->file_path) }}" download
+                                        class="text-green-600 underline">Download</a>
+                                </p>
+                            @endif
+                            <input type="file" name="k3l" accept="application/pdf"
                                 class="w-full border px-3 py-2 rounded">
                         </div>
                     </div>

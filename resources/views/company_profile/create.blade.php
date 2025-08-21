@@ -124,7 +124,7 @@
                     </div>
 
 
-                    <div class="tab-content hidden grid-cols-1 md:grid-cols-2 gap-6" id="legal_document">
+                    <div class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6" id="legal_document">
 
 
                         <!-- Nama jabatan -->

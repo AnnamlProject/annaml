@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 use App\CompanyProfile;
 use App\Departement;
 use App\KlasifikasiAkun;

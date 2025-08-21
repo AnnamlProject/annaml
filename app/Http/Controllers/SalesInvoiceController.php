@@ -46,13 +46,14 @@ class SalesInvoiceController extends Controller
                 return [
                     'id' => $detail->item->id, // ✅ tambahkan ini
                     'item_number'  => $detail->item->item_number ?? '',
+                    'item_name' => $detail->item->item_name,
                     'item_id' => $detail->item->item_id,
                     'description' => $detail->item_description,
                     'quantity' => $detail->quantity,
                     'order' => $detail->order,
                     'back_order' => $detail->back_order,
                     'unit' => $detail->item->unit,
-                    'base_price' => $detail->item->base_price,
+                    'base_price' => $detail->base_price,
                     'discount' => $detail->discount ?? 0,
                     'price' => $detail->price ?? 0,
                     'amount' => $detail->amount ?? 0,
@@ -77,56 +78,50 @@ class SalesInvoiceController extends Controller
     }
     public function store(Request $request)
     {
-        // Cek apakah checkbox auto_generate dicentang
         if ($request->has('auto_generate')) {
             $invoice_number = $this->generateKodeInvoice();
         } else {
-            // Validasi invoice_number manual
             $request->validate([
                 'invoice_number' => 'unique:sales_invoices,invoice_number',
             ]);
             $invoice_number = $request->invoice_number;
         }
 
-        // ✅ VALIDASI FORM UTAMA & ITEM
         $request->validate([
             'invoice_date'           => 'required|date',
             'shipping_date'          => 'required|date',
-            'customers_id'            => 'required|exists:customers,id',
+            'customers_id'           => 'required|exists:customers,id',
             'sales_person_id'        => 'required|exists:employees,id',
-            'sales_order_id'        => 'nullable|exists:sales_orders,id',
+            'sales_order_id'         => 'nullable|exists:sales_orders,id',
             'jenis_pembayaran_id'    => 'required|exists:payment_methods,id',
             'shipping_address'       => 'required|string',
             'freight'                => 'required|numeric|min:0',
             'early_payment_terms'    => 'nullable|string',
             'messages'               => 'nullable|string',
-
-            // Validasi item detail
             'items'                  => 'nullable|array|min:1',
             'items.*.item_id'        => 'nullable|exists:items,id',
             'items.*.quantity'       => 'nullable|numeric|min:0',
-            'items.*.order_quantity'          => 'nullable|numeric|min:0',
+            'items.*.order_quantity' => 'nullable|numeric|min:0',
             'items.*.back_order'     => 'nullable|numeric|min:0',
             'items.*.unit'           => 'nullable|string',
             'items.*.description'    => 'nullable|string',
-            'items.*.base_price'     => 'nullable|numeric|min:0',
-            'items.*.discount'       => 'nullable|numeric|min:0',
-            'items.*.price'          => 'nullable|numeric|min:0',
-            'items.*.amount'         => 'nullable|numeric|min:0',
-            'items.*.tax'            => 'nullable|numeric|min:0',
-            'items.*.account_id'        => 'nullable|exists:chart_of_accounts,id',
-            'items.*.project_id'        => 'nullable|exists:projects,id',
+            'items.*.base_price'     => 'nullable',
+            'items.*.discount'       => 'nullable',
+            'items.*.price'          => 'nullable',
+            'items.*.amount'         => 'nullable',
+            'items.*.tax_value'            => 'nullable',
+            'items.*.account_id'     => 'nullable|exists:chart_of_accounts,id',
+            'items.*.project_id'     => 'nullable|exists:projects,id',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // ✅ Simpan ke tabel sales_invoices
             $salesInvoice = SalesInvoice::create([
                 'invoice_number'       => $invoice_number,
                 'invoice_date'         => $request->invoice_date,
                 'shipping_date'        => $request->shipping_date,
-                'customers_id'          => $request->customers_id,
+                'customers_id'         => $request->customers_id,
                 'sales_order_id'       => $request->sales_order_id,
                 'sales_person_id'      => $request->sales_person_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
@@ -136,23 +131,28 @@ class SalesInvoiceController extends Controller
                 'messages'             => $request->messages,
             ]);
 
-            // ✅ Simpan ke tabel sales_invoice_details
             foreach ($request->items as $item) {
+                $base_price = isset($item['base_price']) ? (float) str_replace(',', '', $item['base_price']) : 0;
+                $discount   = isset($item['discount'])   ? (float) str_replace(',', '', $item['discount'])   : 0;
+                $price      = isset($item['price'])      ? (float) str_replace(',', '', $item['price'])      : 0;
+                $amount     = isset($item['amount'])     ? (float) str_replace(',', '', $item['amount'])     : 0;
+                $tax       = isset($item['tax_value'])        ? (float) str_replace(',', '', $item['tax_value'])        : 0;
+
                 SalesInvoiceDetail::create([
-                    'sales_invoice_id'   => $salesInvoice->id,
-                    'item_id'            => $item['item_id'],
-                    'quantity'           => $item['quantity'],
-                    'order_quantity'              => $item['order_quantity'],
-                    'back_order'         => $item['back_order'] ?? 0,
-                    'unit'               => $item['unit'],
-                    'description'   => $item['description'],
-                    'base_price'         => $item['base_price'] ?? 0,
-                    'discount'           => $item['discount'] ?? 0,
-                    'price'              => $item['price'] ?? 0,
-                    'amount'             => $item['amount'] ?? 0,
-                    'tax'                => $item['tax'] ?? 0,
-                    'account_id'         => $item['account_id'],
-                    'project_id'         => $item['project_id'],
+                    'sales_invoice_id' => $salesInvoice->id,
+                    'item_id'          => $item['item_id'],
+                    'quantity'         => $item['quantity'],
+                    'order_quantity'   => $item['order_quantity'],
+                    'back_order'       => $item['back_order'] ?? 0,
+                    'unit'             => $item['unit'],
+                    'description'      => $item['description'],
+                    'base_price'       => $base_price,
+                    'discount'         => $discount,
+                    'price'            => $price,
+                    'amount'           => $amount,
+                    'tax'              => $tax,
+                    'account_id'       => $item['account_id'],
+                    'project_id'       => $item['project_id'],
                 ]);
             }
 
@@ -163,6 +163,7 @@ class SalesInvoiceController extends Controller
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan: ' . $e->getMessage()])->withInput();
         }
     }
+
     public function show($id)
     {
         // Ambil sales order beserta relasi terkait
@@ -215,7 +216,7 @@ class SalesInvoiceController extends Controller
             'items.*.discount' => 'nullable|numeric|min:0',
             'items.*.price' => 'nullable|numeric|min:0',
             'items.*.amount' => 'nullable|numeric|min:0',
-            'items.*.tax' => 'nullable|numeric|min:0',
+            'items.*.tax_value' => 'nullable|numeric|min:0',
             'items.*.account' => 'nullable|exists:chart_of_accounts,id',
             'items.*.project' => 'nullable|exists:projects,id',
         ]);
@@ -253,7 +254,7 @@ class SalesInvoiceController extends Controller
                     'discount' => $item['discount'],
                     'price' => $item['price'],
                     'amount' => $item['amount'],
-                    'tax' => $item['tax'],
+                    'tax' => $item['tax_value'],
                     'account_id' => $item['account'],
                     'project_id' => $item['project'],
                 ]);

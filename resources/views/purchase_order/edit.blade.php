@@ -101,10 +101,17 @@
                                                     value="{{ $detail->item_description }}">
                                             </td>
                                             <td><input type="number" name="items[{{ $i }}][quantity]"
-                                                    class="w-full border rounded" value="{{ $detail->quantity }}"></td>
+                                                    class="w-full border rounded qty-{{ $i }}"
+                                                    value="{{ $detail->quantity }}"
+                                                    oninput="calculateBackOrder({{ $i }}); calculateAmount({{ $i }});">
+                                            </td>
                                             <td><input type="number" name="items[{{ $i }}][order]"
-                                                    class="w-full border rounded" value="{{ $detail->order }}"></td>
-                                            <td><input type="number" readonly class="w-full border rounded bg-gray-100"
+                                                    class="w-full border rounded order-{{ $i }}"
+                                                    value="{{ $detail->order }}"
+                                                    oninput="calculateBackOrder({{ $i }}); calculateAmount({{ $i }});">
+                                            </td>
+                                            <td><input type="number" readonly
+                                                    class="w-full border rounded bg-gray-100 back-{{ $i }}"
                                                     name="items[{{ $i }}][back_order]"
                                                     value="{{ $detail->back_order }}"></td>
                                             <td><input type="text" readonly class="w-full border rounded bg-gray-100"
@@ -113,19 +120,41 @@
                                             <td><input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     name="items[{{ $i }}][description]"
                                                     value="{{ $detail->item_description }}"></td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][price]" value="{{ $detail->price }}">
+
+
+                                            <td><input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 price-display-{{ $i }}"
+                                                    value="{{ number_format($detail->price ?? 0, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][price]"
+                                                    class="price-hidden-{{ $i }}" value="{{ $detail->price }}">
                                             </td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][tax]" value="{{ $detail->tax }}">
+                                            <td>
+                                                <select class="w-full border rounded tax-{{ $i }}"
+                                                    name="items[{{ $i }}][tax]"
+                                                    onchange="calculateAmount({{ $i }});">
+                                                    <option value="0" {{ $detail->tax == 0 ? 'selected' : '' }}>Tidak
+                                                    </option>
+                                                    <option value="11" {{ $detail->tax == 11 ? 'selected' : '' }}>11%
+                                                    </option>
+                                                    <option value="12" {{ $detail->tax == 12 ? 'selected' : '' }}>12%
+                                                    </option>
+                                                </select>
                                             </td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][tax_amount]"
+                                            <td><input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 tax_amount-display-{{ $i }}"
+                                                    value="{{ number_format($detail->tax_amount ?? 0, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][tax_amount]"
+                                                    class="tax_amount-hidden-{{ $i }}"
                                                     value="{{ $detail->tax_amount }}">
                                             </td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                            <td><input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 amount-display-{{ $i }}"
                                                     name="items[{{ $i }}][amount]"
-                                                    value="{{ $detail->amount }}"></td>
+                                                    value="{{ number_format($detail->amount ?? 0, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][amount]"
+                                                    class="amount-hidden-{{ $i }}"
+                                                    value="{{ $detail->amount }}">
+                                            </td>
                                             <td>
                                                 <input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     value="{{ optional($detail->account)->nama_akun }}">
@@ -179,4 +208,59 @@
             </div>
         </div>
     </div>
+    <script>
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function calculateBackOrder(index) {
+            const qty = parseFloat(document.querySelector(`.qty-${index}`).value) || 0;
+            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
+            const back = qty - order;
+            document.querySelector(`.back-${index}`).value = back;
+        }
+
+        function calculateAmount(index) {
+            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
+            const taxPercent = parseFloat(document.querySelector(`.tax-${index}`).value) || 0;
+            const price = parseFloat(document.querySelector(`.price-hidden-${index}`).value) || 0;
+
+            // Hitung jumlah
+            const baseAmount = order * price;
+            const taxAmount = baseAmount * (taxPercent / 100);
+            const final = baseAmount + taxAmount;
+
+            // Update tampilan
+            document.querySelector(`.price-display-${index}`).value = formatNumber(price);
+            document.querySelector(`.amount-display-${index}`).value = formatNumber(final);
+            document.querySelector(`.tax_amount-display-${index}`).value = formatNumber(taxAmount);
+
+            // Update hidden input untuk submit ke backend
+            document.querySelector(`.price-hidden-${index}`).value = price;
+            document.querySelector(`.amount-hidden-${index}`).value = final;
+            document.querySelector(`.tax_amount-hidden-${index}`).value = taxAmount;
+        }
+
+        // Tambahkan listener ke setiap baris
+        document.querySelectorAll('.item-row').forEach(row => {
+            const index = row.dataset.index;
+            [
+                `.qty-${index}`,
+                `.order-${index}`,
+                `.tax-${index}`
+            ].forEach(selector => {
+                const input = document.querySelector(selector);
+                if (input) {
+                    input.addEventListener('input', function() {
+                        calculateBackOrder(index);
+                        calculateAmount(index);
+                    });
+                }
+            });
+        });
+    </script>
+
 @endsection

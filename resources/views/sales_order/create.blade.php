@@ -2,9 +2,13 @@
 
 @section('content')
 
-    <div class="py-10">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="py-4">
+        <div class="w-full px-2">
+            <div class="bg-white shadow rounded p-4">
+
+                <!-- Judul Menu -->
+                <h2 class="text-lg font-bold mb-4">Sales Order</h2>
+
                 <form method="POST"
                     action="{{ isset($sales_order) ? route('sales_order.update', $sales_order->id) : route('sales_order.store') }}">
                     @csrf
@@ -12,8 +16,9 @@
                         @method('PUT')
                     @endif
 
+                    <!-- Error -->
                     @if ($errors->any())
-                        <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
+                        <div class="mb-2 text-red-600 bg-red-100 p-2 rounded text-sm">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -22,16 +27,13 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        <!-- Nama sales_order_asset -->
-                        <div class="mb-4">
-                            <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
-                            </label>
-                            <select name="customer_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Customers--</option>
+                    <!-- Form Grid -->
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <!-- Customers -->
+                        <div>
+                            <label class="block font-medium mb-1">Customers</label>
+                            <select name="customer_id" class="w-full border rounded px-2 py-1 text-sm" required>
+                                <option value="">-- Customers --</option>
                                 @foreach ($customer as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('customer_id', $sales_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
@@ -39,18 +41,13 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('customer_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
-                            </label>
-                            <select name="jenis_pembayaran_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Payment Method--</option>
+                        <!-- Payment -->
+                        <div>
+                            <label class="block font-medium mb-1">Payment Method</label>
+                            <select name="jenis_pembayaran_id" class="w-full border rounded px-2 py-1 text-sm" required>
+                                <option value="">-- Payment Method --</option>
                                 @foreach ($jenis_pembayaran as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
@@ -58,57 +55,13 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('jenis_pembayaran_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
-                        <!-- deskripsi sales_order_asset -->
-                        <div class="mb-4 md:col-span-2">
-                            <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                Address</label>
-                            <textarea id="shipping_address" name="shipping_address" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $sales_order->shipping_address ?? '') }}</textarea>
-                            @error('shipping_address')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="order_number" class="block text-gray-700 font-medium mb-1">Order Number
-                            </label>
-                            <input type="text" id="name" name="order_number" required
-                                value="{{ old('order_number', $sales_order->order_number ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('order_number')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order
-                            </label>
-                            <input type="date" id="name" name="date_order" required
-                                value="{{ old('date_order', $sales_order->date_order ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('date_order')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
-                            </label>
-                            <input type="date" id="name" name="shipping_date" required
-                                value="{{ old('shipping_date', $sales_order->shipping_date ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('shipping_date')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="Employee" class="block text-gray-700 font-medium mb-1">Employee
-                            </label>
-                            <select name="sales_person_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Employee--</option>
+
+                        <!-- Employee -->
+                        <div>
+                            <label class="block font-medium mb-1">Employee</label>
+                            <select name="sales_person_id" class="w-full border rounded px-2 py-1 text-sm" required>
+                                <option value="">-- Employee --</option>
                                 @foreach ($employee as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('employee_id', $sales_order->employee_id ?? '') == $level->id ? 'selected' : '' }}>
@@ -116,100 +69,142 @@
                                     </option>
                                 @endforeach
                             </select>
-                            @error('employee_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                        </div>
+
+                        <!-- Order Number -->
+                        <div>
+                            <label class="block font-medium mb-1">Order Number</label>
+                            <input type="text" name="order_number"
+                                value="{{ old('order_number', $sales_order->order_number ?? '') }}"
+                                class="w-full border rounded px-2 py-1 text-sm" required>
+                        </div>
+
+                        <!-- Date Order -->
+                        <div>
+                            <label class="block font-medium mb-1">Date Order</label>
+                            <input type="date" name="date_order"
+                                value="{{ old('date_order', $sales_order->date_order ?? '') }}"
+                                class="w-full border rounded px-2 py-1 text-sm" required>
+                        </div>
+
+                        <!-- Shipping Date -->
+                        <div>
+                            <label class="block font-medium mb-1">Shipping Date</label>
+                            <input type="date" name="shipping_date"
+                                value="{{ old('shipping_date', $sales_order->shipping_date ?? '') }}"
+                                class="w-full border rounded px-2 py-1 text-sm" required>
+                        </div>
+
+                        <!-- Shipping Address -->
+                        <div class="col-span-3">
+                            <label class="block font-medium mb-1">Shipping Address</label>
+                            <textarea name="shipping_address" rows="2" class="w-full border rounded px-2 py-1 text-sm">{{ old('shipping_address', $sales_order->shipping_address ?? '') }}</textarea>
                         </div>
                     </div>
-                    <!-- Order Items Table -->
-                    <div class="mt-10">
-                        <h3 class="text-lg font-semibold mb-4">Order Items</h3>
 
-                        <!-- Scrollable Table -->
-                        <div class="overflow-x-auto border rounded-lg shadow-sm">
-                            <table class="min-w-[1300px] table-auto border-collapse text-sm text-left">
-                                <thead class="bg-gray-100 text-gray-700 font-semibold">
+                    <!-- Order Items Table -->
+                    <div class="mt-4">
+                        <h3 class="font-semibold text-sm mb-2">Order Items</h3>
+                        <div class="overflow-x-auto border rounded">
+                            <table class="w-full border-collapse border">
+                                <thead>
                                     <tr>
-                                        <th class="border px-4 py-2 w-56">Item</th>
-                                        <th class="border px-4 py-2 w-24 text-center">Qty</th>
-                                        <th class="border px-4 py-2 w-24 text-center">Order</th>
-                                        <th class="border px-4 py-2 w-28 text-center">Back Order</th>
-                                        <th class="border px-4 py-2 w-28">Unit</th>
-                                        <th class="border px-4 py-2 w-64">Item Desription</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Base Price</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Discount</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Price</th>
-                                        <th class="border px-4 py-2 w-36 text-right">Amount</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Tax</th>
-                                        <th class="border px-4 py-2 w-40">Account</th>
+                                        <th class="border px-2 py-1 w-80">Item</th>
+                                        <th class="border px-2 py-1">Qty</th>
+                                        <th class="border px-2 py-1">Order</th>
+                                        <th class="border px-2 py-1">BackOrder</th>
+                                        <th class="border px-2 py-1">Unit</th>
+                                        <th class="border px-2 py-1">Desc</th>
+                                        <th class="border px-2 py-1">Base Price</th>
+                                        <th class="border px-2 py-1">Disc</th>
+                                        <th class="border px-2 py-1">Price</th>
+                                        <th class="border px-2 py-1">Amount</th>
+                                        <th class="border px-2 py-1">Tax Rate</th>
+                                        <th class="border px-2 py-1">Tax Value</th>
+                                        <th class="border px-2 py-1">Final</th>
+                                        <th class="border px-2 py-1">Account</th>
+                                        <th class="border px-2 py-1">#</th>
                                     </tr>
                                 </thead>
-                                <tbody id="item-table-body" class="bg-white">
-                                    <!-- Baris dinamis dari JS akan dimasukkan di sini -->
-                                </tbody>
+                                <tbody id="item-table-body"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Subtotal</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="subtotal"
+                                                class="w-full border rounded text-right bg-gray-100" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Total Pajak</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="total-tax"
+                                                class="w-full border rounded text-right bg-gray-100" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <!-- Freight row -->
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Freight</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" name="freight" id="freight"
+                                                class="w-full border rounded text-right"
+                                                value="{{ old('freight', $sales_order->freight ?? '') }}">
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Grand Total</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="grand-total"
+                                                class="w-full border rounded text-right bg-gray-100 font-bold" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                </tfoot>
+
                             </table>
-                        </div>
 
-                        <!-- Button Tambah Baris -->
-                        <div class="mt-4">
-                            <button type="button" id="add-row"
-                                class="px-5 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition">
-                                + Tambah Baris
-                            </button>
                         </div>
-
-                        <div class="mb-4 mt-4">
-                            <label for="freight" class="block text-gray-700 font-medium mb-1">Freight
-                            </label>
-                            <input type="number" id="name" name="freight" required
-                                value="{{ old('freight', $sales_order->freight ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('freight')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4 mt-4">
-                            <label for="early_payment_terms" class="block text-gray-700 font-medium mb-1">Early
-                                Payments Terms
-                            </label>
-                            <input type="text" id="name" name="early_payment_terms" required
+                        <button type="button" id="add-row"
+                            class="mt-2 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">+ Add
+                            Row</button>
+                    </div>
+                    <!-- Bottom Form -->
+                    <div class="grid grid-cols-3 gap-4 text-sm mt-4">
+                        <div>
+                            <label class="block font-medium mb-1">Early Payment Terms</label>
+                            <input type="text" name="early_payment_terms"
                                 value="{{ old('early_payment_terms', $sales_order->early_payment_terms ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('early_payment_terms')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                                class="w-full border rounded px-2 py-1 text-sm">
                         </div>
-                        <div class="mb-4 md:col-span-2 ">
-                            <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
-                            </label>
-                            <textarea id="messages" name="messages" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $sales_order->messages ?? '') }}</textarea>
-                            @error('messages')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="col-span-2">
+                            <label class="block font-medium mb-1">Messages</label>
+                            <textarea name="messages" rows="2" class="w-full border rounded px-2 py-1 text-sm">{{ old('messages', $sales_order->messages ?? '') }}</textarea>
                         </div>
                     </div>
+
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
+                    <div class="mt-4 flex space-x-2">
                         <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+                            class="px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700">
                             {{ isset($sales_order) ? 'Update' : 'Create' }}
                         </button>
                         <a href="{{ route('sales_order.index') }}"
-                            class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
-                            Cancel
-                        </a>
+                            class="px-4 py-1 bg-gray-300 text-sm text-gray-700 rounded hover:bg-gray-400">Cancel</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+
+
     <!-- JQUERY DULU -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
     <script>
         let rowIndex = 0;
 
@@ -221,16 +216,37 @@
             </td>
             <td class="border px-2 py-1"><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
             <td class="border px-2 py-1"><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][base_price]" class="base-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][discount]" class="disc-${index} w-full border rounded" value="0" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax]" class="tax-${index} w-full border rounded"  /></td>
+            <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded" /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded" /></td>
+
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][base_price]" class="base-${index} w-full border rounded text-right" /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][discount]" class="disc-${index} w-full border rounded text-right" value="0" /></td>
+
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded text-right" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
+
+            <!-- Tax dropdown -->
             <td class="border px-2 py-1">
-                <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}"  />
+                <select name="items[${index}][tax_rate]" class="tax-${index} w-full border rounded">
+                    <option value="0">Tanpa Pajak</option>
+                    <option value="11">11%</option>
+                    <option value="12">12%</option>
+                </select>
+            </td>
+
+            <!-- Nilai pajak -->
+            <td class="border px-2 py-1">
+                <input type="text" name="items[${index}][tax_value]" class="taxval-${index} w-full border rounded text-right" readonly />
+            </td>
+
+            <!-- Final (amount + tax) -->
+            <td class="border px-2 py-1">
+                <input type="text" name="items[${index}][final]" class="final-${index} w-full border rounded text-right" readonly />
+            </td>
+
+            <td class="border px-2 py-1">
+                <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" />
                 <input type="hidden" name="items[${index}][account]" class="account-id-${index}" />
             </td>
             <td class="border px-2 py-1 text-center">
@@ -256,7 +272,7 @@
                             item_name: item.item_name,
                             unit: item.unit,
                             base_price: item.base_price,
-                            tax_rate: item.tax_rate,
+                            tax_rate: item.tax_rate, // asumsikan 0/11/12 dari server
                             account_id: item.account_id,
                             account_name: item.account_name
                         }))
@@ -267,8 +283,14 @@
                 const data = e.params.data;
                 $(`.desc-${index}`).val(data.item_name);
                 $(`.unit-${index}`).val(data.unit);
-                $(`.base-${index}`).val(data.base_price);
-                $(`.tax-${index}`).val(data.tax_rate + '%');
+                $(`.base-${index}`).val(formatNumber(data.base_price));
+
+                // Set dropdown pajak dengan value numerik (0/11/12)
+                const rate = (typeof data.tax_rate !== 'undefined' && data.tax_rate !== null) ?
+                    String(parseFloat(String(data.tax_rate).toString().replace('%', '')) || 0) :
+                    '0';
+                $(`.tax-${index}`).val(rate).trigger('change');
+
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
 
@@ -277,9 +299,24 @@
         }
 
         function attachEvents(index) {
-            $(`.qty-${index}, .order-${index}, .disc-${index}`).on('input', function() {
+            // Input numerik yang mempengaruhi amount
+            $(`.qty-${index}, .order-${index}, .disc-${index}, .base-${index}`)
+                .on('input', function() {
+                    calculateAmount(index);
+                    calculateBackOrder(index);
+                })
+                .on('blur', function() {
+                    // Format ulang angka saat selesai input
+                    const cls = $(this).attr("class");
+                    let val = parseNumber($(this).val());
+                    if (cls.includes("base-") || cls.includes("disc-")) {
+                        $(this).val(formatNumber(val));
+                    }
+                });
+
+            // Dropdown pajak harus trigger hitung ulang
+            $(`.tax-${index}`).on('change', function() {
                 calculateAmount(index);
-                calculateBackOrder(index);
             });
         }
 
@@ -291,26 +328,58 @@
         }
 
         function calculateAmount(index) {
-            const qty = parseFloat($(`.qty-${index}`).val()) || 0;
-            const base_price = parseFloat($(`.base-${index}`).val()) || 0;
-            const disc = parseFloat($(`.disc-${index}`).val()) || 0;
+            const order = parseFloat($(`.order-${index}`).val()) || 0;
+            const base_price = parseNumber($(`.base-${index}`).val());
+            const disc = parseNumber($(`.disc-${index}`).val());
 
-            const price = (qty * base_price) - disc;
-            $(`.price-${index}`).val(price.toFixed(2));
-            $(`.amount-${index}`).val(price.toFixed(2));
+            // Subtotal kotor
+            const subtotal = order * base_price;
+
+            // Total setelah diskon (clamp minimal 0)
+            const amount = Math.max(subtotal - disc, 0);
+
+            // Harga akhir per unit (sesuai definisi "Price")
+            const pricePerUnit = order > 0 ? amount / order : 0;
+
+            $(`.price-${index}`).val(formatNumber(pricePerUnit));
+            $(`.amount-${index}`).val(formatNumber(amount));
+
+            // Pajak dihitung dari amount (setelah diskon)
+            const taxRate = parseFloat($(`.tax-${index}`).val()) || 0; // 0 / 11 / 12
+            const taxValue = (amount * taxRate) / 100;
+            const finalValue = amount + taxValue;
+
+            $(`.taxval-${index}`).val(formatNumber(taxValue));
+            $(`.final-${index}`).val(formatNumber(finalValue));
 
             updateTotal();
         }
 
         function updateTotal() {
             let total = 0;
+            let totalTax = 0;
+            let grandTotal = 0;
+
             $('.item-row').each(function() {
                 const index = $(this).data('index');
-                const amount = parseFloat($(`.amount-${index}`).val()) || 0;
+                const amount = parseNumber($(`.amount-${index}`).val());
+                const taxVal = parseNumber($(`.taxval-${index}`).val());
+                const finalVal = parseNumber($(`.final-${index}`).val());
+
                 total += amount;
+                totalTax += taxVal;
+                grandTotal += finalVal;
             });
-            $('#grand-total').val(total.toFixed(2));
+
+            // Freight
+            const freight = parseNumber($('#freight').val());
+
+            // Update fields
+            $('#subtotal').val(formatNumber(total));
+            $('#total-tax').val(formatNumber(totalTax));
+            $('#grand-total').val(formatNumber(grandTotal + freight));
         }
+
 
         function addRow() {
             const newRow = generateRow(rowIndex);
@@ -323,6 +392,13 @@
         $('#add-row').on('click', function() {
             addRow();
         });
+        $('#freight').on('input', function() {
+            updateTotal();
+        }).on('blur', function() {
+            let val = parseNumber($(this).val());
+            $(this).val(formatNumber(val));
+        });
+
 
         $(document).on('click', '.remove-row', function() {
             const index = $(this).data('index');
@@ -334,27 +410,48 @@
             addRow();
         });
 
-        function cleanNumber(value) {
-            return parseFloat(value.toString().replace(/[^\d.-]/g, '')) || 0;
+        // Format angka tampilan
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0, // ✅ tanpa angka di belakang koma
+                maximumFractionDigits: 0
+            }).format(Number(num) || 0);
         }
 
+        // Parse dari "1.234,56" -> 1234.56
+        function parseNumber(value) {
+            if (value === null || typeof value === 'undefined') return 0;
+            return parseFloat(value.toString().replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        // Saat submit: kirim angka mentah (decimal) ke server
         $('form').on('submit', function() {
-            const total = cleanNumber($('#grand-total').val());
-            $('#grand-total').val(total.toFixed(2));
+            // Jika punya grand total, ubah ke decimal 2 angka
+            if ($('#grand-total').length) {
+                const total = parseNumber($('#grand-total').val());
+                $('#grand-total').val(total.toFixed(2));
+            }
 
             $('.item-row').each(function() {
                 const index = $(this).data('index');
 
-                const price = cleanNumber($(`.price-${index}`).val());
-                const amount = cleanNumber($(`.amount-${index}`).val());
-                const base = cleanNumber($(`.base-${index}`).val());
-                const tax = cleanNumber($(`.tax-${index}`).val());
+                const price = parseNumber($(`.price-${index}`).val());
+                const amount = parseNumber($(`.amount-${index}`).val());
+                const base = parseNumber($(`.base-${index}`).val());
+                const discount = parseNumber($(`.disc-${index}`).val());
+                const taxVal = parseNumber($(`.taxval-${index}`).val());
+                const finalVal = parseNumber($(`.final-${index}`).val());
+                // NOTE: .tax-${index} adalah <select>, jangan diubah ke toFixed!
+                // Biarkan value-nya tetap "0" / "11" / "12"
 
                 $(`.price-${index}`).val(price.toFixed(2));
                 $(`.amount-${index}`).val(amount.toFixed(2));
                 $(`.base-${index}`).val(base.toFixed(2));
-                $(`.tax-${index}`).val(tax.toFixed(2));
+                $(`.disc-${index}`).val(discount.toFixed(2));
+                $(`.taxval-${index}`).val(taxVal.toFixed(2));
+                $(`.final-${index}`).val(finalVal.toFixed(2));
             });
         });
     </script>
+
 @endsection

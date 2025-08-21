@@ -16,7 +16,7 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex md:items-center md:space-x-8">
                     <!-- Setup Dropdown -->
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -163,7 +163,7 @@
                     </div>
 
                     <!-- Sales Dropdown -->
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -325,7 +325,7 @@
                     </div>
 
                     {{-- Purchases dropdown --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -418,7 +418,7 @@
                     </div>
 
                     {{-- inventory dropdown --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -450,7 +450,7 @@
                     </div>
 
                     {{-- budgeting dropdown --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -496,7 +496,7 @@
                     </div>
 
                     {{-- payroll dropdown --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -616,7 +616,7 @@
                     </div>
 
                     {{-- asset --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -723,7 +723,7 @@
                     </div>
 
                     {{-- project dropdown --}}
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -784,7 +784,7 @@
                     </div>
 
                     <!-- Journal Entry Dropdown -->
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -845,7 +845,7 @@
                     </div>
 
                     <!-- Report Dropdown -->
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -879,9 +879,95 @@
                                 Statement Department</a>
                         </div>
                     </div>
+                    {{-- document menu  --}}
+                    <div class="relative ml-1" x-data="{ open: false }">
+                        <button @click="open = !open" @keydown.escape="open = false"
+                            class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                            :class="{ 'text-blue-600 bg-blue-50': open }">
+                            Documents
+                            <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                            class="absolute left-2 mt-2 w-60 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+
+                            <!-- Company Submenu -->
+                            <div class="relative" x-data="{ subOpen: false }">
+                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                    <span class="text-gray-700 group-hover:text-blue-600">Sales</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="subOpen" x-cloak x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 translate-x-1"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-1"
+                                    class="absolute left-full top-0 ml-0 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    <a href="{{ route('sales_orders.documents.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                        Order</a>
+                                    <a href="{{ route('sales_invoice.documents.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                        Invoice</a>
+                                </div>
+                            </div>
+
+                            <!-- General Submenu -->
+                            <div class="relative" x-data="{ subOpen: false }">
+                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                    <span class="text-gray-700 group-hover:text-blue-600">Purchases</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 translate-x-1"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-1"
+                                    class="absolute left-full top-0 ml-0 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    <a href="{{ route('purchase_order.documents.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
+                                        Order</a>
+                                    <a href="{{ route('purchase_invoice.documents.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
+                                        Invoice
+                                    </a>
+                                </div>
+                            </div>
+
+                            <a href="{{ route('taxes.index') }}"
+                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                Taxes
+                            </a>
+                            {{-- end document menu  --}}
+                        </div>
+                    </div>
 
                     <!-- Maintenance Dropdown -->
-                    <div class="relative ml-2" x-data="{ open: false }">
+                    <div class="relative ml-1" x-data="{ open: false }">
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
@@ -911,17 +997,15 @@
                                 New Year
                             </a>
 
-                            <a href="#"
+                            <a href="{{ route('activity_log.index') }}"
                                 class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Log
                                 Activity
                             </a>
                         </div>
                     </div>
-                    <div class="relative ml-2">
-                        <a href="{{ route('taxes.index') }}"
-                            class="flex items-center px-3 py-2 text-gray-700 font-medium hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md">Taxes
-                        </a>
-                    </div>
+
+
+
                 </div>
 
                 <!-- Profile Section -->

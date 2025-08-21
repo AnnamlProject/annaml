@@ -76,4 +76,13 @@ class ReceiptsController extends Controller
             return back()->with('error', 'Gagal menyimpan receipt: ' . $e->getMessage())->withInput();
         }
     }
+    public function getInvoices($customerId)
+    {
+        $invoices = \App\SalesInvoice::with('details')
+            ->where('customers_id', $customerId)
+            ->where('status', 1)
+            ->get();
+
+        return view('receipts.partials.invoice_table', compact('invoices'));
+    }
 }

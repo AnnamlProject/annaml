@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartemenAkunController;
@@ -20,9 +21,15 @@ use App\Http\Controllers\PembayaranGajiController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseInvoiceController;
+use App\Http\Controllers\PurchaseInvoiceDocumentController;
+use App\Http\Controllers\PurchaseOrderDocumentController;
+use App\Http\Controllers\ReceiptsController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SalesInvoiceController;
+use App\Http\Controllers\SalesInvoiceDocumentController;
+use App\Http\Controllers\SalesOrderDocumentController;
+use App\SalesInvoiceDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -150,10 +157,30 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/customers', [ImportController::class, 'importcustomers'])->name('import.customers');
 
     Route::resource('sales_order', 'SalesOrderController');
+    Route::get('sales-orders/documents', [SalesOrderDocumentController::class, 'index'])
+        ->name('sales_orders.documents.index');
+
+    Route::prefix('sales-orders/{salesOrder}')->group(function () {
+        Route::post('/documents', [App\Http\Controllers\SalesOrderDocumentController::class, 'store'])->name('sales_orders.documents.store');
+        Route::get('/documents/{document}/download', [App\Http\Controllers\SalesOrderDocumentController::class, 'download'])->name('sales_orders.documents.download');
+        Route::delete('/documents/{document}', [App\Http\Controllers\SalesOrderDocumentController::class, 'destroy'])->name('sales_orders.documents.destroy');
+    });
+
     Route::resource('sales_invoice', 'SalesInvoiceController');
+    Route::get('sales-invoice/documents', [SalesInvoiceDocumentController::class, 'index'])
+        ->name('sales_invoice.documents.index');
+    Route::prefix('sales-invoice/{salesInvoice}')->group(function () {
+        Route::post('/documents', [App\Http\Controllers\SalesInvoiceDocumentController::class, 'store'])->name('sales_invoice.documents.store');
+        Route::get('/documents/{document}/download', [App\Http\Controllers\SalesInvoiceDocumentController::class, 'download'])->name('sales_invoice.documents.download');
+        Route::delete('/documents/{document}', [App\Http\Controllers\SalesInvoiceDocumentController::class, 'destroy'])->name('sales_invoice.documents.destroy');
+    });
+
     Route::get('/sales_invoice/get-items/{salesOrderId}', [SalesInvoiceController::class, 'getItemsFromSalesOrder']);
     Route::resource('sales_deposits', 'SalesDepositController');
     Route::resource('receipts', 'ReceiptsController');
+    // web.php
+    Route::get('/get-invoices/{customer}', [ReceiptsController::class, 'getInvoices']);
+
 
 
 
@@ -171,10 +198,25 @@ Route::middleware(['auth'])->group(function () {
 
     // purchase order
     Route::resource('purchase_order', 'PurchaseOrderController');
+    Route::get('purchase-order/documents', [PurchaseOrderDocumentController::class, 'index'])
+        ->name('purchase_order.documents.index');
+    Route::prefix('purchase-order/{purchasOrder}')->group(function () {
+        Route::post('/documents', [App\Http\Controllers\PurchaseOrderDocumentController::class, 'store'])->name('purchase_order.documents.store');
+        Route::get('/documents/{document}/download', [App\Http\Controllers\PurchaseOrderDocumentController::class, 'download'])->name('purchase_order.documents.download');
+        Route::delete('/documents/{document}', [App\Http\Controllers\PurchaseOrderDocumentController::class, 'destroy'])->name('purchase_order.documents.destroy');
+    });
+
     Route::get('/search-item', [ItemController::class, 'search']);
 
     // purchase invoice
     Route::resource('purchase_invoice', 'PurchaseInvoiceController');
+    Route::get('purchase-invoice/documents', [PurchaseInvoiceDocumentController::class, 'index'])
+        ->name('purchase_invoice.documents.index');
+    Route::prefix('purchase-invoice/{purchaseInvoice}')->group(function () {
+        Route::post('/documents', [App\Http\Controllers\PurchaseInvoiceDocumentController::class, 'store'])->name('purchase_invoice.documents.store');
+        Route::get('/documents/{document}/download', [App\Http\Controllers\PurchaseInvoiceDocumentController::class, 'download'])->name('purchase_invoice.documents.download');
+        Route::delete('/documents/{document}', [App\Http\Controllers\PurchaseInvoiceDocumentController::class, 'destroy'])->name('purchase_invoice.documents.destroy');
+    });
     Route::get('/purchase_invoice/get-items/{purchaseOrderId}', [PurchaseInvoiceController::class, 'getItemsFromPurchaseOrder']);
 
 
@@ -260,6 +302,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/start-new-year', [AccountingController::class, 'showStartNewYear'])->name('start_new_year');
         Route::post('/start-new-year', [AccountingController::class, 'startNewYearProcess'])->name('start_new_year_proses');
     });
+
+    Route::get('activity_log', [ActivityLogController::class, 'index'])->name('activity_log.index');
 
 
     // end maintenance menu

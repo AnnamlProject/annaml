@@ -32,4 +32,8 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(PurchaseOrderDetail::class);
     }
+    public function documents()
+    {
+        return $this->hasMany(PurchaseOrderDocument::class);
+    }
 }

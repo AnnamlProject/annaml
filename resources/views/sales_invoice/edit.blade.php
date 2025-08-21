@@ -105,7 +105,9 @@
                                         <th>Discount</th>
                                         <th>Price</th>
                                         <th>Amount</th>
-                                        <th>Tax</th>
+                                        <th>Tax %</th>
+                                        <th>Tax Value</th>
+                                        <th>Final</th>
                                         <th>Account</th>
                                         <th>Project</th>
                                         <th></th>
@@ -113,47 +115,136 @@
                                 </thead>
                                 <tbody id="item-table-body">
                                     @foreach ($salesInvoice->details as $i => $detail)
-                                        <tr class="bg-white even:bg-gray-50 border-b">
-                                            <td><input type="hidden" name="items[{{ $i }}][item_id]"
-                                                    class="w-full border rounded" value="{{ $detail->item_id }}">
-                                                <input type="text" class="w-full border rounded"
+                                        <tr class="item-row bg-white even:bg-gray-50 border-b"
+                                            data-index="{{ $i }}">
+                                            <!-- Item ID -->
+                                            <td>
+                                                <input type="hidden" name="items[{{ $i }}][item_id]"
                                                     value="{{ $detail->item_id }}">
+                                                <input type="text" class="w-full border rounded"
+                                                    value="{{ $detail->item->item_name }}">
                                             </td>
-                                            <td><input type="number" name="items[{{ $i }}][quantity]"
-                                                    class="w-full border rounded" value="{{ $detail->quantity }}"></td>
-                                            <td><input type="number" name="items[{{ $i }}][order_quantity]"
-                                                    class="w-full border rounded" value="{{ $detail->order_quantity }}">
+
+                                            <!-- Quantity -->
+                                            <td>
+                                                <input type="number" name="items[{{ $i }}][quantity]"
+                                                    class="w-full border rounded qty-{{ $i }}"
+                                                    value="{{ $detail->quantity }}"
+                                                    oninput="calculateBackOrder({{ $i }}); calculateAmount({{ $i }});">
                                             </td>
-                                            <td><input type="number" readonly class="w-full border rounded bg-gray-100"
+
+                                            <!-- Order -->
+                                            <td>
+                                                <input type="number" name="items[{{ $i }}][order_quantity]"
+                                                    class="w-full border rounded order-{{ $i }}"
+                                                    value="{{ $detail->order_quantity }}"
+                                                    oninput="calculateBackOrder({{ $i }}); calculateAmount({{ $i }});">
+                                            </td>
+
+                                            <!-- Back Order -->
+                                            <td>
+                                                <input type="number" readonly
+                                                    class="w-full border rounded bg-gray-100 back-{{ $i }}"
                                                     name="items[{{ $i }}][back_order]"
-                                                    value="{{ $detail->back_order }}"></td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+                                                    value="{{ $detail->back_order }}">
+                                            </td>
+
+                                            <!-- Unit -->
+                                            <td>
+                                                <input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     name="items[{{ $i }}][unit]" value="{{ $detail->unit }}">
                                             </td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
+
+                                            <!-- Description -->
+                                            <td>
+                                                <input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     name="items[{{ $i }}][description]"
-                                                    value="{{ $detail->description }}"></td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][base_price]"
-                                                    value="{{ $detail->base_price }}"></td>
-                                            <td><input type="number" class="w-full border rounded"
-                                                    name="items[{{ $i }}][discount]"
-                                                    value="{{ $detail->discount }}"></td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][price]" value="{{ $detail->price }}">
+                                                    value="{{ $detail->description }}">
                                             </td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][amount]"
-                                                    value="{{ $detail->amount }}"></td>
-                                            <td><input type="text" readonly class="w-full border rounded bg-gray-100"
-                                                    name="items[{{ $i }}][tax]" value="{{ $detail->tax }}">
+
+                                            <!-- Base Price -->
+                                            <td>
+                                                <input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 base-display-{{ $i }}"
+                                                    value="{{ number_format($detail->base_price, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][base_price]"
+                                                    class="base-hidden-{{ $i }}"
+                                                    value="{{ $detail->base_price }}">
                                             </td>
+
+                                            <!-- Discount -->
+                                            <td>
+                                                <input type="text"
+                                                    class="w-full border rounded disc-display-{{ $i }}"
+                                                    value="{{ number_format($detail->discount, 0, '.', ',') }}"
+                                                    oninput="calculateAmount({{ $i }}); this.value = this.value.replace(/[^0-9,]/g,'');">
+                                                <input type="hidden" name="items[{{ $i }}][discount]"
+                                                    class="disc-hidden-{{ $i }}"
+                                                    value="{{ $detail->discount }}">
+                                            </td>
+
+                                            <!-- Price -->
+                                            <td>
+                                                <input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 price-display-{{ $i }}"
+                                                    value="{{ number_format($detail->price, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][price]"
+                                                    class="price-hidden-{{ $i }}"
+                                                    value="{{ $detail->price }}">
+                                            </td>
+
+                                            <!-- Amount -->
+                                            <td>
+                                                <input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 amount-display-{{ $i }}"
+                                                    value="{{ number_format($detail->amount, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][amount]"
+                                                    class="amount-hidden-{{ $i }}"
+                                                    value="{{ $detail->amount }}">
+                                            </td>
+
+                                            <!-- Tax -->
+                                            <td>
+                                                <select class="w-full border rounded tax-{{ $i }}"
+                                                    name="items[{{ $i }}][tax]"
+                                                    onchange="calculateAmount({{ $i }});">
+                                                    <option value="0" {{ $detail->tax == 0 ? 'selected' : '' }}>Tidak
+                                                    </option>
+                                                    <option value="11" {{ $detail->tax == 11 ? 'selected' : '' }}>11%
+                                                    </option>
+                                                    <option value="12" {{ $detail->tax == 12 ? 'selected' : '' }}>12%
+                                                    </option>
+                                                </select>
+                                            </td>
+
+                                            <!-- Tax Value -->
+                                            <td>
+                                                <input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 taxval-display-{{ $i }}"
+                                                    value="{{ number_format($detail->tax ?? 0, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][tax_value]"
+                                                    class="taxval-hidden-{{ $i }}"
+                                                    value="{{ $detail->tax ?? 0 }}">
+                                            </td>
+
+                                            <!-- Final -->
+                                            <td>
+                                                <input type="text" readonly
+                                                    class="w-full border rounded bg-gray-100 final-display-{{ $i }}"
+                                                    value="{{ number_format($detail->final ?? 0, 0, '.', ',') }}">
+                                                <input type="hidden" name="items[{{ $i }}][final]"
+                                                    class="final-hidden-{{ $i }}"
+                                                    value="{{ $detail->final ?? 0 }}">
+                                            </td>
+
+                                            <!-- Account -->
                                             <td>
                                                 <input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     value="{{ optional($detail->account)->nama_akun }}">
                                                 <input type="hidden" name="items[{{ $i }}][account]"
                                                     value="{{ $detail->account_id }}">
                                             </td>
+
                                             <td>
                                                 <select name="items[{{ $i }}][project]" id="ptkp_id"
                                                     class="w-full border rounded bg-gray-100">
@@ -168,6 +259,8 @@
                                                 <input type="hidden" name="items[{{ $i }}][project]"
                                                     value="{{ $detail->project_id }}">
                                             </td>
+
+                                            <!-- Remove -->
                                             <td class="text-center">
                                                 <button type="button" class="remove-row text-red-500 font-bold"
                                                     data-index="{{ $i }}">×</button>
@@ -215,4 +308,59 @@
             </div>
         </div>
     </div>
+    <script>
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function calculateBackOrder(index) {
+            const qty = parseFloat(document.querySelector(`.qty-${index}`).value) || 0;
+            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
+            const back = qty - order;
+            document.querySelector(`.back-${index}`).value = back;
+        }
+
+        function calculateAmount(index) {
+            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
+            const basePrice = parseFloat(document.querySelector(`.base-display-${index}`).value.replace(/,/g, '')) || 0;
+            const discount = parseFloat(document.querySelector(`.disc-display-${index}`).value.replace(/,/g, '')) || 0;
+            const taxPercent = parseFloat(document.querySelector(`.tax-${index}`).value) || 0;
+
+            // price per item (after discount)
+            const price = order * basePrice - discount;
+            const amount = price;
+            const taxValue = amount * (taxPercent / 100);
+            const final = amount + taxValue;
+
+            // Update input tampilan (format ribuan)
+            document.querySelector(`.price-display-${index}`).value = formatNumber(price);
+            document.querySelector(`.amount-display-${index}`).value = formatNumber(amount);
+            document.querySelector(`.taxval-display-${index}`).value = formatNumber(taxValue);
+            document.querySelector(`.final-display-${index}`).value = formatNumber(final);
+
+            // Update hidden input untuk backend (angka murni)
+            document.querySelector(`.price-hidden-${index}`).value = price;
+            document.querySelector(`.amount-hidden-${index}`).value = amount;
+            document.querySelector(`.taxval-hidden-${index}`).value = taxValue;
+            document.querySelector(`.final-hidden-${index}`).value = final;
+            document.querySelector(`.base-hidden-${index}`).value = basePrice;
+            document.querySelector(`.disc-hidden-${index}`).value = discount;
+        }
+
+        // Tambahkan listener untuk setiap baris
+        document.querySelectorAll('.item-row').forEach(row => {
+            const index = row.dataset.index;
+            row.querySelectorAll('.qty-' + index + ', .order-' + index + ', .disc-display-' + index + ', .tax-' +
+                    index)
+                .forEach(input => {
+                    input.addEventListener('input', function() {
+                        calculateBackOrder(index);
+                        calculateAmount(index);
+                    });
+                });
+        });
+    </script>
 @endsection

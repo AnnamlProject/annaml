@@ -285,7 +285,13 @@
             <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded" /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border rounded" /></td>
             <td class="border px-2 py-1"><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][tax]" class="tax-${index} w-full border rounded" value="0" /></td>
+            <td class="border px-2 py-1">
+                <select name="items[${index}][tax]" class="tax-${index} w-full border rounded">
+                    <option value="0">0%</option>
+                    <option value="11">11%</option>
+                    <option value="12">12%</option>
+                </select>
+            </td>
             <td class="border px-2 py-1"><input type="number" step="0.01" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border rounded" /></td>
             <td class="border px-2 py-1"><input type="number" step="0.01" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" /></td>
             <td class="border px-2 py-1">

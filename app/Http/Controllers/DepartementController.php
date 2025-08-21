@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\chartOfAccount;
+use App\ChartOfAccount;
 
 use App\DepartemenAkun;
 use App\Departement;
@@ -29,6 +29,7 @@ class DepartementController extends Controller
         ]);
 
         Departement::create($validated);
+
 
 
         return redirect()->route('departemen.index')->with('success', 'Departemen berhasil ditambahkan.');

@@ -2,9 +2,19 @@
 
 namespace App\Providers;
 
+use App\chartOfAccount;
 use App\CompanyProfile;
+use App\Departement;
+use App\KlasifikasiAkun;
+use App\Observers\ChartOfAccountObserver;
+use App\Observers\CompanyProfileObserver;
+use App\Observers\DepartementObserver;
+use App\Observers\KlasifikasiAccountObserver;
+use App\Observers\TaxpayersProfileObserver;
+use App\Observers\UserObserver;
 use App\SettingDepartement;
 use App\TaxpayersProfile;
+use App\User;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+        Departement::observe(DepartementObserver::class);
+        chartOfAccount::observe(ChartOfAccountObserver::class);
+        KlasifikasiAkun::observe(KlasifikasiAccountObserver::class);
+        CompanyProfile::observe(CompanyProfileObserver::class);
+        TaxpayersProfile::observe(TaxpayersProfileObserver::class);
+        User::observe(UserObserver::class);
+
         View::composer('*', function ($view) {
             $view->with('company', CompanyProfile::first());
 

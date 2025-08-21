@@ -40,4 +40,17 @@ class SalesInvoice extends Model
     {
         return $this->belongsTo(SalesOrder::class);
     }
+    public function documents()
+    {
+        return $this->hasMany(SalesInvoiceDocument::class);
+    }
+    public function getOriginalAttribute()
+    {
+        $totalDetail = $this->details->sum('amount');
+        $totalTax    = $this->details->sum('tax');
+        $freight     = $this->freight ?? 0;
+        $discount    = $this->details->sum('discount');
+
+        return ($totalDetail + $totalTax + $freight) - $discount;
+    }
 }

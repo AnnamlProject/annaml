@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('content')
-    <div class="py-8">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="py-2">
+        <div class="w-full px-1">
+            <div class="bg-white shadow rounded p-2">
+
+                <!-- Judul Menu -->
+                <h2 class="text-base font-bold mb-2">Purchase Order</h2>
                 <form method="POST"
                     action="{{ isset($purchase_order) ? route('purchase_order.update', $purchase_order->id) : route('purchase_order.store') }}">
                     @csrf
@@ -11,7 +14,7 @@
                     @endif
 
                     @if ($errors->any())
-                        <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
+                        <div class="mb-2 text-red-600 bg-red-100 p-2 rounded-md text-sm">
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -20,17 +23,14 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        <!-- Nama purchase_order_asset -->
-
-                        <div class="mb-4">
-                            <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
-                            </label>
+                    <div class="grid grid-cols-4 gap-2 text-xs">
+                        <!-- Customers -->
+                        <div>
+                            <label for="customers" class="block text-gray-700 font-medium mb-1">Customers</label>
                             <select name="customer_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 required>
-                                <option value="">-- Customers--</option>
+                                <option value="">-- Customers --</option>
                                 @foreach ($customer as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('customer_id', $purchase_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
@@ -39,16 +39,17 @@
                                 @endforeach
                             </select>
                             @error('customer_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
-                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
-                            </label>
+
+                        <!-- Payment Method -->
+                        <div>
+                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method</label>
                             <select name="jenis_pembayaran_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 required>
-                                <option value="">-- Payment Method--</option>
+                                <option value="">-- Payment Method --</option>
                                 @foreach ($jenis_pembayaran as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
@@ -57,139 +58,150 @@
                                 @endforeach
                             </select>
                             @error('jenis_pembayaran_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <!-- deskripsi purchase_order_asset -->
-                        <div class="mb-4 md:col-span-2">
+                        <!-- Shipping Address -->
+                        <div class="col-span-2">
                             <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
                                 Address</label>
-                            <textarea id="shipping_address" name="shipping_address" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_order->shipping_address ?? '') }}</textarea>
+                            <textarea id="shipping_address" name="shipping_address" rows="2"
+                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">{{ old('shipping_address', $purchase_order->shipping_address ?? '') }}</textarea>
                             @error('shipping_address')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
-                            <label for="order_number" class="block text-gray-700 font-medium mb-1">Order Number
-                            </label>
-                            <input type="text" id="name" name="order_number" required
+
+                        <!-- Order Number -->
+                        <div>
+                            <label for="order_number" class="block text-gray-700 font-medium mb-1">Order Number</label>
+                            <input type="text" name="order_number" required
                                 value="{{ old('order_number', $purchase_order->order_number ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('order_number')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
-                        <div class="mb-4">
-                            <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order
-                            </label>
-                            <input type="date" id="name" name="date_order" required
+
+                        <!-- Date Order -->
+                        <div>
+                            <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order</label>
+                            <input type="date" name="date_order" required
                                 value="{{ old('date_order', $purchase_order->date_order ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('date_order')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
-                        <div class="mb-4">
-                            <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
-                            </label>
-                            <input type="date" id="name" name="shipping_date" required
+
+                        <!-- Shipping Date -->
+                        <div>
+                            <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date</label>
+                            <input type="date" name="shipping_date" required
                                 value="{{ old('shipping_date', $purchase_order->shipping_date ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('shipping_date')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
                     </div>
-                    <!-- Order Items Table -->
-                    <div class="mt-10">
-                        <h3 class="text-lg font-semibold mb-4">Order Items</h3>
 
-                        <!-- Scrollable Table -->
-                        <div class="overflow-x-auto border rounded-lg shadow-sm">
-                            <table class="min-w-[1300px] table-auto border-collapse text-sm text-left">
+                    <!-- Order Items Table -->
+                    <div class="mt-4">
+                        <h3 class="text-base font-semibold mb-2">Order Items</h3>
+                        <div class="overflow-x-auto border rounded shadow-sm">
+                            <table class="min-w-full table-auto border-collapse text-xs text-left">
                                 <thead class="bg-gray-100 text-gray-700 font-semibold">
                                     <tr>
-                                        <th class="border px-4 py-2 w-56">Item</th>
-                                        <th class="border px-4 py-2 w-24 text-center">Qty</th>
-                                        <th class="border px-4 py-2 w-24 text-center">Order</th>
-                                        <th class="border px-4 py-2 w-28 text-center">Back Order</th>
-                                        <th class="border px-4 py-2 w-28">Unit</th>
-                                        <th class="border px-4 py-2 w-64">Item Desription</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Price</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Tax</th>
-                                        <th class="border px-4 py-2 w-32 text-right">Tax Amount</th>
-                                        <th class="border px-4 py-2 w-36 text-right">Amount</th>
-                                        <th class="border px-4 py-2 w-40">Account</th>
+                                        <th class="border px-2 py-1 w-40">Item</th>
+                                        <th class="border px-2 py-1 w-16 text-center">Qty</th>
+                                        <th class="border px-2 py-1 w-16 text-center">Order</th>
+                                        <th class="border px-2 py-1 w-20 text-center">Back Order</th>
+                                        <th class="border px-2 py-1 w-20">Unit</th>
+                                        <th class="border px-2 py-1 w-40">Description</th>
+                                        <th class="border px-2 py-1 w-24 text-right">Price</th>
+                                        <th class="border px-2 py-1 w-20 text-right">Tax</th>
+                                        <th class="border px-2 py-1 w-24 text-right">Tax Amt</th>
+                                        <th class="border px-2 py-1 w-28 text-right">Amount</th>
+                                        <th class="border px-2 py-1 w-28">Account</th>
+                                        <th class="border px-2 py-1 w-28 tex-right">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="item-table-body" class="bg-white">
-                                    <!-- Baris dinamis dari JS akan dimasukkan di sini -->
+                                    <!-- Dynamic rows by JS -->
                                 </tbody>
-
-
                             </table>
                         </div>
 
-                        <!-- Button Tambah Baris -->
-                        <div class="mt-4">
-                            <button type="button" id="add-row"
-                                class="px-5 py-2 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition">
-                                + Tambah Baris
-                            </button>
+                        <!-- Summary -->
+                        <div class="mt-2 w-full flex justify-end">
+                            <table class="text-xs">
+                                <tr>
+                                    <td class="pr-3 text-right font-semibold">Subtotal :</td>
+                                    <td><input type="text" id="subtotal" readonly
+                                            class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                </tr>
+                                <tr>
+                                    <td class="pr-3 text-right font-semibold">Total Tax :</td>
+                                    <td><input type="text" id="grand-tax" readonly
+                                            class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                </tr>
+                                <tr>
+                                    <td class="pr-3 text-right font-semibold">Freight :</td>
+                                    <td>
+                                        <!-- input asli (hidden) -->
+                                        <input type="hidden" id="freight" name="freight" value="0">
+
+                                        <!-- input tampilan -->
+                                        <input type="text" id="freight-display"
+                                            class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="pr-3 text-right font-semibold">Total :</td>
+                                    <td><input type="text" id="grand-total" readonly
+                                            class="w-32 border rounded text-right px-2 py-1 bg-gray-100 font-bold"></td>
+                                </tr>
+                            </table>
                         </div>
 
-                        <div class="mb-4 mt-4">
-                            <label for="freight" class="block text-gray-700 font-medium mb-1">Freight
-                            </label>
-                            <input type="number" id="name" name="freight" required
-                                value="{{ old('freight', $purchase_order->freight ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('freight')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4 mt-4">
-                            <label for="early_payment_terms" class="block text-gray-700 font-medium mb-1">Early
-                                Payments Terms
-                            </label>
-                            <input type="text" id="name" name="early_payment_terms" required
-                                value="{{ old('early_payment_terms', $purchase_order->early_payment_terms ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('early_payment_terms')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4 md:col-span-2 ">
-                            <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
-                            </label>
-                            <textarea id="messages" name="messages" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $purchase_order->messages ?? '') }}</textarea>
-                            @error('messages')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
 
 
-
-
-                    <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($purchase_order) ? 'Update' : 'Create' }}
+                    <!-- Button Tambah -->
+                    <div class="mt-2">
+                        <button type="button" id="add-row"
+                            class="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700">
+                            + Tambah Baris
                         </button>
-                        <a href="{{ route('purchase_order.index') }}"
-                            class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
-                            Cancel
-                        </a>
                     </div>
-                </form>
+                    <!-- Early Payment Terms -->
+                    <div class="mb-2">
+                        <label for="early_payment_terms" class="block text-gray-700 font-medium mb-1">Early Payments
+                            Terms</label>
+                        <input type="text" name="early_payment_terms" required
+                            value="{{ old('early_payment_terms', $purchase_order->early_payment_terms ?? '') }}"
+                            class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="mb-2">
+                        <label for="messages" class="block text-gray-700 font-medium mb-1">Messages</label>
+                        <textarea id="messages" name="messages" rows="2"
+                            class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">{{ old('messages', $purchase_order->messages ?? '') }}</textarea>
+                    </div>
             </div>
+
+
+            <!-- Buttons -->
+            <div class="mt-4 flex space-x-2">
+                <button type="submit"
+                    class="px-4 py-1 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700">
+                    {{ isset($purchase_order) ? 'Update' : 'Create' }}
+                </button>
+                <a href="{{ route('purchase_order.index') }}"
+                    class="px-4 py-1 bg-gray-300 text-gray-700 text-xs font-semibold rounded hover:bg-gray-400">
+                    Cancel
+                </a>
+            </div>
+            </form>
         </div>
     </div>
+    </div>
+
 
     <!-- JQUERY DULU -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -210,10 +222,16 @@
             <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded"  /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded"  /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="purchase-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][tax]" class="tax-${index} w-full border rounded" value="0" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right"  /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded text-right"  /></td>
+            <td class="border px-2 py-1">
+                <select name="items[${index}][tax]" class="tax-${index} w-full border rounded">
+                    <option value="0">0%</option>
+                    <option value="11">11%</option>
+                    <option value="12">12%</option>
+                </select>
+            </td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border rounded text-right" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
             <td class="border px-2 py-1">
                 <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
                 <input type="hidden" name="items[${index}][account]" class="account-id-${index}" />
@@ -244,7 +262,7 @@
                             tax_rate: item.tax_rate,
                             account_id: item.account_id,
                             account_name: item.account_name,
-                            stock_quantity: item.stock_quantity // ✅ tambahkan ini
+                            stock_quantity: item.stock_quantity
                         }))
                     }),
                     cache: true
@@ -253,18 +271,18 @@
                 const data = e.params.data;
                 $(`.desc-${index}`).val(data.item_name);
                 $(`.unit-${index}`).val(data.unit);
-                $(`.purchase-${index}`).val(data.purchase_price);
-                $(`.tax-${index}`).val(data.tax_rate + '%');
+                $(`.price-${index}`).val(formatNumber(data.purchase_price));
+                $(`.tax-${index}`).val(data.tax_rate);
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
                 $(`.qty-${index}`).val(data.stock_quantity);
-
                 calculateAmount(index);
+                calculateBackOrder(index);
             });
         }
 
         function attachEvents(index) {
-            $(`.qty-${index}, .order-${index}, .disc-${index}`).on('input', function() {
+            $(`.qty-${index}, .order-${index}, .tax-${index}`).on('input change', function() {
                 calculateAmount(index);
                 calculateBackOrder(index);
             });
@@ -278,26 +296,49 @@
         }
 
         function calculateAmount(index) {
-            const qty = parseFloat($(`.qty-${index}`).val()) || 0;
-            const base_price = parseFloat($(`.base-${index}`).val()) || 0;
-            const disc = parseFloat($(`.disc-${index}`).val()) || 0;
+            const order = parseFloat($(`.order-${index}`).val()) || 0;
+            const price = parseFloat(cleanNumber($(`.price-${index}`).val())) || 0;
+            const taxRate = parseFloat($(`.tax-${index}`).val()) || 0;
 
-            const price = (qty * base_price) - disc;
-            $(`.price-${index}`).val(price.toFixed(2));
-            $(`.amount-${index}`).val(price.toFixed(2));
+            const baseAmount = order * price;
+            const taxAmount = baseAmount * (taxRate / 100);
+            const totalAmount = baseAmount + taxAmount;
+
+            $(`.tax_amount-${index}`).val(formatNumber(taxAmount));
+            $(`.amount-${index}`).val(formatNumber(totalAmount));
 
             updateTotal();
         }
 
         function updateTotal() {
-            let total = 0;
+            let subtotal = 0;
+            let totalTax = 0;
+
             $('.item-row').each(function() {
                 const index = $(this).data('index');
-                const amount = parseFloat($(`.amount-${index}`).val()) || 0;
-                total += amount;
+                const baseAmount = (parseFloat($(`.order-${index}`).val()) || 0) *
+                    (parseFloat(cleanNumber($(`.price-${index}`).val())) || 0);
+                const taxAmount = parseFloat(cleanNumber($(`.tax_amount-${index}`).val())) || 0;
+                subtotal += baseAmount;
+                totalTax += taxAmount;
             });
-            $('#grand-total').val(total.toFixed(2));
+
+            const freight = parseFloat($('#freight').val()) || 0;
+            const grandTotal = subtotal + totalTax + freight;
+
+            $('#subtotal').val(formatNumber(subtotal));
+            $('#grand-tax').val(formatNumber(totalTax));
+            $('#grand-total').val(formatNumber(grandTotal));
         }
+
+        // event input di display
+        $('#freight-display').on('input', function() {
+            let raw = cleanNumber($(this).val());
+            let value = parseFloat(raw) || 0;
+            $('#freight').val(value); // simpan nilai asli ke hidden input
+            $(this).val(formatNumber(value)); // tampilkan sudah diformat
+            updateTotal();
+        });
 
         function addRow() {
             const newRow = generateRow(rowIndex);
@@ -322,26 +363,27 @@
         });
 
         function cleanNumber(value) {
-            return parseFloat(value.toString().replace(/[^\d.-]/g, '')) || 0;
+            return parseFloat(value.toString().replace(/[^0-9.-]+/g, "")) || 0;
+        }
+
+        function formatNumber(value) {
+            return parseFloat(value).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
 
         $('form').on('submit', function() {
-            const total = cleanNumber($('#grand-total').val());
-            $('#grand-total').val(total.toFixed(2));
-
             $('.item-row').each(function() {
                 const index = $(this).data('index');
-
-                const price = cleanNumber($(`.price-${index}`).val());
-                const amount = cleanNumber($(`.amount-${index}`).val());
-                const base = cleanNumber($(`.base-${index}`).val());
-                const tax = cleanNumber($(`.tax-${index}`).val());
-
-                $(`.price-${index}`).val(price.toFixed(2));
-                $(`.amount-${index}`).val(amount.toFixed(2));
-                $(`.base-${index}`).val(base.toFixed(2));
-                $(`.tax-${index}`).val(tax.toFixed(2));
+                $(`.price-${index}`).val(cleanNumber($(`.price-${index}`).val()).toFixed(2));
+                $(`.amount-${index}`).val(cleanNumber($(`.amount-${index}`).val()).toFixed(2));
+                $(`.tax_amount-${index}`).val(cleanNumber($(`.tax_amount-${index}`).val()).toFixed(2));
             });
+            $('#grand-total').val(cleanNumber($('#grand-total').val()).toFixed(2));
+            $('#grand-tax').val(cleanNumber($('#grand-tax').val()).toFixed(2));
         });
     </script>
+
+
 @endsection

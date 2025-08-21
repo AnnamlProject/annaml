@@ -28,7 +28,7 @@
                         </div>
                         <div>
                             <label>Customer</label>
-                            <select name="customer_id"
+                            <select id="customer" name="customer_id"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                                 <option value="">-- Pilih Customer --</option>
@@ -59,61 +59,10 @@
                     </div>
 
                     <h3 class="text-lg font-semibold mb-2">💳 Invoice yang Dibayar</h3>
-                    <div class="overflow-x-auto mb-4">
-                        <table class="w-full text-sm border">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th>Invoice</th>
-                                    <th>Tgl Invoice</th>
-                                    <th>Original</th>
-                                    <th>Owing</th>
-                                    <th>Disc Avail</th>
-                                    <th>Disc Taken</th>
-                                    <th>Paid</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($invoices as $i => $inv)
-                                    <tr class="border-t">
-                                        <td>
-                                            <input type="hidden" name="details[{{ $i }}][sales_invoice_id]"
-                                                value="{{ $inv->id }}">
-                                            {{ $inv->invoice_number }}
-                                        </td>
-                                        <td>
-                                            <input type="date" name="details[{{ $i }}][invoice_date]"
-                                                class="border rounded w-full" value="{{ $inv->invoice_date }}">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01"
-                                                name="details[{{ $i }}][original_amount]"
-                                                class="border rounded w-full" value="{{ $inv->total_amount ?? 0 }}">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01"
-                                                name="details[{{ $i }}][amount_owing]"
-                                                class="border rounded w-full" value="{{ $inv->sisa_tagihan ?? 0 }}">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01"
-                                                name="details[{{ $i }}][discount_available]"
-                                                class="border rounded w-full" value="0">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01"
-                                                name="details[{{ $i }}][discount_taken]"
-                                                class="border rounded w-full" value="0">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01"
-                                                name="details[{{ $i }}][amount_received]"
-                                                class="border rounded w-full" value="0">
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div id="invoice-table">
+                        <p class="text-gray-500">Silakan pilih customer untuk melihat invoice.</p>
                     </div>
+
                     <div class="mt-4">
                         <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
                             💾 Simpan Receipt
@@ -123,4 +72,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('customer').addEventListener('change', function() {
+            let customerId = this.value;
+            let container = document.getElementById('invoice-table');
+
+            if (!customerId) {
+                container.innerHTML = '<p class="text-gray-500">Silakan pilih customer untuk melihat invoice.</p>';
+                return;
+            }
+
+            fetch(`/get-invoices/${customerId}`)
+                .then(res => res.text())
+                .then(html => {
+                    container.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.innerHTML = '<p class="text-red-500">Gagal memuat data invoice.</p>';
+                });
+        });
+    </script>
 @endsection

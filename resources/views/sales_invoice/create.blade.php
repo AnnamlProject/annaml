@@ -2,11 +2,15 @@
 
 @section('content')
 
-    <div class="py-10">
-        <div class="w-full px-4 sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+    <div class="py-4">
+        <div class="w-full px-2">
+            <div class="bg-white shadow rounded p-4 h-full flex flex-col">
+
+                <h2 class="text-lg font-bold mb-4">Sales Invoice</h2>
+
                 <form method="POST"
-                    action="{{ isset($sales_invoice) ? route('sales_invoice.update', $sales_invoice->id) : route('sales_invoice.store') }}">
+                    action="{{ isset($sales_invoice) ? route('sales_invoice.update', $sales_invoice->id) : route('sales_invoice.store') }}"
+                    class="flex flex-col h-full">
                     @csrf
                     @if (isset($sales_invoice))
                         @method('PUT')
@@ -22,8 +26,8 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="mb-4">
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
                             <label for="invoice_number" class="block text-gray-700 font-medium mb-1">Invoice
                                 Number</label>
                             <input type="text" id="invoice_number" name="invoice_number"
@@ -41,9 +45,8 @@
                             @enderror
                         </div>
 
-
                         <!-- Nama sales_invoice_asset -->
-                        <div class="mb-4">
+                        <div>
                             <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
                             </label>
                             <select name="jenis_pembayaran_id"
@@ -61,7 +64,7 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
                             </label>
                             <select name="customers_id"
@@ -81,16 +84,11 @@
                         </div>
 
                         <!-- deskripsi sales_invoice_asset -->
-                        <div class="mb-4 md:col-span-2">
-                            <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                Address</label>
-                            <textarea id="shipping_address" name="shipping_address" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $sales_invoice->shipping_address ?? '') }}</textarea>
-                            @error('shipping_address')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="col-span-3">
+                            <label class="block font-medium mb-1">Shipping Address</label>
+                            <textarea name="shipping_address" rows="2" class="w-full border rounded px-2 py-1 text-sm">{{ old('shipping_address', $sales_invoice->shipping_address ?? '') }}</textarea>
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label class="inline-flex items-center">
                                 <input type="checkbox" id="use-order-number" class="mr-2">
                                 Pakai Order Number
@@ -114,7 +112,7 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="invoice_date" class="block text-gray-700 font-medium mb-1">Invoice Date
                             </label>
                             <input type="date" id="name" name="invoice_date" required
@@ -124,7 +122,7 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
                             </label>
                             <input type="date" id="name" name="shipping_date" required
@@ -134,7 +132,7 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div class="mb-4">
+                        <div>
                             <label for="Employee" class="block text-gray-700 font-medium mb-1">Employee
                             </label>
                             <select name="sales_person_id"
@@ -155,80 +153,116 @@
                     </div>
 
                     <!-- Order Items Table -->
-                    <div class="mt-10">
+                    <div class="mt-4 flex-1 flex flex-col overflow-hidden">
                         <h3 class="text-lg font-semibold mb-4">Order Items</h3>
 
                         <!-- Scrollable Table -->
-                        <div class="overflow-x-auto border rounded-lg shadow-sm">
-                            <table class="w-full mt-6 text-sm border" id="item-table">
-                                <thead class="bg-gray-100 text-left">
-                                    <tr>
-                                        <th class="px-2 py-1">Item Number</th>
-                                        <th class="px-2 py-1">Description</th>
-                                        <th class="px-2 py-1">Qty</th>
-                                        <th class="px-2 py-1">Order</th>
-                                        <th class="px-2 py-1">Back Order</th>
-                                        <th class="px-2 py-1">Unit</th>
-                                        <th class="px-2 py-1">Base Price</th>
-                                        <th class="px-2 py-1">Discount</th>
-                                        <th class="px-2 py-1">Price</th>
-                                        <th class="px-2 py-1">Amount</th>
-                                        <th class="px-2 py-1">Tax</th>
-                                        <th class="px-2 py-1">Account</th>
-                                        <th class="px-2 py-1">Project</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="items-body">
-                                    <!-- Akan diisi lewat JavaScript -->
-                                </tbody>
-                            </table>
+                        <div>
+                            <div class="overflow-x-auto border rounded">
+                                <table class="w-full border-collapse border">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-2 py-1">Item Number</th>
+                                            <th class="px-2 py-1">Description</th>
+                                            <th class="px-2 py-1">Qty</th>
+                                            <th class="px-2 py-1">Order</th>
+                                            <th class="px-2 py-1">Back Order</th>
+                                            <th class="px-2 py-1">Unit</th>
+                                            <th class="px-2 py-1">Base Price</th>
+                                            <th class="px-2 py-1">Discount</th>
+                                            <th class="px-2 py-1">Price</th>
+                                            <th class="px-2 py-1">Amount</th>
+                                            <th class="px-2 py-1">Tax</th>
+                                            <th class="px-2 py-1">Tax Value</th>
+                                            <th class="px-2 py-1">Final</th>
+                                            <th class="px-2 py-1">Account</th>
+                                            <th class="px-2 py-1">Project</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="items-body">
+                                        <!-- Akan diisi lewat JavaScript -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Subtotal</td>
+                                            <td colspan="2" class="border px-2 py-1">
+                                                <input type="text" id="subtotal"
+                                                    class="w-full border rounded text-right bg-gray-100" readonly>
+                                            </td>
+                                            <td colspan="3" class="border px-2 py-1"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Total Pajak
+                                            </td>
+                                            <td colspan="2" class="border px-2 py-1">
+                                                <input type="text" id="total-tax"
+                                                    class="w-full border rounded text-right bg-gray-100" readonly>
+                                            </td>
+                                            <td colspan="3" class="border px-2 py-1"></td>
+                                        </tr>
+                                        <!-- Freight row -->
+                                        <tr>
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Freight</td>
+                                            <td colspan="2" class="border px-2 py-1">
+                                                <input type="text" id="freight" name="freight"
+                                                    class="w-full border rounded text-right" value="0">
+                                            </td>
+                                            <td colspan="3" class="border px-2 py-1"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Grand Total
+                                            </td>
+                                            <td colspan="2" class="border px-2 py-1">
+                                                <input type="text" id="grand-total"
+                                                    class="w-full border rounded text-right bg-gray-100 font-bold"
+                                                    readonly>
+                                            </td>
+                                            <td colspan="3" class="border px-2 py-1"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4 text-sm mt-4">
+                                <div>
+                                    <label for="early_payment_terms" class="block text-gray-700 font-medium mb-1">Early
+                                        Payments Terms
+                                    </label>
+                                    <input type="text" id="name" name="early_payment_terms" required
+                                        value="{{ old('early_payment_terms', $sales_invoice->early_payment_terms ?? '') }}"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    @error('early_payment_terms')
+                                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div class="mb-4 md:col-span-2 ">
+                                    <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
+                                    </label>
+                                    <textarea id="messages" name="messages" rows="3"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $sales_invoice->messages ?? '') }}</textarea>
+                                    @error('messages')
+                                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-4 mt-4">
-                            <label for="freight" class="block text-gray-700 font-medium mb-1">Freight
-                            </label>
-                            <input type="number" id="name" name="freight" required
-                                value="{{ old('freight', $sales_invoice->freight ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('freight')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+
+                        <!-- Buttons -->
+                        <div class="mt-6 flex space-x-4">
+                            <button type="submit"
+                                class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+                                {{ isset($sales_invoice) ? 'Update' : 'Create' }}
+                            </button>
+                            <a href="{{ route('sales_invoice.index') }}"
+                                class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
+                                Cancel
+                            </a>
                         </div>
-                        <div class="mb-4 mt-4">
-                            <label for="early_payment_terms" class="block text-gray-700 font-medium mb-1">Early
-                                Payments Terms
-                            </label>
-                            <input type="text" id="name" name="early_payment_terms" required
-                                value="{{ old('early_payment_terms', $sales_invoice->early_payment_terms ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('early_payment_terms')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4 md:col-span-2 ">
-                            <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
-                            </label>
-                            <textarea id="messages" name="messages" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $sales_invoice->messages ?? '') }}</textarea>
-                            @error('messages')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($sales_invoice) ? 'Update' : 'Create' }}
-                        </button>
-                        <a href="{{ route('sales_invoice.index') }}"
-                            class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
-                            Cancel
-                        </a>
-                    </div>
                 </form>
             </div>
         </div>
     </div>
+
 
     <!-- JQUERY DULU -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -266,9 +300,89 @@
             const orderWrapper = document.getElementById('order-number-wrapper');
             const selectOrder = document.querySelector('select[name="sales_order_id"]');
             const tbody = document.getElementById('items-body');
+            const subtotalInput = document.getElementById('subtotal');
+            const totalTaxInput = document.getElementById('total-tax');
+            const freightInput = document.getElementById('freight');
+            const grandTotalInput = document.getElementById('grand-total');
             let rowIndex = 0;
 
-            // Toggle mode PO / Manual
+            function formatNumber(num) {
+                return Number(num).toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+
+            function parseNumber(val) {
+                return parseFloat(String(val).replace(/,/g, '')) || 0;
+            }
+
+            function calculateBackOrder(index) {
+                const qty = parseNumber(document.querySelector(`.qty-${index}`).value);
+                const order = parseNumber(document.querySelector(`.order-${index}`).value);
+                const back = qty - order;
+                document.querySelector(`.back-${index}`).value = formatNumber(back);
+            }
+
+            function calculateAmount(index) {
+                const order = parseNumber(document.querySelector(`.order-${index}`).value);
+                const basePrice = parseNumber(document.querySelector(`.purchase-${index}`).value);
+                const discount = parseNumber(document.querySelector(`.disc-${index}`).value);
+                const taxPercent = parseNumber(document.querySelector(`.tax-${index}`).value);
+
+                // price after discount
+                const price = order * basePrice - discount;
+                document.querySelector(`.price-${index}`).value = formatNumber(price);
+
+                // amount
+                const amount = price;
+                document.querySelector(`.amount-${index}`).value = formatNumber(amount);
+
+                // tax value
+                const taxValue = amount * (taxPercent / 100);
+                document.querySelector(`.taxval-${index}`).value = formatNumber(taxValue);
+
+                // final
+                const final = amount + taxValue;
+                document.querySelector(`.final-${index}`).value = formatNumber(final);
+
+                // setelah hitung satu row, update total
+                calculateTotals();
+            }
+
+            function calculateTotals() {
+                let subtotal = 0;
+                let totalTax = 0;
+
+                document.querySelectorAll('#items-body .item-row').forEach(row => {
+                    const idx = row.dataset.index;
+                    subtotal += parseNumber(document.querySelector(`.amount-${idx}`).value);
+                    totalTax += parseNumber(document.querySelector(`.taxval-${idx}`).value);
+                });
+
+                subtotalInput.value = formatNumber(subtotal);
+                totalTaxInput.value = formatNumber(totalTax);
+
+                const freight = parseNumber(freightInput.value);
+                const grandTotal = subtotal + totalTax + freight;
+                grandTotalInput.value = formatNumber(grandTotal);
+            }
+
+            function attachInputListeners(index) {
+                ['qty', 'order', 'disc', 'tax', 'purchase'].forEach(cls => {
+                    const el = document.querySelector(`.${cls}-${index}`);
+                    if (el) {
+                        el.addEventListener('input', function() {
+                            calculateBackOrder(index);
+                            calculateAmount(index);
+                        });
+                    }
+                });
+            }
+
+            freightInput.addEventListener('input', calculateTotals);
+
+            // toggle mode PO / manual
             useOrderCheckbox.addEventListener('change', function() {
                 tbody.innerHTML = '';
                 if (this.checked) {
@@ -279,118 +393,95 @@
                 }
             });
 
-            // Load item dari PO
             selectOrder.addEventListener('change', function() {
                 const orderId = this.value;
                 tbody.innerHTML = '';
-
                 if (!orderId) return;
 
                 fetch(`/sales_invoice/get-items/${orderId}`)
                     .then(res => res.json())
                     .then(data => {
-                        data.items.forEach(item => {
-                            addRowFromPO(item);
-                        });
+                        data.items.forEach(item => addRowFromPO(item));
+                        calculateTotals();
                     });
             });
 
             function addEmptyRow() {
                 const index = rowIndex++;
                 const row = `
-        <tr>
-            <td>
-                <select name="items[${index}][item_id]" data-index="${index}" class="w-full border px-2 py-1"></select>
-            </td>
+        <tr class="item-row" data-index="${index}">
+            <td><select name="items[${index}][item_id]" data-index="${index}" class="w-full border px-2 py-1"></select></td>
             <td><input type="text" name="items[${index}][description]" class="w-full border px-2 py-1 desc-${index}" readonly></td>
-            <td><input type="number" name="items[${index}][quantity]" class="w-full border px-2 py-1 qty-${index}"></td>
-            <td><input type="number" name="items[${index}][order_quantity]" class="w-full border px-2 py-1"></td>
-            <td><input type="number" name="items[${index}][back_order]" class="w-full border px-2 py-1"></td>
+            <td><input type="text" name="items[${index}][quantity]" class="w-full border px-2 py-1 qty-${index}"></td>
+            <td><input type="text" name="items[${index}][order_quantity]" class="w-full border px-2 py-1 order-${index}"></td>
+            <td><input type="text" name="items[${index}][back_order]" class="w-full border px-2 py-1 back-${index}" readonly></td>
             <td><input type="text" name="items[${index}][unit]" class="w-full border px-2 py-1 unit-${index}" readonly></td>
-            <td><input type="number" step="0.01" name="items[${index}][base_price]" class="w-full border px-2 py-1 purchase-${index}"></td>
-            <td><input type="number" step="0.01" name="items[${index}][discount]" class="w-full border px-2 py-1"></td>
-            <td><input type="number" step="0.01" name="items[${index}][price]" class="w-full border px-2 py-1"></td>
-            <td><input type="number" step="0.01" name="items[${index}][amount]" class="w-full border px-2 py-1"></td>
-            <td><input type="number" step="0.01" name="items[${index}][tax]" class="w-full border px-2 py-1 tax-${index}"></td>
+            <td><input type="text" name="items[${index}][base_price]" class="w-full border px-2 py-1 purchase-${index}"></td>
+            <td><input type="text" name="items[${index}][discount]" class="w-full border px-2 py-1 disc-${index}"></td>
+            <td><input type="text" name="items[${index}][price]" class="w-full border px-2 py-1 price-${index}" readonly></td>
+            <td><input type="text" name="items[${index}][amount]" class="w-full border px-2 py-1 amount-${index}" readonly></td>
             <td>
-                <input type="text" class="w-full border px-2 py-1 account-name-${index}" readonly>
-                <input type="hidden" name="items[${index}][account_id]" class="account-id-${index}">
+                <select name="items[${index}][tax_rate]" class="tax-${index} w-full border rounded">
+                    <option value="0">Tanpa Pajak</option>
+                    <option value="11">11%</option>
+                    <option value="12">12%</option>
+                </select>
             </td>
-              <td class="border px-2 py-1">
-                        <select name="items[${index}][project_id]" 
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">-- Pilih Project --</option>
-                            @foreach ($project as $item)
-                                <option value="{{ $item->id }}">{{ $item->nama_project }} </option>
-                            @endforeach
-                        </select>
-                        </td>
+            <td><input type="text" name="items[${index}][tax_value]" class="taxval-${index} w-full border rounded text-right" readonly></td>
+            <td><input type="text" name="items[${index}][final]" class="final-${index} w-full border rounded text-right" readonly></td>
+            <td><input type="text" class="w-full border px-2 py-1 account-name-${index}" readonly><input type="hidden" name="items[${index}][account_id]" class="account-id-${index}"></td>
+            <td>
+                <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
+                    <option value="">-- Pilih Project --</option>
+                    @foreach ($project as $prj)
+                        <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td class="text-center"><button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button></td>
         </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
                 attachSelect2(index);
+                attachInputListeners(index);
             }
 
-
-            // Fungsi tambah row dari PO
             function addRowFromPO(item) {
                 const index = rowIndex++;
                 const row = `
-    <tr class="item-row" data-index="${index}">
-        <td class="border px-2 py-1">
-            <input type="hidden" name="items[${index}][item_id]" value="${item.id}">
-            ${item.item_number ?? ''}
-        </td>
-        <td class="border px-2 py-1">
-            <input type="text" name="items[${index}][description]" value="${item.description ?? ''}" class="w-full border rounded" readonly />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" name="items[${index}][quantity]" value="${item.quantity ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" name="items[${index}][order_quantity]" value="${item.order ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" name="items[${index}][back_order]" value="${item.back_order ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="text" name="items[${index}][unit]" value="${item.unit ?? ''}" class="w-full border rounded" readonly />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" step="0.01" name="items[${index}][base_price]" value="${item.base_price ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" step="0.01" name="items[${index}][discount]" value="${item.discount ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" step="0.01" name="items[${index}][price]" value="${item.price ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" step="0.01" name="items[${index}][amount]" value="${item.amount ?? 0}" class="w-full border rounded" />
-        </td>
-        <td class="border px-2 py-1">
-            <input type="number" step="0.01" name="items[${index}][tax]" value="${item.tax ?? 0}" class="w-full border rounded" />
-        </td>
-         <td class="border px-2 py-1">
-                <input type="text" value="${item.account_name}" class="w-full border rounded bg-gray-100" readonly />
-                <input type="hidden" name="items[${index}][account_id]" value="${item.account_id}" />
+        <tr class="item-row" data-index="${index}">
+            <td class="border px-2 py-1"><input type="hidden" name="items[${index}][item_id]" value="${item.id}">${item.item_number ?? ''}</td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" value="${item.description ?? ''}" class="w-full border rounded" readonly></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][quantity]" value="${formatNumber(item.quantity ?? 0)}" class="w-full border rounded qty-${index}"></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][order_quantity]" value="${formatNumber(item.order ?? 0)}" class="w-full border rounded order-${index}"></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][back_order]" value="${formatNumber(item.back_order ?? 0)}" class="w-full border rounded back-${index}" readonly></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" value="${item.unit ?? ''}" class="w-full border rounded" readonly></td>
+            <td class="border px-2 py-1">
+                <input type="hidden" name="items[${index}][base_price]" class="base-hidden-${index}" value="${item.base_price ?? 0}">
+                <input type="text" value="${formatNumber(item.base_price ??0)}" class="w-full border rounded purchase-${index}">
             </td>
-        <td class="border px-2 py-1">
-            <select name="items[${index}][project_id]" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][discount]" value="${formatNumber(item.discount ?? 0)}" class="w-full border rounded disc-${index}"></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" value="${formatNumber(item.price ?? 0)}" class="w-full border rounded price-${index}" readonly></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" value="${formatNumber(item.amount ?? 0)}" class="w-full border rounded amount-${index}" readonly></td>
+            <td><select name="items[${index}][tax_rate]" class="tax-${index} w-full border rounded">
+                    <option value="0">Tanpa Pajak</option>
+                    <option value="11">11%</option>
+                    <option value="12">12%</option>
+                </select></td>
+            <td><input type="text" name="items[${index}][tax_value]" value="${formatNumber(item.tax ?? 0)}" class="taxval-${index} w-full border rounded text-right" readonly></td>
+            <td><input type="text" name="items[${index}][final]" value="${formatNumber(item.final ?? 0)}" class="final-${index} w-full border rounded text-right" readonly></td>
+            <td class="border px-2 py-1"><input type="text" value="${item.account_name}" class="w-full border rounded bg-gray-100" readonly><input type="hidden" name="items[${index}][account_id]" value="${item.account_id}"></td>
+            <td class="border px-2 py-1"><select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
                 <option value="">-- Pilih Project --</option>
                 @foreach ($project as $prj)
                     <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                 @endforeach
-            </select>
-        </td>
-        <td class="border px-2 py-1 text-center">
-            <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
-        </td>
-    </tr>`;
+            </select></td>
+            <td class="text-center"><button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button></td>
+        </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
+                attachInputListeners(index);
             }
 
-
-            // Attach Select2 untuk row manual
             function attachSelect2(index) {
                 $(`select[data-index="${index}"]`).select2({
                     placeholder: 'Cari item...',
@@ -420,23 +511,26 @@
                     const data = e.params.data;
                     $(`.desc-${index}`).val(data.item_name);
                     $(`.unit-${index}`).val(data.unit);
-                    $(`.purchase-${index}`).val(data.purchase_price);
-                    $(`.tax-${index}`).val(data.tax);
+                    $(`.purchase-${index}`).val(formatNumber(data.purchase_price));
+                    $(`.tax-${index}`).val(data.tax_rate);
                     $(`.account-name-${index}`).val(data.account_name);
                     $(`.account-id-${index}`).val(data.account_id);
-                    $(`.qty-${index}`).val(data.stock_quantity);
+                    $(`.qty-${index}`).val(formatNumber(data.stock_quantity));
+                    calculateAmount(index);
                 });
             }
 
-            // Event hapus row
+            // hapus row
             $(document).on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
+                calculateTotals();
             });
 
-            // Tambah baris pertama manual saat load jika PO tidak dipilih
             if (!useOrderCheckbox.checked) {
                 addEmptyRow();
             }
         });
     </script>
+
+
 @endsection

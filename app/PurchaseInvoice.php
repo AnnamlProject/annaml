@@ -36,4 +36,8 @@ class PurchaseInvoice extends Model
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
+    public function documents()
+    {
+        return $this->hasMany(PurchaseInvoiceDocument::class);
+    }
 }

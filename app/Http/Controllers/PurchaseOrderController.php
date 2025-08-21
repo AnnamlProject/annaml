@@ -75,6 +75,11 @@ class PurchaseOrderController extends Controller
 
             // ✅ Simpan setiap item ke tabel sales_order_details
             foreach ($request->items as $item) {
+                $price = isset($item['price']) ? (float) str_replace(',', '', $item['price']) : 0;
+                $amount     = isset($item['amount'])     ? (float) str_replace(',', '', $item['amount'])     : 0;
+                $tax_amount       = isset($item['tax_amount'])        ? (float) str_replace(',', '', $item['tax_amount'])        : 0;
+
+
                 PurchaseOrderDetail::create([
                     'purchase_order_id'     => $purchaseOrder->id,
                     'item_id'            => $item['item_id'],
@@ -83,10 +88,10 @@ class PurchaseOrderController extends Controller
                     'back_order'         => $item['back_order'],
                     'unit'               => $item['unit'],
                     'item_description'   => $item['description'],
-                    'price'         => $item['price'],
+                    'price'         => $price,
                     'tax'           => $item['tax'],
-                    'tax_amount'              => $item['tax_amount'],
-                    'amount'             => $item['amount'],
+                    'tax_amount'              => $tax_amount,
+                    'amount'             => $amount,
                     'account_id'         => $item['account'],
                 ]);
             }

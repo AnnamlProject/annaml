@@ -58,7 +58,7 @@ class SalesOrderController extends Controller
             'items.*.discount'     => 'nullable|numeric|min:0',
             'items.*.price'        => 'nullable|numeric|min:0',
             'items.*.amount'       => 'nullable|numeric|min:0',
-            'items.*.tax'          => 'nullable|numeric|min:0',
+            'items.*.tax_value'          => 'nullable|numeric|min:0',
             'items.*.account'      => 'required|exists:chart_of_accounts,id',
         ]);
 
@@ -74,7 +74,7 @@ class SalesOrderController extends Controller
                 'sales_person_id'          => $request->sales_person_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
-                'freight'              => $request->freight,
+                'freight'              => $this->normalizeNumber($request['freight']),
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
             ]);
@@ -82,21 +82,22 @@ class SalesOrderController extends Controller
             // ✅ Simpan setiap item ke tabel sales_order_details
             foreach ($request->items as $item) {
                 SalesOrderDetail::create([
-                    'sales_order_id'     => $salesOrder->id,
-                    'item_id'            => $item['item_id'],
-                    'quantity'           => $item['quantity'],
-                    'order'              => $item['order'],
-                    'back_order'         => $item['back_order'],
-                    'unit'               => $item['unit'],
-                    'item_description'   => $item['description'],
-                    'base_price'         => $item['base_price'],
-                    'discount'           => $item['discount'],
-                    'price'              => $item['price'],
-                    'amount'             => $item['amount'],
-                    'tax'                => $item['tax'],
-                    'account_id'         => $item['account'],
+                    'sales_order_id'   => $salesOrder->id,
+                    'item_id'          => $item['item_id'],
+                    'quantity'         => $this->normalizeNumber($item['quantity']),
+                    'order'            => $this->normalizeNumber($item['order']),
+                    'back_order'       => $this->normalizeNumber($item['back_order']),
+                    'unit'             => $item['unit'],
+                    'item_description' => $item['description'],
+                    'base_price'       => $this->normalizeNumber($item['base_price']),
+                    'discount'         => $this->normalizeNumber($item['discount']),
+                    'price'            => $this->normalizeNumber($item['price']),
+                    'amount'           => $this->normalizeNumber($item['amount']),
+                    'tax'              => $this->normalizeNumber($item['tax_value']),
+                    'account_id'       => $item['account'],
                 ]);
             }
+
 
             DB::commit();
             return redirect()->route('sales_order.index')->with('success', 'Sales order berhasil disimpan.');
@@ -105,6 +106,16 @@ class SalesOrderController extends Controller
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan: ' . $e->getMessage()])->withInput();
         }
     }
+    // Helper untuk normalisasi angka
+    private function normalizeNumber($value)
+    {
+        if ($value === null) return 0;
+        // cukup ganti koma jadi titik (kalau ada), jangan hapus titik desimal
+        $value = str_replace(',', '.', $value);
+        return (float) $value;
+    }
+
+
     public function show($id)
     {
         // Ambil sales order beserta relasi terkait
@@ -156,7 +167,7 @@ class SalesOrderController extends Controller
             'items.*.discount' => 'required|numeric|min:0',
             'items.*.price' => 'required|numeric|min:0',
             'items.*.amount' => 'required|numeric|min:0',
-            'items.*.tax' => 'required|numeric|min:0',
+            'items.*.tax_value' => 'required|numeric|min:0',
             'items.*.account' => 'required|exists:chart_of_accounts,id',
         ]);
 
@@ -193,7 +204,7 @@ class SalesOrderController extends Controller
                     'discount' => $item['discount'],
                     'price' => $item['price'],
                     'amount' => $item['amount'],
-                    'tax' => $item['tax'],
+                    'tax' => $item['tax_value'],
                     'account_id' => $item['account'],
                 ]);
             }

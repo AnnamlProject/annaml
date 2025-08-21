@@ -36,4 +36,8 @@ class SalesOrder extends Model
     {
         return $this->belongsTo(Employee::class, 'sales_person_id');
     }
+    public function documents()
+    {
+        return $this->hasMany(SalesOrderDocument::class);
+    }
 }

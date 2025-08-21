@@ -21,6 +21,7 @@ class SalesInvoiceDetail extends Model
         'price',
         'amount',
         'tax',
+        'status',
         'account_id',
         'project_id'
     ];

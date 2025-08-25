@@ -88,6 +88,9 @@
                                     x-transition:leave-end="opacity-0 translate-x-1"
                                     class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                     @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    <a href="{{ route('start_new_year.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Year
+                                        Book</a>
                                     <a href="{{ route('numbering_account.index') }}" @click="open = false"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Numbering</a>
                                     <a href="{{ route('klasifikasiAkun.index') }}" @click="open = false"
@@ -213,7 +216,7 @@
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Price List
                                     </a>
-                                    <a href="{{ $taxpayers ? route('taxpayers_company.show', $taxpayers->id) : route('taxpayers_company.create') }}"
+                                    <a href="{{ route('sales_discount.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Sales Discount
                                     </a>
@@ -239,12 +242,12 @@
                                     x-transition:leave-end="opacity-0 translate-x-1"
                                     class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                     @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('item_category.index') }}"
+                                    {{-- <a href="{{ route('item_category.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Item
                                         Category</a>
                                     <a href="{{ route('items.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
-                                    </a>
+                                    </a> --}}
                                     <a href="{{ route('PaymentMethod.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payement
                                         Method</a>
@@ -431,6 +434,7 @@
                             </svg>
                         </button>
 
+
                         <div x-show="open" x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0 scale-95"
                             x-transition:enter-end="opacity-100 scale-100"
@@ -439,7 +443,52 @@
                             x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
                             class="absolute left-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
-                            <a href="{{ route('intangible_asset.index') }}"
+                            <div class="relative" x-data="{ subOpen: false }">
+                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                    <span class="text-gray-700 group-hover:text-blue-600">Settings</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 translate-x-1"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-1"
+                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    {{-- <a href="{{ route('item_category.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Item
+                                        Category</a>
+                                    <a href="{{ route('items.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
+                                    </a> --}}
+                                    <a href="{{ route('PaymentMethod.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Options</a>
+                                    <a href="{{ route('price_list_inventory.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Price List</a>
+                                    <a href="{{ route('lokasi_inventory.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Locations</a>
+                                    <a href="{{ route('customers.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Categories</a>
+                                    <a href="{{ route('customers.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Names</a>
+                                    <a href="{{ route('customers.index') }}"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Linked Accounts</a>
+                                </div>
+                            </div>
+
+                            <a href="{{ route('inventory.index') }}"
                                 class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Inventory
 
                             </a>
@@ -987,11 +1036,7 @@
                             x-transition:leave-start="opacity-100 scale-100"
                             x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
                             class="absolute right-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
-                            <a href="{{ route('start_new_year.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Periode
-                                Buku
 
-                            </a>
                             <a href="{{ route('accounting.start_new_year') }}"
                                 class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Start
                                 New Year

@@ -10,8 +10,11 @@ use App\jenis_pembayaran;
 use App\PaymentMethod;
 use App\SalesOrder;
 use App\SalesOrderDetail;
+use Barryvdh\DomPDF\PDF as DomPDFPDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class SalesOrderController extends Controller
 {
@@ -215,5 +218,13 @@ class SalesOrderController extends Controller
             DB::rollback();
             return back()->with('error', 'Terjadi kesalahan saat update: ' . $e->getMessage())->withInput();
         }
+    }
+
+    public function exportPdf($id)
+    {
+        $salesOrder = SalesOrder::with('details.item', 'customer', 'jenisPembayaran', 'salesPerson')->findOrFail($id);
+
+        $pdf = Pdf::loadView('sales_order.pdf', compact('salesOrder'));
+        return $pdf->download('SalesOrder-' . $salesOrder->order_number . '.pdf');
     }
 }

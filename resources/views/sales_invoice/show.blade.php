@@ -25,7 +25,7 @@
                     <!-- Informasi Utama Sales Order -->
                     <div x-show="tab === 'details'">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div>
                                 <strong>Invoice Number:</strong>
                                 <p>{{ $salesInvoice->invoice_number }}</p>
@@ -53,10 +53,6 @@
                             <div class="md:col-span-2">
                                 <strong>Shipping Address:</strong>
                                 <p>{{ $salesInvoice->shipping_address }}</p>
-                            </div>
-                            <div>
-                                <strong>Freight:</strong>
-                                <p>{{ number_format($salesInvoice->freight, 2) }}</p>
                             </div>
                             <div>
                                 <strong>Early Payment Terms:</strong>
@@ -99,15 +95,15 @@
                                             <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
                                             <td class="border px-3 py-2">{{ $item->description }}</td>
                                             <td class="border px-3 py-2 text-right">
-                                                {{ number_format($item->base_price, 2) }}
+                                                {{ number_format($item->base_price) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->discount, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->discount) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->price, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->price) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->amount, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->amount) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->tax, 2) }}%
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->tax) }}
                                             </td>
                                             <td class="border px-3 py-2">{{ $item->account->nama_akun ?? '-' }}</td>
                                             <td class="border px-3 py-2">{{ $item->project->nama_project ?? 'Tidak Ada' }}
@@ -115,6 +111,38 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                <tfoot>
+                                    @php
+                                        $subtotal = $salesInvoice->details->sum('amount');
+                                        $totalTax = $salesInvoice->details->sum('tax');
+                                        $freight = $salesInvoice->freight ?? 0;
+                                        $grandTotal = $subtotal + $totalTax + $freight;
+                                    @endphp
+                                    <tr>
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Subtotal</td>
+                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($subtotal) }}
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Total Pajak</td>
+                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($totalTax) }}
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Freight</td>
+                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($freight) }}
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Grand Total</td>
+                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($grandTotal) }}
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>
@@ -122,74 +150,10 @@
                     <div x-show="tab === 'documents'">
                         <h3 class="text-xl font-semibold mb-4">Dokumen Sales Invoice</h3>
 
-
-                        <!-- Form Upload -->
-                        <form action="{{ route('sales_invoice.documents.store', $salesInvoice->id) }}" method="POST"
-                            enctype="multipart/form-data" class="space-y-4 mb-6">
-                            @csrf
-                            <div>
-                                <label for="document_name" class="block text-sm font-medium text-gray-700">Nama
-                                    Dokumen</label>
-                                <input type="text" name="document_name" id="document_name"
-                                    class="mt-1 w-full border rounded p-2" required>
-                            </div>
-                            <div>
-                                <label for="file" class="block text-sm font-medium text-gray-700">File</label>
-                                <input type="file" name="file" id="file" class="mt-1 w-full border rounded p-2"
-                                    required>
-                                <p class="text-xs text-gray-500">Format: pdf, docx, xlsx, jpg, png (maks. 2MB)</p>
-                            </div>
-                            <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                                <textarea name="description" id="description" class="mt-1 w-full border rounded p-2"></textarea>
-                            </div>
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
-                        </form>
-
-                        <!-- Tabel Dokumen -->
-                        <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="border px-3 py-2">Nama</th>
-                                    <th class="border px-3 py-2 text-center">File</th>
-                                    <th class="border px-3 py-2">Deskripsi</th>
-                                    <th class="border px-3 py-2">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($salesInvoice->documents as $doc)
-                                    <tr>
-                                        <td class="border px-3 py-2">{{ $doc->document_name }}</td>
-                                        <td class="border px-3 py-2">
-                                            <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank"
-                                                class="text-blue-600 hover:underline mr-4">
-                                                📄 View
-                                            </a>
-                                            <a href="{{ asset('storage/' . $doc->file_path) }}" download
-                                                class="text-green-600 hover:underline">
-                                                ⬇️ Download
-                                            </a>
-                                        </td>
-                                        <td class="border px-3 py-2">{{ $doc->description }}</td>
-                                        <td class="border px-3 py-2">
-                                            <form
-                                                action="{{ route('sales_orders.documents.destroy', [$salesInvoice->id, $doc->id]) }}"
-                                                method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-500 hover:underline">Hapus</button>
-                                            </form>
-
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="border px-3 py-2 text-center text-gray-500">Belum ada
-                                            dokumen</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                        <a href="{{ route('sales_invoice.pdf', $salesInvoice->id) }}"
+                            class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                            <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                        </a>
                     </div>
 
                     <!-- Tombol Kembali -->

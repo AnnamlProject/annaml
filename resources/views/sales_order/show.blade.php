@@ -22,7 +22,7 @@
             <!-- Tab Detail -->
             <div x-show="tab === 'details'">
                 <!-- Informasi Utama Sales Order -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div>
                         <strong>Order Number:</strong>
                         <p>{{ $salesOrder->order_number }}</p>
@@ -47,19 +47,15 @@
                         <strong>Payment Method:</strong>
                         <p>{{ $salesOrder->jenisPembayaran->nama_jenis ?? '-' }}</p>
                     </div>
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-3">
                         <strong>Shipping Address:</strong>
                         <p>{{ $salesOrder->shipping_address }}</p>
-                    </div>
-                    <div>
-                        <strong>Freight:</strong>
-                        <p>{{ number_format($salesOrder->freight, 2) }}</p>
                     </div>
                     <div>
                         <strong>Early Payment Terms:</strong>
                         <p>{{ $salesOrder->early_payment_terms }}</p>
                     </div>
-                    <div class="md:col-span-2">
+                    <div class="md:col-span-3">
                         <strong>Messages:</strong>
                         <p>{{ $salesOrder->messages }}</p>
                     </div>
@@ -103,6 +99,34 @@
                                 </tr>
                             @endforeach
                         </tbody>
+                        <tfoot>
+                            @php
+                                $subtotal = $salesOrder->details->sum('amount');
+                                $totalTax = $salesOrder->details->sum('tax');
+                                $freight = $salesOrder->freight ?? 0; // kalau ada kolom freight di salesOrder
+                                $grandTotal = $subtotal + $totalTax + $freight;
+                            @endphp
+                            <tr>
+                                <td colspan="9" class="border px-3 py-2 text-right font-bold">Subtotal</td>
+                                <td class="border px-3 py-2 text-right font-bold">{{ number_format($subtotal) }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="border px-3 py-2 text-right font-bold">Total Pajak</td>
+                                <td class="border px-3 py-2 text-right font-bold">{{ number_format($totalTax) }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="border px-3 py-2 text-right font-bold">Freight</td>
+                                <td class="border px-3 py-2 text-right font-bold">{{ number_format($freight) }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" class="border px-3 py-2 text-right font-bold">Grand Total</td>
+                                <td class="border px-3 py-2 text-right font-bold">{{ number_format($grandTotal) }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -111,81 +135,16 @@
             <div x-show="tab === 'documents'">
                 <h3 class="text-xl font-semibold mb-4">Dokumen Sales Order</h3>
 
-                @if (session('success'))
-                    <div class="bg-green-200 text-green-800 p-2 rounded mb-4">
-                        {{ session('success') }}
-                    </div>
-                @endif
+                <a href="{{ route('sales_order.pdf', $salesOrder->id) }}"
+                    class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                    <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                </a>
 
-                <!-- Form Upload -->
-                <form action="{{ route('sales_orders.documents.store', $salesOrder->id) }}" method="POST"
-                    enctype="multipart/form-data" class="space-y-4 mb-6">
-                    @csrf
-                    <div>
-                        <label for="document_name" class="block text-sm font-medium text-gray-700">Nama Dokumen</label>
-                        <input type="text" name="document_name" id="document_name" class="mt-1 w-full border rounded p-2"
-                            required>
-                    </div>
-                    <div>
-                        <label for="file" class="block text-sm font-medium text-gray-700">File</label>
-                        <input type="file" name="file" id="file" class="mt-1 w-full border rounded p-2" required>
-                        <p class="text-xs text-gray-500">Format: pdf, docx, xlsx, jpg, png (maks. 2MB)</p>
-                    </div>
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                        <textarea name="description" id="description" class="mt-1 w-full border rounded p-2"></textarea>
-                    </div>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
-                </form>
-
-                <!-- Tabel Dokumen -->
-                <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="border px-3 py-2">Nama</th>
-                            <th class="border px-3 py-2 text-center">File</th>
-                            <th class="border px-3 py-2">Deskripsi</th>
-                            <th class="border px-3 py-2">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($salesOrder->documents as $doc)
-                            <tr>
-                                <td class="border px-3 py-2">{{ $doc->document_name }}</td>
-                                <td class="border px-3 py-2">
-                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank"
-                                        class="text-blue-600 hover:underline mr-4">
-                                        📄 View
-                                    </a>
-                                    <a href="{{ asset('storage/' . $doc->file_path) }}" download
-                                        class="text-green-600 hover:underline">
-                                        ⬇️ Download
-                                    </a>
-                                </td>
-                                <td class="border px-3 py-2">{{ $doc->description }}</td>
-                                <td class="border px-3 py-2">
-                                    <form
-                                        action="{{ route('sales_orders.documents.destroy', [$salesOrder->id, $doc->id]) }}"
-                                        method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:underline">Hapus</button>
-                                    </form>
-
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="border px-3 py-2 text-center text-gray-500">Belum ada dokumen</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
             </div>
 
             <!-- Tombol Kembali -->
             <div class="px-6 py-4 border-t bg-gray-50 flex justify-between">
-                <a href="{{ route('sales_order.edit', $salesInvoice->id) }}"
+                <a href="{{ route('sales_order.edit', $salesOrder->id) }}"
                     class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
                     <i class="fas fa-edit mr-2"></i>Edit
                 </a>

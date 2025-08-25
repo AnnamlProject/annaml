@@ -11,6 +11,7 @@ use App\Project;
 use App\SalesInvoice;
 use App\SalesInvoiceDetail;
 use App\SalesOrder;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -289,5 +290,12 @@ class SalesInvoiceController extends Controller
 
             return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
         }
+    }
+    public function exportPdf($id)
+    {
+        $salesInvoice = SalesInvoice::with('details.item', 'customer', 'jenisPembayaran', 'salesPerson', 'salesOrder', 'details.project')->findOrFail($id);
+
+        $pdf = Pdf::loadView('sales_invoice.pdf', compact('salesInvoice'));
+        return $pdf->download('SalesInvoice-' . $salesInvoice->invoice_number . '.pdf');
     }
 }

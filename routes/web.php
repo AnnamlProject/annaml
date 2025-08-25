@@ -142,6 +142,8 @@ Route::middleware(['auth'])->group(function () {
     // sales menu 
     Route::resource('linkedAccountSales', 'linkedAccountSalesController');
     Route::resource('sales_option', 'salesOptionsController');
+    Route::resource('sales_discount', 'SalesDiscountController');
+
     Route::resource('item_category', 'ItemCategoryController');
 
     Route::resource('items', 'ItemController');
@@ -166,9 +168,16 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/documents/{document}', [App\Http\Controllers\SalesOrderDocumentController::class, 'destroy'])->name('sales_orders.documents.destroy');
     });
 
+    Route::get('/sales-orders/{id}/pdf', [App\Http\Controllers\SalesOrderController::class, 'exportPdf'])
+        ->name('sales_order.pdf');
+
+
     Route::resource('sales_invoice', 'SalesInvoiceController');
     Route::get('sales-invoice/documents', [SalesInvoiceDocumentController::class, 'index'])
         ->name('sales_invoice.documents.index');
+
+    Route::get('/sales-invoice/{id}/pdf', [App\Http\Controllers\SalesInvoiceController::class, 'exportPdf'])
+        ->name('sales_invoice.pdf');
     Route::prefix('sales-invoice/{salesInvoice}')->group(function () {
         Route::post('/documents', [App\Http\Controllers\SalesInvoiceDocumentController::class, 'store'])->name('sales_invoice.documents.store');
         Route::get('/documents/{document}/download', [App\Http\Controllers\SalesInvoiceDocumentController::class, 'download'])->name('sales_invoice.documents.download');
@@ -225,6 +234,15 @@ Route::middleware(['auth'])->group(function () {
 
 
     // end purchases menu
+
+    // inventory menu 
+    Route::resource('inventory', 'InventoryController');
+    Route::resource('lokasi_inventory', 'LokasiInventoryController');
+    Route::resource('price_list_inventory', 'PriceListInventoryController');
+
+    // end inventory  menu
+
+
     // payroll menu
 
     // level karyawan

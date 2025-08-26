@@ -34,4 +34,5 @@ class PriceListInventorySeeder extends Seeder
             ],
         ]);
     }
+    // cekcek
 }

@@ -22,4 +22,5 @@ class JamKerjaSeeder extends Seeder
             ],
         ]);
     }
+    // cekcek
 }

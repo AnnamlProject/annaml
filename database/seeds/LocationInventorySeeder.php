@@ -23,4 +23,5 @@ class LocationInventorySeeder extends Seeder
             ],
         ]);
     }
+    // cekcek
 }

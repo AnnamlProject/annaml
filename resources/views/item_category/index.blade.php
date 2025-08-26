@@ -13,11 +13,11 @@
                 flex justify-between items-center">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
-                        Item Category
+                        Category
                     </h3>
                     <a href="{{ route('item_category.create') }}"
                         class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Item Category
+                        <i class="fas fa-plus mr-2"></i> Add Category
                     </a>
                 </div>
             </div>

@@ -32,7 +32,8 @@ class Employee extends Model
         'status_pegawai',
         'sertifikat',
         'photo',
-        'foto_ktp'
+        'foto_ktp',
+        'rfid_code'
     ];
 
     public function jabatan()

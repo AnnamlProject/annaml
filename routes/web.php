@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BukuBesarController;
@@ -239,6 +240,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('inventory', 'InventoryController');
     Route::resource('lokasi_inventory', 'LokasiInventoryController');
     Route::resource('price_list_inventory', 'PriceListInventoryController');
+    Route::resource('options_inventory', 'OptionsInventoryController');
 
     // end inventory  menu
 
@@ -253,6 +255,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('jabatan', 'JabatanController');
     // ptkp
     Route::resource('ptkp', 'PtkpController');
+
+    // absensi menu 
+    Route::get('/scan-rfid', [AbsensiController::class, 'form'])->name('absensi.form');
+    Route::post('/scan-rfid', [AbsensiController::class, 'scan'])->name('absensi.scan');
+
     // export dan import ptkp 
     Route::get('/export/Ptkp', [ExportController::class, 'exportPtkp'])->name('export.Ptkp');
     Route::post('/import/Ptkp', [ImportController::class, 'importPtkp'])->name('import.Ptkp');

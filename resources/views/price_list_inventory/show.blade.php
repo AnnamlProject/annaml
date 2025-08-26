@@ -10,7 +10,7 @@
                     <tbody>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Description</th>
-                            <td class="py-2">{{ $data->deskripsi }}</td>
+                            <td class="py-2">{{ $data->description }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Status</th>

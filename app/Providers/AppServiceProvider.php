@@ -12,6 +12,7 @@ use App\Observers\DepartementObserver;
 use App\Observers\KlasifikasiAccountObserver;
 use App\Observers\TaxpayersProfileObserver;
 use App\Observers\UserObserver;
+use App\OptionsInventory;
 use App\SettingDepartement;
 use App\TaxpayersProfile;
 use App\User;
@@ -50,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('company', CompanyProfile::first());
 
             $view->with('taxpayers', TaxpayersProfile::first());
+            $view->with('options_inventory', OptionsInventory::first());
 
 
             $currentDept = SettingDepartement::where('key', 'current_department')->value('value') ?? '-';

@@ -11,26 +11,43 @@ class Item extends Model
         'item_number',
         'item_name',
         'item_description',
-        'unit',
-        'base_price',
-        'tax_rate',
-        'account_id',
-        'is_active',
-        'category_id',
-        'brand',
-        'stock_quantity',
-        'purchase_price',
-        'barcode',
-        'image',
+        'description',
+        'type',
+        'picture_path',
+        'thubmnail_path',
     ];
-
-    public function account()
+    public function quantities()
     {
-        return $this->belongsTo(chartOfAccount::class, 'account_id');
+        return $this->hasMany(ItemQuantities::class);
     }
 
-    public function category()
+    public function units()
     {
-        return $this->belongsTo(itemCategory::class, 'category_id');
+        return $this->hasOne(ItemUnit::class);
+    }
+
+    public function prices()
+    {
+        return $this->hasMany(ItemPrice::class);
+    }
+
+    public function vendors()
+    {
+        return $this->hasMany(ItemVendor::class);
+    }
+
+    public function accounts()
+    {
+        return $this->hasOne(ItemAccount::class);
+    }
+
+    public function builds()
+    {
+        return $this->hasMany(ItemBuild::class);
+    }
+
+    public function taxes()
+    {
+        return $this->hasMany(ItemTaxes::class);
     }
 }

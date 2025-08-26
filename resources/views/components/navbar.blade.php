@@ -467,7 +467,7 @@
                                     <a href="{{ route('items.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
                                     </a> --}}
-                                    <a href="{{ route('PaymentMethod.index') }}"
+                                    <a href="{{ $options_inventory ? route('options_inventory.edit', $options_inventory->id) : route('options_inventory.create') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Options</a>
                                     <a href="{{ route('price_list_inventory.index') }}"
@@ -476,15 +476,9 @@
                                     <a href="{{ route('lokasi_inventory.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Locations</a>
-                                    <a href="{{ route('customers.index') }}"
+                                    <a href="{{ route('item_category.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Categories</a>
-                                    <a href="{{ route('customers.index') }}"
-                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Names</a>
-                                    <a href="{{ route('customers.index') }}"
-                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Linked Accounts</a>
                                 </div>
                             </div>
 
@@ -609,22 +603,25 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
                                         Components
                                     </a>
-                                    <a href="{{ route('ptkp.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
+                                    <a href="{{ route('absensi.form') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
+                                        Pegawai
+                                        <a href="{{ route('ptkp.index') }}"
+                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
 
-                                    </a>
-                                    <a href="{{ route('tax_rates.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
-                                        (Tax Rates)
-                                    </a>
-                                    <a href="{{ route('employee.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Employee
-                                    </a>
-                                    <a href="{{ route('komposisi_gaji.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Salary Components
-                                    </a>
+                                        </a>
+                                        <a href="{{ route('tax_rates.index') }}"
+                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
+                                            (Tax Rates)
+                                        </a>
+                                        <a href="{{ route('employee.index') }}"
+                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                            Employee
+                                        </a>
+                                        <a href="{{ route('komposisi_gaji.index') }}"
+                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                            Salary Components
+                                        </a>
 
                                 </div>
                             </div>

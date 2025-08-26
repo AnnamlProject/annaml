@@ -17,7 +17,7 @@
             @endif
 
             {{-- Data Pribadi --}}
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-3 gap-4 mb-4">
                 <div>
                     <label>Kode Karyawan</label>
                     <input type="text" name="kode_karyawan" class="w-full border p-2" required>
@@ -60,7 +60,7 @@
                 <label>Alamat</label>
                 <textarea name="alamat" class="w-full border p-2"></textarea>
             </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-3 gap-4 mb-4">
                 <div>
                     <label>Telepon</label>
                     <input type="text" name="telepon" class="w-full border p-2">
@@ -72,7 +72,7 @@
             </div>
 
             {{-- Lain-lain --}}
-            <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="grid grid-cols-3 gap-4 mb-4">
                 <div>
                     <label>Agama</label>
                     <select name="agama" id="agama" class="w-full border p-2">
@@ -160,6 +160,13 @@
                     @enderror
 
                 </div>
+                <div>
+                    <label for="">Tempelkan Kartu RFID</label>
+                    <input type="text" name="rfid_code" class="w-full border p-2">
+                    @error('rfid_code')
+                        <p class="text-red-500 text-sm">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <div class="text-right">
@@ -168,4 +175,29 @@
             </div>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rfidInput = document.getElementById("rfid");
+            let buffer = "";
+
+            // Tangkap inputan keyboard
+            document.addEventListener("keypress", function(e) {
+                const char = String.fromCharCode(e.which || e.keyCode);
+
+                if (e.key === "Enter") {
+                    // Ketika RFID selesai dikirim (biasanya diakhiri ENTER)
+                    if (buffer.length >= 8) {
+                        rfidInput.value = buffer.trim();
+                        buffer = "";
+                    }
+                    e.preventDefault(); // mencegah form terkirim otomatis
+                } else {
+                    buffer += char;
+                }
+            });
+        });
+    </script>
+
 @endsection

@@ -60,7 +60,9 @@ class EmployeeController extends Controller
             'status_pegawai' => 'nullable|string',
             'sertifikat' => 'nullable|string',
             'photo' => 'nullable|mimes:jpg,jpeg,png,pdf',
-            'foto_ktp' => 'nullable|mimes:jpg,jpeg,png,pdf'
+            'foto_ktp' => 'nullable|mimes:jpg,jpeg,png,pdf',
+            'rfid_code' => 'required|string|unique:employees,rfid_code',
+
 
         ]);
 
@@ -79,7 +81,7 @@ class EmployeeController extends Controller
     }
     public function show($id)
     {
-        $employee = Employee::findOrFail($id);
+        $employee = Employee::with(['jabatan', 'ptkp', 'levelKaryawan', 'unitKerja'])->findOrFail($id);
 
         return view('employee.show', compact('employee'));
     }
@@ -95,7 +97,7 @@ class EmployeeController extends Controller
     }
     public function update(Request $request, $id): RedirectResponse
     {
-        //validate form
+        // Validasi form
         $this->validate($request, [
             'kode_karyawan' => 'required|string',
             'nama_karyawan' => 'required|string',
@@ -120,63 +122,42 @@ class EmployeeController extends Controller
             'status_pegawai' => 'nullable|string',
             'sertifikat' => 'nullable|string',
             'photo' => 'nullable|mimes:jpg,jpeg,png,pdf',
-            'foto_ktp' => 'nullable|mimes:jpg,jpeg,png,pdf'
+            'foto_ktp' => 'nullable|mimes:jpg,jpeg,png,pdf',
+            'rfid_code' => 'nullable|string|unique:employees,rfid_code,' . $id,
         ]);
 
-        //get post by ID
         $employee = Employee::findOrFail($id);
 
-        //check if image is uploaded
-        if ($request->hasFile('logo')) {
+        // handle upload photo jika ada
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $photo->storeAs('public/employee', $photo->hashName());
 
-            //upload new image
-            $image = $request->file('image');
-            $image->storeAs('public/employee', $image->hashName());
+            // hapus foto lama
+            if ($employee->photo) {
+                Storage::delete('public/employee/' . $employee->photo);
+            }
 
-            //delete old image
-            Storage::delete('public/employee/' . $employee->logo);
-
-            //update post with new image
-            $employee->update([
-                'kode_karyawan'     => $image->hashName(),
-                'nama_karyawan'     => $request->nama_perusahaan,
-                'nik'   => $request->jalan,
-                'tempat_lahir' => $request->kelurahan,
-                'tanggal_lagir'     => $request->kecamatan,
-                'kota'   => $request->kota,
-                'provinsi' => $request->provinsi,
-                'kode_pos' => $request->kode_pos,
-                'phone_number'     => $request->phone_number,
-                'email'   => $request->email,
-                'bentuk_badan_hukum' => $request->bentuk_badan_hukum,
-                'npwp' => $request->npwp,
-                'klu_code' => $request->klu_code,
-                'klu_description' => $request->klu_description,
-                'tax_office' => $request->tax_office
-            ]);
-        } else {
-
-            //update post without image
-            $employee->update([
-                'nama_perusahaan'     => $request->nama_perusahaan,
-                'jalan'   => $request->jalan,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan'     => $request->kecamatan,
-                'kota'   => $request->kota,
-                'provinsi' => $request->provinsi,
-                'kode_pos' => $request->kode_pos,
-                'phone_number'     => $request->phone_number,
-                'email'   => $request->email,
-                'bentuk_badan_hukum' => $request->bentuk_badan_hukum,
-                'npwp' => $request->npwp,
-                'klu_code' => $request->klu_code,
-                'klu_description' => $request->klu_description,
-                'tax_office' => $request->tax_office
-            ]);
+            $employee->photo = $photo->hashName();
         }
 
-        //redirect to index
-        return redirect()->route('taxpayers_company.show', $employee->id)->with(['success' => 'Data Berhasil Diubah!']);
+        if ($request->hasFile('foto_ktp')) {
+            $ktp = $request->file('foto_ktp');
+            $ktp->storeAs('public/employee', $ktp->hashName());
+
+            // hapus KTP lama
+            if ($employee->foto_ktp) {
+                Storage::delete('public/employee/' . $employee->foto_ktp);
+            }
+
+            $employee->foto_ktp = $ktp->hashName();
+        }
+
+        // update data lain
+        $employee->update($request->except(['photo', 'foto_ktp']));
+
+        return redirect()->route('employee.show', $employee->id)
+            ->with(['success' => 'Data Berhasil Diubah!']);
     }
     public function destroy($id)
     {

@@ -7,7 +7,7 @@
                 <!-- Informasi Klasifikasi Akun -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Employee</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
 
                         <div>
                             <span class="font-medium">Kode Karyawan:</span>
@@ -69,7 +69,7 @@
                         </div>
                         <div class="md:col-span-2">
                             <span class="font-medium">PTKP:</span>
-                            <span class="ml-2">{{ $employee->ptkp->nama }}</span>
+                            <span class="ml-2">{{ $employee->ptkp->nama ?? '-' }}</span>
                         </div>
                         <div class="md:col-span-2">
                             <span class="font-medium">Jabatan:</span>
@@ -113,6 +113,10 @@
                             @else
                                 <span class="ml-2">Tidak ada foto KTP</span>
                             @endif
+                        </div>
+                        <div>
+                            <span class="font-medium">RFID Code:</span>
+                            <span class="ml-2">{{ $employee->rfid_code }}</span>
                         </div>
                     </div>
                 </div>

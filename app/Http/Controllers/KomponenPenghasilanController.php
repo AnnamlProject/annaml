@@ -22,21 +22,28 @@ class KomponenPenghasilanController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_komponen' => 'required',
-            'tipe' => 'required',
-            'kategori' => 'required',
-            'sifat' => 'required',
-            'periode_perhitungan' => 'required',
-            'status_komponen' => 'required',
+        $validated = $request->validate([
+            'nama_komponen' => 'required|string|max:255',
+            'tipe' => 'required|string|max:100',
+            'kategori' => 'required|string|max:100',
+            'sifat' => 'required|string|max:100',
+            'periode_perhitungan' => 'required|string|max:100',
+            'status_komponen' => 'required|string|max:100',
             'level_karyawan_id' => 'required|exists:level_karyawans,id',
-            'cek_komponen' => 'nullable|boolean'
+            'cek_komponen' => 'nullable|boolean',
+            'is_kehadiran' => 'nullable|boolean',
         ]);
 
-        KomponenPenghasilan::create($request->all());
+        // Pastikan boolean terset benar
+        $validated['cek_komponen'] = $request->has('cek_komponen');
+        $validated['is_kehadiran'] = $request->has('is_kehadiran');
 
-        return redirect()->route('komponen_penghasilan.index')->with('success', 'Data berhasil ditambahkan.');
+        KomponenPenghasilan::create($validated);
+
+        return redirect()->route('komponen_penghasilan.index')
+            ->with('success', 'Data berhasil ditambahkan.');
     }
+
     public function show($id)
     {
         $data = KomponenPenghasilan::findOrFail($id);
@@ -61,6 +68,7 @@ class KomponenPenghasilanController extends Controller
             'status_komponen' => 'required',
             'level_karyawan_id' => 'required|exists:level_karyawans,id',
             'cek_komponen' => 'nullable|boolean',
+            'is_kehadiran' => 'nullable|boolean',
         ]);
 
         $data = KomponenPenghasilan::findOrFail($id);
@@ -73,11 +81,14 @@ class KomponenPenghasilanController extends Controller
             'periode_perhitungan' => $request->periode_perhitungan,
             'status_komponen' => $request->status_komponen,
             'level_karyawan_id' => $request->level_karyawan_id,
-            'cek_komponen' => $request->has('cek_komponen') ? 1 : 0
+            'cek_komponen' => $request->has('cek_komponen') ? 1 : 0,
+            'is_kehadiran' => $request->has('is_kehadiran') ? 1 : 0,
         ]);
 
-        return redirect()->route('komponen_penghasilan.index')->with('success', 'Data berhasil diperbarui.');
+        return redirect()->route('komponen_penghasilan.index')
+            ->with('success', 'Data berhasil diperbarui.');
     }
+
     public function destroy($id)
     {
         $komponen_penghasilan = KomponenPenghasilan::findOrFail($id);

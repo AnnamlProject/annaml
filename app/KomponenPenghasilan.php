@@ -16,6 +16,7 @@ class KomponenPenghasilan extends Model
         'status_komponen',
         'level_karyawan_id',
         'cek_komponen',
+        'is_kehadiran'
     ];
 
 

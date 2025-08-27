@@ -24,12 +24,15 @@
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Header & Controls -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                    bg-gradient-to-r from-indigo-500 to-blue-600 
-                    flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
-                        <i class="fas fa-list mr-2 text-blue-400"></i> Employee List
+                        <i class="fas fa-list mr-3 text-white text-xl"></i>
+                        Employee
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- Filter Button -->
@@ -79,10 +82,6 @@
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     #
-                                </th>
-                                <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Kode Karyawan
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -162,6 +161,14 @@
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Unit Kerja
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    RFID Code
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Sertifikat
                                 </th>
                                 <th scope="col"
@@ -181,86 +188,92 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($employees as $Karyawan)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {{ $loop->iteration }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ $Karyawan->kode_karyawan }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->nama_karyawan }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->nik }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->tempat_lahir }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->tanggal_lahir }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->jenis_kelamin }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->golongan_darah }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->tinggi_badan }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->alamat }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->telepon }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->email }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->agama }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             {{ $Karyawan->kewarganegaraan }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->status_pernikahan }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             {{ $Karyawan->ptkp->nama ?? '-' }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             {{ $Karyawan->jabatan->nama_jabatan ?? '-' }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->tanggal_masuk }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->tanggal_keluar }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->status_pegawai }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
                                             {{ $Karyawan->levelKaryawan->nama_level ?? '-' }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $Karyawan->unitKerja->nama_unit ?? '-' }}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $Karyawan->rfid_code ?? '-' }}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->sertifikat }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             @if ($Karyawan->photo)
                                                 <img src="{{ asset('storage/' . $Karyawan->photo) }}" alt="Foto"
@@ -271,7 +284,7 @@
                                         </div>
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
                                             @if ($Karyawan->foto_ktp)
                                                 <img src="{{ asset('storage/' . $Karyawan->foto_ktp) }}" alt="Foto KTP"
@@ -283,7 +296,7 @@
                                     </td>
 
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end space-x-3">
                                             <a href="{{ route('employee.show', $Karyawan->id) }}"
                                                 class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"

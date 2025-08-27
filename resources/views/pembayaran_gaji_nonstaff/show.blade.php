@@ -39,8 +39,22 @@
                                 </tr>
                             @endforeach
                         </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-100 font-semibold">
+                                <td colspan="5" class="px-4 py-2 border text-right">Total Keseluruhan</td>
+                                <td class="px-4 py-2 border text-right">
+                                    {{ number_format(
+                                        $details->sum(function ($detail) {
+                                            return $detail->nilai * $detail->jumlah_hari + $detail->potongan * $detail->jumlah_hari;
+                                        }),
+                                        2,
+                                    ) }}
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
+
 
                 <div class="mt-6">
                     <a href="{{ route('pembayaran_gaji_nonstaff.index') }}" class="text-blue-600 hover:underline">← Kembali

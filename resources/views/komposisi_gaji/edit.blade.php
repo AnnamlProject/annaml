@@ -27,13 +27,14 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full border border-gray-200 table-auto">
+                        <table id="komponenTable" class="min-w-full border border-gray-200 table-auto">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="px-4 py-2 border">Nama Komponen</th>
-                                    <th class="px-4 py-2 border">Nilai</th>
-                                    <th class="px-4 py-2 border">Jumlah Hari</th>
-                                    <th class="px-4 py-2 border">Potongan</th>
+                                    <th class="px-4 py-2 border text-center">Jumlah Hari</th>
+                                    <th class="px-4 py-2 border text-right">Nilai</th>
+                                    <th class="px-4 py-2 border text-right">Potongan</th>
+                                    <th class="px-4 py-2 border text-right">Total Nilai</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -47,20 +48,37 @@
                                                 value="{{ $detail->kode_komponen }}">
                                         </td>
                                         <td class="px-4 py-2 border">
-                                            <input type="number" name="komponen[{{ $index }}][nilai]"
-                                                class="w-full border p-1 rounded" value="{{ $detail->nilai }}">
+                                            <input type="number" name="komponen[{{ $index }}][jumlah_hari]"
+                                                class="w-full border p-1 rounded text-center jumlah_hari"
+                                                value="{{ $detail->jumlah_hari }}">
                                         </td>
                                         <td class="px-4 py-2 border">
-                                            <input type="number" name="komponen[{{ $index }}][jumlah_hari]"
-                                                class="w-full border p-1 rounded" value="{{ $detail->jumlah_hari }}">
+                                            <input type="number" name="komponen[{{ $index }}][nilai]"
+                                                class="w-full border p-1 rounded text-right nilai"
+                                                value="{{ $detail->nilai }}">
                                         </td>
+
                                         <td class="px-4 py-2 border">
                                             <input type="number" name="komponen[{{ $index }}][potongan]"
-                                                class="w-full border p-1 rounded" value="{{ $detail->potongan }}">
+                                                class="w-full border p-1 rounded text-right potongan"
+                                                value="{{ $detail->potongan }}">
+                                        </td>
+                                        <td class="px-4 py-2 border text-right">
+                                            <input type="text"
+                                                class="total border rounded w-full p-1 bg-gray-100 text-right" readonly
+                                                value="0">
+                                            <input type="hidden" name="komponen[{{ $index }}][total]"
+                                                class="total_raw" value="0">
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-200 font-semibold">
+                                    <td colspan="4" class="px-4 py-2 border text-right">Total Keseluruhan</td>
+                                    <td class="px-4 py-2 border text-right" id="grandTotal">0</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                     @if ($komponenBaru->count())
@@ -113,4 +131,40 @@
             </div>
         </div>
     </div>
+    <script>
+        function formatNumber(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function calculateTotals() {
+            let grandTotal = 0;
+            const rows = document.querySelectorAll('#komponenTable tbody tr');
+
+            rows.forEach(row => {
+                const nilai = parseFloat(row.querySelector('.nilai').value) || 0;
+                const jumlahHari = parseFloat(row.querySelector('.jumlah_hari').value) || 0;
+                const potongan = parseFloat(row.querySelector('.potongan').value) || 0;
+
+                const total = (nilai + potongan) * jumlahHari;
+                row.querySelector('.total').value = formatNumber(total);
+                row.querySelector('.total_raw').value = total;
+
+                grandTotal += total;
+            });
+
+            document.getElementById('grandTotal').textContent = formatNumber(grandTotal);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateTotals();
+
+            const inputs = document.querySelectorAll('.nilai, .jumlah_hari, .potongan');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateTotals);
+            });
+        });
+    </script>
 @endsection

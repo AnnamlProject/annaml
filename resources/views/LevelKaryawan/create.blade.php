@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="py-10 max-w-4xl mx-auto px-6">
+    <div class="py-10 max-w-full mx-auto px-6">
         <form action="{{ route('LevelKaryawan.store') }}" method="POST" class="bg-white p-6 rounded-xl shadow-sm space-y-6">
             @csrf
+            <h2 class="text-lg font-bold mb-4">Employee Level Create</h2>
 
             <div>
                 <label class="block font-medium text-gray-700">Nama</label>

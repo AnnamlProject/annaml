@@ -134,6 +134,20 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <div class="form-check">
+                            <input type="checkbox" name="is_kehadiran" value="1" class="form-check-input"
+                                id="isKehadiran">
+                            <label class="form-check-label" for="isKehadiran">
+                                Apakah komponen ini untuk Kehadiran?
+                            </label>
+                            <br>
+                            <small class="form-text text-muted">
+                                Centang jika komponen ini digunakan untuk perhitungan otomatis berdasarkan jumlah hadir
+                                karyawan.
+                            </small>
+                        </div>
+
                     </div>
 
                     <!-- Buttons -->

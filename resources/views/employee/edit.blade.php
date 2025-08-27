@@ -151,7 +151,6 @@
                                 {{ isset($employee) && $employee->level_kepegawaian_id == $level->id ? 'selected' : '' }}>
                                 {{ $level->nama_level }}
                             </option>
-                            <option value="{{ $level->id }}">{{ $level->nama_level }}</option>
                         @endforeach
                     </select>
                 </div>

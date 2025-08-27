@@ -17,10 +17,10 @@
                             <tr>
                                 <th class="px-4 py-2 border">No</th>
                                 <th class="px-4 py-2 border">Nama Komponen</th>
-                                <th class="px-4 py-2 border">Nilai</th>
-                                <th class="px-4 py-2 border">Jumlah Hari</th>
-                                <th class="px-4 py-2 border">Potongan</th>
-                                <th class="px-4 py-2 border">Total Nilai</th>
+                                <th class="px-4 py-2 border text-right">Nilai</th>
+                                <th class="px-4 py-2 border text-center">Jumlah Hari</th>
+                                <th class="px-4 py-2 border text-right">Potongan</th>
+                                <th class="px-4 py-2 border text-right">Total Nilai</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,6 +37,19 @@
                                 </tr>
                             @endforeach
                         </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-100 font-semibold">
+                                <td colspan="5" class="px-4 py-2 border text-right">Total Keseluruhan</td>
+                                <td class="px-4 py-2 border text-right">
+                                    {{ number_format(
+                                        $details->sum(function ($detail) {
+                                            return $detail->nilai * $detail->jumlah_hari + $detail->potongan * $detail->jumlah_hari;
+                                        }),
+                                        2,
+                                    ) }}
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
 

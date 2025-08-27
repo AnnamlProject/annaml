@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Absensi;
 use App\Employee;
 use App\komposisi_gaji;
 use App\komposisi_gaji_detail;
@@ -37,24 +38,39 @@ class PembayaranGajiController extends Controller
             return response()->json([]);
         }
 
+        // Ambil periode dari request
+        $periodeAwal = request()->get('periode_awal');
+        $periodeAkhir = request()->get('periode_akhir');
+
         $details = KomposisiGajiDetail::with('komponen')
             ->where('komposisi_gaji_id', $komposisi->id)
-            ->orderBy('urut') // opsional
+            ->orderBy('urut')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($id, $periodeAwal, $periodeAkhir) {
+                $jumlahHari = $item->jumlah_hari ?? 0;
+
+                // Kalau ini komponen kehadiran → hitung otomatis
+                if ($item->komponen->is_kehadiran && $periodeAwal && $periodeAkhir) {
+                    $jumlahHari = Absensi::where('employee_id', $id)
+                        ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
+                        ->where('status', 'Hadir')
+                        ->count();
+                }
+
                 return [
                     'id' => $item->komponen->id,
                     'nama_komponen' => $item->komponen->nama_komponen,
                     'tipe' => $item->komponen->tipe ?? '-',
                     'periode_perhitungan' => $item->komponen->periode_perhitungan ?? '-',
                     'nilai' => $item->nilai,
-                    'jumlah_hari' => $item->jumlah_hari ?? 0,
+                    'jumlah_hari' => $jumlahHari,
                     'potongan' => $item->potongan,
                 ];
             });
 
         return response()->json($details);
     }
+
     public function store(Request $request)
     {
         $request->validate([

@@ -120,6 +120,21 @@
                             </select>
                         </div>
 
+                        <div class="form-check">
+                            <input type="checkbox" name="is_kehadiran" value="1" class="form-check-input"
+                                id="isKehadiran" {{ old('is_kehadiran', $data->is_kehadiran) ? 'checked' : '' }}>
+
+                            <label class="form-check-label" for="isKehadiran">
+                                Apakah komponen ini untuk Kehadiran?
+                            </label>
+                            <br>
+                            <small class="form-text text-muted">
+                                Centang jika komponen ini digunakan untuk perhitungan otomatis berdasarkan jumlah hadir
+                                karyawan.
+                            </small>
+                        </div>
+
+
                     </div>
 
                     <!-- Buttons -->

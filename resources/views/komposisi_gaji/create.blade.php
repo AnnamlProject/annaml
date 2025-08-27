@@ -108,8 +108,8 @@
                                             <th class="px-4 py-2 border">Nama Komponen</th>
                                             <th class="px-4 py-2 border">Tipe</th>
                                             <th class="px-4 py-2 border">Periode</th>
-                                            <th class="px-4 py-2 border">Nilai</th>
                                             <th class="px-4 py-2 border">Jumlah Hari</th>
+                                            <th class="px-4 py-2 border">Nilai</th>
                                             <th class="px-4 py-2 border">Potongan</th>
                                             <th class="px-4 py-2 border">Total Nilai</th>
                                         </tr>
@@ -124,11 +124,11 @@
                                         <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
                                         <td class="px-4 py-2 border">${item.tipe}</td>
                                         <td class="px-4 py-2 border">${item.periode_perhitungan}</td>
-                                        <td class="px-4 py-2 border">
-                                            <input type="text" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1" data-index="${index}">
+                                          <td class="px-4 py-2 border">
+                                            <input type="number" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1" data-index="${index}">
                                         </td>
                                         <td class="px-4 py-2 border">
-                                            <input type="number" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1" data-index="${index}">
+                                            <input type="text" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1" data-index="${index}">
                                         </td>
                                         <td class="px-4 py-2 border">
                                             <input type="text" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1" data-index="${index}">

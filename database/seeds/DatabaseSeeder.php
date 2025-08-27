@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PriceListInventorySeeder::class);
         $this->call(LocationInventorySeeder::class);
         $this->call(JamKerjaSeeder::class);
+        $this->call(AbsensiSeeder::class);
         // cekcek
     }
 }

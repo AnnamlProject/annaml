@@ -164,20 +164,24 @@
                     <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th>Price List</th>
-                                <th>Price Per Selling Unit</th>
+                                <th class="px-4 py-2 border text-center">Price List</th>
+                                <th class="px-4 py-2 border text-right">Price Per Selling Unit</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <input type="text" name="price_list_name"
-                                        class="form-input w-full border rounded px-2 py-1 text-sm">
-                                </td>
-                                <td>
-                                    <input type="text" name="price" class="w-full border rounded px-2 py-1 text-sm">
-                                </td>
-                            </tr>
+                            @foreach ($priceListInventory as $item)
+                                <tr>
+                                    <td class="px-4 py-2 border text-center">
+                                        <input type="text" name="price_list_name"
+                                            class="form-input w-full border rounded px-2 py-1 text-sm"
+                                            value="{{ $item->description }}">
+                                    </td>
+                                    <td class="px-4 py-2 border text-right">
+                                        <input type="text" name="price"
+                                            class="form-input w-full border rounded px-2 py-1 text-sm">
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -378,15 +382,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <input type="text" name="price_list_name"
-                                        class="form-input w-full border rounded px-2 py-1 text-sm">
-                                </td>
-                                <td>
-                                    <input type="text" name="price" class="w-full border rounded px-2 py-1 text-sm">
-                                </td>
-                            </tr>
+                            @foreach ($priceListInventory as $item)
+                                <tr>
+                                    <td class="px-4 py-2 border text-center">
+                                        <input type="text" name="price_list_name"
+                                            class="form-input w-full border rounded px-2 py-1 text-sm"
+                                            value="{{ $item->description }}">
+                                    </td>
+                                    <td class="px-4 py-2 border text-right">
+                                        <input type="text" name="price"
+                                            class="form-input w-full border rounded px-2 py-1 text-sm">
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

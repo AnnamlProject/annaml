@@ -4,6 +4,7 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6 space-y-6">
+                <h2 class="font-bold text-lg mb-4">Salary Calculation Staff</h2>
                 <form method="POST" enctype="multipart/form-data"
                     action="{{ isset($data) ? route('pembayaran_gaji_nonstaff.update', $data->id) : route('pembayaran_gaji_nonstaff.store') }}">
                     @csrf
@@ -136,7 +137,8 @@
             if (!karyawanId || !periodeAwal || !periodeAkhir) return;
 
             fetch(
-                    `/get-pembayaran-gaji-by-karyawan/${karyawanId}?periode_awal=${periodeAwal}&periode_akhir=${periodeAkhir}`)
+                    `/get-pembayaran-gaji-by-karyawan/${karyawanId}?periode_awal=${periodeAwal}&periode_akhir=${periodeAkhir}`
+                )
                 .then(response => response.json())
                 .then(data => {
                     if (!Array.isArray(data) || data.length === 0) {
@@ -152,10 +154,10 @@
                                 <th class="px-4 py-2 border">Nama Komponen</th>
                                 <th class="px-4 py-2 border">Tipe</th>
                                 <th class="px-4 py-2 border">Periode</th>
-                                <th class="px-4 py-2 border">Nilai</th>
-                                <th class="px-4 py-2 border">Jumlah Hari</th>
-                                <th class="px-4 py-2 border">Potongan</th>
-                                <th class="px-4 py-2 border">Total Nilai</th>
+                                <th class="px-4 py-2 border text-right">Nilai</th>
+                                <th class="px-4 py-2 border text-center">Jumlah Hari</th>
+                                <th class="px-4 py-2 border text-right">Potongan</th>
+                                <th class="px-4 py-2 border text-right">Total Nilai</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -171,17 +173,17 @@
                             <td class="px-4 py-2 border">${item.tipe || '-'}</td>
                             <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
                             <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1" data-index="${index}" value="${item.nilai || 0}">
+                                <input type="number" step="any" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1 text-right" data-index="${index}" value="${item.nilai || 0}">
                             </td>
                             <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1" data-index="${index}" value="${item.jumlah_hari || 0}">
+                                <input type="number" step="any" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1 text-center" data-index="${index}" value="${item.jumlah_hari || 0}">
                             </td>
                             <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1" data-index="${index}" value="${item.potongan || 0}">
+                                <input type="number" step="any" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1 text-right" data-index="${index}" value="${item.potongan || 0}">
                             </td>
                             <td class="px-4 py-2 border">
                                 <!-- input display, readonly -->
-                                <input type="text" class="total-display border rounded w-full p-1 bg-gray-100" data-index="${index}" value="0" readonly>
+                                <input type="text" class="total-display border rounded w-full p-1 bg-gray-100 text-right" data-index="${index}" value="0" readonly>
                                 <!-- input hidden untuk server -->
                                 <input type="hidden" name="komponen[${index}][total]" class="total-hidden" data-index="${index}" value="0">
                             </td>

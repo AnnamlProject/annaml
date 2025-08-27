@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
             <h2 class="text-2xl font-semibold text-gray-800 mb-2">Detail Journal Entry</h2>
@@ -29,8 +29,8 @@
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="border px-4 py-2">Kode Akun</th>
-                            <th class="border px-4 py-2">Debit</th>
-                            <th class="border px-4 py-2">Kredit</th>
+                            <th class="border px-4 py-2 text-right">Debit</th>
+                            <th class="border px-4 py-2 text-right">Kredit</th>
                             <th class="border px-4 py-2">Comment</th>
                         </tr>
                     </thead>
@@ -38,7 +38,17 @@
                         @foreach ($journal->details as $detail)
                             <tr>
                                 <td class="border px-4 py-2">
-                                    {{ $detail->kode_akun }} - {{ $detail->chartOfAccount->nama_akun ?? '-' }}
+                                    @if ($detail->departemen_akun_id)
+                                        {{-- Jika ada departemen --}}
+                                        {{ $detail->kode_akun }} -
+                                        {{ $detail->departemenAkun->kode ?? '-' }} -
+                                        {{ $detail->chartOfAccount->nama_akun ?? '-' }} -
+                                        {{ $detail->departemenAkun->deskripsi ?? '-' }}
+                                    @else
+                                        {{-- Jika tidak ada departemen --}}
+                                        {{ $detail->kode_akun }} -
+                                        {{ $detail->chartOfAccount->nama_akun ?? '-' }}
+                                    @endif
                                 </td>
                                 <td class="border px-4 py-2 text-right">
                                     {{ number_format($detail->debits, 2, ',', '.') }}

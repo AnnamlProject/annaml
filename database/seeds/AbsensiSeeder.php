@@ -25,5 +25,24 @@ class AbsensiSeeder extends Seeder
             'jam' => '07:50:00',
             'status' => 'Hadir',
         ]);
+        Absensi::create([
+            'employee_id' => 4,
+            'tanggal' => now()->toDateString(), // tanggal hari ini
+            'jam' => '07:45:00', // sebelum jam 08
+            'status' => 'Hadir',
+        ]);
+
+        Absensi::create([
+            'employee_id' => 4,
+            'tanggal' => now()->subDay()->toDateString(), // kemarin
+            'jam' => '07:50:00',
+            'status' => 'Hadir',
+        ]);
+        Absensi::create([
+            'employee_id' => 4,
+            'tanggal' => now()->subDay()->toDateString(), // kemarin
+            'jam' => '07:50:00',
+            'status' => 'Hadir',
+        ]);
     }
 }

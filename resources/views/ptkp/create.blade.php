@@ -2,6 +2,8 @@
 
 @section('content')
     <div class="py-10 max-w-full mx-auto px-6">
+        <h2 class="text-lg font-bold mb-4">PTKP Create</h2>
+
         <form action="{{ route('ptkp.store') }}" method="POST" class="bg-white p-6 rounded-xl shadow-sm space-y-6">
             @csrf
 

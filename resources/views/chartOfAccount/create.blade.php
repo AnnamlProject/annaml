@@ -5,6 +5,7 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="mb-6 font-bold text-lg">Account Create</h2>
                 <form method="POST"
                     action="{{ isset($chartOfAccounts) ? route('chartOfAccount.update', $chartOfAccounts->id) : route('chartOfAccount.store') }}">
                     @csrf

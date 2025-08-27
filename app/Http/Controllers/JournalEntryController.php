@@ -221,7 +221,7 @@ class JournalEntryController extends Controller
 
     public function show($id)
     {
-        $journal = JournalEntry::with(['details.chartOfAccount'])->findOrFail($id);
+        $journal = JournalEntry::with(['details.chartOfAccount', 'details.departemenAkun'])->findOrFail($id);
         return view('journal_entry.show', compact('journal'));
     }
     public function destroy($id)

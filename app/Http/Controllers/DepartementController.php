@@ -127,4 +127,11 @@ class DepartementController extends Controller
 
         return redirect()->route('departemen.assign')->with('success', 'Akun berhasil di-assign ke departemen.');
     }
+    public function destroyAssign($id)
+    {
+        $assign = DepartemenAkun::findOrFail($id);
+        $assign->delete();
+
+        return redirect()->back()->with('success', 'Akun berhasil dihapus dari departemen.');
+    }
 }

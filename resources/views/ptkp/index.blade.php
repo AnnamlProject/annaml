@@ -6,10 +6,12 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                bg-gradient-to-r from-indigo-500 to-blue-600 
-                flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         PTKP List
@@ -32,26 +34,26 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 #</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 PTKP </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Golongan TER</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nilai PTKP Setahun</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($ptkp as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4">{{ $item->nama }}</td>
-                                <td class="px-6 py-4">{{ $item->kategori }}</td>
-                                <td class="px-6 py-4" style="text-align: right;">{{ $item->nilai }}</td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-2 py-1 text-sm text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->nama }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->kategori }}</td>
+                                <td class="px-2 py-1 text-right">{{ number_format($item->nilai) }}</td>
+                                <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
                                         <a href="{{ route('ptkp.show', $item->id) }}"
                                             class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"

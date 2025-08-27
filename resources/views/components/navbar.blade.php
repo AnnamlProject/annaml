@@ -212,10 +212,6 @@
                                     <a href="{{ route('sales_option.create') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
                                     </a>
-                                    <a href="{{ $taxpayers ? route('taxpayers_company.show', $taxpayers->id) : route('taxpayers_company.create') }}"
-                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Price List
-                                    </a>
                                     <a href="{{ route('sales_discount.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Sales Discount
@@ -249,7 +245,7 @@
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
                                     </a> --}}
                                     <a href="{{ route('PaymentMethod.index') }}"
-                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payement
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payment
                                         Method</a>
                                     <a href="{{ route('customers.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">

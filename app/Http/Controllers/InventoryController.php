@@ -6,6 +6,7 @@ use App\ChartOfAccount;
 use App\Inventory;
 use App\Item;
 use App\LocationInventory;
+use App\PriceListInventory;
 use App\Taxes;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,7 @@ class InventoryController extends Controller
         $items = Item::all();
         $taxes = Taxes::all();
         $lokasiInventory = LocationInventory::all();
-        return view('inventory.create', compact('accounts', 'items', 'taxes', 'lokasiInventory'));
+        $priceListInventory = PriceListInventory::all();
+        return view('inventory.create', compact('accounts', 'items', 'taxes', 'lokasiInventory', 'priceListInventory'));
     }
 }

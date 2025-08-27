@@ -4,6 +4,8 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-bold mb-4">PTKP Edit</h2>
+
                 <form action="{{ route('ptkp.update', $ptkp->id) }}" method="POST">
                     @csrf
                     @method('PUT')

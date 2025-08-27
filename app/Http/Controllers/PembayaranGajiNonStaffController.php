@@ -13,9 +13,15 @@ class PembayaranGajiNonStaffController extends Controller
     //
     public function index()
     {
-        $data = PembayaranGaji::latest()->paginate(10);
+        $data = PembayaranGaji::whereHas('employee.levelkaryawan', function ($query) {
+            $query->where('nama_level', '<>', 'STAFF'); // selain STAFF
+        })
+            ->latest()
+            ->paginate(10);
+
         return view('pembayaran_gaji_nonstaff.index', compact('data'));
     }
+
     public function create()
     {
         $karyawan = Employee::whereHas('levelKaryawan', function ($query) {

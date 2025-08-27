@@ -5,13 +5,15 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                    bg-gradient-to-r from-indigo-500 to-blue-600 
-                     flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
-                        Salary Calculations
+                        Salary Calculations Staff
                     </h3>
                     <a href="{{ route('pembayaran_gaji.create') }}"
                         class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
@@ -24,17 +26,18 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Nama
                                 Karyawan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nik
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Nik
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Periode Awal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Periode Akhir</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tanggal Pembayaran</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi
                             </th>
@@ -43,13 +46,13 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4">{{ $item->employee->nama_karyawan }}</td>
-                                <td class="px-6 py-4">{{ $item->employee->nik }}</td>
-                                <td class="px-6 py-4">{{ $item->periode_awal }}</td>
-                                <td class="px-6 py-4">{{ $item->periode_akhir }}</td>
-                                <td class="px-6 py-4">{{ $item->tanggal_pembayaran }}</td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-2 py-1 text-sm text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->employee->nama_karyawan }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->employee->nik }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->periode_awal }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->periode_akhir }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->tanggal_pembayaran }}</td>
+                                <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
                                         <a href="{{ route('pembayaran_gaji.show', $item->id) }}"
                                             class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"

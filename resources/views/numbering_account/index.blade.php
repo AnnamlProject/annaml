@@ -7,10 +7,12 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                bg-gradient-to-r from-indigo-500 to-blue-600 
-                flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Numbering Account List
@@ -26,31 +28,31 @@
                     <table class="min-w-max w-full divide-y divide-gray-200 text-base">
                         <thead class="bg-gray-100 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">#</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nama Grup</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Jumlah Digit</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nomor Akun Awal</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nomor Akun Akhir</th>
-                                <th class="px-6 py-4 text-right font-medium text-gray-600 uppercase">Aksi</th>
+                                <th class="px-4 py-2 text-center text-gray-600 uppercase">#</th>
+                                <th class="px-4 py-2 text-center text-gray-600 uppercase">Nama Grup</th>
+                                <th class="px-4 py-2 text-center text-gray-600 uppercase">Jumlah Digit</th>
+                                <th class="px-4 py-2 text-center text-gray-600 uppercase">Nomor Akun Awal</th>
+                                <th class="px-4 py-2 text-center text-gray-600 uppercase">Nomor Akun Akhir</th>
+                                <th class="px-4 py-2 text-right text-gray-600 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($numberingAccount as $numberingAccounts)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 text-gray-700">{{ $loop->iteration }}</td>
-                                    <td class="px-6 py-4 font-semibold text-gray-900">
+                                    <td class="px-2 py-1 text-center text-gray-700">{{ $loop->iteration }}</td>
+                                    <td class="px-2 py-1 text-center font-semibold text-gray-900">
                                         {{ $numberingAccounts->nama_grup }}
                                     </td>
-                                    <td class="px-6 py-4 text-gray-800">
+                                    <td class="px-2 py-1 text-center text-gray-800">
                                         {{ $numberingAccounts->jumlah_digit }}
                                     </td>
-                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                    <td class="px-2 py-1 text-center font-medium text-gray-900">
                                         {{ $numberingAccounts->nomor_akun_awal }}
                                     </td>
-                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                    <td class="px-2 py-1 text-center font-medium text-gray-900">
                                         {{ $numberingAccounts->nomor_akun_akhir }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">
                                             <a href="{{ route('numbering_account.show', $numberingAccounts->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-50 transition-colors"

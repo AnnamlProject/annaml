@@ -36,29 +36,29 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 #</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 User</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Activity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 IP Address</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 User Agent</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Time</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4">{{ $item->user->name }}</td>
-                                <td class="px-6 py-4">{{ $item->activity ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->ip_address ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->user_agent ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->created_at ?? '-' }}</td>
+                                <td class="px-2 py-1 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->user->name }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->activity ?? '-' }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->ip_address ?? '-' }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->user_agent ?? '-' }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->created_at ?? '-' }}</td>
 
                             </tr>
                         @empty

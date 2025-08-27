@@ -3,6 +3,8 @@
     <div class="py-8">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="font-bold text-lg mb-2">Journal Entry Edit</h2>
+
                 <form id="journal-entry-form" action="{{ route('journal_entry.update', $journalEntry->id) }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -57,10 +59,18 @@
                                     <tr class="item-row" data-index="{{ $i }}">
                                         <td class="border px-2 py-1">
                                             <select class="item-select w-full border rounded"
+                                                name="details[{{ $i }}][kode_akun]"
                                                 data-index="{{ $i }}">
                                                 <option value="{{ $item->kode_akun }}" selected>
-                                                    {{ $item->kode_akun }} -
-                                                    {{ $item->chartOfAccount->nama_akun ?? 'Akun lama' }}
+                                                    @if ($item->departemen_akun_id)
+                                                        {{ $item->kode_akun }} -
+                                                        {{ $item->departemenAkun->kode ?? '-' }} -
+                                                        {{ $item->chartOfAccount->nama_akun ?? 'Akun lama' }} -
+                                                        {{ $item->departemenAkun->deskripsi ?? '-' }}
+                                                    @else
+                                                        {{ $item->kode_akun }} -
+                                                        {{ $item->chartOfAccount->nama_akun ?? 'Akun lama' }}
+                                                    @endif
                                                 </option>
                                             </select>
                                         </td>

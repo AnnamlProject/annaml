@@ -4,6 +4,8 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="font-bold text-lg mb-4">Salary Calculation Non Staff</h2>
+
                 <form method="POST" action="{{ route('pembayaran_gaji_nonstaff.update', $pembayaran->id) }}">
                     @csrf
                     @method('PUT')
@@ -22,23 +24,23 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Karyawan</label>
                             <input type="text" value="{{ $pembayaran->employee->nama_karyawan }}" disabled
-                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <input type="hidden" name="kode_karyawan" value="{{ $pembayaran->kode_karyawan }}">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pembayaran</label>
                             <input type="date" name="tanggal_pembayaran" value="{{ $pembayaran->tanggal_pembayaran }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Periode Awal</label>
                             <input type="date" name="periode_awal" value="{{ $pembayaran->periode_awal }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Periode Akhir</label>
                             <input type="date" name="periode_akhir" value="{{ $pembayaran->periode_akhir }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
@@ -48,10 +50,10 @@
                             <thead class="bg-gray-100">
                                 <tr class="text-left">
                                     <th class="px-4 py-2 border">Nama Komponen</th>
-                                    <th class="px-4 py-2 border">Jumlah Hari</th>
-                                    <th class="px-4 py-2 border">Nilai</th>
-                                    <th class="px-4 py-2 border">Potongan</th>
-                                    <th class="px-4 py-2 border">Total Nilai</th>
+                                    <th class="px-4 py-2 border text-center">Jumlah Hari</th>
+                                    <th class="px-4 py-2 border text-right">Nilai</th>
+                                    <th class="px-4 py-2 border text-right">Potongan</th>
+                                    <th class="px-4 py-2 border text-right">Total Nilai</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -66,23 +68,26 @@
                                         </td>
                                         <td class="px-4 py-2 border">
                                             <input type="number" name="komponen[{{ $index }}][jumlah_hari]"
-                                                class="w-full border rounded p-1 jumlah_hari"
+                                                class="w-full border rounded p-1 text-center jumlah_hari"
                                                 value="{{ $detail->jumlah_hari }}">
                                         </td>
                                         <td class="px-4 py-2 border">
                                             <input type="number" step="any"
                                                 name="komponen[{{ $index }}][nilai]"
-                                                class="w-full border rounded p-1 nilai" value="{{ $detail->nilai }}">
+                                                class="w-full border rounded p-1 text-right nilai"
+                                                value="{{ $detail->nilai }}">
                                         </td>
 
                                         <td class="px-4 py-2 border">
                                             <input type="number" step="any"
                                                 name="komponen[{{ $index }}][potongan]"
-                                                class="w-full border rounded p-1 potongan" value="{{ $detail->potongan }}">
+                                                class="w-full border rounded p-1 text-right potongan"
+                                                value="{{ $detail->potongan }}">
                                         </td>
                                         <td class="px-4 py-2 border text-right">
-                                            <input type="text" class="total border rounded w-full p-1 bg-gray-100"
-                                                readonly value="0">
+                                            <input type="text"
+                                                class="total border rounded w-full p-1 bg-gray-100 text-right" readonly
+                                                value="0">
                                             <input type="hidden" name="komponen[{{ $index }}][total]"
                                                 class="total_raw" value="0">
                                         </td>

@@ -3,6 +3,8 @@
 @section('content')
 
     <div class="max-w-full mx-auto bg-white shadow-md rounded-xl p-8 mt-6">
+        <h2 class="text-lg font-bold mb-4">Tax Rates Create</h2>
+
         <form method="POST"
             action="{{ isset($tarif_ter) ? route('tax_rates.update', $tarif_ter->id) : route('tax_rates.store') }}">
             @csrf

@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\chartOfAccount as AppChartOfAccount;
+use App\Departement;
 use App\JournalEntry;
 use App\JournalEntryDetail;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -87,20 +88,27 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                 // Simpan detailnya
                 foreach ($groupRows as $row) {
+                    // cari departemen berdasarkan deskripsi
+                    $departemen = Departement::where('deskripsi', $row['departemen'])->first();
+
+                    $departemenId = $departemen ? $departemen->id : null;
+
                     Log::info('Menyimpan JournalEntryDetail:', [
-                        'journal_entry_id' => $journalEntry->id,
-                        'kode_akun' => $row['kode_akun'],
-                        'debits' => $row['debit'] ?? 0,
-                        'credits' => $row['kredit'] ?? 0,
-                        'comment' => $row['comment_line'] ?? null,
+                        'journal_entry_id'   => $journalEntry->id,
+                        'departemen_akun_id' => $departemenId,
+                        'kode_akun'          => $row['kode_akun'],
+                        'debits'             => $row['debit'] ?? 0,
+                        'credits'            => $row['kredit'] ?? 0,
+                        'comment'            => $row['comment_line'] ?? null,
                     ]);
 
                     JournalEntryDetail::create([
-                        'journal_entry_id' => $journalEntry->id,
-                        'kode_akun'        => $row['kode_akun'],
-                        'debits'           => $row['debit'] ?? 0,
-                        'credits'          => $row['kredit'] ?? 0,
-                        'comment'          => $row['comment_line'] ?? null,
+                        'journal_entry_id'   => $journalEntry->id,
+                        'departemen_akun_id' => $departemenId,
+                        'kode_akun'          => $row['kode_akun'],
+                        'debits'             => $row['debit'] ?? 0,
+                        'credits'            => $row['kredit'] ?? 0,
+                        'comment'            => $row['comment_line'] ?? null,
                     ]);
                 }
             }

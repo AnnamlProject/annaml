@@ -5,10 +5,12 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                bg-gradient-to-r from-indigo-500 to-blue-600 
-                flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Masa Manfaat
@@ -24,17 +26,17 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 #</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Jenis</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Kelompok Harta</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Golongan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Dalam Tahun</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tarif Penyusutan</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
@@ -43,13 +45,13 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4">{{ $item->jenis }}</td>
-                                <td class="px-6 py-4">{{ $item->kelompok_harta }}</td>
-                                <td class="px-6 py-4">{{ $item->nama_golongan ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->masa_tahun }}</td>
-                                <td class="px-6 py-4">{{ $item->tarif_penyusutan ?? '-' }}</td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-2 py-1 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->jenis }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->kelompok_harta }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->nama_golongan ?? '-' }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->masa_tahun }}</td>
+                                <td class="px-2 py-1 text-center">{{ $item->tarif_penyusutan ?? '-' }}</td>
+                                <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
                                         <a href="{{ route('masa_manfaat.show', $item->id) }}"
                                             class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"

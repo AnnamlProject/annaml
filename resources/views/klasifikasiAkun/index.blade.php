@@ -11,12 +11,15 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                    bg-gradient-to-r from-indigo-500 to-blue-600 
-                    flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
-                        <i class="fas fa-list mr-2 text-blue-400"></i> Klasifikasi Akun List
+                        <i class="fas fa-list mr-3 text-white text-xl"></i>
+                        Classification Account
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- Filter Button -->
@@ -64,38 +67,38 @@
                     <table class="min-w-full divide-y divide-gray-200 text-base">
                         <thead class="bg-gray-100 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     No</th>
 
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Grup</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Nama</th>
                                 {{-- <th
-                                    class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                    class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Parent</th> --}}
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Aktif</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Deskripsi</th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">
+                                <th class="px-6 py-4 text-center font-medium text-gray-600 uppercase">
                                     Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($klasifikasis as $akun)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 text-gray-700">{{ $loop->iteration }}</td>
-                                    <td class="px-6 py-4">{{ $akun->numberingAccount->nama_grup ?? '-' }}</td>
-                                    <td class="px-6 py-4">{{ $akun->nama_klasifikasi }}</td>
+                                    <td class="px-2 py-1 text-center text-gray-700">{{ $loop->iteration }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $akun->numberingAccount->nama_grup ?? '-' }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $akun->nama_klasifikasi }}</td>
                                     {{-- <td class="px-3 py-1">{{ $akun->parent->nama_klasifikasi ?? '-' }}</td> --}}
-                                    <td class="px-6 py-4">
+                                    <td class="px-2 py-1 text-center">
                                         <span class="{{ $akun->aktif ? 'text-green-600' : 'text-red-600' }}">
                                             {{ $akun->aktif ? 'Aktif' : 'Nonaktif' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4">{{ $akun->deskripsi }}</td>
-                                    <td class="px-6 py-4 text-right">
+                                    <td class="px-2 py-1 text-center">{{ $akun->deskripsi }}</td>
+                                    <td class="px-2 py-1 text-center">
                                         <div class="flex justify-end space-x-3">
                                             <a href="{{ route('klasifikasiAkun.show', $akun->id) }}"
                                                 class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"

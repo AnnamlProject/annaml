@@ -57,15 +57,29 @@
                             </div>
 
                             {{-- Akun yang Sudah Diassign --}}
+                            {{-- Akun yang Sudah Diassign --}}
                             <div>
                                 <h3 class="font-semibold mb-2">Akun Department</h3>
                                 <ul class="border p-2 rounded h-64 overflow-y-auto">
                                     @forelse ($departemenAccounts as $entry)
-                                        <li>
-                                            {{ $entry->chartOfAccount->kode_akun ?? '-' }}
-                                            {{ $entry->chartOfAccount->nama_akun ?? '-' }}
-                                            - <span
-                                                class="text-sm text-gray-500">{{ $entry->departemen->deskripsi ?? '-' }}</span>
+                                        <li class="flex justify-between items-center">
+                                            <div>
+                                                {{ $entry->chartOfAccount->kode_akun ?? '-' }}
+                                                {{ $entry->chartOfAccount->nama_akun ?? '-' }}
+                                                - <span class="text-sm text-gray-500">
+                                                    {{ $entry->departemen->deskripsi ?? '-' }}
+                                                </span>
+                                            </div>
+
+                                            {{-- Tombol Hapus --}}
+                                            <form method="POST"
+                                                action="{{ route('departemen.assign.destroy', $entry->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 text-sm hover:underline">
+                                                    Hapus
+                                                </button>
+                                            </form>
                                         </li>
                                     @empty
                                         <li class="text-gray-400">Belum ada akun ditempatkan ke departemen ini</li>
@@ -80,8 +94,6 @@
                         <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                             Assign
                         </button>
-
-
                     </form>
                 @endif
             </div>

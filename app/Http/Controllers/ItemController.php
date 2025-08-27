@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\chartOfAccount;
 use App\Item;
 use App\itemCategory;
+use App\PriceListInventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,8 +34,9 @@ class ItemController extends Controller
     public function create()
     {
         $accounts = chartOfAccount::all();
+        $priceListInventory = PriceListInventory::all();
         $categories = itemCategory::where('status', 1)->orderBy('nama_kategori')->get();
-        return view('items.create', compact('accounts', 'categories'));
+        return view('items.create', compact('accounts', 'categories', 'priceListInventory'));
     }
 
     public function store(Request $request)

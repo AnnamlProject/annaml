@@ -5,6 +5,7 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="text-lg font-bold mb-4">Salary Components Create</h2>
                 <form method="POST" enctype="multipart/form-data"
                     action="{{ isset($data) ? route('komponen_penghasilan.update', $data->id) : route('komposisi_gaji.store') }}">
 

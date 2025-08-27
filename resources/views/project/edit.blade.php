@@ -3,6 +3,8 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="font-bold text-lg mb-4">Project Edit</h2>
+
                 <form action="{{ route('project.update', $project->id) }}" method="POST">
                     @csrf
                     @method('PUT')

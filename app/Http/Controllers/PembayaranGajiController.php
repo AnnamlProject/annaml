@@ -20,7 +20,12 @@ class PembayaranGajiController extends Controller
     //
     public function index()
     {
-        $data = PembayaranGaji::latest()->paginate(10);
+        $data = PembayaranGaji::whereHas('employee.levelkaryawan', function ($query) {
+            $query->where('nama_level', 'STAFF');
+        })
+            ->latest()
+            ->paginate(10);
+
         return view('pembayaran_gaji.index', compact('data'));
     }
     public function create()

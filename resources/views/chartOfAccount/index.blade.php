@@ -6,12 +6,15 @@
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Header & Controls -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                    bg-gradient-to-r from-indigo-500 to-blue-600 
-                    flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
-                        <i class="fas fa-list mr-2 text-blue-400"></i> Account List
+                        <i class="fas fa-list mr-3 text-white text-xl"></i>
+                        Account List
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- Filter Button -->
@@ -79,17 +82,17 @@
                     <table class="min-w-full divide-y">
                         <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Kode Akun
+                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Kode Akun
                                 </th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Nama Akun
+                                <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase">Nama Akun
                                 </th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Tipe Akun
+                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Tipe Akun
                                 </th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Level Akun
+                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Level Akun
                                 </th>
-                                <th class="px-6 py-4 text-left font-medium text-gray-600 uppercase">Klasifikasi
+                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Klasifikasi
                                     Akun</th>
-                                <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -119,8 +122,9 @@
                                     $icon = $iconMap[$lowerLevel] ?? '📄';
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $chartOfAccount->kode_akun }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->kode_akun }}
+                                    </td>
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">
                                         <div class="flex items-center" style="margin-left: {{ $margin }}px">
                                             {!! $icon !!}
                                             &nbsp;
@@ -135,12 +139,14 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $chartOfAccount->tipe_akun }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $chartOfAccount->level_akun }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->tipe_akun }}
+                                    </td>
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->level_akun }}
+                                    </td>
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">
                                         {{ $chartOfAccount->klasifikasiAkun->nama_klasifikasi ?? '-' }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <td class="px-2 py-1 text-center whitespace-nowrap text-right">
                                         <div class="flex justify-end space-x-2">
                                             <a href="{{ route('chartOfAccount.show', $chartOfAccount->id) }}"
                                                 class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50">

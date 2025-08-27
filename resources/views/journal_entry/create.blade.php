@@ -4,6 +4,7 @@
     <div class="py-8">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-md p-6">
+                <h2 class="font-bold text-lg mb-2">Journal Entry Create</h2>
                 <form id="journal-entry-form" action="{{ route('journal_entry.store') }}" method="POST">
                     @csrf
 

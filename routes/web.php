@@ -99,6 +99,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/departemen/assign-account', [DepartementController::class, 'assign'])->name('departemen.assign');
     Route::post('/departemen/assign-account', [DepartementController::class, 'storeAssign'])->name('departemen.assign.store');
+    Route::delete('/departemen/assign/{id}', [DepartementController::class, 'destroyAssign'])->name('departemen.assign.destroy');
+
     Route::resource('/departemen', 'DepartementController');
     // export dan import Departemen
     Route::get('/export/Departemen', [ExportController::class, 'exportDepartemen'])->name('export.Departemen');

@@ -6,7 +6,6 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <!-- Sticky Card Header -->
                 @php
                     $themeColor = \App\Setting::get('theme_color', '#4F46E5');
                 @endphp

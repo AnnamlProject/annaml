@@ -60,4 +60,8 @@ class chartOfAccount extends Model
     {
         return $this->hasMany(JournalEntryDetail::class, 'kode_akun');
     }
+    public function paymentMethodDetails()
+    {
+        return $this->hasMany(PaymentMethodDetail::class, 'coa_id');
+    }
 }

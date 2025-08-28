@@ -12,4 +12,8 @@ class PaymentMethod extends Model
         'nama_jenis',
         'status'
     ];
+    public function details()
+    {
+        return $this->hasMany(PaymentMethodDetail::class, 'payment_method_id');
+    }
 }

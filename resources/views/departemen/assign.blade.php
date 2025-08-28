@@ -72,14 +72,10 @@
                                             </div>
 
                                             {{-- Tombol Hapus --}}
-                                            <form method="POST"
-                                                action="{{ route('departemen.assign.destroy', $entry->id) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 text-sm hover:underline">
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                            <button type="button" onclick="deleteAssign({{ $entry->id }})"
+                                                class="text-red-600 text-sm hover:underline">
+                                                Hapus
+                                            </button>
                                         </li>
                                     @empty
                                         <li class="text-gray-400">Belum ada akun ditempatkan ke departemen ini</li>
@@ -108,6 +104,20 @@
 
         function deselectAll() {
             document.querySelectorAll('#checkbox-container input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+    </script>
+    <script>
+        async function deleteAssign(id) {
+            if (!confirm('Hapus akun ini dari departemen?')) return;
+            const res = await fetch("{{ url('/departemen/assign') }}/" + id, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-HTTP-Method-Override': 'DELETE',
+                }
+            });
+            if (res.ok) location.reload();
+            else alert('Gagal menghapus.');
         }
     </script>
 @endsection

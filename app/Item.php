@@ -9,12 +9,11 @@ class Item extends Model
     //
     protected $fillable = [
         'item_number',
-        'item_name',
         'item_description',
         'description',
         'type',
         'picture_path',
-        'thubmnail_path',
+        'thumbnail_path',
     ];
     public function quantities()
     {

@@ -1,17 +1,34 @@
 @extends('layouts.app')
 @section('content')
+    @if (session('error'))
+        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="max-w-full border rounded text-sm mx-auto py-10 px-6">
         <h2 class="text-2xl font-semibold mb-6">Inventory</h2>
 
         <form action="{{ route('inventory.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+
+            @if ($errors->any())
+                <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
+                    <ul class="list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="bg-white p-6 rounded-lg shadow space-y-6">
                 <div>
                     <label for="" class="font-semibold text-gray-700 block mb-2">Item</label>
                     <label for="" class="mr-4">Number</label>
                     <input type="text" name="item_number" class="form-input w-1/8 border rounded px-2 py-1 text-sm">
                     <label for="" class="mr-4">Description</label>
-                    <input type="text" name="item_name" class="form-input w-1/3 border rounded px-2 py-1 text-sm">
+                    <input type="text" name="item_description" class="form-input w-1/3 border rounded px-2 py-1 text-sm">
                 </div>
                 <div class="mb-4">
                     <label class="font-semibold text-gray-700 block mb-2">Type</label>
@@ -57,7 +74,7 @@
                 {{-- Quantities Tab --}}
                 <div id="quantities" class="tab-content">
                     <h3 class="font-semibold text-lg mb-2">Quantities</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block">Location</label>
                             <select name="location_id" id="location_id"
@@ -127,7 +144,7 @@
                             Selling unit same as stocking unit
                         </label>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block">Selling Unit (if different)</label>
                             <input type="text" name="selling_unit"
@@ -161,33 +178,69 @@
 
                 {{-- Pricing Tab --}}
                 <div id="pricing" class="tab-content hidden">
-                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
+                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm" id="pricingTable">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="px-4 py-2 border text-center">Price List</th>
-                                <th class="px-4 py-2 border text-right">Price Per Selling Unit</th>
+                                <th>Price List</th>
+                                <th>Price Per Selling Unit</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($priceListInventory as $item)
+                            @foreach ($priceListInventory as $index => $item)
                                 <tr>
                                     <td class="px-4 py-2 border text-center">
-                                        <input type="text" name="price_list_name"
+                                        <input type="text" name="pricing[{{ $index }}][name]"
                                             class="form-input w-full border rounded px-2 py-1 text-sm"
                                             value="{{ $item->description }}">
                                     </td>
                                     <td class="px-4 py-2 border text-right">
-                                        <input type="text" name="price"
+                                        <input type="text" name="pricing[{{ $index }}][price]"
                                             class="form-input w-full border rounded px-2 py-1 text-sm">
+                                    </td>
+                                    <td class="px-4 py-2 border text-center">
+                                        <button type="button"
+                                            class="remove-row bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="mt-2">
+                        <button type="button" id="addRow" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">+
+                            Tambah Data</button>
+                    </div>
                 </div>
 
                 {{-- Vendors Tab --}}
-                <div id="vendors" class="tab-content hidden"></div>
+                <div id="vendors" class="tab-content hidden">
+                    <div>
+                        <label class="block">Vendor</label>
+                        <select name="vendor_id" id="vendor_id"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Vendor --</option>
+                            @foreach ($vendors as $g)
+                                <option value="{{ $g->id }}">
+                                    {{ $g->nama_vendors }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div id="vendorsService" class="tab-content hidden">
+                    <div>
+                        <label class="block">Vendor</label>
+                        <select name="vendor_id" id="vendor_id"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Vendor --</option>
+                            @foreach ($vendors as $g)
+                                <option value="{{ $g->id }}">
+                                    {{ $g->nama_vendors }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
 
                 {{-- Description Tab --}}
                 <div id="description" class="tab-content hidden">
@@ -219,8 +272,7 @@
                         <div>
                             <label for="asset_account_id" class="block text-sm font-medium text-gray-700">Asset
                                 Account</label>
-                            <select name="asset_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="asset_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Aset --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Aset') as $account)
                                     <option value="{{ $account->id }}">
@@ -234,8 +286,7 @@
                         <div>
                             <label for="revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
                                 Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Pendapatan --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}">
@@ -249,8 +300,7 @@
                         <div>
                             <label for="cogs_account_id" class="block text-sm font-medium text-gray-700">COGS
                                 Account</label>
-                            <select name="cogs_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="cogs_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Beban Pokok Penjualan --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
                                     <option value="{{ $account->id }}">
@@ -264,8 +314,8 @@
                         <div>
                             <label for="variance_account_id" class="block text-sm font-medium text-gray-700">Variance
                                 Account</label>
-                            <select name="variance_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="variance_account_id"
+                                class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Selisih Harga --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
                                     <option value="{{ $account->id }}">
@@ -279,56 +329,74 @@
                 </div>
 
                 <div id="build" class="tab-content hidden">
-                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
+                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm" id="buildTable">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th>Item</th>
                                 <th>Unit</th>
                                 <th>Description</th>
                                 <th>Quantity</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                {{-- Pilih Item --}}
+                            {{-- Row awal (index 0) --}}
+                            <tr data-index="0">
                                 <td>
-                                    <select name="item" id="item-select"
-                                        class="form-select w-full border rounded px-2 py-1 text-sm">
+                                    <select name="build[0][item_id]"
+                                        class="item-select form-select w-full border rounded px-2 py-1 text-sm">
                                         <option value="">-- Pilih Item --</option>
                                         @foreach ($items as $item)
                                             <option value="{{ $item->id }}" data-unit="{{ $item->unit }}"
                                                 data-description="{{ $item->item_description }}">
-                                                {{ $item->item_name }}
+                                                {{ $item->item_description }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </td>
 
-                                {{-- Unit --}}
                                 <td>
-                                    <input type="text" id="unit" name="unit"
-                                        class="form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                                    <input type="text" name="build[0][unit]"
+                                        class="unit-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
                                 </td>
 
-                                {{-- Description --}}
                                 <td>
-                                    <input type="text" id="description" name="description"
-                                        class="form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                                    <input type="text" name="build[0][description]"
+                                        class="desc-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
                                 </td>
 
-                                {{-- Quantity --}}
                                 <td>
-                                    <input type="number" name="quantity"
-                                        class="form-input w-full border rounded px-2 py-1 text-sm">
+                                    <input type="number" name="build[0][quantity]"
+                                        class="qty-input form-input w-full border rounded px-2 py-1 text-sm"
+                                        min="0" step="1">
+                                </td>
+
+                                <td class="px-4 py-2 border text-center">
+                                    <button type="button"
+                                        class="remove-row-build bg-red-500 text-white px-2 py-1 rounded text-xs">
+                                        Hapus
+                                    </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <div class="mt-2">
+                        <button type="button" id="addRowBuild" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                            + Tambah Data
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Taxes Tab --}}
                 <div id="taxes" class="tab-content hidden">
                     <h3 class="font-semibold text-lg mb-2">Tax Configuration</h3>
+
+                    {{-- Notifikasi error khusus taxes (opsional) --}}
+                    @error('taxes.*')
+                        <div class="text-red-600 text-sm mb-2">{{ $message }}</div>
+                    @enderror
+
                     <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
@@ -341,15 +409,19 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
+                                            {{-- Pilih pajaknya --}}
                                             <input type="checkbox" name="taxes[]" value="{{ $tax->id }}"
-                                                class="form-checkbox">
+                                                class="form-checkbox"
+                                                {{ in_array($tax->id, old('taxes', [])) ? 'checked' : '' }}>
                                             <span>{{ $tax->name }} ({{ $tax->rate }}%)</span>
                                         </label>
                                     </td>
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
+                                            {{-- Tandai exempt utk pajak tersebut --}}
                                             <input type="checkbox" name="tax_exempt[]" value="{{ $tax->id }}"
-                                                class="form-checkbox">
+                                                class="form-checkbox"
+                                                {{ in_array($tax->id, old('tax_exempt', [])) ? 'checked' : '' }}>
                                             <span>Exempt {{ $tax->name }}</span>
                                         </label>
                                     </td>
@@ -358,6 +430,7 @@
                         </tbody>
                     </table>
                 </div>
+
 
 
                 {{-- service area --}}
@@ -374,29 +447,38 @@
 
                 {{-- Pricing Tab --}}
                 <div id="pricingService" class="tab-content hidden">
-                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm">
+                    <table class="table-auto w-full border-collapse border border-gray-200 text-sm" id="pricingTable">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th>Price List</th>
                                 <th>Price Per Selling Unit</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($priceListInventory as $item)
+                            @foreach ($priceListInventory as $index => $item)
                                 <tr>
                                     <td class="px-4 py-2 border text-center">
-                                        <input type="text" name="price_list_name"
+                                        <input type="text" name="pricing[{{ $index }}][name]"
                                             class="form-input w-full border rounded px-2 py-1 text-sm"
                                             value="{{ $item->description }}">
                                     </td>
                                     <td class="px-4 py-2 border text-right">
-                                        <input type="text" name="price"
+                                        <input type="text" name="pricing[{{ $index }}][price]"
                                             class="form-input w-full border rounded px-2 py-1 text-sm">
+                                    </td>
+                                    <td class="px-4 py-2 border text-center">
+                                        <button type="button"
+                                            class="remove-row bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    <div class="mt-2">
+                        <button type="button" id="addRow" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">+
+                            Tambah Data</button>
+                    </div>
                 </div>
 
                 {{-- Tab Linked (Chart of Accounts) --}}
@@ -408,8 +490,7 @@
                         <div>
                             <label for="revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
                                 Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Account --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}">
@@ -425,8 +506,7 @@
                         <div>
                             <label for="expense_account_id" class="block text-sm font-medium text-gray-700">Expense
                                 Account</label>
-                            <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Account --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
                                     <option value="{{ $account->id }}">
@@ -510,9 +590,132 @@
             </div>
         </form>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Hitung index awal dari jumlah baris existing
+            let index = document.querySelectorAll("#buildTable tbody tr").length;
+            const tableBody = document.querySelector("#buildTable tbody");
+            const addRowBtn = document.getElementById("addRowBuild");
 
+            // Template baris baru (pakai fungsi agar gampang inject index dinamis)
+            function rowTemplate(i) {
+                return `
+            <tr data-index="${i}">
+                <td>
+                    <select name="build[${i}][item_id]" 
+                            class="item-select form-select w-full border rounded px-2 py-1 text-sm">
+                        <option value="">-- Pilih Item --</option>
+                        @foreach ($items as $item)
+                            <option value="{{ $item->id }}"
+                                    data-unit="{{ $item->unit }}"
+                                    data-description="{{ $item->item_description }}">
+                                {{ $item->item_description }}
+                            </option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <input type="text" 
+                           name="build[${i}][unit]"
+                           class="unit-input form-input w-full border rounded px-2 py-1 text-sm" 
+                           readonly>
+                </td>
+                <td>
+                    <input type="text" 
+                           name="build[${i}][description]"
+                           class="desc-input form-input w-full border rounded px-2 py-1 text-sm" 
+                           readonly>
+                </td>
+                <td>
+                    <input type="number" 
+                           name="build[${i}][quantity]"
+                           class="qty-input form-input w-full border rounded px-2 py-1 text-sm" 
+                           min="0" step="1">
+                </td>
+                <td class="px-4 py-2 border text-center">
+                    <button type="button"
+                            class="remove-row-build bg-red-500 text-white px-2 py-1 rounded text-xs">
+                        Hapus
+                    </button>
+                </td>
+            </tr>
+        `;
+            }
 
+            // Tambah baris
+            addRowBtn.addEventListener("click", function() {
+                tableBody.insertAdjacentHTML("beforeend", rowTemplate(index));
+                index++;
+            });
+
+            // Event delegation: autofill Unit & Description saat pilih item
+            tableBody.addEventListener("change", function(e) {
+                if (e.target.classList.contains("item-select")) {
+                    const select = e.target;
+                    const selected = select.options[select.selectedIndex];
+                    const unit = selected.getAttribute("data-unit") || "";
+                    const desc = selected.getAttribute("data-description") || "";
+
+                    const row = select.closest("tr");
+                    row.querySelector(".unit-input").value = unit;
+                    row.querySelector(".desc-input").value = desc;
+                }
+            });
+
+            // Hapus baris
+            tableBody.addEventListener("click", function(e) {
+                if (e.target.classList.contains("remove-row-build")) {
+                    const row = e.target.closest("tr");
+                    // Jika hanya 1 baris, kosongkan saja (opsional), atau langsung hapus
+                    if (tableBody.querySelectorAll("tr").length === 1) {
+                        // kosongkan input-input jika ingin minimal satu baris tetap ada
+                        row.querySelector(".item-select").value = "";
+                        row.querySelector(".unit-input").value = "";
+                        row.querySelector(".desc-input").value = "";
+                        row.querySelector(".qty-input").value = "";
+                    } else {
+                        row.remove();
+                    }
+                }
+            });
+        });
+    </script>
     {{-- Script Tab Navigation --}}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let index = {{ count($priceListInventory) }};
+            const tableBody = document.querySelector("#pricingTable tbody");
+            const addRowBtn = document.getElementById("addRow");
+
+            // Tambah baris
+            addRowBtn.addEventListener("click", function() {
+                let newRow = document.createElement("tr");
+                newRow.innerHTML = `
+                <td class="px-4 py-2 border text-center">
+                    <input type="text" name="pricing[${index}][name]" 
+                        class="form-input w-full border rounded px-2 py-1 text-sm">
+                </td>
+                <td class="px-4 py-2 border text-right">
+                    <input type="text" name="pricing[${index}][price]" 
+                        class="form-input w-full border rounded px-2 py-1 text-sm">
+                </td>
+                <td class="px-4 py-2 border text-center">
+                    <button type="button" class="remove-row bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
+                </td>
+            `;
+                tableBody.appendChild(newRow);
+                index++;
+            });
+
+            // Hapus baris
+            tableBody.addEventListener("click", function(e) {
+                if (e.target.classList.contains("remove-row")) {
+                    e.target.closest("tr").remove();
+                }
+            });
+        });
+    </script>
     <script>
         const typeRadios = document.querySelectorAll('input[name="type"]');
         const inventoryTabs = document.getElementById('inventory-tabs');

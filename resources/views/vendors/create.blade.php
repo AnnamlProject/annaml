@@ -11,7 +11,7 @@
                         @method('PUT')
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- kode vendors -->
                         <div class="mb-4" id="manual_kd">
                             <label for="kd_vendor" class="block text-gray-700 font-medium mb-1">Kode vendors</label>
@@ -51,8 +51,8 @@
                         </div>
 
                         <!-- alamat -->
-                        <div class="mb-4 md:col-span-2">
-                            <label for="alamat" class="block text-gray-700 font-medium mb-1">alamat</label>
+                        <div class="mb-4 md:col-span-3">
+                            <label for="alamat" class="block text-gray-700 font-medium mb-1">Alamat</label>
                             <textarea id="alamat" name="alamat" rows="3"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('alamat', $vendors->alamat ?? '') }}</textarea>
                             @error('alamat')

@@ -25,26 +25,26 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Nama Item</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Stocking Unit</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Stok (Qty)</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Nilai (Rp)</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium">Aksi</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium">Item Number</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium"> Item Description</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium">Type</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium">Description</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium">Picture Path</th>
+                                <th class="px-6 py-3 text-center text-sm font-medium">Thumbnail Path</th>
+                                <th class="px-6 py-3 text-right text-sm font-medium">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($items as $item)
                                 <tr>
-                                    <td class="px-6 py-4">{{ $item->name }}</td>
-                                    <td class="px-6 py-4">{{ $item->stocking_unit ?? '-' }}</td>
-                                    <td class="px-6 py-4">
-                                        {{ optional($item->quantities->first())->on_hand_qty ?? 0 }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        Rp
-                                        {{ number_format(optional($item->quantities->first())->on_hand_value ?? 0, 0, ',', '.') }}
-                                    </td>
-                                    <td class="px-6 py-4 space-x-2">
+                                    <td class="px-2 py-1 text-center">{{ $item->item_number }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->item_description ?? '-' }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->type }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->description }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->picture_path }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->thumbnail_path }}</td>
+
+                                    <td class="px-2 py-1 text-right space-x-2">
                                         <a href="{{ route('inventory.edit', $item->id) }}"
                                             class="text-blue-600 hover:underline">Edit</a>
                                         <form action="{{ route('inventory.destroy', $item->id) }}" method="POST"

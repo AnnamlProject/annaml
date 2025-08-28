@@ -120,6 +120,10 @@
                                     <a href="{{ route('linkedAccount.index') }}" @click="open = false"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Linked
                                         Account</a>
+                                    <a href="{{ route('sales_taxes.index') }}" @click="open = false"
+                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                        - Taxes
+                                    </a>
                                 </div>
                             </div>
 
@@ -591,6 +595,10 @@
                                     <a href="{{ route('jenis_hari.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jenis
                                         Hari
+                                    </a>
+                                    <a href="{{ route('jam_kerja.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jam
+                                        Kerja
                                     </a>
                                     <a href="{{ route('jabatan.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position

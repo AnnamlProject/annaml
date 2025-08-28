@@ -4,6 +4,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BukuBesarController;
+use App\Http\Controllers\CoaSearchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartemenAkunController;
 use App\Http\Controllers\DepartementController;
@@ -87,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/klasifikasiAkun', [ImportController::class, 'importklasifikasiAkun'])->name('import.klasifikasiAkun');
 
     Route::resource('/chartOfAccount', 'ChartOfAccountController');
+    Route::get('/coa/search', [CoaSearchController::class, 'search'])->name('coa.search');
     // export dan import chart of account
     Route::get('/export/charofaccount', [ExportController::class, 'exportchartOfAccount'])->name('export.chartOfAccount');
     Route::post('/import/chartofaccount', [ImportController::class, 'importchartOfAccount'])->name('import.chartOfAccount');
@@ -102,6 +104,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/departemen/assign/{id}', [DepartementController::class, 'destroyAssign'])->name('departemen.assign.destroy');
 
     Route::resource('/departemen', 'DepartementController');
+
+    // sales taxes
+    Route::resource('/sales_taxes', 'SalesTaxesController');
+
     // export dan import Departemen
     Route::get('/export/Departemen', [ExportController::class, 'exportDepartemen'])->name('export.Departemen');
     Route::post('/import/Departemen', [ImportController::class, 'importDepartemen'])->name('import.Departemen');
@@ -155,6 +161,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/items', [ImportController::class, 'importItems'])->name('import.items');
     // payment method 
     Route::resource('PaymentMethod', 'PaymentMethodController');
+    // routes/web.php
+    Route::get('/payment-methods/{id}/accounts', [\App\Http\Controllers\PaymentMethodController::class, 'accounts'])
+        ->name('payment-methods.accounts');
+
 
     Route::resource('customers', 'CustomersController');
     // export dan import customers
@@ -287,6 +297,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('target_wahana', 'TargetWahanaController');
     // jenis hari
     Route::resource('jenis_hari', 'JenisHariController');
+
+    Route::resource('jam_kerja', 'JamKerjaController');
     // komposisi Gaji
     Route::resource('komposisi_gaji', 'KomposisiGajiController');
     Route::get('/get-komponen-by-karyawan/{id}', [KomposisiGajiController::class, 'getKomponenByKaryawan']);

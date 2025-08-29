@@ -65,6 +65,6 @@ class JournalEntryDetail extends Model
     }
     public function departemenAkun()
     {
-        return $this->belongsTo(Departement::class, 'departemen_akun_id');
+        return $this->belongsTo(DepartemenAkun::class, 'departemen_akun_id');
     }
 }

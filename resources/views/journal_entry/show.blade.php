@@ -34,18 +34,26 @@
                             <th class="border px-4 py-2">Comment</th>
                         </tr>
                     </thead>
+                    @php
+                        $totalDebit = 0;
+                        $totalKredit = 0;
+                    @endphp
+
                     <tbody class="bg-white text-gray-700">
                         @foreach ($journal->details as $detail)
+                            @php
+                                $totalDebit += $detail->debits;
+                                $totalKredit += $detail->credits;
+                            @endphp
+
                             <tr>
                                 <td class="border px-4 py-2">
-                                    @if ($detail->departemen_akun_id)
-                                        {{-- Jika ada departemen --}}
+                                    @if ($detail->departemen_akun_id && $detail->departemenAkun && $detail->departemenAkun->departemen)
                                         {{ $detail->kode_akun }} -
-                                        {{ $detail->departemenAkun->kode ?? '-' }} -
+                                        {{ $detail->departemenAkun->departemen->kode ?? '-' }} -
                                         {{ $detail->chartOfAccount->nama_akun ?? '-' }} -
-                                        {{ $detail->departemenAkun->deskripsi ?? '-' }}
+                                        {{ $detail->departemenAkun->departemen->deskripsi ?? '-' }}
                                     @else
-                                        {{-- Jika tidak ada departemen --}}
                                         {{ $detail->kode_akun }} -
                                         {{ $detail->chartOfAccount->nama_akun ?? '-' }}
                                     @endif
@@ -62,6 +70,16 @@
                             </tr>
                         @endforeach
                     </tbody>
+                    <tfoot class="bg-gray-100 font-bold text-gray-800">
+                        <tr>
+                            <td class="border px-4 py-2 text-right">TOTAL</td>
+                            <td class="border px-4 py-2 text-right">{{ number_format($totalDebit, 2, ',', '.') }}</td>
+                            <td class="border px-4 py-2 text-right">{{ number_format($totalKredit, 2, ',', '.') }}</td>
+                            <td class="border px-4 py-2"></td>
+                        </tr>
+                    </tfoot>
+
+
                 </table>
             </div>
         </div>

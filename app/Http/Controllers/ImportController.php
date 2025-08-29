@@ -78,7 +78,7 @@ class ImportController extends Controller
             if (count($skipped) > 0) {
                 $pesan = 'Terjadi Kesalahan: <br><ul>';
                 foreach ($skipped as $group) {
-                    $pesan .= "<li><b>{$group['key']}</b> - {$group['reason']}</li>";
+                    $pesan .= "<li>{$group['reason']}</li>";
                 }
                 $pesan .= '</ul>';
 
@@ -90,6 +90,7 @@ class ImportController extends Controller
             return back()->with('error', 'Import gagal: ' . $e->getMessage());
         }
     }
+
     public function importItems(Request $request)
     {
         $request->validate([

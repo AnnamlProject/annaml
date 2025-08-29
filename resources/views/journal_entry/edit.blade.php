@@ -9,6 +9,7 @@
                     @csrf
                     @method('PUT')
 
+                    {{-- Error --}}
                     @if ($errors->any())
                         <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
                             <ul class="list-disc list-inside">
@@ -19,30 +20,26 @@
                         </div>
                     @endif
 
-                    @if (session('error'))
-                        <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
+                    {{-- Header --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 text-base">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Source</label>
-                            <input type="text" name="source" class="w-full rounded-md border border-gray-300 px-3 py-2"
+                            <input type="text" name="source" class="w-full rounded-md border px-3 py-2"
                                 value="{{ old('source', $journalEntry->source) }}" required>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Date</label>
-                            <input type="date" name="tanggal" class="w-full rounded-md border border-gray-300 px-3 py-2"
+                            <input type="date" name="tanggal" class="w-full rounded-md border px-3 py-2"
                                 value="{{ old('tanggal', $journalEntry->tanggal) }}" required>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Comment</label>
-                            <input type="text" name="comment" class="w-full rounded-md border border-gray-300 px-3 py-2"
+                            <input type="text" name="comment" class="w-full rounded-md border px-3 py-2"
                                 value="{{ old('comment', $journalEntry->comment) }}">
                         </div>
                     </div>
 
+                    {{-- Table --}}
                     <div class="overflow-x-auto overflow-y-auto max-h-[450px] mb-6 border rounded">
                         <table class="min-w-full table-auto border-collapse text-base text-left bg-white">
                             <thead class="bg-gray-100 text-gray-700 font-semibold sticky top-0 z-10">
@@ -55,60 +52,80 @@
                                 </tr>
                             </thead>
                             <tbody id="item-table-body" class="bg-white">
-                                @foreach ($journalEntry->details as $i => $item)
+                                @php
+                                    $totalDebit = 0;
+                                    $totalKredit = 0;
+                                @endphp
+
+                                @foreach ($journalEntry->details as $i => $detail)
+                                    @php
+                                        $totalDebit += $detail->debits;
+                                        $totalKredit += $detail->credits;
+                                    @endphp
+
                                     <tr class="item-row" data-index="{{ $i }}">
                                         <td class="border px-2 py-1">
                                             <select class="item-select w-full border rounded"
-                                                name="details[{{ $i }}][kode_akun]"
+                                                name="items[{{ $i }}][kode_akun]"
                                                 data-index="{{ $i }}">
-                                                <option value="{{ $item->kode_akun }}" selected>
-                                                    @if ($item->departemen_akun_id)
-                                                        {{ $item->kode_akun }} -
-                                                        {{ $item->departemenAkun->kode ?? '-' }} -
-                                                        {{ $item->chartOfAccount->nama_akun ?? 'Akun lama' }} -
-                                                        {{ $item->departemenAkun->deskripsi ?? '-' }}
-                                                    @else
-                                                        {{ $item->kode_akun }} -
-                                                        {{ $item->chartOfAccount->nama_akun ?? 'Akun lama' }}
-                                                    @endif
+                                                <option value="{{ $detail->kode_akun }}" selected>
+                                                    {{ $detail->kode_akun }} -
+                                                    {{ $detail->chartOfAccount->nama_akun ?? '-' }}
                                                 </option>
                                             </select>
                                         </td>
                                         <td class="border px-2 py-1">
-                                            <input type="hidden" name="items[{{ $i }}][kode_akun]"
-                                                class="kode_akun-{{ $i }}" value="{{ $item->kode_akun }}" />
                                             <input type="hidden" name="items[{{ $i }}][departemen_akun_id]"
-                                                class="departemen-akun-{{ $i }}"
-                                                value="{{ $item->departemen_akun_id }}" />
+                                                value="{{ $detail->departemen_akun_id }}" />
                                             <input type="text" name="items[{{ $i }}][debits]"
-                                                class="money-input w-full border rounded px-2 py-1 text-right"
-                                                inputmode="numeric"
-                                                value="{{ number_format($item->debits, 0, ',', '.') }}" />
+                                                class="money-input debit-input w-full border rounded px-2 py-1 text-right"
+                                                value="{{ number_format($detail->debits, 0, ',', '.') }}" />
                                         </td>
                                         <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][credits]"
-                                                class="money-input w-full border rounded px-2 py-1 text-right"
-                                                inputmode="numeric"
-                                                value="{{ number_format($item->credits, 0, ',', '.') }}" />
+                                                class="money-input credit-input w-full border rounded px-2 py-1 text-right"
+                                                value="{{ number_format($detail->credits, 0, ',', '.') }}" />
                                         </td>
                                         <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][comment]"
-                                                class="w-full border rounded px-2 py-1" value="{{ $item->comment }}" />
+                                                class="w-full border rounded px-2 py-1" value="{{ $detail->comment }}" />
                                         </td>
                                         <td class="border px-2 py-1 text-center">
                                             <button type="button"
-                                                class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                                data-index="{{ $i }}">X</button>
+                                                class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
+
+                            <tfoot class="bg-gray-100 font-bold text-gray-800">
+                                <tr>
+                                    <td class="border px-4 py-2 text-right">TOTAL</td>
+                                    <td class="border px-4 py-2 text-right" id="total-debit">
+                                        {{ number_format($totalDebit, 0, ',', '.') }}
+                                    </td>
+                                    <td class="border px-4 py-2 text-right" id="total-credit">
+                                        {{ number_format($totalKredit, 0, ',', '.') }}
+                                    </td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
+
+                    {{-- Tombol Add Row --}}
+                    <div class="mb-6">
+                        <button type="button" id="add-row"
+                            class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                            + Tambah Row
+                        </button>
+                    </div>
+
+                    {{-- Actions --}}
                     <div class="mt-6 flex justify-end gap-4">
                         <button type="button" onclick="history.go(-1)"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
-                            <i class="fas fa-arrow-left mr-2"></i> Batal
+                            Batal
                         </button>
 
                         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
@@ -121,102 +138,160 @@
     </div>
 @endsection
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{{-- Script --}}
+@push('scripts')
+    <script>
+        function parseNumber(value) {
+            if (!value) return 0;
+            return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
+        }
 
-<script>
-    let rowIndex = {{ count($journalEntry->details) }};
+        function formatNumber(value) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
 
-    function generateRow(index) {
-        return `...`; // tetap seperti yang Anda punya
-    }
+        function updateTotals() {
+            let totalDebit = 0,
+                totalCredit = 0;
 
+            document.querySelectorAll('.debit-input').forEach(input => {
+                totalDebit += parseNumber(input.value);
+            });
+            document.querySelectorAll('.credit-input').forEach(input => {
+                totalCredit += parseNumber(input.value);
+            });
 
-    function attachSelect2(index) {
-        $(`select[data-index="${index}"]`).select2({
-            placeholder: 'Cari Account...',
-            ajax: {
-                url: '/search-account',
-                dataType: 'json',
-                delay: 250,
-                data: params => ({
-                    q: params.term
-                }),
-                processResults: data => {
-                    let results = [];
+            document.getElementById('total-debit').innerText = formatNumber(totalDebit);
+            document.getElementById('total-credit').innerText = formatNumber(totalCredit);
 
-                    data.forEach(item => {
-                        // Akun utama (tanpa departemen)
-                        results.push({
-                            id: item.id,
-                            text: `${item.kode_akun} - ${item.nama_akun}`,
-                            kode_akun: item.kode_akun,
-                            departemen_akun_id: null
-                        });
+            const statusCell = document.getElementById('balance-status');
+            statusCell.innerText = (totalDebit === totalCredit) ? 'BALANCE' : 'NOT BALANCE';
+            statusCell.className = totalDebit === totalCredit ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
+        }
 
-                        // Akun dengan departemen
-                        if (item.daftar_departemen && item.daftar_departemen.length > 0) {
-                            item.daftar_departemen.forEach(dept => {
-                                results.push({
-                                    id: `d-${dept.id}`, // id unik biar tidak bentrok
-                                    text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
-                                    kode_akun: item.kode_akun,
-                                    departemen_akun_id: dept.id,
-                                    deskripsi_departemen: dept.deskripsi
-                                });
+        // === TEMPLATE ROW ===
+        function generateRow() {
+            return `
+            <tr class="item-row">
+                <td class="border px-2 py-1">
+                    <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
+                </td>
+                <td class="border px-2 py-1">
+                    <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
+                    <input type="text" name="items[][debits]"
+                           class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+                </td>
+                <td class="border px-2 py-1">
+                    <input type="text" name="items[][credits]"
+                           class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+                </td>
+                <td class="border px-2 py-1">
+                    <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
+                </td>
+                <td class="border px-2 py-1 text-center">
+                    <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
+                </td>
+            </tr>
+        `;
+        }
+
+        // === REINDEX ===
+        function reindexRows() {
+            $('#item-table-body tr').each(function(i, row) {
+                $(row).attr('data-index', i);
+                $(row).find('input, select').each(function() {
+                    const name = $(this).attr('name');
+                    if (name) {
+                        // ganti index lama jadi index baru
+                        $(this).attr('name', name.replace(/\[\d*\]/, `[${i}]`));
+                    }
+                });
+            });
+        }
+
+        // === SELECT2 ===
+        function attachSelect2($select) {
+            $select.select2({
+                placeholder: 'Cari Account...',
+                ajax: {
+                    url: '/search-account',
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({
+                        q: params.term
+                    }),
+                    processResults: data => {
+                        let results = [];
+                        data.forEach(item => {
+                            results.push({
+                                id: item.id,
+                                text: `${item.kode_akun} - ${item.nama_akun}`,
+                                kode_akun: item.kode_akun,
+                                departemen_akun_id: null
                             });
-                        }
-                    });
+                            if (item.daftar_departemen) {
+                                item.daftar_departemen.forEach(dept => {
+                                    results.push({
+                                        id: `d-${dept.id}`,
+                                        text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
+                                        kode_akun: item.kode_akun,
+                                        departemen_akun_id: dept.id
+                                    });
+                                });
+                            }
+                        });
+                        return {
+                            results
+                        };
+                    }
+                }
+            }).on('select2:select', function(e) {
+                const data = e.params.data;
+                $(this).closest('tr').find('.departemen-akun').val(data.departemen_akun_id ?? '');
+            });
+        }
 
-                    return {
-                        results
-                    };
-                },
+        // === READY ===
+        $(document).ready(function() {
+            // inisialisasi select2 untuk row lama
+            $('.item-select').each(function() {
+                attachSelect2($(this));
+            });
 
-                cache: true
-            },
-            templateResult: function(data) {
-                return data.text; // cukup tampilkan text biasa
-            }
-        }).on('select2:select', function(e) {
-            const data = e.params.data;
-            $(`.kode_akun-${index}`).val(data.kode_akun);
+            // tombol tambah
+            $('#add-row').click(function() {
+                $('#item-table-body').append(generateRow());
+                reindexRows();
+                updateTotals();
+                attachSelect2($('#item-table-body tr:last .item-select'));
+            });
 
-            // Simpan departemen_akun_id kalau ada
-            const departemenAkunId = data.departemen_akun_id ?? '';
-            $(`.departemen-akun-${index}`).val(departemenAkunId);
+            // tombol hapus
+            $(document).on('click', '.remove-row', function() {
+                $(this).closest('tr').remove();
+                reindexRows();
+                updateTotals();
+            });
+
+            // input uang realtime
+            $(document).on('input', '.money-input', function() {
+                const raw = this.value.replace(/[^0-9]/g, '');
+                this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
+                updateTotals();
+            });
+
+            // submit: ubah ke angka murni
+            $('#journal-entry-form').on('submit', function() {
+                document.querySelectorAll('.money-input').forEach(input => {
+                    const raw = input.value.replace(/\./g, '');
+                    input.value = raw === '' ? '' : parseFloat(raw);
+                });
+            });
+
+            updateTotals();
         });
-    }
-
-    function unformatAllCurrencyInputs() {
-        document.querySelectorAll('.money-input').forEach(input => {
-            const raw = input.value.replace(/\./g, '');
-            input.value = raw === '' ? '' : parseFloat(raw);
-        });
-    }
-
-    $(document).ready(function() {
-        // untuk select2 di data existing
-        $('.item-select').each(function() {
-            const index = $(this).data('index');
-            attachSelect2(index);
-        });
-
-        $(document).on('click', '.remove-row', function() {
-            const index = $(this).data('index');
-            $(`tr[data-index="${index}"]`).remove();
-        });
-
-        document.addEventListener('input', function(e) {
-            if (e.target.classList.contains('money-input')) {
-                const raw = e.target.value.replace(/[^0-9]/g, '');
-                e.target.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
-            }
-        });
-
-        document.getElementById('journal-entry-form').addEventListener('submit', function() {
-            unformatAllCurrencyInputs();
-        });
-    });
-</script>
+    </script>
+@endpush

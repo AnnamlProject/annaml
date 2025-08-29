@@ -38,30 +38,40 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 $totalDebit = 0;
                 $totalKredit = 0;
                 $invalidKodeAkun = false;
-
-                Log::info("Memproses group: {$key}, jumlah baris: " . count($groupRows));
+                $invalidDepartemenAkun = false;
 
                 foreach ($groupRows as $row) {
                     // Validasi kode akun
                     $exists = \App\ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists();
                     if (!$exists) {
-                        Log::warning("Kode akun tidak ditemukan: {$row['kode_akun']} untuk group {$key}");
                         $invalidKodeAkun = true;
                     }
 
-                    $totalDebit += (float) ($row['debit'] ?? 0);
-                    $totalKredit += (float) ($row['kredit'] ?? 0);
+                    // Validasi departemen akun
+                    $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($row) {
+                        $q->where('deskripsi', $row['departemen']);
+                    })->first();
 
-                    Log::debug("Row {$key} => debit: {$row['debit']}, kredit: {$row['kredit']}");
+                    if (!$departemenAkun) {
+                        $invalidDepartemenAkun = true;
+                    }
+
+                    $totalDebit  += (float) ($row['debit'] ?? 0);
+                    $totalKredit += (float) ($row['kredit'] ?? 0);
                 }
 
-                Log::info("Group {$key} => totalDebit={$totalDebit}, totalKredit={$totalKredit}");
-
-                // Skip jika kode akun tidak valid
+                // Skip jika ada kode akun tidak valid
                 if ($invalidKodeAkun) {
                     $this->skippedGroups[] = [
-                        'key' => $key,
-                        'reason' => 'Kode akun tidak sesuai dengan account yang tersedia.'
+                        'reason' => "Kode akun tidak sesuai dengan account yang tersedia."
+                    ];
+                    continue;
+                }
+
+                // Skip jika ada departemen akun tidak valid
+                if ($invalidDepartemenAkun) {
+                    $this->skippedGroups[] = [
+                        'reason' => "Ada baris dengan departemen akun tidak ditemukan."
                     ];
                     continue;
                 }
@@ -69,7 +79,6 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 // Skip jika hanya 1 baris dan debit/kredit kosong
                 if (count($groupRows) === 1 && ($totalDebit == 0 || $totalKredit == 0)) {
                     $this->skippedGroups[] = [
-                        'key' => $key,
                         'reason' => 'Hanya 1 baris dan tidak ada debit atau kredit.'
                     ];
                     continue;
@@ -78,20 +87,13 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 // Skip jika total debit dan kredit tidak balance
                 if (round($totalDebit, 2) !== round($totalKredit, 2)) {
                     $this->skippedGroups[] = [
-                        'key' => $key,
                         'reason' => "Total debit ($totalDebit) dan kredit ($totalKredit) tidak balance."
                     ];
                     continue;
                 }
 
-                // Simpan journal entry
+                // Kalau semua valid → simpan JournalEntry
                 [$source, $tanggal, $comment] = explode('|', $key);
-
-                Log::info('Menyimpan JournalEntry:', [
-                    'source' => $source,
-                    'tanggal' => $tanggal,
-                    'comment' => $comment,
-                ]);
 
                 $journalEntry = JournalEntry::create([
                     'source'  => $source,
@@ -101,24 +103,15 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                 Log::info('JournalEntry disimpan dengan ID: ' . $journalEntry->id);
 
-                // Simpan detailnya
+                // Simpan detail
                 foreach ($groupRows as $row) {
                     $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($row) {
                         $q->where('deskripsi', $row['departemen']);
                     })->first();
 
-                    $departemenAkunId = $departemenAkun ? $departemenAkun->id : null;
-                    Log::debug("Menyimpan detail untuk JournalEntry {$journalEntry->id}", [
-                        'departemen_akun_id' => $departemenAkunId,
-                        'kode_akun'          => $row['kode_akun'],
-                        'debits'             => $row['debit'] ?? 0,
-                        'credits'            => $row['kredit'] ?? 0,
-                        'comment'            => $row['comment_line'] ?? null,
-                    ]);
-
                     JournalEntryDetail::create([
                         'journal_entry_id'   => $journalEntry->id,
-                        'departemen_akun_id' => $departemenAkunId,
+                        'departemen_akun_id' => $departemenAkun->id,
                         'kode_akun'          => $row['kode_akun'],
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,
@@ -131,11 +124,9 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
             if (count($this->skippedGroups) > 0) {
                 $pesan = 'Beberapa transaksi dilewati: <br><ul>';
                 foreach ($this->skippedGroups as $group) {
-                    $pesan .= "<li><b>{$group['key']}</b> - {$group['reason']}</li>";
+                    $pesan .= "<li>{$group['reason']}</li>";
                 }
                 $pesan .= '</ul>';
-
-                Log::warning('Skipped groups: ', $this->skippedGroups);
 
                 Session::flash('error', $pesan);
             } else {

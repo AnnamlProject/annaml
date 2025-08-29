@@ -221,9 +221,14 @@ class JournalEntryController extends Controller
 
     public function show($id)
     {
-        $journal = JournalEntry::with(['details.chartOfAccount', 'details.departemenAkun'])->findOrFail($id);
+        $journal = JournalEntry::with([
+            'details.chartOfAccount',
+            'details.departemenAkun.departemen'
+        ])->findOrFail($id);
+
         return view('journal_entry.show', compact('journal'));
     }
+
     public function destroy($id)
     {
         DB::beginTransaction();
@@ -302,7 +307,7 @@ class JournalEntryController extends Controller
     }
     public function edit($id)
     {
-        $journalEntry = JournalEntry::with('details.chartOfAccount')->findOrFail($id);
+        $journalEntry = JournalEntry::with(['details.chartOfAccount', 'details.departemenAkun.departemen'])->findOrFail($id);
 
         return view('journal_entry.edit', compact('journalEntry'));
     }
@@ -312,15 +317,14 @@ class JournalEntryController extends Controller
         $cleanedItems = collect($request->items)->filter(function ($item) {
             return isset($item['kode_akun']) && $item['kode_akun'] !== '';
         })->map(function ($item) {
-            $item['debits'] = isset($item['debits']) && $item['debits'] !== '' ? str_replace(['.', ','], '', $item['debits']) : null;
-            $item['credits'] = isset($item['credits']) && $item['credits'] !== '' ? str_replace(['.', ','], '', $item['credits']) : null;
+            $item['debits'] = isset($item['debits']) && $item['debits'] !== '' ? str_replace(['.', ','], '', $item['debits']) : 0;
+            $item['credits'] = isset($item['credits']) && $item['credits'] !== '' ? str_replace(['.', ','], '', $item['credits']) : 0;
             return $item;
         })->values()->all();
 
-        // Gabungkan kembali ke dalam request
         $request->merge(['items' => $cleanedItems]);
 
-        // Validasi
+        // Validasi dasar
         $request->validate([
             'source' => 'required|string|max:255',
             'tanggal' => 'required|date',
@@ -332,6 +336,21 @@ class JournalEntryController extends Controller
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
         ]);
+
+        // ===== Tambahkan validasi manual di sini =====
+        $totalDebit  = collect($cleanedItems)->sum(fn($i) => (float) $i['debits']);
+        $totalCredit = collect($cleanedItems)->sum(fn($i) => (float) $i['credits']);
+
+        // Cek balance
+        if ($totalDebit !== $totalCredit) {
+            return back()->withInput()->withErrors(['items' => 'Total debit dan kredit harus sama.']);
+        }
+
+        // Cek apakah hanya ada salah satu sisi
+        if (($totalDebit == 0 && $totalCredit > 0) || ($totalCredit == 0 && $totalDebit > 0)) {
+            return back()->withInput()->withErrors(['items' => 'Harus ada lawan transaksi, tidak boleh hanya debit atau hanya kredit.']);
+        }
+
         // Simpan ke database
         DB::beginTransaction();
         try {
@@ -345,7 +364,7 @@ class JournalEntryController extends Controller
             ]);
 
             // Hapus detail lama
-            $entry->details()->delete(); // pastikan relasi `details()` ada di model
+            $entry->details()->delete();
 
             // Simpan item baru
             foreach ($request->items as $item) {

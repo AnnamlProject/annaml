@@ -98,56 +98,54 @@
             </div>
         </div>
     </div>
-@endsection
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const karyawanSelect = document.getElementById('kode_karyawan_id');
+            const periodeAwalInput = document.querySelector('input[name="periode_awal"]');
+            const periodeAkhirInput = document.querySelector('input[name="periode_akhir"]');
+            const komponenContainer = document.getElementById('komponenContainer');
+            const komponenTable = document.getElementById('komponenTable');
+            const grandTotalSpan = document.getElementById('grandTotal');
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const karyawanSelect = document.getElementById('kode_karyawan_id');
-        const periodeAwalInput = document.querySelector('input[name="periode_awal"]');
-        const periodeAkhirInput = document.querySelector('input[name="periode_akhir"]');
-        const komponenContainer = document.getElementById('komponenContainer');
-        const komponenTable = document.getElementById('komponenTable');
-        const grandTotalSpan = document.getElementById('grandTotal');
+            function formatNumber(value) {
+                return parseFloat(value).toLocaleString('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
 
-        function formatNumber(value) {
-            return parseFloat(value).toLocaleString('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
+            // Hitung total keseluruhan dari semua hidden input
+            function updateGrandTotal() {
+                let total = 0;
+                document.querySelectorAll('input.total-hidden').forEach(input => {
+                    const val = parseFloat(input.value) || 0;
+                    total += val;
+                });
+                grandTotalSpan.textContent = formatNumber(total);
+            }
 
-        // Hitung total keseluruhan dari semua hidden input
-        function updateGrandTotal() {
-            let total = 0;
-            document.querySelectorAll('input.total-hidden').forEach(input => {
-                const val = parseFloat(input.value) || 0;
-                total += val;
-            });
-            grandTotalSpan.textContent = formatNumber(total);
-        }
+            function loadKomponen() {
+                const karyawanId = karyawanSelect.value;
+                const periodeAwal = periodeAwalInput.value;
+                const periodeAkhir = periodeAkhirInput.value;
 
-        function loadKomponen() {
-            const karyawanId = karyawanSelect.value;
-            const periodeAwal = periodeAwalInput.value;
-            const periodeAkhir = periodeAkhirInput.value;
+                komponenTable.innerHTML = '';
+                komponenContainer.classList.add('hidden');
 
-            komponenTable.innerHTML = '';
-            komponenContainer.classList.add('hidden');
+                if (!karyawanId || !periodeAwal || !periodeAkhir) return;
 
-            if (!karyawanId || !periodeAwal || !periodeAkhir) return;
+                fetch(
+                        `/get-pembayaran-gaji-by-karyawan/${karyawanId}?periode_awal=${periodeAwal}&periode_akhir=${periodeAkhir}`
+                    )
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!Array.isArray(data) || data.length === 0) {
+                            komponenTable.innerHTML =
+                                '<p class="text-red-500 mt-4">Tidak ada komposisi gaji ditemukan untuk karyawan ini.</p>';
+                            return;
+                        }
 
-            fetch(
-                    `/get-pembayaran-gaji-by-karyawan/${karyawanId}?periode_awal=${periodeAwal}&periode_akhir=${periodeAkhir}`
-                )
-                .then(response => response.json())
-                .then(data => {
-                    if (!Array.isArray(data) || data.length === 0) {
-                        komponenTable.innerHTML =
-                            '<p class="text-red-500 mt-4">Tidak ada komposisi gaji ditemukan untuk karyawan ini.</p>';
-                        return;
-                    }
-
-                    let tableHTML = `
+                        let tableHTML = `
                     <table class="min-w-full table-auto border border-gray-200">
                         <thead>
                             <tr class="bg-gray-100 text-left">
@@ -163,8 +161,8 @@
                         <tbody>
                 `;
 
-                    data.forEach((item, index) => {
-                        tableHTML += `
+                        data.forEach((item, index) => {
+                            tableHTML += `
                         <tr>
                             <td class="px-4 py-2 border">
                                 ${item.nama_komponen}
@@ -189,59 +187,60 @@
                             </td>
                         </tr>
                     `;
-                    });
-
-                    tableHTML += '</tbody></table>';
-                    komponenTable.innerHTML = tableHTML;
-                    komponenContainer.classList.remove('hidden');
-
-                    function updateTotal(index) {
-                        const nilai = parseFloat(document.querySelector(
-                            `input[name="komponen[${index}][nilai]"]`).value) || 0;
-                        const jumlahHari = parseFloat(document.querySelector(
-                            `input[name="komponen[${index}][jumlah_hari]"]`).value) || 0;
-                        const potongan = parseFloat(document.querySelector(
-                            `input[name="komponen[${index}][potongan]"]`).value) || 0;
-
-                        const totalNilai = nilai * jumlahHari;
-                        const totalPotongan = potongan * jumlahHari;
-                        const total = totalNilai + totalPotongan;
-
-                        // tampilkan number format
-                        const displayInput = document.querySelector(
-                            `input.total-display[data-index="${index}"]`);
-                        if (displayInput) displayInput.value = formatNumber(total);
-
-                        // simpan nilai asli ke hidden input
-                        const hiddenInput = document.querySelector(
-                            `input.total-hidden[data-index="${index}"]`);
-                        if (hiddenInput) hiddenInput.value = total;
-
-                        // update grand total
-                        updateGrandTotal();
-                    }
-
-                    // pasang event listener untuk setiap baris
-                    data.forEach((_, index) => {
-                        ['nilai', 'jumlah_hari', 'potongan'].forEach(field => {
-                            const input = document.querySelector(
-                                `input[name="komponen[${index}][${field}]"]`);
-                            if (input) {
-                                input.addEventListener('input', () => updateTotal(index));
-                                updateTotal(index); // hitung awal
-                            }
                         });
-                    });
-                })
-                .catch(err => {
-                    console.error('Error saat mengambil data:', err);
-                    komponenTable.innerHTML =
-                        '<p class="text-red-500 mt-4">Terjadi kesalahan saat memuat data komponen.</p>';
-                });
-        }
 
-        karyawanSelect.addEventListener('change', loadKomponen);
-        periodeAwalInput.addEventListener('change', loadKomponen);
-        periodeAkhirInput.addEventListener('change', loadKomponen);
-    });
-</script>
+                        tableHTML += '</tbody></table>';
+                        komponenTable.innerHTML = tableHTML;
+                        komponenContainer.classList.remove('hidden');
+
+                        function updateTotal(index) {
+                            const nilai = parseFloat(document.querySelector(
+                                `input[name="komponen[${index}][nilai]"]`).value) || 0;
+                            const jumlahHari = parseFloat(document.querySelector(
+                                `input[name="komponen[${index}][jumlah_hari]"]`).value) || 0;
+                            const potongan = parseFloat(document.querySelector(
+                                `input[name="komponen[${index}][potongan]"]`).value) || 0;
+
+                            const totalNilai = nilai * jumlahHari;
+                            const totalPotongan = potongan * jumlahHari;
+                            const total = totalNilai - totalPotongan;
+
+                            // tampilkan number format
+                            const displayInput = document.querySelector(
+                                `input.total-display[data-index="${index}"]`);
+                            if (displayInput) displayInput.value = formatNumber(total);
+
+                            // simpan nilai asli ke hidden input
+                            const hiddenInput = document.querySelector(
+                                `input.total-hidden[data-index="${index}"]`);
+                            if (hiddenInput) hiddenInput.value = total;
+
+                            // update grand total
+                            updateGrandTotal();
+                        }
+
+                        // pasang event listener untuk setiap baris
+                        data.forEach((_, index) => {
+                            ['nilai', 'jumlah_hari', 'potongan'].forEach(field => {
+                                const input = document.querySelector(
+                                    `input[name="komponen[${index}][${field}]"]`);
+                                if (input) {
+                                    input.addEventListener('input', () => updateTotal(index));
+                                    updateTotal(index); // hitung awal
+                                }
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Error saat mengambil data:', err);
+                        komponenTable.innerHTML =
+                            '<p class="text-red-500 mt-4">Terjadi kesalahan saat memuat data komponen.</p>';
+                    });
+            }
+
+            karyawanSelect.addEventListener('change', loadKomponen);
+            periodeAwalInput.addEventListener('change', loadKomponen);
+            periodeAkhirInput.addEventListener('change', loadKomponen);
+        });
+    </script>
+@endsection

@@ -2,9 +2,8 @@
 
 namespace App\Imports;
 
-use App\chartOfAccount as AppChartOfAccount;
+use App\ChartOfAccount;
 use App\DepartemenAkun;
-use App\Departement;
 use App\JournalEntry;
 use App\JournalEntryDetail;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -38,22 +37,12 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 $totalDebit = 0;
                 $totalKredit = 0;
                 $invalidKodeAkun = false;
-                $invalidDepartemenAkun = false;
 
                 foreach ($groupRows as $row) {
                     // Validasi kode akun
-                    $exists = \App\ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists();
+                    $exists = ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists();
                     if (!$exists) {
                         $invalidKodeAkun = true;
-                    }
-
-                    // Validasi departemen akun
-                    $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($row) {
-                        $q->where('deskripsi', $row['departemen']);
-                    })->first();
-
-                    if (!$departemenAkun) {
-                        $invalidDepartemenAkun = true;
                     }
 
                     $totalDebit  += (float) ($row['debit'] ?? 0);
@@ -64,14 +53,6 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 if ($invalidKodeAkun) {
                     $this->skippedGroups[] = [
                         'reason' => "Kode akun tidak sesuai dengan account yang tersedia."
-                    ];
-                    continue;
-                }
-
-                // Skip jika ada departemen akun tidak valid
-                if ($invalidDepartemenAkun) {
-                    $this->skippedGroups[] = [
-                        'reason' => "Ada baris dengan departemen akun tidak ditemukan."
                     ];
                     continue;
                 }
@@ -111,7 +92,8 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                     JournalEntryDetail::create([
                         'journal_entry_id'   => $journalEntry->id,
-                        'departemen_akun_id' => $departemenAkun->id,
+                        // kalau tidak ketemu → null
+                        'departemen_akun_id' => $departemenAkun ? $departemenAkun->id : null,
                         'kode_akun'          => $row['kode_akun'],
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,

@@ -605,25 +605,22 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
                                         Components
                                     </a>
-                                    <a href="{{ route('absensi.form') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
-                                        Pegawai
-                                        <a href="{{ route('ptkp.index') }}"
-                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
+                                    <a href="{{ route('employee.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Employee
+                                    </a>
+                                    <a href="{{ route('komposisi_gaji.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Salary Components
+                                    </a>
+                                    <a href="{{ route('ptkp.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
 
-                                        </a>
-                                        <a href="{{ route('tax_rates.index') }}"
-                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
-                                            (Tax Rates)
-                                        </a>
-                                        <a href="{{ route('employee.index') }}"
-                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                            Employee
-                                        </a>
-                                        <a href="{{ route('komposisi_gaji.index') }}"
-                                            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                            Salary Components
-                                        </a>
+                                    </a>
+                                    <a href="{{ route('tax_rates.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
+                                        (Tax Rates)
+                                    </a>
 
                                 </div>
                             </div>
@@ -658,6 +655,10 @@
                                     <a href="{{ route('report.klasifikasi') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Salary Slip</a>
+                                    <a href="{{ route('absensi.form') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
+                                        Pegawai
+                                    </a>
                                 </div>
                             </div>
                         </div>

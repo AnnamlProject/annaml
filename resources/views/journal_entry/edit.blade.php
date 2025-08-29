@@ -107,7 +107,6 @@
                                     <td class="border px-4 py-2 text-right" id="total-credit">
                                         {{ number_format($totalKredit, 0, ',', '.') }}
                                     </td>
-                                    <td colspan="2"></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -138,7 +137,6 @@
     </div>
 @endsection
 
-{{-- Script --}}
 @push('scripts')
     <script>
         function parseNumber(value) {
@@ -166,13 +164,8 @@
 
             document.getElementById('total-debit').innerText = formatNumber(totalDebit);
             document.getElementById('total-credit').innerText = formatNumber(totalCredit);
-
-            const statusCell = document.getElementById('balance-status');
-            statusCell.innerText = (totalDebit === totalCredit) ? 'BALANCE' : 'NOT BALANCE';
-            statusCell.className = totalDebit === totalCredit ? 'text-green-600 font-bold' : 'text-red-600 font-bold';
         }
 
-        // === TEMPLATE ROW ===
         function generateRow() {
             return `
             <tr class="item-row">
@@ -198,21 +191,18 @@
         `;
         }
 
-        // === REINDEX ===
         function reindexRows() {
             $('#item-table-body tr').each(function(i, row) {
                 $(row).attr('data-index', i);
                 $(row).find('input, select').each(function() {
                     const name = $(this).attr('name');
                     if (name) {
-                        // ganti index lama jadi index baru
                         $(this).attr('name', name.replace(/\[\d*\]/, `[${i}]`));
                     }
                 });
             });
         }
 
-        // === SELECT2 ===
         function attachSelect2($select) {
             $select.select2({
                 placeholder: 'Cari Account...',
@@ -254,14 +244,11 @@
             });
         }
 
-        // === READY ===
         $(document).ready(function() {
-            // inisialisasi select2 untuk row lama
             $('.item-select').each(function() {
                 attachSelect2($(this));
             });
 
-            // tombol tambah
             $('#add-row').click(function() {
                 $('#item-table-body').append(generateRow());
                 reindexRows();
@@ -269,21 +256,18 @@
                 attachSelect2($('#item-table-body tr:last .item-select'));
             });
 
-            // tombol hapus
             $(document).on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
                 reindexRows();
                 updateTotals();
             });
 
-            // input uang realtime
             $(document).on('input', '.money-input', function() {
                 const raw = this.value.replace(/[^0-9]/g, '');
                 this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
                 updateTotals();
             });
 
-            // submit: ubah ke angka murni
             $('#journal-entry-form').on('submit', function() {
                 document.querySelectorAll('.money-input').forEach(input => {
                     const raw = input.value.replace(/\./g, '');

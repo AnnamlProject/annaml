@@ -16,7 +16,7 @@ class JournalEntryController extends Controller
 
     public function index()
     {
-        $data = JournalEntry::orderBy('source', 'desc')->get();
+        $data = JournalEntry::orderBy('tanggal')->get();
         return view('journal_entry.index', compact('data'));
     }
     public function create()

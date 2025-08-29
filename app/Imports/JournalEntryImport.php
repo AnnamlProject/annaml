@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\chartOfAccount as AppChartOfAccount;
+use App\DepartemenAkun;
 use App\Departement;
 use App\JournalEntry;
 use App\JournalEntryDetail;
@@ -21,26 +22,40 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         try {
+            Log::info('Jumlah rows diimport: ' . $rows->count());
+
             // Group rows by key: source|tanggal|comment_transaksi
             foreach ($rows as $row) {
+                Log::debug('Row dibaca:', $row->toArray());
+
                 $key = $row['source'] . '|' . $row['tanggal'] . '|' . ($row['comment_transaksi'] ?? '');
                 $this->grouped[$key][] = $row;
             }
+
+            Log::info('Total group terbentuk: ' . count($this->grouped));
 
             foreach ($this->grouped as $key => $groupRows) {
                 $totalDebit = 0;
                 $totalKredit = 0;
                 $invalidKodeAkun = false;
 
+                Log::info("Memproses group: {$key}, jumlah baris: " . count($groupRows));
+
                 foreach ($groupRows as $row) {
                     // Validasi kode akun
-                    if (!\App\ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists()) {
+                    $exists = \App\ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists();
+                    if (!$exists) {
+                        Log::warning("Kode akun tidak ditemukan: {$row['kode_akun']} untuk group {$key}");
                         $invalidKodeAkun = true;
                     }
 
                     $totalDebit += (float) ($row['debit'] ?? 0);
                     $totalKredit += (float) ($row['kredit'] ?? 0);
+
+                    Log::debug("Row {$key} => debit: {$row['debit']}, kredit: {$row['kredit']}");
                 }
+
+                Log::info("Group {$key} => totalDebit={$totalDebit}, totalKredit={$totalKredit}");
 
                 // Skip jika kode akun tidak valid
                 if ($invalidKodeAkun) {
@@ -64,7 +79,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 if (round($totalDebit, 2) !== round($totalKredit, 2)) {
                     $this->skippedGroups[] = [
                         'key' => $key,
-                        'reason' => 'Total debit dan kredit tidak balance.'
+                        'reason' => "Total debit ($totalDebit) dan kredit ($totalKredit) tidak balance."
                     ];
                     continue;
                 }
@@ -88,14 +103,13 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                 // Simpan detailnya
                 foreach ($groupRows as $row) {
-                    // cari departemen berdasarkan deskripsi
-                    $departemen = Departement::where('deskripsi', $row['departemen'])->first();
+                    $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($row) {
+                        $q->where('deskripsi', $row['departemen']);
+                    })->first();
 
-                    $departemenId = $departemen ? $departemen->id : null;
-
-                    Log::info('Menyimpan JournalEntryDetail:', [
-                        'journal_entry_id'   => $journalEntry->id,
-                        'departemen_akun_id' => $departemenId,
+                    $departemenAkunId = $departemenAkun ? $departemenAkun->id : null;
+                    Log::debug("Menyimpan detail untuk JournalEntry {$journalEntry->id}", [
+                        'departemen_akun_id' => $departemenAkunId,
                         'kode_akun'          => $row['kode_akun'],
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,
@@ -104,7 +118,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                     JournalEntryDetail::create([
                         'journal_entry_id'   => $journalEntry->id,
-                        'departemen_akun_id' => $departemenId,
+                        'departemen_akun_id' => $departemenAkunId,
                         'kode_akun'          => $row['kode_akun'],
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,
@@ -121,12 +135,14 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 }
                 $pesan .= '</ul>';
 
+                Log::warning('Skipped groups: ', $this->skippedGroups);
+
                 Session::flash('error', $pesan);
             } else {
                 Session::flash('success', 'Semua data berhasil diimport dan seimbang.');
             }
         } catch (\Exception $e) {
-            Log::error('Import gagal: ' . $e->getMessage());
+            Log::error('Import gagal: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             Session::flash('error', 'Import gagal: ' . $e->getMessage());
         }
     }

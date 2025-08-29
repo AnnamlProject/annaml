@@ -17,6 +17,7 @@ use App\ItemAccount;
 use App\ItemBuild;
 use App\ItemBuildDetail;
 use App\ItemQuantities;
+use App\ItemTaxes;
 use App\SalesTaxes;
 use App\Tax;
 use Illuminate\Http\Request;
@@ -109,13 +110,13 @@ class InventoryController extends Controller
 
         // Tambah aturan "wajib akun" sesuai type
         if ($request->type === 'inventory') {
-            $rules['asset_account_id'][]    = 'required';
-            $rules['revenue_account_id'][]  = 'required';
-            $rules['cogs_account_id'][]     = 'required';
-            $rules['variance_account_id'][] = 'required';
+            $rules['asset_account_id'][]    = 'nullable';
+            $rules['revenue_account_id'][]  = 'nullable';
+            $rules['cogs_account_id'][]     = 'nullable';
+            $rules['variance_account_id'][] = 'nullable';
         } else { // service
-            $rules['revenue_account_id'][]  = 'required';
-            $rules['expense_account_id'][]  = 'required';
+            $rules['revenue_account_id'][]  = 'nullable';
+            $rules['expense_account_id'][]  = 'nullable';
         }
 
         $validated = $request->validate($rules);
@@ -138,15 +139,13 @@ class InventoryController extends Controller
             // ===== 2b) Buat Item =====
             $item = Item::create([
                 'item_number'     => $validated['item_number'],
-                'item_description'       => $validated['item_description'],
-                // Form ini pakai "long_description" sebagai deskripsi panjang,
-                // mapping ke kolom yang kamu punya:
-                'item_description' => $request->input('long_description'), // atau 'description' sesuai kebutuhanmu
-                'description'     => $request->input('long_description'),
+                'item_description' => $validated['item_description'], // deskripsi singkat
+                'description'     => $request->input('long_description'), // deskripsi panjang
                 'type'            => $validated['type'],
                 'picture_path'    => $picturePath,
-                'thubmnail_path'  => $thumbPath, // mengikuti nama kolom di DB
+                'thubmnail_path'  => $thumbPath,
             ]);
+
 
             // ===== 2c) Item Quantities (opsional, buat 1 baris per item) =====
             $anyQuantityFilled = $request->filled([
@@ -305,6 +304,306 @@ class InventoryController extends Controller
 
             report($e);
             return back()->withInput()->with('error', 'Gagal menyimpan item: ' . $e->getMessage());
+        }
+    }
+    public function edit($id)
+    {
+        // Eager load semua relasi yang dibutuhkan di form
+        $item = Item::with([
+            'quantities',
+            'units',
+            'prices',
+            'vendors',
+            'accounts',
+            'builds',            // asumsi: ItemBuild punya relasi "details"
+            'builds.details',
+            'taxes',
+        ])->findOrFail($id);
+
+        // Master data untuk dropdown & tabel
+        $lokasiInventory    = LocationInventory::orderBy('kode_lokasi')->get();
+        $vendors            = Vendors::orderBy('nama_vendors')->get();
+        $accounts           = ChartOfAccount::orderBy('kode_akun')->get();
+        $items              = Item::orderBy('item_description')->get(['id', 'item_description']); // untuk tab Build (dropdown item)
+        $taxes              = SalesTaxes::orderBy('name')->get();
+
+        // Jika kamu punya master daftar "price list" agar muncul default baris,
+        // siapkan di sini (contoh hardcode; ganti dengan query jika ada tabel master-nya).
+        $priceListInventory = collect([
+            (object)['description' => 'Harga 1'],
+            (object)['description' => 'Harga 2'],
+            (object)['description' => 'Harga 3'],
+        ]);
+
+        // Prefill harga yang sudah ada (key = price_list_name)
+        $pricingPrefill = $item->prices->keyBy('price_list_name'); // ->get('Harga 1')->price
+
+        // ===== Taxes: mapping balik ke ID =====
+        // Skema kamu menyimpan di item_taxes: tax_name + is_exempt
+        // Untuk pre-check checkbox di form, kita perlu ID dari master Tax
+        $itemTaxNames       = $item->taxes->pluck('tax_name')->all();
+        $itemTaxNamesExempt = $item->taxes->where('is_exempt', true)->pluck('tax_name')->all();
+
+        $selectedTaxIds = $taxes->whereIn('name', $itemTaxNames)->pluck('id')->values()->all();
+        $exemptTaxIds   = $taxes->whereIn('name', $itemTaxNamesExempt)->pluck('id')->values()->all();
+
+        // ===== Quantities default (kalau kosong, untuk memudahkan form) =====
+        // Jika kamu hanya menampilkan 1 baris quantities, handy helper:
+        $quantity = $item->quantities->first(); // bisa null
+        // atau kalau mau selalu ada object:
+        // $quantity = $item->quantities->first() ?? new ItemQuantities(['on_hand_qty'=>0, ...]);
+
+        // Kirim semua ke view edit
+        return view('inventory.edit', [
+            'item'               => $item,
+            'quantity'           => $quantity,
+            'lokasiInventory'    => $lokasiInventory,
+            'vendors'            => $vendors,
+            'accounts'           => $accounts,
+            'items'              => $items,
+            'taxes'              => $taxes,
+            'priceListInventory' => $priceListInventory,
+            'pricingPrefill'     => $pricingPrefill,
+            'selectedTaxIds'     => $selectedTaxIds,  // untuk old('taxes', $selectedTaxIds)
+            'exemptTaxIds'       => $exemptTaxIds,    // untuk old('tax_exempt', $exemptTaxIds)
+        ]);
+    }
+    public function update(Request $request, Item $item)
+    {
+        // 1) VALIDASI
+        $rules = [
+            'item_number' => ['required', 'string', 'max:100', Rule::unique('items', 'item_number')->ignore($item->id)],
+            'item_description'   => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::in(['inventory', 'service'])],
+
+            // Quantities
+            'location_id'           => ['nullable', 'integer', 'exists:location_inventories,id'],
+            'on_hand_qty'           => ['nullable', 'integer'],
+            'on_hand_value'         => ['nullable', 'numeric'],
+            'pending_orders_qty'    => ['nullable', 'integer'],
+            'pending_orders_value'  => ['nullable', 'numeric'],
+            'purchase_order_qty'    => ['nullable', 'integer'],
+            'sales_order_qty'       => ['nullable', 'integer'],
+            'reorder_minimum'       => ['nullable', 'integer'],
+            'reorder_to_order'      => ['nullable', 'integer'],
+
+            // Units
+            'stocking_unit'             => ['nullable', 'string', 'max:100'],
+            'selling_same_as_stocking'  => ['nullable'],
+            'selling_unit'              => ['nullable', 'string', 'max:100'],
+            'selling_relationship'      => ['nullable', 'integer', 'min:0'],
+            'buying_same_as_stocking'   => ['nullable'],
+            'buying_unit'               => ['nullable', 'string', 'max:100'],
+            'buying_relationship'       => ['nullable', 'integer', 'min:0'],
+
+            // Pricing
+            'pricing'               => ['nullable', 'array'],
+            'pricing.*.name'        => ['nullable', 'string', 'max:255'],
+            'pricing.*.price'       => ['nullable', 'numeric'],
+
+            // Vendor
+            'vendor_id'             => ['nullable', 'integer', 'exists:vendors,id'],
+
+            // Accounts
+            'asset_account_id'      => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'revenue_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'cogs_account_id'       => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'variance_account_id'   => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'expense_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+
+            // Build
+            'build'                 => ['nullable', 'array'],
+            'build.*.item_id'       => ['nullable', 'integer', 'exists:items,id'],
+            'build.*.unit'          => ['nullable', 'string', 'max:100'],
+            'build.*.description'   => ['nullable', 'string', 'max:255'],
+            'build.*.quantity'      => ['nullable', 'integer', 'min:0'],
+
+            // Taxes
+            'taxes'                 => ['nullable', 'array'],
+            'taxes.*'               => ['integer', 'exists:taxes,id'],
+            'tax_exempt'            => ['nullable', 'array'],
+            'tax_exempt.*'          => ['integer', 'exists:taxes,id'],
+
+            // Files
+            'picture'   => ['nullable', 'file', 'image', 'max:2048'],
+            'thumbnail' => ['nullable', 'file', 'image', 'max:1024'],
+
+            // Long desc
+            'long_description' => ['nullable', 'string'],
+        ];
+
+        // Wajib akun (kalau kamu mau enforce saat edit, bisa ganti nullable→required)
+        if ($request->type === 'inventory') {
+            // tetap nullable sesuai versi store terakhir kamu
+        } else {
+            // service
+        }
+
+        $validated = $request->validate($rules);
+
+        DB::beginTransaction();
+        try {
+            // 2) FILES: ganti jika ada upload baru
+            $picturePath = $item->picture_path;
+            $thumbPath   = $item->thubmnail_path;
+
+            if ($request->hasFile('picture')) {
+                if ($picturePath) Storage::disk('public')->delete($picturePath);
+                $picturePath = $request->file('picture')->store('items/pictures', 'public');
+            }
+            if ($request->hasFile('thumbnail')) {
+                if ($thumbPath) Storage::disk('public')->delete($thumbPath);
+                $thumbPath = $request->file('thumbnail')->store('items/thumbnails', 'public');
+            }
+
+            // 3) UPDATE ITEM (header)
+            $item->update([
+                'item_number'      => $validated['item_number'],
+                'item_description' => $validated['item_description'],              // short desc
+                'description'      => $request->input('long_description'),         // long desc
+                'type'             => $validated['type'],
+                'picture_path'     => $picturePath,
+                'thubmnail_path'   => $thumbPath,
+            ]);
+
+            // 4) QUANTITIES: upsert satu baris/ lokasi
+            $anyQuantityFilled = $request->filled([
+                'location_id',
+                'on_hand_qty',
+                'on_hand_value',
+                'pending_orders_qty',
+                'pending_orders_value',
+                'purchase_order_qty',
+                'sales_order_qty',
+                'reorder_minimum',
+                'reorder_to_order'
+            ]);
+
+            if ($anyQuantityFilled) {
+                $qty = ItemQuantities::firstOrNew([
+                    'item_id'     => $item->id,
+                    'location_id' => $request->input('location_id'),
+                ]);
+                $qty->on_hand_qty          = (int) $request->input('on_hand_qty', 0);
+                $qty->on_hand_value        = (float) $request->input('on_hand_value', 0);
+                $qty->pending_orders_qty   = (int) $request->input('pending_orders_qty', 0);
+                $qty->pending_orders_value = (float) $request->input('pending_orders_value', 0);
+                $qty->purchase_order_qty   = (int) $request->input('purchase_order_qty', 0);
+                $qty->sales_order_qty      = (int) $request->input('sales_order_qty', 0);
+                $qty->reorder_minimum      = $request->input('reorder_minimum');
+                $qty->reorder_to_order     = $request->input('reorder_to_order');
+                $qty->save();
+            }
+
+            // 5) UNITS: upsert satu baris
+            $sellingSame = $request->has('selling_same_as_stocking');
+            $buyingSame  = $request->has('buying_same_as_stocking');
+
+            $unit = ItemUnit::firstOrNew(['item_id' => $item->id]);
+            $unit->selling_same_as_stocking = $sellingSame;
+            $unit->selling_unit             = $sellingSame ? null : $request->input('selling_unit');
+            $unit->selling_relationship     = $sellingSame ? null : $request->input('selling_relationship');
+            $unit->buying_same_as_stocking  = $buyingSame;
+            $unit->buying_unit              = $buyingSame ? null : $request->input('buying_unit');
+            $unit->buying_relationship      = $buyingSame ? null : $request->input('buying_relationship');
+            $unit->unit_of_measure          = $request->input('stocking_unit');
+            $unit->save();
+
+            // 6) PRICES: sync (hapus lama → insert baru)
+            ItemPrice::where('item_id', $item->id)->delete();
+            $pricing = collect($request->input('pricing', []))
+                ->filter(fn($row) => !empty($row['name']) || isset($row['price']));
+            foreach ($pricing as $row) {
+                ItemPrice::create([
+                    'item_id'         => $item->id,
+                    'price_list_name' => $row['name'] ?? '',
+                    'price'           => (float) ($row['price'] ?? 0),
+                ]);
+            }
+
+            // 7) VENDOR: upsert (satu vendor per item sesuai form kamu)
+            if ($request->filled('vendor_id')) {
+                $iv = ItemVendor::firstOrNew(['item_id' => $item->id]);
+                $iv->vendor_id = $request->input('vendor_id');
+                // $iv->vendor_contact = ... (jika ada field)
+                $iv->save();
+            } else {
+                // jika kosongkan vendor, hapus relasi vendor
+                ItemVendor::where('item_id', $item->id)->delete();
+            }
+
+            // 8) ACCOUNTS: upsert satu baris
+            $accountsPayload = [
+                'item_id'            => $item->id,
+                'asset_account_id'   => $request->input('asset_account_id'),
+                'revenue_account_id' => $request->input('revenue_account_id'),
+                'cogs_account_id'    => $request->input('cogs_account_id'),
+                'variance_account_id' => $request->input('variance_account_id'),
+                'expense_account_id' => $request->input('expense_account_id'),
+            ];
+            if ($item->type === 'inventory') {
+                $accountsPayload['expense_account_id'] = null;
+            } else {
+                $accountsPayload['asset_account_id']    = null;
+                $accountsPayload['cogs_account_id']     = null;
+                $accountsPayload['variance_account_id'] = null;
+            }
+
+            $acc = ItemAccount::firstOrNew(['item_id' => $item->id]);
+            $acc->fill($accountsPayload)->save();
+
+            // 9) BUILD: sync
+            ItemBuild::where('item_id', $item->id)->each(function ($b) {
+                // cascade akan hapus details, tapi untuk aman:
+                ItemBuildDetail::where('item_build_id', $b->id)->delete();
+                $b->delete();
+            });
+
+            $buildRows = collect($request->input('build', []))
+                ->filter(fn($row) => !empty($row['item_id']) && !empty($row['quantity']));
+
+            if ($buildRows->isNotEmpty()) {
+                $build = ItemBuild::create([
+                    'item_id'         => $item->id,
+                    'build_quantity'  => 1,
+                    'additional_costs' => null,
+                    'cost_account'    => null,
+                ]);
+
+                foreach ($buildRows as $d) {
+                    ItemBuildDetail::create([
+                        'item_build_id' => $build->id,
+                        'item_id'       => $d['item_id'],
+                        'unit'          => $d['unit'] ?? '',
+                        'description'   => $d['description'] ?? null,
+                        'quantity'      => (int) $d['quantity'],
+                    ]);
+                }
+            }
+
+            // 10) TAXES: sync
+            ItemTaxes::where('item_id', $item->id)->delete();
+
+            $selectedTaxIds = collect($request->input('taxes', []))->filter();
+            $exemptTaxIds   = collect($request->input('tax_exempt', []))->filter();
+
+            if ($selectedTaxIds->isNotEmpty()) {
+                $taxes = SalesTaxes::whereIn('id', $selectedTaxIds)->get(['id', 'name']);
+                foreach ($taxes as $t) {
+                    ItemTaxes::create([
+                        'item_id'   => $item->id,
+                        'tax_name'  => $t->name,                       // sesuai skema kamu
+                        'is_exempt' => $exemptTaxIds->contains($t->id),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('inventory.index')->with('success', 'Item berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return back()->withInput()->with('error', 'Gagal update item: ' . $e->getMessage());
         }
     }
 }

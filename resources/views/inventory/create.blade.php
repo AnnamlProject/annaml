@@ -25,9 +25,9 @@
             <div class="bg-white p-6 rounded-lg shadow space-y-6">
                 <div>
                     <label for="" class="font-semibold text-gray-700 block mb-2">Item</label>
-                    <label for="" class="mr-4">Number</label>
+                    <label for="item_number" class="mr-4">Number</label>
                     <input type="text" name="item_number" class="form-input w-1/8 border rounded px-2 py-1 text-sm">
-                    <label for="" class="mr-4">Description</label>
+                    <label for="item_description" class="mr-4">Description</label>
                     <input type="text" name="item_description" class="form-input w-1/3 border rounded px-2 py-1 text-sm">
                 </div>
                 <div class="mb-4">

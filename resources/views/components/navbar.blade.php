@@ -281,7 +281,7 @@
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
                                         Invoices
                                     </a>
-                                    <a href="{{ route('PaymentMethod.index') }}"
+                                    <a href="{{ route('employee.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
                                         Person
                                     </a>
@@ -484,10 +484,8 @@
 
                             <a href="{{ route('inventory.index') }}"
                                 class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Inventory
+                                & Service
 
-                            </a>
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Service
                             </a>
                         </div>
                     </div>

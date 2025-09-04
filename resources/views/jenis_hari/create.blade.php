@@ -25,6 +25,20 @@
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+                        <div class="mb-2">
+                            <label for="jam_mulai" class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai
+                            </label>
+                            <input type="time" name="jam_mulai"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
+                        <div class="mb-2">
+                            <label for="jam_selesai" class="block text-sm font-medium text-gray-700 mb-1">Jam Selesai
+                            </label>
+                            <input type="time" name="jam_selesai"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
 
                         <!-- deskripsi jenis_hari_asset -->
                         <div class="mb-4 md:col-span-2">

@@ -4,7 +4,7 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-md rounded-lg p-6 space-y-6">
-                <h2 class="font-bold text-lg mb-4">Salary Calculation Staff</h2>
+                <h2 class="font-bold text-lg mb-4">Salary Calculation Non Staff</h2>
                 <form method="POST" enctype="multipart/form-data"
                     action="{{ isset($data) ? route('pembayaran_gaji_nonstaff.update', $data->id) : route('pembayaran_gaji_nonstaff.store') }}">
                     @csrf
@@ -116,7 +116,7 @@
             });
         }
 
-        // Hitung total keseluruhan dari semua hidden input
+        // Hitung total keseluruhan
         function updateGrandTotal() {
             let total = 0;
             document.querySelectorAll('input.total-hidden').forEach(input => {
@@ -148,87 +148,96 @@
                     }
 
                     let tableHTML = `
-                    <table class="min-w-full table-auto border border-gray-200">
-                        <thead>
-                            <tr class="bg-gray-100 text-left">
-                                <th class="px-4 py-2 border">Nama Komponen</th>
-                                <th class="px-4 py-2 border">Tipe</th>
-                                <th class="px-4 py-2 border">Periode</th>
-                                <th class="px-4 py-2 border text-right">Nilai</th>
-                                <th class="px-4 py-2 border text-center">Jumlah Hari</th>
-                                <th class="px-4 py-2 border text-right">Potongan</th>
-                                <th class="px-4 py-2 border text-right">Total Nilai</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
+                        <table class="min-w-full table-auto border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100 text-left">
+                                    <th class="px-4 py-2 border">Nama Komponen</th>
+                                    <th class="px-4 py-2 border">Tipe</th>
+                                    <th class="px-4 py-2 border">Periode</th>
+                                    <th class="px-4 py-2 border text-right">Nilai</th>
+                                    <th class="px-4 py-2 border text-center">Jumlah</th>
+                                    <th class="px-4 py-2 border text-right">Potongan</th>
+                                    <th class="px-4 py-2 border text-right">Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
 
                     data.forEach((item, index) => {
+                        // label Jumlah → bisa "Hari" atau "Jam"
+                        const jumlahLabel = (item.nama_komponen.toLowerCase() === 'lembur') ?
+                            'Jam' : 'Hari';
+
                         tableHTML += `
-                        <tr>
-                            <td class="px-4 py-2 border">
-                                ${item.nama_komponen}
-                                <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
-                            </td>
-                            <td class="px-4 py-2 border">${item.tipe || '-'}</td>
-                            <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
-                            <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1 text-right" data-index="${index}" value="${item.nilai || 0}">
-                            </td>
-                            <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1 text-center" data-index="${index}" value="${item.jumlah_hari || 0}">
-                            </td>
-                            <td class="px-4 py-2 border">
-                                <input type="number" step="any" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1 text-right" data-index="${index}" value="${item.potongan || 0}">
-                            </td>
-                            <td class="px-4 py-2 border">
-                                <!-- input display, readonly -->
-                                <input type="text" class="total-display border rounded w-full p-1 bg-gray-100 text-right" data-index="${index}" value="0" readonly>
-                                <!-- input hidden untuk server -->
-                                <input type="hidden" name="komponen[${index}][total]" class="total-hidden" data-index="${index}" value="0">
-                            </td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td class="px-4 py-2 border">
+                                    ${item.nama_komponen}
+                                    <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
+                                </td>
+                                <td class="px-4 py-2 border">${item.tipe || '-'}</td>
+                                <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][nilai]" 
+                                           class="nilai border rounded w-full p-1 text-right" 
+                                           data-index="${index}" value="${item.nilai || 0}">
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][jumlah_hari]" 
+                                           class="jumlah-hari border rounded w-full p-1 text-center" 
+                                           data-index="${index}" value="${item.jumlah_hari || 0}">
+                                    <span class="text-xs text-gray-500">${jumlahLabel}</span>
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="number" step="any" name="komponen[${index}][potongan]" 
+                                           class="potongan border rounded w-full p-1 text-right" 
+                                           data-index="${index}" value="${item.potongan || 0}">
+                                </td>
+                                <td class="px-4 py-2 border">
+                                    <input type="text" class="total-display border rounded w-full p-1 bg-gray-100 text-right" 
+                                           data-index="${index}" value="0" readonly>
+                                    <input type="hidden" name="komponen[${index}][total]" 
+                                           class="total-hidden" data-index="${index}" value="0">
+                                </td>
+                            </tr>
+                        `;
                     });
 
                     tableHTML += '</tbody></table>';
                     komponenTable.innerHTML = tableHTML;
                     komponenContainer.classList.remove('hidden');
 
+                    // perhitungan ulang total
                     function updateTotal(index) {
                         const nilai = parseFloat(document.querySelector(
                             `input[name="komponen[${index}][nilai]"]`).value) || 0;
-                        const jumlahHari = parseFloat(document.querySelector(
+                        const jumlah = parseFloat(document.querySelector(
                             `input[name="komponen[${index}][jumlah_hari]"]`).value) || 0;
                         const potongan = parseFloat(document.querySelector(
                             `input[name="komponen[${index}][potongan]"]`).value) || 0;
 
-                        const totalNilai = nilai * jumlahHari;
-                        const totalPotongan = potongan * jumlahHari;
-                        const total = totalNilai + totalPotongan;
+                        const totalNilai = nilai * jumlah;
+                        const totalPotongan = potongan * jumlah;
+                        const total = totalNilai - totalPotongan;
 
-                        // tampilkan number format
                         const displayInput = document.querySelector(
                             `input.total-display[data-index="${index}"]`);
                         if (displayInput) displayInput.value = formatNumber(total);
 
-                        // simpan nilai asli ke hidden input
                         const hiddenInput = document.querySelector(
                             `input.total-hidden[data-index="${index}"]`);
                         if (hiddenInput) hiddenInput.value = total;
 
-                        // update grand total
                         updateGrandTotal();
                     }
 
-                    // pasang event listener untuk setiap baris
+                    // pasang event listener
                     data.forEach((_, index) => {
                         ['nilai', 'jumlah_hari', 'potongan'].forEach(field => {
                             const input = document.querySelector(
                                 `input[name="komponen[${index}][${field}]"]`);
                             if (input) {
                                 input.addEventListener('input', () => updateTotal(index));
-                                updateTotal(index); // hitung awal
+                                updateTotal(index);
                             }
                         });
                     });

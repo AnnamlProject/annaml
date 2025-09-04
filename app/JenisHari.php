@@ -10,6 +10,8 @@ class JenisHari extends Model
     protected $fillable =
     [
         'nama',
-        'deskripsi'
+        'deskripsi',
+        'jam_mulai',
+        'jam_selesai',
     ];
 }

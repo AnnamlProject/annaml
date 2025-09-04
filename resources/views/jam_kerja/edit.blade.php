@@ -21,7 +21,7 @@
                             @enderror
                         </div>
                         <div>
-                            <label for="jam_keluar" class="block font-medium">Jam Masuk</label>
+                            <label for="jam_keluar" class="block font-medium">Jam Keluar</label>
                             <input type="time" name="jam_keluar" id="jam_keluar"
                                 value="{{ old('jam_keluar', $data->jam_keluar) }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none

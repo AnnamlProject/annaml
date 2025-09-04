@@ -4,7 +4,7 @@
         <div class="py-8">
             <div class="w-full px-4 sm:px-6 lg:px-8">
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <h2 class="font-bold text-lg mb-4">Project Create</h2>
+                    <h2 class="font-bold text-lg mb-4">Specpose Create</h2>
                     <form action="{{ route('project.store') }}" method="POST">
                         @csrf
 

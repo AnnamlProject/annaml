@@ -15,6 +15,10 @@
                             <td class="py-2">{{ $target_wahana->wahana->nama_wahana }}</td>
                         </tr>
                         <tr class="border-t">
+                            <th class="py-2 font-medium">Unit Kerja</th>
+                            <td class="py-2">{{ $target_wahana->unit->nama_unit }}</td>
+                        </tr>
+                        <tr class="border-t">
                             <th class="py-2 font-medium">Jenis Hari</th>
                             <td class="py-2">{{ $target_wahana->jenis_hari->nama }}</td>
                         </tr>

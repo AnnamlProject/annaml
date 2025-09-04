@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-100 py-8">
-        <div class="max-w-7xl mx-auto space-y-6">
+        <div class="max-w-full mx-auto space-y-6">
 
             {{-- Card Input RFID --}}
             <div class="bg-white shadow-lg rounded-xl p-8">
@@ -52,33 +52,47 @@
                     <table class="min-w-full border border-gray-200 divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Nama</th>
                                 <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tanggal</th>
-                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Jam</th>
-                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Nama</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Level</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Masuk</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Pulang</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Lembur Masuk</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Lembur Pulang</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Durasi Lembur</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($absensis as $absen)
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-gray-700">
-                                        {{ $absen->employee->nama_karyawan }}
-                                    </td>
-                                    <td class="px-4 py-2 text-sm text-gray-700">
                                         {{ $absen->tanggal }}
                                     </td>
                                     <td class="px-4 py-2 text-sm text-gray-700">
-                                        {{ $absen->jam }}
+                                        {{ $absen->employee->nama_karyawan }}
                                     </td>
-                                    <td
-                                        class="px-4 py-2 text-sm font-semibold 
-                                               {{ $absen->status === 'Masuk' ? 'text-green-600' : 'text-blue-600' }}">
-                                        {{ $absen->status }}
+                                    <td class="px-4 py-2 text-sm text-gray-700">
+                                        {{ $absen->employee->levelKaryawan->nama_level }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm text-green-600 font-semibold">
+                                        {{ $absen->jam_masuk ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm text-blue-600 font-semibold">
+                                        {{ $absen->jam_pulang ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm text-purple-600 font-semibold">
+                                        {{ $absen->jam_lembur_masuk ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm text-red-600 font-semibold">
+                                        {{ $absen->jam_lembur_pulang ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm text-black-600 font-semibold">
+                                        {{ $absen->durasi_lembur ?? '-' }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                                    <td colspan="6" class="px-4 py-4 text-center text-gray-500">
                                         Belum ada data absensi.
                                     </td>
                                 </tr>
@@ -87,6 +101,7 @@
                     </table>
                 </div>
             </div>
+
 
         </div>
     </div>

@@ -37,12 +37,28 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                 $totalDebit = 0;
                 $totalKredit = 0;
                 $invalidKodeAkun = false;
+                $invalidDepartemen = false;
 
                 foreach ($groupRows as $row) {
                     // Validasi kode akun
                     $exists = ChartOfAccount::where('kode_akun', $row['kode_akun'])->exists();
                     if (!$exists) {
                         $invalidKodeAkun = true;
+                    }
+
+                    // Validasi departemen
+                    $departemenValue = $row['departemen'] ?? null;
+                    if (!empty($departemenValue)) {
+                        $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($departemenValue) {
+                            $q->where('deskripsi', $departemenValue);
+                        })->first();
+
+                        if (!$departemenAkun) {
+                            $invalidDepartemen = true;
+                            $this->skippedGroups[] = [
+                                'reason' => "Departemen '{$departemenValue}' tidak terdaftar. Group transaksi dilewati."
+                            ];
+                        }
                     }
 
                     $totalDebit  += (float) ($row['debit'] ?? 0);
@@ -54,6 +70,11 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     $this->skippedGroups[] = [
                         'reason' => "Kode akun tidak sesuai dengan account yang tersedia."
                     ];
+                    continue;
+                }
+
+                // Skip jika ada departemen invalid
+                if ($invalidDepartemen) {
                     continue;
                 }
 
@@ -73,7 +94,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                // Kalau semua valid → simpan JournalEntry
+                // Kalau semua valid → simpan JournalEntry master
                 [$source, $tanggal, $comment] = explode('|', $key);
 
                 $journalEntry = JournalEntry::create([
@@ -86,13 +107,17 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                 // Simpan detail
                 foreach ($groupRows as $row) {
-                    $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($row) {
-                        $q->where('deskripsi', $row['departemen']);
-                    })->first();
+                    $departemenValue = $row['departemen'] ?? null;
+                    $departemenAkun = null;
+
+                    if (!empty($departemenValue)) {
+                        $departemenAkun = DepartemenAkun::whereHas('departemen', function ($q) use ($departemenValue) {
+                            $q->where('deskripsi', $departemenValue);
+                        })->first();
+                    }
 
                     JournalEntryDetail::create([
                         'journal_entry_id'   => $journalEntry->id,
-                        // kalau tidak ketemu → null
                         'departemen_akun_id' => $departemenAkun ? $departemenAkun->id : null,
                         'kode_akun'          => $row['kode_akun'],
                         'debits'             => $row['debit'] ?? 0,
@@ -101,6 +126,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     ]);
                 }
             }
+
 
             // Kirim pesan error jika ada group yang dilewatkan
             if (count($this->skippedGroups) > 0) {

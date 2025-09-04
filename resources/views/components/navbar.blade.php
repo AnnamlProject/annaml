@@ -590,9 +590,24 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
                                         Wahana
                                     </a>
+                                    <a href="{{ route('target_unit.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
+                                        Unit
+                                    </a>
                                     <a href="{{ route('jenis_hari.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jenis
                                         Hari
+                                    </a>
+                                    <a href="{{ route('shift_karyawan.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Scheduling
+                                        Employee
+                                    </a>
+                                    <a href="{{ route('bonus_karyawan.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Bonus
+                                        Employee
+                                    </a>
+                                    <a href="{{ route('transaksi_wahana.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transaksi
                                     </a>
                                     <a href="{{ route('jam_kerja.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jam
@@ -652,12 +667,39 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
                                         Salary Calculations Non Staff
                                     </a>
-                                    <a href="{{ route('report.klasifikasi') }}"
+                                    <a href="{{ route('slip.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Salary Slip</a>
+                                        Salary Slip Staff</a>
+                                    <a href="{{ route('slip.nonStaff.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Salary Slip Non Staff</a>
                                     <a href="{{ route('absensi.form') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
                                         Pegawai
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="relative" x-data="{ subOpen: false }">
+                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                    <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 translate-x-1"
+                                    x-transition:enter-end="opacity-100 translate-x-0"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 translate-x-0"
+                                    x-transition:leave-end="opacity-0 translate-x-1"
+                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    <a href="{{ route('report.absensi.filter') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Rekap Absensi Pegawai
                                     </a>
                                 </div>
                             </div>
@@ -776,7 +818,7 @@
                         <button @click="open = !open" @keydown.escape="open = false"
                             class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
                             :class="{ 'text-blue-600 bg-blue-50': open }">
-                            Project
+                            Specpose
                             <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
                                 :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -797,7 +839,7 @@
                             <div class="relative" x-data="{ subOpen: false }">
                                 <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                     class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Project</span>
+                                    <span class="text-gray-700 group-hover:text-blue-600">Setup</span>
                                     <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -814,17 +856,20 @@
                                     @mouseenter="subOpen = true" @mouseleave="subOpen = false">
                                     <a href="{{ route('project.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Data
-                                        Project</a>
+                                        Specpose</a>
                                     <a href="{{ route('project.create') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                        Project</a>
+                                        Specpose</a>
                                     <a href="{{ route('project.edit_project') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Edit
-                                        Project</a>
+                                        Specpose</a>
                                     <a href="{{ route('project.view_project') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">View
-                                        Project</a>
+                                        Specpose</a>
                                 </div>
+                                <a href="#"
+                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                    Reports</a>
                             </div>
 
                             <!-- Divider -->

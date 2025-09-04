@@ -150,7 +150,7 @@
                 const jumlahHari = parseFloat(row.querySelector('.jumlah_hari').value) || 0;
                 const potongan = parseFloat(row.querySelector('.potongan').value) || 0;
 
-                const total = (nilai + potongan) * jumlahHari;
+                const total = (nilai + jumlahHari) - (potongan * jumlahHari);
                 row.querySelector('.total').value = formatNumber(total);
                 row.querySelector('.total_raw').value = total;
 

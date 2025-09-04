@@ -27,8 +27,12 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">kode
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Jam Mulai</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Jam Selesai</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Deksripsi</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi
@@ -40,6 +44,8 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-2">{{ $item->nama }}</td>
+                                <td class="px-4 py-2">{{ $item->jam_mulai }}</td>
+                                <td class="px-4 py-2">{{ $item->jam_selesai }}</td>
                                 <td class="px-4 py-2">{{ $item->deskripsi ?? '-' }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">

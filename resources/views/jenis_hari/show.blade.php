@@ -13,6 +13,14 @@
                             <td class="py-2">{{ $data->nama }}</td>
                         </tr>
                         <tr class="border-t">
+                            <th class="py-2 font-medium">Jam Mulai</th>
+                            <td class="py-2">{{ $data->jam_mulai }}</td>
+                        </tr>
+                        <tr class="border-t">
+                            <th class="py-2 font-medium">Jam Selesai</th>
+                            <td class="py-2">{{ $data->jam_selesai }}</td>
+                        </tr>
+                        <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Deskripsi</th>
                             <td class="py-2">{{ $data->deskripsi }}</td>
                         </tr>

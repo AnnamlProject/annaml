@@ -3,6 +3,7 @@
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\BonusKaryawanController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\CoaSearchController;
 use App\Http\Controllers\DashboardController;
@@ -31,6 +32,9 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\SalesInvoiceDocumentController;
 use App\Http\Controllers\SalesOrderDocumentController;
+use App\Http\Controllers\SlipGajiController;
+use App\Http\Controllers\TargetUnitController;
+use App\Http\Controllers\TargetWahanaController;
 use App\SalesInvoiceDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -295,6 +299,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/Wahana', [ImportController::class, 'importWahana'])->name('import.Wahana');
     // target wahana
     Route::resource('target_wahana', 'TargetWahanaController');
+    Route::get('/wahana-by-unit/{id}', [TargetWahanaController::class, 'getWahanaByUnit']);
+
+    // target unit
+    Route::resource('target_unit', 'TargetUnitController');
+    Route::get('/komponen-by-level/{id}', [TargetUnitController::class, 'getKomponenByLevel']);
+
+    // transaksi Wahana
+    Route::resource('transaksi_wahana', 'TransaksiWahanaController');
+
+    // shift karyawan wahana
+    Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController');
+
     // jenis hari
     Route::resource('jenis_hari', 'JenisHariController');
 
@@ -307,6 +323,26 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pembayaran_gaji', 'PembayaranGajiController');
     Route::resource('pembayaran_gaji_nonstaff', 'PembayaranGajiNonStaffController');
     Route::get('/get-pembayaran-gaji-by-karyawan/{id}', [PembayaranGajiController::class, 'getKomposisiGajiByKaryawan']);
+
+    // slip gaji staff
+    Route::get('/slip-gaji', [SlipGajiController::class, 'index'])->name('slip.index');
+    Route::get('/slip-gaji/{id}', [SlipGajiController::class, 'show'])->name('slip.show');
+    Route::get('/slip-gaji/{id}/download', [SlipGajiController::class, 'download'])->name('slip.download');
+
+    // rekap absensi
+    Route::get('/rekap-absensi', [ReportController::class, 'filter'])->name('report.absensi.filter');
+    Route::get('/rekap-absensi/hasil', [ReportController::class, 'hasil'])->name('report.absensi.hasil');
+    // routes/web.php
+    Route::get('/report/absensi/pdf', [ReportController::class, 'exportPdf'])->name('report.absensi.pdf');
+    Route::get('/report/absensi/excel', [ReportController::class, 'exportExcel'])->name('report.absensi.excel');
+
+    // slip gaji non staff
+    Route::get('/slip-gaji-nonstaff', [SlipGajiController::class, 'indexNonStaff'])->name('slip.nonStaff.index');
+    Route::get('/slip-gaji-nonstaff/{id}', [SlipGajiController::class, 'showNonSataff'])->name('slip.nonStaffshow');
+    Route::get('/slip-gaji-nonstaff/{id}/download', [SlipGajiController::class, 'downloadNonStaff'])->name('slip.nonStaffdownload');
+
+    Route::get('/bonus_karyawan', [BonusKaryawanController::class, 'index'])->name('bonus_karyawan.index');
+
     // end payroll menu
 
     // asset menu 

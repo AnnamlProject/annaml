@@ -27,19 +27,21 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama Wahana</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unit Kerja</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Jenis Hari</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tahun</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Bulan</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Target Harian</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Keterangan</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
@@ -48,13 +50,14 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2">{{ $item->wahana->nama_wahana }}</td>
-                                <td class="px-4 py-2">{{ $item->jenis_hari->nama }}</td>
-                                <td class="px-4 py-2">{{ $item->tahun ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $item->bulan ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ number_format($item->target_harian) }}</td>
-                                <td class="px-4 py-2">{{ $item->keterangan ?? 'Tidak Ada' }}</td>
+                                <td class="px-4 py-2  text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->wahana->nama_wahana }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->unit->nama_unit }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->jenis_hari->nama }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->tahun ?? '-' }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->bulan ?? '-' }}</td>
+                                <td class="px-4 py-2 text-center ">{{ number_format($item->target_harian) }}</td>
+                                <td class="px-4 py-2 text-center ">{{ $item->keterangan ?? 'Tidak Ada' }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
                                         <a href="{{ route('target_wahana.show', $item->id) }}"

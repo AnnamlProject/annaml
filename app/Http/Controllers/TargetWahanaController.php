@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\JenisHari;
 use App\TargetWahana;
+use App\UnitKerja;
 use App\Wahana;
 use Facade\FlareClient\View;
 use Illuminate\Contracts\View\View as ViewView;
@@ -15,15 +16,21 @@ class TargetWahanaController extends Controller
     //
     public function index()
     {
-        $data = TargetWahana::with('wahana', 'jenis_hari')->orderBy('wahana_id')->get();
+        $data = TargetWahana::with('wahana', 'jenis_hari', 'unit')->orderBy('wahana_id')->get();
         return view('target_wahana.index', compact('data'));
     }
     public function create()
     {
-        $wahana = Wahana::all();
+        $unit = UnitKerja::all();
         $jenis_hari = JenisHari::all();
-        return view('target_wahana.create', compact('wahana', 'jenis_hari'));
+        return view('target_wahana.create', compact('jenis_hari', 'unit'));
     }
+    public function getWahanaByUnit($unitId)
+    {
+        $wahana = Wahana::where('unit_kerja_id', $unitId)->get();
+        return response()->json($wahana);
+    }
+
     public function store(Request $request)
     {
         // Bersihkan titik ribuan sebelum validasi
@@ -35,6 +42,7 @@ class TargetWahanaController extends Controller
         // Validasi setelah input dibersihkan
         $request->validate([
             'wahana_id' => 'required|exists:wahanas,id',
+            'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jenis_hari_id' => 'required|exists:jenis_haris,id',
             'target_harian' => 'required|numeric',
             'bulan' => 'required|integer',
@@ -65,10 +73,10 @@ class TargetWahanaController extends Controller
     {
         //get post by ID
         $target_wahana = \App\TargetWahana::findOrFail($id);
-        $wahana = Wahana::all();
+        $unit = UnitKerja::all();
         $jenis_hari = JenisHari::all();
 
-        return view('target_wahana.edit', compact('target_wahana', 'wahana', 'jenis_hari'));
+        return view('target_wahana.edit', compact('target_wahana', 'jenis_hari', 'unit'));
     }
     public function update(Request $request, TargetWahana $target_wahana)
     {
@@ -78,6 +86,7 @@ class TargetWahanaController extends Controller
 
         $request->validate([
             'wahana_id' => 'required|exists:wahanas,id',
+            'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jenis_hari_id' => 'required|exists:jenis_haris,id',
             'target_harian' => 'required|numeric',
             'bulan' => 'required|integer',

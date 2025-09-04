@@ -23,7 +23,9 @@ class JenisHariController extends Controller
             // Hapus 'required' karena bisa auto-generate
 
             'nama' => 'string|max:255',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
+            'jam_mulai'     => 'required|date_format:H:i',
+            'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
         ]);
 
 
@@ -45,7 +47,9 @@ class JenisHariController extends Controller
     {
         $request->validate([
             'nama' => 'string|max:255',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
+            'jam_mulai'     => 'required|date_format:H:i',
+            'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
 
         ]);
 

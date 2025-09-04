@@ -22,6 +22,6 @@ class KomponenPenghasilan extends Model
 
     public function levelKaryawan()
     {
-        return $this->belongsTo(LevelKaryawan::class);
+        return $this->belongsTo(LevelKaryawan::class, 'level_karyawan_id');
     }
 }

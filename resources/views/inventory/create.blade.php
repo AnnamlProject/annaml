@@ -133,22 +133,27 @@
                 {{-- Units Tab --}}
                 <div id="units" class="tab-content hidden">
                     <h3 class="font-semibold text-lg mb-2">Units</h3>
+
+                    {{-- Stocking --}}
                     <div class="mb-4">
                         <label class="block">Stocking Unit of Measure</label>
-                        <input type="text" name="stocking_unit"
+                        <input type="text" id="stocking_unit" name="stocking_unit"
                             class="form-input w-full border rounded px-2 py-1 text-sm" />
                     </div>
+
+                    {{-- Selling --}}
                     <div class="mb-4">
-                        <label>
-                            <input type="checkbox" name="selling_same_as_stocking" value="1" checked />
-                            Selling unit same as stocking unit
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="selling_same" name="selling_same_as_stocking" value="1"
+                                checked>
+                            <span class="ml-2">Selling unit same as stocking unit</span>
                         </label>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <label class="block">Selling Unit (if different)</label>
-                            <input type="text" name="selling_unit"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                            <input type="text" id="selling_unit" name="selling_unit"
+                                class="form-input w-full border rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Selling Relationship</label>
@@ -156,17 +161,20 @@
                                 class="form-input w-full border rounded px-2 py-1 text-sm" />
                         </div>
                     </div>
+
+                    {{-- Buying --}}
                     <div class="mb-4 mt-4">
-                        <label>
-                            <input type="checkbox" name="buying_same_as_stocking" value="1" checked />
-                            Buying unit same as stocking unit
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="buying_same" name="buying_same_as_stocking" value="1"
+                                checked>
+                            <span class="ml-2">Buying unit same as stocking unit</span>
                         </label>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block">Buying Unit (if different)</label>
-                            <input type="text" name="buying_unit"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                            <input type="text" id="buying_unit" name="buying_unit"
+                                class="form-input w-full border rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Buying Relationship</label>
@@ -175,6 +183,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 {{-- Pricing Tab --}}
                 <div id="pricing" class="tab-content hidden">
@@ -715,6 +724,45 @@
                 }
             });
         });
+    </script>
+    <script>
+        const stocking = document.getElementById('stocking_unit');
+        const sellingSame = document.getElementById('selling_same');
+        const sellingUnit = document.getElementById('selling_unit');
+        const buyingSame = document.getElementById('buying_same');
+        const buyingUnit = document.getElementById('buying_unit');
+
+        function toggleSelling() {
+            if (sellingSame.checked) {
+                sellingUnit.value = stocking.value;
+                sellingUnit.readOnly = true;
+            } else {
+                sellingUnit.readOnly = false;
+                sellingUnit.value = '';
+            }
+        }
+
+        function toggleBuying() {
+            if (buyingSame.checked) {
+                buyingUnit.value = stocking.value;
+                buyingUnit.readOnly = true;
+            } else {
+                buyingUnit.readOnly = false;
+                buyingUnit.value = '';
+            }
+        }
+
+        // event listener
+        sellingSame.addEventListener('change', toggleSelling);
+        buyingSame.addEventListener('change', toggleBuying);
+        stocking.addEventListener('input', () => {
+            if (sellingSame.checked) sellingUnit.value = stocking.value;
+            if (buyingSame.checked) buyingUnit.value = stocking.value;
+        });
+
+        // init on page load
+        toggleSelling();
+        toggleBuying();
     </script>
     <script>
         const typeRadios = document.querySelectorAll('input[name="type"]');

@@ -12,6 +12,7 @@ use App\pembayaran_gaji;
 use App\pembayaran_gaji_detail;
 use App\PembayaranGaji;
 use App\PembayaranGajiDetail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -52,14 +53,108 @@ class PembayaranGajiController extends Controller
             ->orderBy('urut')
             ->get()
             ->map(function ($item) use ($id, $periodeAwal, $periodeAkhir) {
-                $jumlahHari = $item->jumlah_hari ?? 0;
+                $jumlah = $item->jumlah_hari ?? 0;
+                $catatan = null;
 
-                // Kalau ini komponen kehadiran → hitung otomatis
-                if ($item->komponen->is_kehadiran && $periodeAwal && $periodeAkhir) {
-                    $jumlahHari = Absensi::where('employee_id', $id)
-                        ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
-                        ->where('status', 'Hadir')
-                        ->count();
+                if ($periodeAwal && $periodeAkhir) {
+                    // === 1. Komponen Kehadiran (hitung jumlah hari masuk) ===
+                    if ($item->komponen->is_kehadiran) {
+                        $jumlah = Absensi::where('employee_id', $id)
+                            ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
+                            ->whereIn('status', ['Masuk', 'Terlambat'])
+                            ->count();
+                    }
+
+                    // === 2. Komponen Lembur (hitung total jam lembur) ===
+                    if (strtolower($item->komponen->nama_komponen) === 'lembur') {
+                        $lemburRecords = Absensi::where('employee_id', $id)
+                            ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
+                            ->whereIn('status', ['Lembur Masuk', 'Lembur Pulang'])
+                            ->orderBy('tanggal')
+                            ->orderBy('jam')
+                            ->get()
+                            ->groupBy('tanggal');
+
+                        $totalJam = 0;
+                        foreach ($lemburRecords as $tanggal => $records) {
+                            $masuk = $records->firstWhere('status', 'Lembur Masuk');
+                            $pulang = $records->firstWhere('status', 'Lembur Pulang');
+
+                            if ($masuk && $pulang) {
+                                $masukTime = \Carbon\Carbon::parse($masuk->jam);
+                                $pulangTime = \Carbon\Carbon::parse($pulang->jam);
+                                $totalJam += $masukTime->diffInHours($pulangTime);
+                            }
+                        }
+                        $jumlah = $totalJam; // jumlah jam lembur
+                    }
+
+                    // === 3. Komponen Transportasi (cek target unit) ===
+                    if (strtolower($item->komponen->nama_komponen) === 'transportasi') {
+                        $employee = \App\Employee::find($id);
+
+                        if ($employee) {
+                            $bulan = \Carbon\Carbon::parse($periodeAwal)->month;
+                            $tahun = \Carbon\Carbon::parse($periodeAwal)->year;
+
+                            $targetUnit = \App\Targetunit::where('unit_kerja_id', $employee->unit_kerja_id)
+                                ->where('komponen_penghasilan_id', $item->komponen->id)
+                                ->where('bulan', $bulan)
+                                ->where('tahun', $tahun)
+                                ->first();
+
+                            $totalRealisasi = \App\TransaksiWahana::where('unit_kerja_id', $employee->unit_kerja_id)
+                                ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
+                                ->sum('realisasi');
+
+                            if ($targetUnit) {
+                                $target = number_format($targetUnit->target_bulanan, 0, ',', '.');
+                                $realisasi = number_format($totalRealisasi, 0, ',', '.');
+
+                                if ($totalRealisasi < $targetUnit->target_bulanan) {
+                                    $catatan = "Target unit tidak tercapai. Target: Rp {$target}, Realisasi: Rp {$realisasi}";
+                                    $item->nilai = 0;
+                                } else {
+                                    $catatan = "Target tercapai ✔. Realisasi: Rp {$realisasi}";
+                                }
+                            } else {
+                                $catatan = "⚠ Tidak ada target unit untuk periode ini";
+                            }
+                        }
+                    }
+                    // === 4. Komponen Bonus (cek target harian via transaksi wahana) ===
+                    if (strtolower($item->komponen->nama_komponen) === 'bonus') {
+                        $employee = \App\Employee::find($id);
+
+                        if ($employee) {
+                            $bulan = \Carbon\Carbon::parse($periodeAwal)->month;
+                            $tahun = \Carbon\Carbon::parse($periodeAwal)->year;
+
+                            $targetUnit = \App\Targetunit::where('unit_kerja_id', $employee->unit_kerja_id)
+                                ->where('komponen_penghasilan_id', $item->komponen->id)
+                                ->where('bulan', $bulan)
+                                ->where('tahun', $tahun)
+                                ->first();
+
+                            $totalRealisasi = \App\TransaksiWahana::where('unit_kerja_id', $employee->unit_kerja_id)
+                                ->whereBetween('tanggal', [$periodeAwal, $periodeAkhir])
+                                ->sum('realisasi');
+
+                            if ($targetUnit) {
+                                $target = number_format($targetUnit->target_bulanan, 0, ',', '.');
+                                $realisasi = number_format($totalRealisasi, 0, ',', '.');
+
+                                if ($totalRealisasi < $targetUnit->target_bulanan) {
+                                    $catatan = "Target unit tidak tercapai. Target: Rp {$target}, Realisasi: Rp {$realisasi}";
+                                    $item->nilai = 0;
+                                } else {
+                                    $catatan = "Target tercapai ✔. Realisasi: Rp {$realisasi}";
+                                }
+                            } else {
+                                $catatan = "⚠ Tidak ada target unit untuk periode ini";
+                            }
+                        }
+                    }
                 }
 
                 return [
@@ -68,8 +163,9 @@ class PembayaranGajiController extends Controller
                     'tipe' => $item->komponen->tipe ?? '-',
                     'periode_perhitungan' => $item->komponen->periode_perhitungan ?? '-',
                     'nilai' => $item->nilai,
-                    'jumlah_hari' => $jumlahHari,
+                    'jumlah_hari' => $jumlah,
                     'potongan' => $item->potongan,
+                    'catatan' => $catatan, // tambahan untuk transportasi
                 ];
             });
 

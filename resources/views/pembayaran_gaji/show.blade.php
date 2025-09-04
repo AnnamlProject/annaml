@@ -45,7 +45,7 @@
                                 <td class="px-4 py-2 border text-right">
                                     {{ number_format(
                                         $details->sum(function ($detail) {
-                                            return $detail->nilai * $detail->jumlah_hari + $detail->potongan * $detail->jumlah_hari;
+                                            return $detail->nilai * $detail->jumlah_hari - $detail->potongan * $detail->jumlah_hari;
                                         }),
                                         2,
                                     ) }}

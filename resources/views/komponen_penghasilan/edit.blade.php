@@ -92,6 +92,9 @@
                             <select name="periode_perhitungan" id="periode_perhitungan" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
+                                <option value="Jam"
+                                    {{ old('periode_perhitungan', $data->periode_perhitungan) == 'Jam' ? 'selected' : '' }}>
+                                    Jam</option>
                                 <option value="Harian"
                                     {{ old('periode_perhitungan', $data->periode_perhitungan) == 'Harian' ? 'selected' : '' }}>
                                     Harian</option>

@@ -22,7 +22,7 @@ class ShiftKaryawanWahanaController extends Controller
             'wahana',
             'jenisHari'
         ])
-            ->join('unit_kerjas', 'shift_karyawan_wahanas.unit_kerja_id', '=', 'unit_Kerjas.id')
+            ->join('unit_kerjas', 'shift_karyawan_wahanas.unit_kerja_id', '=', 'unit_kerjas.id')
             ->orderBy('unit_kerjas.nama_unit')
             ->select('shift_karyawan_wahanas.*')
             ->get();

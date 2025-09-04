@@ -14,7 +14,7 @@ class TargetUnitController extends Controller
     public function index()
     {
         $data = TargetUnit::with(['unit', 'komponen', 'levelKaryawan'])
-            ->join('unit_kerjas', 'targetunits.unit_kerja_id', '=', 'unit_Kerjas.id')
+            ->join('unit_kerjas', 'targetunits.unit_kerja_id', '=', 'unit_kerjas.id')
             ->orderBy('unit_kerjas.nama_unit')
             ->select('targetunits.*')
             ->get();

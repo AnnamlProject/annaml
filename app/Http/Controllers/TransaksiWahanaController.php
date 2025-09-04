@@ -19,8 +19,8 @@ class TransaksiWahanaController extends Controller
     public function index()
     {
         $data = TransaksiWahana::with(['unitKerja', 'wahana'])
-            ->join('unit_kerja', 'transaksi_wahanas.unit_kerja_id', '=', 'unit_kerja.id')
-            ->orderBy('unit_kerja.nama_unit')
+            ->join('unit_kerjas', 'transaksi_wahanas.unit_kerja_id', '=', 'unit_kerjas.id')
+            ->orderBy('unit_kerjas.nama_unit')
             ->select('transaksi_wahanas.*')
             ->get();
         return view('transaksi_wahana.index', compact('data'));

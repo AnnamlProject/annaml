@@ -9,6 +9,7 @@ use App\Targetunit;
 use App\TargetWahana;
 use App\TransaksiWahana;
 use App\UnitKerja;
+use App\Wahana;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -18,12 +19,50 @@ class TransaksiWahanaController extends Controller
     //
     public function index()
     {
-        $data = TransaksiWahana::with(['unitKerja', 'wahana'])
+        $query = TransaksiWahana::with(['unitKerja', 'wahana'])
             ->join('unit_kerjas', 'transaksi_wahanas.unit_kerja_id', '=', 'unit_kerjas.id')
             ->orderBy('unit_kerjas.nama_unit')
-            ->select('transaksi_wahanas.*')
-            ->get();
-        return view('transaksi_wahana.index', compact('data'));
+            ->select('transaksi_wahanas.*');
+
+        if ($unit = request('filter_tipe')) {
+            $query->where('unit_kerjas.nama_unit', $unit);
+        }
+
+        // Filter Level Karyawan
+        if ($wahana = request('filter_wahana')) {
+            $query->whereHas('wahana', function ($q) use ($wahana) {
+                $q->where('nama_wahana', $wahana);
+            });
+        }
+        $searchable = ['tanggal', 'realisasi', 'jumlah_pengunjung'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+
+                // tambahkan juga relasi
+                $q->orWhereHas('unitKerja', function ($q2) use ($search) {
+                    $q2->where('nama_unit', 'like', "%{$search}%");
+                });
+                // tambahkan juga relasi
+                $q->orWhereHas('wahana', function ($q4) use ($search) {
+                    $q4->where('nama_wahana', 'like', "%{$search}%");
+                });
+            });
+        }
+
+
+        // Eksekusi query sekali di akhir
+        $data = $query->get();
+        // Atau kalau mau paginasi:
+        // $data = $query->paginate(20)->appends(request()->query());
+
+        // Sumber data untuk dropdown
+        $unitkerja = UnitKerja::select('nama_unit')->distinct()->orderBy('nama_unit')->pluck('nama_unit');
+        $wahana = Wahana::select('nama_wahana')->distinct()->orderBy('nama_wahana')->pluck('nama_wahana');
+        return view('transaksi_wahana.index', compact('data', 'unitkerja', 'wahana'));
     }
     public function create()
     {

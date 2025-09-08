@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Absensi;
 use App\chartOfAccount;
+use App\Exports\TargetWahanaExport;
+use App\JenisHari;
+use App\TargetWahana;
 use App\UnitKerja;
+use App\Wahana;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -284,5 +288,84 @@ class ReportController extends Controller
             'filterType' => $filterType,
             'unitName'   => $unitName,
         ];
+    }
+    // Halaman Filter
+    public function filterWahana()
+    {
+        $units = UnitKerja::orderBy('nama_unit')->get();
+        $wahanas = Wahana::orderBy('nama_wahana')->get();
+        $jenisHaris = JenisHari::orderBy('nama')->get();
+
+        return view('report.target_wahana.filter', compact('units', 'wahanas', 'jenisHaris'));
+    }
+
+    // Hasil Report
+    public function resultWahana(Request $request)
+    {
+        $query = TargetWahana::with(['wahana.unitKerja', 'jenis_hari']);
+
+        if ($request->filled('unit_id')) {
+            $query->whereHas('wahana', function ($q) use ($request) {
+                $q->where('unit_kerja_id', $request->unit_id);
+            });
+        }
+
+        if ($request->filled('wahana_id')) {
+            $query->where('wahana_id', $request->wahana_id);
+        }
+
+        if ($request->filled('jenis_hari_id')) {
+            $query->where('jenis_hari_id', $request->jenis_hari_id);
+        }
+
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+
+        $results = $query->get();
+
+        return view('report.target_wahana.result', compact('results'));
+    }
+    // ReportController.php
+    public function getWahanaByUnit($unitId)
+    {
+        $wahanas = Wahana::where('unit_kerja_id', $unitId)->get(['id', 'nama_wahana']);
+        return response()->json($wahanas);
+    }
+
+    public function exportPdfWahana(Request $request)
+    {
+        // Query ulang sesuai filter
+        $query = TargetWahana::with(['wahana.unitKerja', 'jenis_hari']);
+
+        if ($request->filled('unit_id')) {
+            $query->whereHas('wahana', fn($q) => $q->where('unit_kerja_id', $request->unit_id));
+        }
+        if ($request->filled('wahana_id')) {
+            $query->where('wahana_id', $request->wahana_id);
+        }
+        if ($request->filled('jenis_hari_id')) {
+            $query->where('jenis_hari_id', $request->jenis_hari_id);
+        }
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+        if ($request->filled('bulan')) {
+            $query->where('bulan', $request->bulan);
+        }
+
+        $results = $query->get();
+
+        $pdf = PDF::loadView('report.target_wahana.pdf', compact('results'));
+        return $pdf->download('report.target_wahana.pdf');
+    }
+
+    public function exportExcelWahana(Request $request)
+    {
+        return Excel::download(new TargetWahanaExport($request), 'report_target_wahana.xlsx');
     }
 }

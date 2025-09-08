@@ -12,8 +12,54 @@ class KomponenPenghasilanController extends Controller
     //
     public function index()
     {
-        $data = KomponenPenghasilan::with('levelKaryawan')->get();
-        return view('komponen_penghasilan.index', compact('data'));
+        $query = KomponenPenghasilan::with('levelKaryawan');
+
+
+        // Filter Level Karyawan
+        if ($level_karyawan = request('filter_tipe')) {
+            $query->whereHas('levelKaryawan', function ($q) use ($level_karyawan) {
+                $q->where('nama_level', $level_karyawan);
+            });
+        }
+
+        // Filter Status
+        if ($status = request('filter_status')) {
+            $query->where('status_komponen', $status);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+        if ($sifat = request('filter_sifat')) {
+            $query->where('sifat', $sifat);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+        if ($tipe_gaji = request('filter_tipe_gaji')) {
+            $query->where('tipe', $tipe_gaji);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+        $searchable = ['nama_komponen', 'kategori'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+                $q->orWhereHas('levelKaryawan', function ($q4) use ($search) {
+                    $q4->where('nama_level', 'like', "%{$search}%");
+                });
+            });
+        }
+
+
+        // Eksekusi query sekali di akhir
+        $data = $query->get();
+        // Atau kalau mau paginasi:
+        // $data = $query->paginate(20)->appends(request()->query());
+
+        // Sumber data untuk dropdown
+        $levelKaryawan = LevelKaryawan::select('nama_level')->distinct()->orderBy('nama_level')->pluck('nama_level');
+        return view('komponen_penghasilan.index', compact('data', 'levelKaryawan'));
     }
     public function create()
     {

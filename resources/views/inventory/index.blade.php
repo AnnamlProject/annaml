@@ -37,22 +37,38 @@
                         <tbody class="divide-y divide-gray-100">
                             @forelse($items as $item)
                                 <tr>
-                                    <td class="px-2 py-1 text-center">{{ $item->item_number }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $item->item_description ?? '-' }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $item->type }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $item->description }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $item->picture_path }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $item->thumbnail_path }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->item_number }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->item_description ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->type }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->description }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->picture_path }}</td>
+                                    <td class="px-4 py-2 text-center">{{ $item->thumbnail_path }}</td>
 
-                                    <td class="px-2 py-1 text-right space-x-2">
-                                        <a href="{{ route('inventory.edit', $item->id) }}"
-                                            class="text-blue-600 hover:underline">Edit</a>
-                                        <form action="{{ route('inventory.destroy', $item->id) }}" method="POST"
-                                            class="inline" onsubmit="return confirm('Yakin ingin menghapus item ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Hapus</button>
-                                        </form>
+                                    <td class="px-4 py-2 text-right">
+                                        <div class="flex justify-end space-x-3">
+                                            <a href="{{ route('inventory.show', $item->id) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('inventory.edit', $item->id) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('inventory.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

@@ -54,24 +54,71 @@
                 </div>
 
                 <!-- Filter Panel -->
-                <div id="filterPanel" class="hidden px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <div class="flex flex-wrap gap-4">
-                        <!-- Search Input -->
-                        <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Cari..."
-                                class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm w-64 shadow-sm" />
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <i class="fas fa-search text-gray-400 text-sm"></i>
+                <div id="filterPanel"
+                    class="{{ request('search') || request('filter_tipe') ? '' : 'hidden' }} px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <form method="GET" action="{{ route('employee.index') }}">
+                        <div class="flex flex-wrap gap-4">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="Cari level,nama, dan tempat lahir"
+                                    class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm w-64 shadow-sm" />
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                                </div>
                             </div>
+
+                            <!-- Filter Tipe Akun -->
+                            <select name="filter_unit"
+                                class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                                <option value="">Semua Unit</option>
+                                @foreach ($unit as $tipe)
+                                    <option value="{{ $tipe }}"
+                                        {{ request('filter_unit') == $tipe ? 'selected' : '' }}>
+                                        {{ $tipe }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="filter_tipe"
+                                class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                                <option value="">Semua Level Karyawan</option>
+                                @foreach ($level_karyawan as $tipe)
+                                    <option value="{{ $tipe }}"
+                                        {{ request('filter_tipe') == $tipe ? 'selected' : '' }}>
+                                        {{ $tipe }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+
+
+                            <select name="filter_jenis_kelamin"
+                                class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                                <option value="">Jenis Kelamin</option>
+                                <option value="Laki Laki"
+                                    {{ request('filter_jenis_kelamin') == 'Laki Laki' ? 'selected' : '' }}>
+                                    Laki Laki
+                                </option>
+                                <option value="Perempuan"
+                                    {{ request('filter_jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>
+                                    Perempuan
+                                </option>
+                            </select>
+
+
+                            <!-- Tombol Filter -->
+                            <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-600 text-sm">
+                                <i class="fas fa-search mr-1"></i> Filter
+                            </button>
+
+                            <!-- Tombol Reset -->
+                            <a href="{{ route('employee.index') }}"
+                                class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-times mr-1 text-gray-400"></i> Reset
+                            </a>
                         </div>
-                        <!-- Filter Tipe Akun -->
-                        <select id="filterTipeAkun" class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
-                            <option value="">Level Karyawan</option>
-                            @foreach ($level_karyawan as $tipe)
-                                <option value="{{ strtolower($tipe) }}">{{ $tipe }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Table Container -->

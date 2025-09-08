@@ -29,7 +29,7 @@
         <table class="w-full border-collapse border text-sm">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="border px-2 py-1">Pegawai</th>
+                    <th class="border px-2 py-1">Nama Karyawan</th>
                     <th class="border px-2 py-1">Level</th>
                     <th class="border px-2 py-1">Unit</th>
                     <th class="border px-2 py-1">Total Hari Kerja</th>

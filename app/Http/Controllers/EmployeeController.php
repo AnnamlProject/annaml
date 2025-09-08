@@ -18,11 +18,50 @@ class EmployeeController extends Controller
 
     public function index()
     {
-        $employees = Employee::with(['jabatan', 'ptkp', 'levelKaryawan', 'unitKerja'])->latest()->paginate(5);
+        $query = Employee::with(['jabatan', 'ptkp', 'levelKaryawan', 'unitKerja']);
+        // Filter Level Karyawan
+        if ($level_karyawan = request('filter_tipe')) {
+            $query->whereHas('levelKaryawan', function ($q) use ($level_karyawan) {
+                $q->where('nama_level', $level_karyawan);
+            });
+        }
+        if ($unit = request('filter_unit')) {
+            $query->whereHas('unitKerja', function ($q) use ($unit) {
+                $q->where('nama_unit', $unit);
+            });
+        }
 
+
+        if ($jenis_kelamin = request('filter_jenis_kelamin')) {
+            $query->where('jenis_kelamin', $jenis_kelamin);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+
+        $searchable = ['kode_karyawan', 'nama_karyawan', 'nik', 'tempat_lahir'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+                $q->orWhereHas('levelKaryawan', function ($q4) use ($search) {
+                    $q4->where('nama_level', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('unitKerja', function ($q1) use ($search) {
+                    $q1->where('nama_unit', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $employees = $query->paginate(10); // tampilkan 10 per halaman
+
+
+
+
+        $unit = UnitKerja::pluck('nama_unit')->filter()->unique()->values();
         $level_karyawan = LevelKaryawan::pluck('nama_level')->filter()->unique()->values();
-
-        return view('employee.index', compact('employees', 'level_karyawan'));
+        return view('employee.index', compact('employees', 'level_karyawan', 'unit'));
     }
 
 

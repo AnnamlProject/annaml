@@ -12,9 +12,40 @@ class WahanaController extends Controller
     //
     public function index()
     {
-        $data = Wahana::with('UnitKerja')->orderBy('nama_wahana')->get();
-        return view('wahana.index', compact('data'));
+        // Ambil query dasar
+        $query = Wahana::with('UnitKerja')->orderBy('nama_wahana');
+
+        // Filter Unit
+        if ($unit = request('filter_tipe')) {
+            $query->whereHas('UnitKerja', function ($q) use ($unit) {
+                $q->where('nama_unit', $unit);
+            });
+        }
+
+        // Filter Status
+        if ($status = request('filter_status')) {
+            $query->where('status', $status);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+
+        // Filter Search
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_wahana', 'like', "%$search%")
+                    ->orWhere('kode_wahana', 'like', "%$search%");
+            });
+        }
+
+        // Eksekusi query
+        $data = $query->get();
+
+        // Ambil list unit unik
+        $unitkerja = UnitKerja::select('nama_unit')->distinct()->pluck('nama_unit');
+
+        return view('wahana.index', compact('data', 'unitkerja'));
     }
+
     public function create()
     {
         $unit_kerja = UnitKerja::all();

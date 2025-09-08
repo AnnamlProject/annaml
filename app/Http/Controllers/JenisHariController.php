@@ -31,7 +31,7 @@ class JenisHariController extends Controller
 
         JenisHari::create($validated);
 
-        return redirect()->route('jenis_hari.index')->with('success', 'Location Asset created successfully.');
+        return redirect()->route('jenis_hari.index')->with('success', 'Jenis Hari created successfully.');
     }
     public function show($id)
     {

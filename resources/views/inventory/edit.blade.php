@@ -915,3 +915,5 @@
             toggleTypeSections(checked ? checked.value : 'inventory');
         });
     </script>
+
+@endsection

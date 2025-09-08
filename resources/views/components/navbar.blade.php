@@ -583,16 +583,16 @@
                                     <a href="{{ route('unit_kerja.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
                                     </a>
+                                    <a href="{{ route('target_unit.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
+                                        Unit
+                                    </a>
                                     <a href="{{ route('wahana.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana
                                     </a>
                                     <a href="{{ route('target_wahana.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
                                         Wahana
-                                    </a>
-                                    <a href="{{ route('target_unit.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
-                                        Unit
                                     </a>
                                     <a href="{{ route('jenis_hari.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jenis
@@ -602,12 +602,12 @@
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Scheduling
                                         Employee
                                     </a>
+                                    <a href="{{ route('transaksi_wahana.index') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transaksi
+                                    </a>
                                     <a href="{{ route('bonus_karyawan.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Bonus
                                         Employee
-                                    </a>
-                                    <a href="{{ route('transaksi_wahana.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transaksi
                                     </a>
                                     <a href="{{ route('jam_kerja.index') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jam
@@ -700,6 +700,10 @@
                                     <a href="{{ route('report.absensi.filter') }}"
                                         class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                         Rekap Absensi Pegawai
+                                    </a>
+                                    <a href="{{ route('report.target_wahana.filter') }}"
+                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Rekap Target Wahana
                                     </a>
                                 </div>
                             </div>

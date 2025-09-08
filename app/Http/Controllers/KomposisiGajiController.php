@@ -7,6 +7,8 @@ use App\KomposisiGaji;
 use Illuminate\Http\Request;
 use App\KomponenPenghasilan;
 use App\KomposisiGajiDetail;
+use App\LevelKaryawan;
+use App\UnitKerja;
 
 class KomposisiGajiController extends Controller
 {
@@ -14,9 +16,55 @@ class KomposisiGajiController extends Controller
 
     public function index()
     {
-        $data = KomposisiGaji::latest()->paginate(10);
-        return view('komposisi_gaji.index', compact('data'));
+        $query = KomposisiGaji::with(['employee', 'employee.unitKerja', 'employee.levelKaryawan']);
+
+        // Filter Level Karyawan
+        if ($level_karyawan = request('filter_tipe')) {
+            $query->whereHas('employee.levelKaryawan', function ($q) use ($level_karyawan) {
+                $q->where('nama_level', $level_karyawan);
+            });
+        }
+
+        // Filter Unit
+        if ($unit = request('filter_unit')) {
+            $query->whereHas('employee.unitKerja', function ($q) use ($unit) {
+                $q->where('nama_unit', $unit);
+            });
+        }
+
+        // Kolom searchable ada di tabel employee
+        $searchable = ['kode_karyawan', 'nama_karyawan', 'nik', 'tempat_lahir'];
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                // cari di tabel employees
+                $q->orWhereHas('employee', function ($qEmp) use ($search, $searchable) {
+                    $qEmp->where(function ($qq) use ($search, $searchable) {
+                        foreach ($searchable as $col) {
+                            $qq->orWhere($col, 'like', "%{$search}%");
+                        }
+                    });
+                });
+
+                // cari di level karyawan
+                $q->orWhereHas('employee.levelKaryawan', function ($q4) use ($search) {
+                    $q4->where('nama_level', 'like', "%{$search}%");
+                });
+
+                // cari di unit kerja
+                $q->orWhereHas('employee.unitKerja', function ($q1) use ($search) {
+                    $q1->where('nama_unit', 'like', "%{$search}%");
+                });
+            });
+        }
+
+
+        $data = $query->paginate(10);
+        $unit = UnitKerja::pluck('nama_unit')->filter()->unique()->values();
+        $level_karyawan = LevelKaryawan::pluck('nama_level')->filter()->unique()->values();
+
+        return view('komposisi_gaji.index', compact('data', 'unit', 'level_karyawan'));
     }
+
     public function create()
     {
         $karyawan = Employee::all();

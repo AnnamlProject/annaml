@@ -332,6 +332,14 @@ Route::middleware(['auth'])->group(function () {
     // rekap absensi
     Route::get('/rekap-absensi', [ReportController::class, 'filter'])->name('report.absensi.filter');
     Route::get('/rekap-absensi/hasil', [ReportController::class, 'hasil'])->name('report.absensi.hasil');
+    // report target wahana 
+    Route::prefix('reports')->group(function () {
+        Route::get('/target-wahana/filter', [ReportController::class, 'filterWahana'])->name('report.target_wahana.filter');
+        Route::get('/target-wahana/result', [ReportController::class, 'resultWahana'])->name('report.target_wahana.result');
+    });
+    Route::get('/get-wahana-by-unit/{unitId}', [ReportController::class, 'getWahanaByUnit'])->name('report.getWahanaByUnit');
+    Route::get('/reports/target-wahana/pdf', [ReportController::class, 'exportPdfWahana'])->name('report.target_wahana.pdf');
+    Route::get('/reports/target-wahana/excel', [ReportController::class, 'exportExcelWahana'])->name('report.target_wahana.excel');
     // routes/web.php
     Route::get('/report/absensi/pdf', [ReportController::class, 'exportPdf'])->name('report.absensi.pdf');
     Route::get('/report/absensi/excel', [ReportController::class, 'exportExcel'])->name('report.absensi.excel');

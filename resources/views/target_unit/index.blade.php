@@ -16,13 +16,68 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Target Unit
                     </h3>
-                    <a href="{{ route('target_unit.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Target Unit
-                    </a>
+                    <div class="flex flex-wrap gap-2">
+
+                        <button onclick="document.getElementById('filterPanel').classList.toggle('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-filter text-gray-500 mr-2"></i> Filter
+                        </button>
+                        <a href="{{ route('target_unit.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Target Unit
+                        </a>
+                    </div>
                 </div>
             </div>
+            <!-- Filter Panel -->
+            <div id="filterPanel"
+                class="{{ request('search') || request('filter_tipe') ? '' : 'hidden' }} px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <form method="GET" action="{{ route('target_unit.index') }}">
+                    <div class="flex flex-wrap gap-4">
+                        <!-- Search Input -->
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                placeholder="Cari unit,komponen, dan level karyawan"
+                                class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm w-64 shadow-sm" />
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-search text-gray-400 text-sm"></i>
+                            </div>
+                        </div>
 
+                        <!-- Filter Tipe Akun -->
+                        <select name="filter_tipe" class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                            <option value="">Semua Unit Kerja</option>
+                            @foreach ($unitkerja as $tipe)
+                                <option value="{{ $tipe }}" {{ request('filter_tipe') == $tipe ? 'selected' : '' }}>
+                                    {{ $tipe }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <select name="filter_level" class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                            <option value="">Semua Level Karyawan</option>
+                            @foreach ($levelKaryawan as $level)
+                                <option value="{{ $level }}"
+                                    {{ request('filter_tipe') == $level ? 'selected' : '' }}>
+                                    {{ $level }}
+                                </option>
+                            @endforeach
+                        </select>
+
+
+                        <!-- Tombol Filter -->
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-600 text-sm">
+                            <i class="fas fa-search mr-1"></i> Filter
+                        </button>
+
+                        <!-- Tombol Reset -->
+                        <a href="{{ route('target_unit.index') }}"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-times mr-1 text-gray-400"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
             <div class="relative overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
@@ -54,7 +109,8 @@
                                 <td class="px-4 py-2 text-center">{{ $item->unit->nama_unit }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->komponen->nama_komponen }}</td>
                                 <td class="px-4 py-2 text-center">{{ number_format($item->target_bulanan) }}</td>
-                                <td class="px-4 py-2 text-center">{{ $item->levelKaryawan->nama_level ?? 'Tidak Ada' }}</td>
+                                <td class="px-4 py-2 text-center">{{ $item->levelKaryawan->nama_level ?? 'Tidak Ada' }}
+                                </td>
                                 <td class="px-4 py-2 text-center">{{ number_format($item->besaran_nominal) }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->tahun ?? '-' }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->bulan ?? '-' }}</td>

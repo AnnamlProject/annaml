@@ -146,12 +146,6 @@
                             <label for="remember_me" class="ml-2 text-sm text-gray-700 smooth-transition">Remember
                                 me</label>
                         </div>
-                        @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}"
-                                class="text-sm text-secondary hover:text-blue-800 smooth-transition hover:underline">
-                                Forgot password?
-                            </a>
-                        @endif
                     </div>
 
                     <button type="submit"

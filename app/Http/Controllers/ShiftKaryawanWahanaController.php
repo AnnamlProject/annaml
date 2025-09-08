@@ -8,6 +8,7 @@ use App\Exports\EmployeeExport;
 use App\JenisHari;
 use App\ShiftKaryawanWahana;
 use App\UnitKerja;
+use App\Wahana;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -16,7 +17,7 @@ class ShiftKaryawanWahanaController extends Controller
     //
     public function index()
     {
-        $data = ShiftKaryawanWahana::with([
+        $query = ShiftKaryawanWahana::with([
             'karyawan',
             'unitKerja',
             'wahana',
@@ -24,9 +25,65 @@ class ShiftKaryawanWahanaController extends Controller
         ])
             ->join('unit_kerjas', 'shift_karyawan_wahanas.unit_kerja_id', '=', 'unit_kerjas.id')
             ->orderBy('unit_kerjas.nama_unit')
-            ->select('shift_karyawan_wahanas.*')
-            ->get();
-        return view('shift_karyawan.index', compact('data'));
+            ->select('shift_karyawan_wahanas.*');
+
+        if ($unit = request('filter_tipe')) {
+            $query->where('unit_kerjas.nama_unit', $unit);
+        }
+
+        // Filter Level Karyawan
+        if ($wahana = request('filter_wahana')) {
+            $query->whereHas('wahana', function ($q) use ($wahana) {
+                $q->where('nama_wahana', $wahana);
+            });
+        }
+        if ($jenisHari = request('filter_jenis_hari')) {
+            $query->whereHas('jenisHari', function ($q) use ($jenisHari) {
+                $q->where('nama', $jenisHari);
+            });
+        }
+        // Filter Status
+        if ($status = request('filter_status')) {
+            $query->where('status', $status);
+            // pastikan di tabel Wahana ada kolom 'status'
+            // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
+        }
+        $searchable = ['tanggal', 'jam_mulai', 'jam_selesai'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+
+                // tambahkan juga relasi
+                $q->orWhereHas('unitKerja', function ($q2) use ($search) {
+                    $q2->where('nama_unit', 'like', "%{$search}%");
+                });
+                // tambahkan juga relasi
+                $q->orWhereHas('jenisHari', function ($q3) use ($search) {
+                    $q3->where('nama', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('wahana', function ($q4) use ($search) {
+                    $q4->where('nama_wahana', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('karyawan', function ($q4) use ($search) {
+                    $q4->where('nama_karyawan', 'like', "%{$search}%");
+                });
+            });
+        }
+
+
+        // Eksekusi query sekali di akhir
+        $data = $query->get();
+        // Atau kalau mau paginasi:
+        // $data = $query->paginate(20)->appends(request()->query());
+
+        // Sumber data untuk dropdown
+        $unitkerja = UnitKerja::select('nama_unit')->distinct()->orderBy('nama_unit')->pluck('nama_unit');
+        $jenis_hari = JenisHari::select('nama')->distinct()->orderBy('nama')->pluck('nama');
+        $wahana = Wahana::select('nama_wahana')->distinct()->orderBy('nama_wahana')->pluck('nama_wahana');
+        return view('shift_karyawan.index', compact('data', 'unitkerja', 'jenis_hari', 'wahana'));
     }
     public function create()
     {

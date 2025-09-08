@@ -15,7 +15,68 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Bonus Employee
                     </h3>
+                    <div class="flex flex-wrap gap-2">
 
+                        <button onclick="document.getElementById('filterPanel').classList.toggle('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-filter text-gray-500 mr-2"></i> Filter
+                        </button>
+
+                    </div>
+
+                </div>
+                <div id="filterPanel"
+                    class="{{ request('search') || request('filter_tipe') ? '' : 'hidden' }} px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <form method="GET" action="{{ route('bonus_karyawan.index') }}">
+                        <div class="flex flex-wrap gap-4">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="Cari wahana, dan jenis hari"
+                                    class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm w-64 shadow-sm" />
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="fas fa-search text-gray-400 text-sm"></i>
+                                </div>
+                            </div>
+
+
+                            <select name="filter_wahana"
+                                class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                                <option value="">Semua wahana </option>
+                                @foreach ($wahana as $whn)
+                                    <option value="{{ $whn }}"
+                                        {{ request('filter_tipe') == $whn ? 'selected' : '' }}>
+                                        {{ $whn }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <select name="filter_jenis_hari"
+                                class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                                <option value="">Semua jenis hari </option>
+                                @foreach ($jenis_hari as $js)
+                                    <option value="{{ $js }}"
+                                        {{ request('filter_tipe') == $js ? 'selected' : '' }}>
+                                        {{ $js }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+
+
+
+                            <!-- Tombol Filter -->
+                            <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-600 text-sm">
+                                <i class="fas fa-search mr-1"></i> Filter
+                            </button>
+
+                            <!-- Tombol Reset -->
+                            <a href="{{ route('bonus_karyawan.index') }}"
+                                class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-times mr-1 text-gray-400"></i> Reset
+                            </a>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Table Container -->
@@ -68,7 +129,8 @@
                                         </div>
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $item->transaksiWahana->wahana->nama_wahana }}
+                                        <div class="text-sm text-gray-900">
+                                            {{ $item->transaksiWahana->wahana->nama_wahana }}
                                         </div>
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">

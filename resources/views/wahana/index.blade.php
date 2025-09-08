@@ -33,6 +33,10 @@
                         Wahana List
                     </h3>
                     <div class="flex flex-wrap gap-2">
+                        <button onclick="document.getElementById('filterPanel').classList.toggle('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-filter text-gray-500 mr-2"></i> Filter
+                        </button>
                         <!-- File Button -->
                         <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
                             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
@@ -46,7 +50,53 @@
 
                 </div>
             </div>
+            <!-- Filter Panel -->
+            <div id="filterPanel"
+                class="{{ request('search') || request('filter_tipe') ? '' : 'hidden' }} px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <form method="GET" action="{{ route('wahana.index') }}">
+                    <div class="flex flex-wrap gap-4">
+                        <!-- Search Input -->
+                        <div class="relative">
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Wahana"
+                                class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 text-sm w-64 shadow-sm" />
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-search text-gray-400 text-sm"></i>
+                            </div>
+                        </div>
 
+                        <!-- Filter Tipe Akun -->
+                        <select name="filter_tipe" class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                            <option value="">Semua Unit Kerja</option>
+                            @foreach ($unitkerja as $tipe)
+                                <option value="{{ $tipe }}" {{ request('filter_tipe') == $tipe ? 'selected' : '' }}>
+                                    {{ $tipe }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <!-- Filter Status -->
+                        <select name="filter_status" class="py-2 px-3 border rounded-lg text-sm border-gray-300 shadow-sm">
+                            <option value="">Semua Status</option>
+                            <option value="Aktif" {{ request('filter_status') == 'Aktif' ? 'selected' : '' }}>Aktif
+                            </option>
+                            <option value="Non Aktif" {{ request('filter_status') == 'Non Aktif' ? 'selected' : '' }}>Non
+                                Aktif</option>
+                        </select>
+
+
+                        <!-- Tombol Filter -->
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded shadow-sm hover:bg-blue-600 text-sm">
+                            <i class="fas fa-search mr-1"></i> Filter
+                        </button>
+
+                        <!-- Tombol Reset -->
+                        <a href="{{ route('wahana.index') }}"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-times mr-1 text-gray-400"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
             <div class="relative overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0 z-10">
@@ -137,7 +187,8 @@
                 <a href="{{ route('export.Wahana') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
                     <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
                 </a>
-                <form action="{{ route('import.Wahana') }}" method="POST" enctype="multipart/form-data" class="space-y-2">
+                <form action="{{ route('import.Wahana') }}" method="POST" enctype="multipart/form-data"
+                    class="space-y-2">
                     @csrf
                     <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
                     <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>

@@ -19,7 +19,7 @@
                     </ul>
                 </div>
             @endif
-            <div class="grid grid-cols-3 gap-4 text-sm">
+            <div class="grid grid-cols-4 gap-4 text-sm">
                 <div class="mb-2">
                     <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-1">Employee</label>
                     <select name="employee_id" id="employee_id"

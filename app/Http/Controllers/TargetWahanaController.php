@@ -16,9 +16,42 @@ class TargetWahanaController extends Controller
     //
     public function index()
     {
-        $data = TargetWahana::with('wahana', 'jenis_hari', 'unit')->orderBy('wahana_id')->get();
-        return view('target_wahana.index', compact('data'));
+        $query = TargetWahana::with(['wahana', 'jenis_hari', 'unit'])
+            ->orderBy('wahana_id');
+
+        // Filter Unit (dropdown berisi nama_unit)
+        if ($unit = request('filter_tipe')) {
+            $query->whereHas('unit', function ($q) use ($unit) {
+                $q->where('nama_unit', $unit);
+            });
+        }
+
+        // Filter Wahana (dropdown berisi nama_wahana)
+        if ($whn = request('filter_wahana')) {
+            $query->whereHas('wahana', function ($q) use ($whn) {
+                $q->where('nama_wahana', $whn);
+            });
+            // Alternatif jika yang dikirim id: $query->where('wahana_id', $whn);
+        }
+
+        // Search (di kolom milik tabel wahana)
+        if ($search = request('search')) {
+            $query->whereHas('wahana', function ($q) use ($search) {
+                $q->where('nama_wahana', 'like', "%{$search}%")
+                    ->orWhere('kode_wahana', 'like', "%{$search}%");
+            });
+        }
+
+        // Eksekusi query SEKALI di akhir
+        $data = $query->get();
+
+        // Sumber data untuk dropdown
+        $unitkerja = UnitKerja::select('nama_unit')->distinct()->orderBy('nama_unit')->pluck('nama_unit');
+        $wahana    = Wahana::select('nama_wahana')->distinct()->orderBy('nama_wahana')->pluck('nama_wahana');
+
+        return view('target_wahana.index', compact('data', 'unitkerja', 'wahana'));
     }
+
     public function create()
     {
         $unit = UnitKerja::all();

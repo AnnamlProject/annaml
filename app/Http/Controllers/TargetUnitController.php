@@ -13,14 +13,56 @@ class TargetUnitController extends Controller
     //
     public function index()
     {
-        $data = TargetUnit::with(['unit', 'komponen', 'levelKaryawan'])
+        $query = TargetUnit::with(['unit', 'komponen', 'levelKaryawan'])
             ->join('unit_kerjas', 'targetunits.unit_kerja_id', '=', 'unit_kerjas.id')
             ->orderBy('unit_kerjas.nama_unit')
-            ->select('targetunits.*')
-            ->get();
+            ->select('targetunits.*');
 
-        return view('target_unit.index', compact('data'));
+        if ($unit = request('filter_tipe')) {
+            $query->where('unit_kerjas.nama_unit', $unit);
+        }
+
+        // Filter Level Karyawan
+        if ($level = request('filter_level')) {
+            $query->whereHas('levelKaryawan', function ($q) use ($level) {
+                $q->where('nama_level', $level);
+            });
+        }
+        $searchable = ['bulan', 'tahun'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+
+                // tambahkan juga relasi
+                $q->orWhereHas('unit', function ($q2) use ($search) {
+                    $q2->where('nama_unit', 'like', "%{$search}%");
+                });
+                // tambahkan juga relasi
+                $q->orWhereHas('komponen', function ($q3) use ($search) {
+                    $q3->where('nama_komponen', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('levelKaryawan', function ($q4) use ($search) {
+                    $q4->where('nama_level', 'like', "%{$search}%");
+                });
+            });
+        }
+
+
+        // Eksekusi query sekali di akhir
+        $data = $query->get();
+        // Atau kalau mau paginasi:
+        // $data = $query->paginate(20)->appends(request()->query());
+
+        // Sumber data untuk dropdown
+        $unitkerja = UnitKerja::select('nama_unit')->distinct()->orderBy('nama_unit')->pluck('nama_unit');
+        $levelKaryawan = LevelKaryawan::select('nama_level')->distinct()->orderBy('nama_level')->pluck('nama_level');
+
+        return view('target_unit.index', compact('data', 'unitkerja', 'levelKaryawan'));
     }
+
     public function create()
     {
         $unit = UnitKerja::all();

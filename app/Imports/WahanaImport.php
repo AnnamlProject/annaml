@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\UnitKerja;
-use App\wahana;
+use App\Wahana;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;

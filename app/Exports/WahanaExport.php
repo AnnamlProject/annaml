@@ -17,7 +17,7 @@ class WahanaExport implements FromCollection, WithHeadings
 
         return $data->map(function ($item) {
             return [
-                $item->unitKerja->nama ?? '-', // Ambil nama unit kerja, fallback '-'
+                $item->unitKerja->nama_unit ?? '-', // Ambil nama unit kerja, fallback '-'
                 $item->kode_wahana,
                 $item->nama_wahana,
                 $item->status,

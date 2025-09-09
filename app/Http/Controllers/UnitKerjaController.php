@@ -22,6 +22,7 @@ class UnitKerjaController extends Controller
     {
         $request->validate([
             'nama_unit' => 'required|string',
+            'urutan' => 'required|integer',
             'deskripsi' => 'nullable|string',
 
         ]);
@@ -47,6 +48,7 @@ class UnitKerjaController extends Controller
     {
         $request->validate([
             'nama_unit' => 'required|string',
+            'urutan' => 'required|integer',
             'deskripsi' => 'nullable|string',
         ]);
 

@@ -10,6 +10,7 @@ class UnitKerja extends Model
 
     protected $fillable = [
         'nama_unit',
-        'deskripsi'
+        'deskripsi',
+        'urutan',
     ];
 }

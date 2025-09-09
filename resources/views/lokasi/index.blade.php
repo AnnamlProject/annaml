@@ -15,10 +15,13 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Location Asset
                     </h3>
-                    <a href="{{ route('lokasi.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Location Asset
-                    </a>
+                    @can('lokasi_asset.create')
+                        <a href="{{ route('lokasi.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Location Asset
+                        </a>
+                    @endcan
+
                 </div>
             </div>
             <div class="relative overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
@@ -48,28 +51,37 @@
                                 <td class="px-2 py-1 text-center">{{ $item->deskripsi ?? '-' }}</td>
                                 <td class="px-2 py-1 text-center text-right">
                                     <div class="flex justify-end space-x-3">
-                                        <a href="{{ route('lokasi.show', $item->kode_lokasi) }}"
-                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                            title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('lokasi.edit', $item->kode_lokasi) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form id="delete-form-{{ $item->id }}"
-                                            action="{{ route('lokasi.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                        @can('lokasi_asset.view')
+                                            <a href="{{ route('lokasi.show', $item->kode_lokasi) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
 
-                                        <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('lokasi_asset.update')
+                                            <a href="{{ route('lokasi.edit', $item->kode_lokasi) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('lokasi_asset.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('lokasi.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+
                                     </div>
                                 </td>
                             </tr>

@@ -264,16 +264,16 @@ Route::middleware(['auth'])->group(function () {
     // payroll menu
 
     // level karyawan
-    Route::resource('LevelKaryawan', 'LevelKaryawanController');
+    Route::resource('LevelKaryawan', 'LevelKaryawanController')->middleware('permission:level_karyawan.access');
     // unit kerja
-    Route::resource('unit_kerja', 'UnitKerjaController');
+    Route::resource('unit_kerja', 'UnitKerjaController')->middleware('permission:unit.access');
     // jabatan
-    Route::resource('jabatan', 'JabatanController');
+    Route::resource('jabatan', 'JabatanController')->middleware('permission:jabatan.access');
     // ptkp
-    Route::resource('ptkp', 'PtkpController');
+    Route::resource('ptkp', 'PtkpController')->middleware('permission:ptkp.access');
 
     // absensi menu 
-    Route::get('/scan-rfid', [AbsensiController::class, 'form'])->name('absensi.form');
+    Route::get('/scan-rfid', [AbsensiController::class, 'form'])->name('absensi.form')->middleware('permission:absensi.access');
     Route::post('/scan-rfid', [AbsensiController::class, 'scan'])->name('absensi.scan');
 
     // export dan import ptkp 
@@ -281,60 +281,60 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/Ptkp', [ImportController::class, 'importPtkp'])->name('import.Ptkp');
 
     // komponen penghasilan
-    Route::resource('komponen_penghasilan', 'KomponenPenghasilanController');
+    Route::resource('komponen_penghasilan', 'KomponenPenghasilanController')->middleware('permission:komponen_penghasilan.access');
     Route::get('/export/KomponenPenghasilan', [ExportController::class, 'exportKomponenPenghasilan'])->name('export.KomponenPenghasilan');
     Route::post('/import/KomponenPenghasilan', [ImportController::class, 'importKomponenPenghasilan'])->name('import.KomponenPenghasilan');
     // Tax Rates
-    Route::resource('tax_rates', 'TaxRatesController');
+    Route::resource('tax_rates', 'TaxRatesController')->middleware('permission:tax_rates.access');
     // export dan import tax rates 
     Route::get('/export/TaxRates', [ExportController::class, 'exportTaxRates'])->name('export.TaxRates');
     Route::post('/import/TaxRates', [ImportController::class, 'importTaxRates'])->name('import.TaxRates');
     // employee
-    Route::resource('employee', 'EmployeeController');
+    Route::resource('employee', 'EmployeeController')->middleware('permission:employee.access');
     Route::get('/export/Employee', [ExportController::class, 'exportEmployee'])->name('export.Employee');
     Route::post('/import/Employee', [ImportController::class, 'importEmployee'])->name('import.Employee');
     // wahana
-    Route::resource('wahana', 'WahanaController');
+    Route::resource('wahana', 'WahanaController')->middleware('permission:wahana.access');
     Route::get('/export/Wahana', [ExportController::class, 'exportWahana'])->name('export.Wahana');
     Route::post('/import/Wahana', [ImportController::class, 'importWahana'])->name('import.Wahana');
     // target wahana
-    Route::resource('target_wahana', 'TargetWahanaController');
+    Route::resource('target_wahana', 'TargetWahanaController')->middleware('permission:target_wahana.access');
     Route::get('/wahana-by-unit/{id}', [TargetWahanaController::class, 'getWahanaByUnit']);
 
     // target unit
-    Route::resource('target_unit', 'TargetUnitController');
+    Route::resource('target_unit', 'TargetUnitController')->middleware('permission:target_unit.access');
     Route::get('/komponen-by-level/{id}', [TargetUnitController::class, 'getKomponenByLevel']);
 
     // transaksi Wahana
-    Route::resource('transaksi_wahana', 'TransaksiWahanaController');
+    Route::resource('transaksi_wahana', 'TransaksiWahanaController')->middleware('permission:transaksi_wahana.access');
 
     // shift karyawan wahana
-    Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController');
+    Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
 
     // jenis hari
-    Route::resource('jenis_hari', 'JenisHariController');
+    Route::resource('jenis_hari', 'JenisHariController')->middleware('permission:jenis_hari.access');
 
-    Route::resource('jam_kerja', 'JamKerjaController');
+    Route::resource('jam_kerja', 'JamKerjaController')->middleware('permission:jam_kerja.access');
     // komposisi Gaji
-    Route::resource('komposisi_gaji', 'KomposisiGajiController');
+    Route::resource('komposisi_gaji', 'KomposisiGajiController')->middleware('permission:komposisi_gaji.access');
     Route::get('/get-komponen-by-karyawan/{id}', [KomposisiGajiController::class, 'getKomponenByKaryawan']);
     Route::delete('komposisi_gaji/detail/{id}', [KomposisiGajiController::class, 'destroyDetail'])->name('komposisi_gaji.detail.destroy');
 
-    Route::resource('pembayaran_gaji', 'PembayaranGajiController');
-    Route::resource('pembayaran_gaji_nonstaff', 'PembayaranGajiNonStaffController');
+    Route::resource('pembayaran_gaji', 'PembayaranGajiController')->middleware('permission:pembayaran_gaji.access');
+    Route::resource('pembayaran_gaji_nonstaff', 'PembayaranGajiNonStaffController')->middleware('permission:pembayaran_gaji_nonstaff.access');
     Route::get('/get-pembayaran-gaji-by-karyawan/{id}', [PembayaranGajiController::class, 'getKomposisiGajiByKaryawan']);
 
     // slip gaji staff
-    Route::get('/slip-gaji', [SlipGajiController::class, 'index'])->name('slip.index');
-    Route::get('/slip-gaji/{id}', [SlipGajiController::class, 'show'])->name('slip.show');
+    Route::get('/slip-gaji', [SlipGajiController::class, 'index'])->name('slip.index')->middleware('permission:slip_gaji.access');
+    Route::get('/slip-gaji/{id}', [SlipGajiController::class, 'show'])->name('slip.show')->middleware('permission:slip_gaji_nonstaff.access');
     Route::get('/slip-gaji/{id}/download', [SlipGajiController::class, 'download'])->name('slip.download');
 
     // rekap absensi
-    Route::get('/rekap-absensi', [ReportController::class, 'filter'])->name('report.absensi.filter');
+    Route::get('/rekap-absensi', [ReportController::class, 'filter'])->name('report.absensi.filter')->middleware('permission:rekap_absensi.access');
     Route::get('/rekap-absensi/hasil', [ReportController::class, 'hasil'])->name('report.absensi.hasil');
     // report target wahana 
     Route::prefix('reports')->group(function () {
-        Route::get('/target-wahana/filter', [ReportController::class, 'filterWahana'])->name('report.target_wahana.filter');
+        Route::get('/target-wahana/filter', [ReportController::class, 'filterWahana'])->name('report.target_wahana.filter')->middleware('permission:rekap_target_wahana.access');
         Route::get('/target-wahana/result', [ReportController::class, 'resultWahana'])->name('report.target_wahana.result');
     });
     Route::get('/get-wahana-by-unit/{unitId}', [ReportController::class, 'getWahanaByUnit'])->name('report.getWahanaByUnit');
@@ -345,11 +345,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/report/absensi/excel', [ReportController::class, 'exportExcel'])->name('report.absensi.excel');
 
     // slip gaji non staff
-    Route::get('/slip-gaji-nonstaff', [SlipGajiController::class, 'indexNonStaff'])->name('slip.nonStaff.index');
+    Route::get('/slip-gaji-nonstaff', [SlipGajiController::class, 'indexNonStaff'])->name('slip.nonStaff.index')->middleware('permission:slip_gaji_nonstaff.access');
     Route::get('/slip-gaji-nonstaff/{id}', [SlipGajiController::class, 'showNonSataff'])->name('slip.nonStaffshow');
     Route::get('/slip-gaji-nonstaff/{id}/download', [SlipGajiController::class, 'downloadNonStaff'])->name('slip.nonStaffdownload');
 
-    Route::get('/bonus_karyawan', [BonusKaryawanController::class, 'index'])->name('bonus_karyawan.index');
+    Route::get('/bonus_karyawan', [BonusKaryawanController::class, 'index'])->name('bonus_karyawan.index')->middleware('permission:bonus_karyawan.access');
 
     // end payroll menu
 

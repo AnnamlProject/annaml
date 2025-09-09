@@ -31,11 +31,11 @@
                             @enderror
                         </div>
                         <div class="mb-5">
-                            <label for="unit_kerja_id" class="block text-sm font-medium text-gray-700 mb-1">Golongan
-                                PTKP</label>
+                            <label for="unit_kerja_id" class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja
+                            </label>
                             <select name="unit_kerja_id" id="unit_kerja_id"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">-- Pilih Golongan --</option>
+                                <option value="">-- Pilih unit kerja --</option>
                                 @foreach ($unit as $g)
                                     <option value="{{ $g->id }}"
                                         {{ isset($wahana) && $wahana->unit_kerja_id == $g->id ? 'selected' : '' }}>
@@ -45,12 +45,11 @@
                             </select>
                         </div>
                         <div>
-                            <label for="kategori" class="block font-medium">Contact Person</label>
+                            <label for="kategori" class="block font-medium">Kategori wahana</label>
                             <input type="text" name="kategori" id="kategori"
                                 value="{{ old('kategori', $wahana->kategori) }}"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                                          @error('kategori') border-red-500 @enderror"
-                                required>
+                                          @error('kategori') border-red-500 @enderror">
                             @error('kategori')
                                 <p class="text-red-500 text-sm">{{ $message }}</p>
                             @enderror
@@ -60,9 +59,19 @@
                             <input type="text" name="kapasitas" id="kapasitas"
                                 value="{{ old('kapasitas', $wahana->kapasitas) }}"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                                          @error('kapasitas') border-red-500 @enderror"
-                                required>
+                                          @error('kapasitas') border-red-500 @enderror">
                             @error('kapasitas')
+                                <p class="text-red-500 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="urutan" class="block font-medium">Urutan</label>
+                            <input type="text" name="urutan" id="urutan"
+                                value="{{ old('urutan', $wahana->urutan) }}"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                          @error('urutan') border-red-500 @enderror"
+                                required>
+                            @error('urutan')
                                 <p class="text-red-500 text-sm">{{ $message }}</p>
                             @enderror
                         </div>

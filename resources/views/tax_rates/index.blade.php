@@ -16,10 +16,13 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Tax Rates List
                     </h3>
-                    <a href="{{ route('tax_rates.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Tax Rates
-                    </a>
+                    @can('tax_rates.create')
+                        <a href="{{ route('tax_rates.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Tax Rates
+                        </a>
+                    @endcan
+
                 </div>
             </div>
 
@@ -65,28 +68,35 @@
                                 <td class="px-2 py-1 text-right">{{ $item->tarif_ter ?? '-' }}</td>
                                 <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
-                                        <a href="{{ route('tax_rates.show', $item->id) }}"
-                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                            title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('tax_rates.edit', $item->id) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form id="delete-form-{{ $item->id }}"
-                                            action="{{ route('tax_rates.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                        @can('tax_rates.view')
+                                            <a href="{{ route('tax_rates.show', $item->id) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
 
-                                        <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('tax_rates.update')
+                                            <a href="{{ route('tax_rates.edit', $item->id) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('tax_rates.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('tax_rates.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

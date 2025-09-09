@@ -28,6 +28,12 @@
                     class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     rows="3"></textarea>
             </div>
+            <div>
+                <label class="block font-medium text-gray-700">Urutan</label>
+                <input type="number" name="urutan"
+                    class="w-1/3 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Masukkan urutan unit untuk prioritas tampilan " required>
+            </div>
 
 
 

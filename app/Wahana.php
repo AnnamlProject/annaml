@@ -13,7 +13,8 @@ class Wahana extends Model
         'nama_wahana',
         'status',
         'kapasitas',
-        'kategori'
+        'kategori',
+        'urutan',
     ];
 
     public function UnitKerja()

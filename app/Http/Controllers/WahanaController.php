@@ -13,7 +13,11 @@ class WahanaController extends Controller
     public function index()
     {
         // Ambil query dasar
-        $query = Wahana::with('UnitKerja')->orderBy('nama_wahana');
+        $query = Wahana::select('wahanas.*')
+            ->join('unit_kerjas', 'unit_kerjas.id', '=', 'wahanas.unit_kerja_id')
+            ->orderBy('unit_kerjas.urutan', 'asc')
+            ->orderBy('wahanas.urutan', 'asc');
+
 
         // Filter Unit
         if ($unit = request('filter_tipe')) {
@@ -60,6 +64,7 @@ class WahanaController extends Controller
             'kategori' => 'required|array',
             'status' => 'required|array',
             'kapasitas' => 'required|array',
+            'urutan' => 'required|array',
         ]);
 
         // Ambil kode terakhir
@@ -85,6 +90,7 @@ class WahanaController extends Controller
                 'kategori' => $request->kategori[$i],
                 'status' => $request->status[$i],
                 'kapasitas' => $request->kapasitas[$i],
+                'urutan' => $request->urutan[$i],
                 'created_at' => now(),
                 'updated_at' => now()
             ];
@@ -119,7 +125,8 @@ class WahanaController extends Controller
             'nama_wahana' => 'required|string',
             'status' => 'required|string',
             'kapasitas' => 'nullable|integer',
-            'kategori' => 'nullable|string'
+            'kategori' => 'nullable|string',
+            'urutan' => 'required|integer'
 
         ]);
 

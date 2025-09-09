@@ -15,10 +15,13 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Category Asset
                     </h3>
-                    <a href="{{ route('kategori_asset.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> AddCategory Asset
-                    </a>
+                    @can('kategori_asset.create')
+                        <a href="{{ route('kategori_asset.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> AddCategory Asset
+                        </a>
+                    @endcan
+
                 </div>
             </div>
 
@@ -49,26 +52,37 @@
                                 <td class="px-2 py-1 text-center">{{ $item->deskripsi ?? '-' }}</td>
                                 <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
-                                        <a href="{{ route('kategori_asset.show', $item->kode_kategori) }}"
-                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                            title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('kategori_asset.edit', $item->kode_kategori) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('kategori_asset.destroy', $item->kode_kategori) }}"
-                                            method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
+                                        @can('kategori_asset.view')
+                                            <a href="{{ route('kategori_asset.show', $item->kode_kategori) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('kategori_asset.update')
+                                            <a href="{{ route('kategori_asset.edit', $item->kode_kategori) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('kategori_asset.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('kategori_asset.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
                                                 class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Hapus">
+                                                title="Delete">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </form>
+                                        @endcan
+
                                     </div>
                                 </td>
                             </tr>

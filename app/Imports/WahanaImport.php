@@ -31,6 +31,8 @@ class WahanaImport implements ToModel, WithHeadingRow
             'status'        => $row['status'],
             'kapasitas'     => $row['kapasitas'] ?? null,
             'kategori'      => $row['kategori'] ?? null,
+            'urutan'        => $row['urutan'],
+
         ]);
     }
 }

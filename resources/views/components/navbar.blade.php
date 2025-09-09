@@ -161,10 +161,6 @@
                                     class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                     Users & Roles
                                 </a>
-                                <a href="{{ route('permissions.index') }}" @click="open = false"
-                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                    Permissions
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -537,255 +533,352 @@
                     </div>
 
                     {{-- payroll dropdown --}}
-                    <div class="relative ml-1" x-data="{ open: false }">
-                        <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
-                            :class="{ 'text-blue-600 bg-blue-50': open }">
-                            Payroll
-                            <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
-                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                    @can('payroll.access')
+                        <div class="relative ml-1" x-data="{ open: false }">
+                            <button @click="open = !open" @keydown.escape="open = false"
+                                class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                                :class="{ 'text-blue-600 bg-blue-50': open }">
+                                Payroll
+                                <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
-                            class="absolute left-2 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                                class="absolute left-2 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
-                            <!-- Company Submenu -->
-                            <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Setup</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('LevelKaryawan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
-                                        Level</a>
-                                    <a href="{{ route('unit_kerja.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
-                                    </a>
-                                    <a href="{{ route('target_unit.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
-                                        Unit
-                                    </a>
-                                    <a href="{{ route('wahana.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana
-                                    </a>
-                                    <a href="{{ route('target_wahana.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Target
-                                        Wahana
-                                    </a>
-                                    <a href="{{ route('jenis_hari.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jenis
-                                        Hari
-                                    </a>
-                                    <a href="{{ route('shift_karyawan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Scheduling
-                                        Employee
-                                    </a>
-                                    <a href="{{ route('transaksi_wahana.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transaksi
-                                    </a>
-                                    <a href="{{ route('bonus_karyawan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Bonus
-                                        Employee
-                                    </a>
-                                    <a href="{{ route('jam_kerja.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Jam
-                                        Kerja
-                                    </a>
-                                    <a href="{{ route('jabatan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
-                                    </a>
-                                    <a href="{{ route('komponen_penghasilan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
-                                        Components
-                                    </a>
-                                    <a href="{{ route('employee.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Employee
-                                    </a>
-                                    <a href="{{ route('komposisi_gaji.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Salary Components
-                                    </a>
-                                    <a href="{{ route('ptkp.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
+                                <!-- Company Submenu -->
+                                @can('setup.access')
+                                    <div class="relative" x-data="{ subOpen: false }">
+                                        <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                            class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                            <span class="text-gray-700 group-hover:text-blue-600">Setup</span>
+                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 translate-x-1"
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 translate-x-0"
+                                            x-transition:leave-end="opacity-0 translate-x-1"
+                                            class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                            @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                            @can('level_karyawan.access')
+                                                <a href="{{ route('LevelKaryawan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    Level</a>
+                                            @endcan
+                                            @can('jabatan.access')
+                                                <a href="{{ route('jabatan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
+                                                </a>
+                                            @endcan
+                                            @can('komponen_penghasilan.access')
+                                                <a href="{{ route('komponen_penghasilan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
+                                                    Components By Level
+                                                </a>
+                                            @endcan
+                                            @can('unit.access')
+                                                <a href="{{ route('unit_kerja.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
+                                                </a>
+                                            @endcan
+                                            @can('wahana.access')
+                                                <a href="{{ route('wahana.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana(Rides)
+                                                </a>
+                                            @endcan
+                                            @can('ptkp.access')
+                                                <a href="{{ route('ptkp.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
 
-                                    </a>
-                                    <a href="{{ route('tax_rates.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
-                                        (Tax Rates)
-                                    </a>
+                                                </a>
+                                            @endcan
+                                            @can('employee.access')
+                                                <a href="{{ route('employee.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Employee Profiles
+                                                </a>
+                                            @endcan
+                                            @can('komposisi_gaji.access')
+                                                <a href="{{ route('komposisi_gaji.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Income Components By Employee
+                                                </a>
+                                            @endcan
+                                            @can('jenis_hari.access')
+                                                <a href="{{ route('jenis_hari.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Type
+                                                    Of Days
 
-                                </div>
-                            </div>
+                                                </a>
+                                            @endcan
+                                            @can('jam_kerja.access')
+                                                <a href="{{ route('jam_kerja.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Working
+                                                    Hours
+                                                </a>
+                                            @endcan
+                                            @can('target_unit.access')
+                                                <a href="{{ route('target_unit.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Target
+                                                    By Unit
+                                                </a>
+                                            @endcan
 
-                            <!-- Reports Submenu -->
-                            <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Process</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('pembayaran_gaji.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                        Salary Calculations Staff
-                                    </a>
-                                    <a href="{{ route('pembayaran_gaji_nonstaff.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                        Salary Calculations Non Staff
-                                    </a>
-                                    <a href="{{ route('slip.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Salary Slip Staff</a>
-                                    <a href="{{ route('slip.nonStaff.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Salary Slip Non Staff</a>
-                                    <a href="{{ route('absensi.form') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
-                                        Pegawai
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Report</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('report.absensi.filter') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Rekap Absensi Pegawai
-                                    </a>
-                                    <a href="{{ route('report.target_wahana.filter') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                                        Rekap Target Wahana
-                                    </a>
-                                </div>
+                                            @can('target_wahana.access')
+                                                <a href="{{ route('target_wahana.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Target
+                                                    By Wahana
+                                                </a>
+                                            @endcan
+
+
+                                            @can('shift_karyawan.access')
+                                                <a href="{{ route('shift_karyawan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Personnel
+                                                    Scheduling
+
+                                                </a>
+                                            @endcan
+
+                                            @can('transaksi_wahana.access')
+                                                <a href="{{ route('transaksi_wahana.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Input
+                                                    Sales Achievement
+
+                                                </a>
+                                            @endcan
+                                            @can('bonus_karyawan.access')
+                                                <a href="{{ route('bonus_karyawan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    Bonus Update
+                                                </a>
+                                            @endcan
+                                            @can('tax_rates.access')
+                                                <a href="{{ route('tax_rates.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
+                                                    (Tax Rates)
+                                                </a>
+                                            @endcan
+
+
+                                        </div>
+                                    </div>
+                                @endcan
+
+
+                                <!-- Reports Submenu -->
+                                @can('process.access')
+                                    <div class="relative" x-data="{ subOpen: false }">
+                                        <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                            class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                            <span class="text-gray-700 group-hover:text-blue-600">Process</span>
+                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 translate-x-1"
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 translate-x-0"
+                                            x-transition:leave-end="opacity-0 translate-x-1"
+                                            class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                            @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                            @can('pembayaran_gaji.access')
+                                                <a href="{{ route('pembayaran_gaji.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Salary Calculations Staff
+                                                </a>
+                                            @endcan
+
+                                            @can('pembayaran_gaji_nonstaff.access')
+                                                <a href="{{ route('pembayaran_gaji_nonstaff.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Salary Calculations Non Staff
+                                                </a>
+                                            @endcan
+
+                                            @can('slip.access')
+                                                <a href="{{ route('slip.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Salary Slip Staff</a>
+                                            @endcan
+
+                                            @can('slip_gaji_nonstaff.access')
+                                                <a href="{{ route('slip.nonStaff.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Salary Slip Non Staff</a>
+                                            @endcan
+
+                                            @can('absensi.access')
+                                                <a href="{{ route('absensi.form') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
+                                                    Pegawai
+                                                </a>
+                                            @endcan
+
+                                        </div>
+                                    </div>
+                                @endcan
+
+                                @can('report_payroll.access')
+                                    <div class="relative" x-data="{ subOpen: false }">
+                                        <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                            class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                            <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 translate-x-1"
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 translate-x-0"
+                                            x-transition:leave-end="opacity-0 translate-x-1"
+                                            class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                            @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                            @can('rekap_abensi.access')
+                                                <a href="{{ route('report.absensi.filter') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Rekap Absensi Pegawai
+                                                </a>
+                                            @endcan
+                                            @can('rekap_target_wahana.access')
+                                                <a href="{{ route('report.target_wahana.filter') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Rekap Target Wahana
+                                                </a>
+                                            @endcan
+
+                                        </div>
+                                    </div>
+                                @endcan
+
                             </div>
                         </div>
-                    </div>
+                    @endcan
+
 
                     {{-- asset --}}
-                    <div class="relative ml-1" x-data="{ open: false }">
-                        <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
-                            :class="{ 'text-blue-600 bg-blue-50': open }">
-                            Asset
-                            <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
-                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                    @can('asset.access')
+                        <div class="relative ml-1" x-data="{ open: false }">
+                            <button @click="open = !open" @keydown.escape="open = false"
+                                class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                                :class="{ 'text-blue-600 bg-blue-50': open }">
+                                Asset
+                                <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
-                            class="absolute left-2 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                                class="absolute left-2 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
-                            <!-- Company Submenu -->
-                            <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Setup</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('kategori_asset.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Category
+                                <!-- setup asset Submenu -->
+                                @can('setup_asset.access')
+                                    <div class="relative" x-data="{ subOpen: false }">
+                                        <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                            class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                            <span class="text-gray-700 group-hover:text-blue-600">Setup</span>
+                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 translate-x-1"
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 translate-x-0"
+                                            x-transition:leave-end="opacity-0 translate-x-1"
+                                            class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                            @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                            @can('kategori_asset.access')
+                                                <a href="{{ route('kategori_asset.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Category
+                                                    Asset
+                                                </a>
+                                            @endcan
+                                            @can('lokasi_asset.access')
+                                                <a href="{{ route('lokasi.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Location
+                                                    Asset
+                                                </a>
+                                            @endcan
+
+                                            @can('masa_manfaat.access')
+                                                <a href="{{ route('masa_manfaat.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Masa
+                                                    Manfaat
+
+                                                </a>
+                                            @endcan
+                                            @can('metode_penyusutan.access')
+                                                <a href="{{ route('metode_penyusutan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Metode
+                                                    Penyusutan
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+
+
+                                <!-- Tangible Asset -->
+                                @can('tangible_asset.access')
+                                    <a href="{{ route('tangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Tangible
                                         Asset
                                     </a>
-                                    <a href="{{ route('lokasi.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Location
+                                @endcan
+
+                                @can('intangible_asset.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Intangible
                                         Asset
                                     </a>
-                                    <a href="{{ route('masa_manfaat.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Masa
-                                        Manfaat
+                                @endcan
 
+                                @can('monthly_process.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Monthly
+                                        Process
                                     </a>
-                                    <a href="{{ route('metode_penyusutan.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Metode
-                                        Penyusutan
-                                    </a>
-                                </div>
-                            </div>
+                                @endcan
 
-                            <!-- Tangible Asset -->
-                            <a href="{{ route('tangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Tangible
-                                Asset
-                            </a>
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Intangible
-                                Asset
-                            </a>
-                            <a href=""
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Monthly
-                                Process
-                            </a>
 
-                            {{-- <!-- Reports Submenu -->
+                                {{-- <!-- Reports Submenu -->
                             <div class="relative" x-data="{ subOpen: false }">
                                 <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                     class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
@@ -814,8 +907,10 @@
 
                                 </div>
                             </div> --}}
+                            </div>
                         </div>
-                    </div>
+                    @endcan
+
 
                     {{-- project dropdown --}}
                     <div class="relative ml-1" x-data="{ open: false }">

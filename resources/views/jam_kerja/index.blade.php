@@ -58,23 +58,29 @@
                                 <td class="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-3">
 
-                                        <a href="{{ route('jam_kerja.edit', $item->id) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form id="delete-form-{{ $item->id }}"
-                                            action="{{ route('jam_kerja.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                        @can('jam_kerja.update')
+                                            <a href="{{ route('jam_kerja.edit', $item->id) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
 
-                                        <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('jam_kerja.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('jam_kerja.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+
                                     </div>
                                 </td>
                             </tr>

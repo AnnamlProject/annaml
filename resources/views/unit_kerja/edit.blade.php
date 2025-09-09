@@ -13,11 +13,11 @@
 
 
                         <div>
-                            <label for="nama_klasifikasi" class="block text-sm font-medium text-gray-700">Nama</label>
-                            <input type="text" name="nama_unit" id="nama_klasifikasi"
+                            <label for="nama_unit" class="block text-sm font-medium text-gray-700">Nama</label>
+                            <input type="text" name="nama_unit" id="nama_unit"
                                 value="{{ old('nama_unit', $unit_kerja->nama_unit) }}"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('nama_level')
+                            @error('nama_unit')
                                 <span class="text-sm text-red-600">{{ $message }}</span>
                             @enderror
                         </div>
@@ -29,6 +29,15 @@
                         <textarea name="deskripsi" id="deskripsi" rows="3"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('deskripsi', $unit_kerja->deskripsi) }}</textarea>
                         @error('deskripsi')
+                            <span class="text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="urutan" class="block text-sm font-medium text-gray-700">Urutan</label>
+                        <input type="number" name="urutan" id="urutan" value="{{ old('urutan', $unit_kerja->urutan) }}"
+                            class="w-1/3 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        @error('urutan')
                             <span class="text-sm text-red-600">{{ $message }}</span>
                         @enderror
                     </div>

@@ -158,7 +158,7 @@
 
         <!-- Footer -->
         <p class="text-center text-gray-600 mt-6 text-sm animate__fadeIn animate__delay-1s">
-            &copy; {{ date('Y') }} Develop. All rights reserved.
+            &copy; {{ date('Y') }} An Naml. All rights reserved.
         </p>
     </div>
 

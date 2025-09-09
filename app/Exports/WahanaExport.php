@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\wahana;
+use App\Wahana;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 

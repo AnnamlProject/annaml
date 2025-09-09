@@ -21,6 +21,7 @@
                                     <th style="padding: 12px; border: 1px solid #ddd;">Kategori</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Status</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Kapasitas</th>
+                                    <th style="padding: 12px; border: 1px solid #ddd;">Urutan</th>
                                     <th style="padding: 12px; border: 1px solid #ddd; width: 70px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -58,6 +59,11 @@
                                     <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="number" name="kapasitas[]"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <input type="number" name="urutan[]"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Masukkan urutan prioritas tampilan">
                                     </td>
                                     <td style="text-align: center; border: 1px solid #ddd;">
                                         <button type="button" onclick="hapusBaris(this)"
@@ -126,6 +132,9 @@
         </td>
         <td style="padding: 12px; border: 1px solid #ddd;">
             <input type="number" name="kapasitas[]" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </td>
+        <td style="padding: 12px; border: 1px solid #ddd;">
+            <input type="number" name="urutan[]" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </td>
         <td style="text-align: center; border: 1px solid #ddd;">
             <button type="button" onclick="hapusBaris(this)" style="color: red; border: none; background: none;">🗑️</button>

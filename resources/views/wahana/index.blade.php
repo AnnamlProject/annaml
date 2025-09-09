@@ -42,10 +42,13 @@
                             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
-                        <a href="{{ route('wahana.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add wahana
-                        </a>
+                        @can('wahana.create')
+                            <a href="{{ route('wahana.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add wahana
+                            </a>
+                        @endcan
+
                     </div>
 
                 </div>
@@ -104,9 +107,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Unit Kerja</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama Wahana</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unit Kerja</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Kategori</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -121,35 +124,44 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2">{{ $item->UnitKerja->nama_unit }}</td>
                                 <td class="px-4 py-2">{{ $item->nama_wahana ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $item->UnitKerja->nama_unit }}</td>
                                 <td class="px-4 py-2">{{ $item->kategori ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $item->kapasitas ?? '-' }}</td>
                                 <td class="px-4 py-2">{{ $item->status }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
-                                        <a href="{{ route('wahana.show', $item->id) }}"
-                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                            title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('wahana.edit', $item->id) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form id="delete-form-{{ $item->id }}"
-                                            action="{{ route('wahana.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                        @can('wahana.view')
+                                            <a href="{{ route('wahana.show', $item->id) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
 
-                                        <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('wahana.update')
+                                            <a href="{{ route('wahana.edit', $item->id) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('wahana.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('wahana.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+
                                     </div>
                                 </td>
                             </tr>
@@ -158,7 +170,7 @@
                                 <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center text-gray-400">
                                         <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
-                                        <p class="text-lg font-medium">Belum ada Unit Kerja</p>
+                                        <p class="text-lg font-medium">Belum ada wahana</p>
                                         <a href="{{ route('wahana.create') }}"
                                             class="mt-4 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                                             <i class="fas fa-plus mr-2"></i> Tambah

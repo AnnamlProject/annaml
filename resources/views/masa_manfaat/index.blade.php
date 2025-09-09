@@ -15,10 +15,13 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Masa Manfaat
                     </h3>
-                    <a href="{{ route('masa_manfaat.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Masa Manfaat
-                    </a>
+                    @can('masa_manfaat.create')
+                        <a href="{{ route('masa_manfaat.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Masa Manfaat
+                        </a>
+                    @endcan
+
                 </div>
             </div>
 
@@ -53,28 +56,37 @@
                                 <td class="px-2 py-1 text-center">{{ $item->tarif_penyusutan ?? '-' }}</td>
                                 <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">
-                                        <a href="{{ route('masa_manfaat.show', $item->id) }}"
-                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                            title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('masa_manfaat.edit', $item->id) }}"
-                                            class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form id="delete-form-{{ $item->id }}"
-                                            action="{{ route('masa_manfaat.destroy', $item->id) }}" method="POST"
-                                            style="display: none;">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
+                                        @can('masa_manfaat.view')
+                                            <a href="{{ route('masa_manfaat.show', $item->id) }}"
+                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        @endcan
 
-                                        <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                            class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                            title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        @can('masa_manfaat.update')
+                                            <a href="{{ route('masa_manfaat.edit', $item->id) }}"
+                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        @endcan
+
+                                        @can('masa_manfaat.delete')
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('masa_manfaat.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+
+                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endcan
+
                                     </div>
                                 </td>
                             </tr>

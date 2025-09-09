@@ -138,7 +138,11 @@ class PermissionSeeder extends Seeder
             // report 
             'report_payroll.access',
 
-            'bonus_karyawan.access'
+            'bonus_karyawan.access',
+
+            'maintenance.access',
+            'start_new_year.access',
+            'log_activity.access',
 
 
         ];

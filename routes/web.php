@@ -255,10 +255,10 @@ Route::middleware(['auth'])->group(function () {
     // end purchases menu
 
     // inventory menu 
-    Route::resource('inventory', 'InventoryController');
-    Route::resource('lokasi_inventory', 'LokasiInventoryController');
-    Route::resource('price_list_inventory', 'PriceListInventoryController');
-    Route::resource('options_inventory', 'OptionsInventoryController');
+    Route::resource('inventory', 'InventoryController')->middleware('permission:inventory.access');
+    Route::resource('lokasi_inventory', 'LokasiInventoryController')->middleware('permission:lokasi_inventory.access');
+    Route::resource('price_list_inventory', 'PriceListInventoryController')->middleware('permission:price_list_inventory.access');
+    Route::resource('options_inventory', 'OptionsInventoryController')->middleware('permission:options_inventory.access');
 
     // end inventory  menu
 
@@ -384,11 +384,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('start_new_year', 'StartNewYearController');
 
     Route::prefix('accounting')->name('accounting.')->group(function () {
-        Route::get('/start-new-year', [AccountingController::class, 'showStartNewYear'])->name('start_new_year');
+        Route::get('/start-new-year', [AccountingController::class, 'showStartNewYear'])->name('start_new_year')->middleware('permission:start_new_year.access');
         Route::post('/start-new-year', [AccountingController::class, 'startNewYearProcess'])->name('start_new_year_proses');
     });
 
-    Route::get('activity_log', [ActivityLogController::class, 'index'])->name('activity_log.index');
+    Route::get('activity_log', [ActivityLogController::class, 'index'])->name('activity_log.index')->middleware('permission:log_activity.access');
 
 
     // end maintenance menu

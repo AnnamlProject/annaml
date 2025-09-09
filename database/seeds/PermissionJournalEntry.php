@@ -13,8 +13,6 @@ class PermissionJournalEntry extends Seeder
      */
     public function run()
     {
-        //
-        //
         $permissions = [
             // Modul journal entry
             'general_journal.access',

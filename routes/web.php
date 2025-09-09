@@ -119,13 +119,15 @@ Route::middleware(['auth'])->group(function () {
     // journal entry menu
     Route::get('/journal-entry/auto-data', [JournalEntryController::class, 'getAutoData']);
 
-    Route::get('view_journal_entry', [JournalEntryController::class, 'journalEntryShow'])->name('journal_entry.view_journal_entry');
+    Route::get('view_journal_entry', [JournalEntryController::class, 'journalEntryShow'])->name('journal_entry.view_journal_entry')->middleware('permission:journal_entry.access');
     Route::get('view_journal_entry/result', [JournalEntryController::class, 'journalEntryView'])->name('journal_entry.view_journal_entry_result');
     // Tampilkan form kosong
-    Route::get('filter_journal_entry', [JournalEntryController::class, 'showFilterForm'])->name('journal_entry.filter_journal_entry');
+    Route::get('filter_journal_entry', [JournalEntryController::class, 'showFilterForm'])->name('journal_entry.filter_journal_entry')->middleware('permission:journal_entry.access');
     // Tampilkan hasil filter
     Route::get('filter_journal_entry/result', [JournalEntryController::class, 'journalEntryFilter'])->name('journal_entry.filter_journal_entry_result');
-    Route::resource('journal_entry', 'JournalEntryController');
+
+    Route::resource('journal_entry', 'JournalEntryController')->middleware('permission:journal_entry.access');
+
     Route::post('/import/journal_entry', [ImportController::class, 'importjournal_entry'])->name('import.journal_entry');
 
     Route::get('/search-account', [DepartemenAkunController::class, 'search']);

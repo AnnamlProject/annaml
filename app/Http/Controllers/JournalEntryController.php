@@ -16,8 +16,35 @@ class JournalEntryController extends Controller
 
     public function index()
     {
-        $data = JournalEntry::orderBy('tanggal')->get();
-        return view('journal_entry.index', compact('data'));
+        $tahunList = JournalEntry::selectRaw('YEAR(tanggal) as tahun')
+            ->distinct()
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun');
+
+        $query = JournalEntry::orderBy('tanggal');
+        if ($bulan = request('filter_bulan')) {
+            $query->whereMonth('tanggal', $bulan);
+        }
+
+        if ($tahun = request('filter_tahun')) {
+            $query->whereYear('tanggal', $tahun);
+        }
+
+        $searchable = ['source', 'comment', 'tanggal'];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+            });
+        }
+
+
+        // Eksekusi query sekali di akhir
+        $data = $query->get();
+
+        return view('journal_entry.index', compact('data', 'tahunList'));
     }
     public function create()
     {

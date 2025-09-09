@@ -977,65 +977,79 @@
                     </div>
 
                     <!-- Journal Entry Dropdown -->
-                    <div class="relative ml-1" x-data="{ open: false }">
-                        <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
-                            :class="{ 'text-blue-600 bg-blue-50': open }">
-                            Journal Entry
-                            <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
-                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                    @can('journal_entry.access')
+                        <div class="relative ml-1" x-data="{ open: false }">
+                            <button @click="open = !open" @keydown.escape="open = false"
+                                class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                                :class="{ 'text-blue-600 bg-blue-50': open }">
+                                Journal Entry
+                                <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
-                            class="absolute left-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                                class="absolute left-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
-                            <!-- General Journal Submenu -->
-                            <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">General Journal</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('journal_entry.index') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Data
-                                        Journal Entry</a>
-                                    <a href="{{ route('journal_entry.create') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                        Journal Entry</a>
-                                    <a href="{{ route('journal_entry.filter_journal_entry') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Edit
-                                        Journal Entry</a>
-                                    <a href="{{ route('journal_entry.view_journal_entry') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">View
-                                        Journal Entry</a>
+                                <!-- General Journal Submenu -->
+                                <div class="relative" x-data="{ subOpen: false }">
+                                    <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                        class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                        <span class="text-gray-700 group-hover:text-blue-600">General Journal</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                        @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                        @can('journal_entry.data')
+                                            <a href="{{ route('journal_entry.index') }}"
+                                                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Data
+                                                Journal Entry</a>
+                                        @endcan
+                                        @can('journal_entry.create')
+                                            <a href="{{ route('journal_entry.create') }}"
+                                                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                Journal Entry</a>
+                                        @endcan
+
+                                        @can('journal_entry.update')
+                                            <a href="{{ route('journal_entry.filter_journal_entry') }}"
+                                                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Edit
+                                                Journal Entry</a>
+                                        @endcan
+
+                                        @can('journal_entry.view')
+                                            <a href="{{ route('journal_entry.view_journal_entry') }}"
+                                                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">View
+                                                Journal Entry</a>
+                                        @endcan
+
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Divider -->
-                            <div class="my-1 border-t border-gray-100"></div>
+                                <!-- Divider -->
+                                <div class="my-1 border-t border-gray-100"></div>
+                            </div>
                         </div>
-                    </div>
+                    @endcan
+
 
                     <!-- Report Dropdown -->
                     <div class="relative ml-1" x-data="{ open: false }">

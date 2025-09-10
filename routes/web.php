@@ -62,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/home', 'HomeController@index')->name('home');
     // setup 
-    Route::get('/setting', [SettingController::class, 'index'])->name('setting.index');
+    Route::get('/setting', [SettingController::class, 'index'])->name('setting.index')->middleware('permission:setting_setup.access');
     Route::post('/setting', [SettingController::class, 'update'])->name('setting.update');
 
     // user dan role
@@ -79,26 +79,26 @@ Route::middleware(['auth'])->group(function () {
 
 
     // setting company
-    Route::resource('/taxpayers_company', 'TaxpayersCompanyController');
+    Route::resource('/taxpayers_company', 'TaxpayersCompanyController')->middleware('permission:taxpayers_company.access');
 
-    Route::resource('/company_profile', 'CompanyProfileController');
+    Route::resource('/company_profile', 'CompanyProfileController')->middleware('permission:company_profile.access');
 
     // general menu
-    Route::resource('/numbering_account', 'NumberingAccountController');
+    Route::resource('/numbering_account', 'NumberingAccountController')->middleware('permission:numbering.access');
 
-    Route::resource('/klasifikasiAkun', 'KlasifikasiAkunController');
+    Route::resource('/klasifikasiAkun', 'KlasifikasiAkunController')->middleware('permission:klasifikasi_akun.access');
     // export dan import klasifikasi akun
     Route::get('/export/klasifikasiAkun', [ExportController::class, 'exportklasifikasiAkun'])->name('export.klasifikasiAkun');
     Route::post('/import/klasifikasiAkun', [ImportController::class, 'importklasifikasiAkun'])->name('import.klasifikasiAkun');
 
-    Route::resource('/chartOfAccount', 'ChartOfAccountController');
+    Route::resource('/chartOfAccount', 'ChartOfAccountController')->middleware('permission:chart_of_account.access');
     Route::get('/coa/search', [CoaSearchController::class, 'search'])->name('coa.search');
     // export dan import chart of account
     Route::get('/export/charofaccount', [ExportController::class, 'exportchartOfAccount'])->name('export.chartOfAccount');
     Route::post('/import/chartofaccount', [ImportController::class, 'importchartOfAccount'])->name('import.chartOfAccount');
 
     // crud linked Accounts
-    Route::resource('linkedAccount', 'linkedAccountController');
+    Route::resource('linkedAccount', 'linkedAccountController')->middleware('permission:linked_account_setup.access');
 
     Route::get('/admin/setting_departement', [SettingDepartementController::class, 'edit'])->name('setting_departement.edit');
     Route::put('/admin/setting_departement', [SettingDepartementController::class, 'update'])->name('setting_departement.update');
@@ -107,10 +107,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/departemen/assign-account', [DepartementController::class, 'storeAssign'])->name('departemen.assign.store');
     Route::delete('/departemen/assign/{id}', [DepartementController::class, 'destroyAssign'])->name('departemen.assign.destroy');
 
-    Route::resource('/departemen', 'DepartementController');
+    Route::resource('/departemen', 'DepartementController')->middleware('permission:departement.access');
 
     // sales taxes
-    Route::resource('/sales_taxes', 'SalesTaxesController');
+    Route::resource('/sales_taxes', 'SalesTaxesController')->middleware('permission:sales_taxes.access');
 
     // export dan import Departemen
     Route::get('/export/Departemen', [ExportController::class, 'exportDepartemen'])->name('export.Departemen');
@@ -141,23 +141,23 @@ Route::middleware(['auth'])->group(function () {
     // report
 
     // buku besar
-    Route::get('filter_buku_besar', [BukuBesarController::class, 'bukuBesarFilter'])->name('buku_besar.filter_buku_besar');
+    Route::get('filter_buku_besar', [BukuBesarController::class, 'bukuBesarFilter'])->name('buku_besar.filter_buku_besar')->middleware('permission:buku_besar.access');
     Route::get('/laporan/buku-besar', [BukuBesarController::class, 'bukuBesarReport'])->name('buku_besar.buku_besar_report');
 
     // Trial Balance
-    Route::get('filter_trial_balance', [TrialBalanceController::class, 'trialBalanceFilter'])->name('trial_balance.filter_trial_balance');
+    Route::get('filter_trial_balance', [TrialBalanceController::class, 'trialBalanceFilter'])->name('trial_balance.filter_trial_balance')->middleware('permission:trial_balance.access');
     Route::get('trial_balance_report', [TrialBalanceController::class, 'trialBalanceReport'])->name('trial_balance.trial_balance_report');
 
     // income statement
-    Route::get('filter_income_statement', [IncomeStatementController::class, 'incomeStatementFilter'])->name('income_statement.filter_income_statement');
+    Route::get('filter_income_statement', [IncomeStatementController::class, 'incomeStatementFilter'])->name('income_statement.filter_income_statement')->middleware('permission:income_statement.access');
     Route::get('income_statement', [IncomeStatementController::class, 'incomeStatementReport'])->name('income_statement.income_statement_report');
 
 
 
     // sales menu 
-    Route::resource('linkedAccountSales', 'linkedAccountSalesController');
-    Route::resource('sales_option', 'salesOptionsController');
-    Route::resource('sales_discount', 'SalesDiscountController');
+    Route::resource('linkedAccountSales', 'linkedAccountSalesController')->middleware('permission:linked_account_sales.access');
+    Route::resource('sales_option', 'salesOptionsController')->middleware('permission:option_sales.access');
+    Route::resource('sales_discount', 'SalesDiscountController')->middleware('permission:sales_discount.access');
 
     Route::resource('item_category', 'ItemCategoryController');
 
@@ -166,18 +166,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/export/items', [ExportController::class, 'exportItems'])->name('export.items');
     Route::post('/import/items', [ImportController::class, 'importItems'])->name('import.items');
     // payment method 
-    Route::resource('PaymentMethod', 'PaymentMethodController');
+    Route::resource('PaymentMethod', 'PaymentMethodController')->middleware('permission:payment_method.access');
     // routes/web.php
     Route::get('/payment-methods/{id}/accounts', [\App\Http\Controllers\PaymentMethodController::class, 'accounts'])
         ->name('payment-methods.accounts');
 
 
-    Route::resource('customers', 'CustomersController');
+    Route::resource('customers', 'CustomersController')->middleware('permission:customers.access');
     // export dan import customers
     Route::get('/export/customers', [ExportController::class, 'exportcustomers'])->name('export.customers');
     Route::post('/import/customers', [ImportController::class, 'importcustomers'])->name('import.customers');
 
-    Route::resource('sales_order', 'SalesOrderController');
+    Route::resource('sales_order', 'SalesOrderController')->middleware('permission:sales_orders.access');
     Route::get('sales-orders/documents', [SalesOrderDocumentController::class, 'index'])
         ->name('sales_orders.documents.index');
 
@@ -191,7 +191,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('sales_order.pdf');
 
 
-    Route::resource('sales_invoice', 'SalesInvoiceController');
+    Route::resource('sales_invoice', 'SalesInvoiceController')->middleware('permission:sales_invoice.access');
     Route::get('sales-invoice/documents', [SalesInvoiceDocumentController::class, 'index'])
         ->name('sales_invoice.documents.index');
 
@@ -204,8 +204,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/sales_invoice/get-items/{salesOrderId}', [SalesInvoiceController::class, 'getItemsFromSalesOrder']);
-    Route::resource('sales_deposits', 'SalesDepositController');
-    Route::resource('receipts', 'ReceiptsController');
+    Route::resource('sales_deposits', 'SalesDepositController')->middleware('permission:deposits.access');
+    Route::resource('receipts', 'ReceiptsController')->middleware('permission:receipts.access');
     // web.php
     Route::get('/get-invoices/{customer}', [ReceiptsController::class, 'getInvoices']);
 
@@ -215,17 +215,17 @@ Route::middleware(['auth'])->group(function () {
     // end sales menu
 
     // purchases menu
-    Route::resource('linkedAccountPurchases', 'LinkedAccountPurchasesControlller');
-    Route::resource('purchases_options', 'PurchasesOptionsController');
+    Route::resource('linkedAccountPurchases', 'LinkedAccountPurchasesControlller')->middleware('permission:linked_account_purchase.access');
+    Route::resource('purchases_options', 'PurchasesOptionsController')->middleware('permission:option_purchase.access');
 
 
-    Route::resource('vendors', 'VendorsController');
+    Route::resource('vendors', 'VendorsController')->middleware('permission:vendor.access');
     // export dan import items
     Route::get('/export/vendors', [ExportController::class, 'exportVendors'])->name('export.vendors');
     Route::post('/import/vendors', [ImportController::class, 'ImportVendors'])->name('import.vendors');
 
     // purchase order
-    Route::resource('purchase_order', 'PurchaseOrderController');
+    Route::resource('purchase_order', 'PurchaseOrderController')->middleware('permission:purchase_order.access');
     Route::get('purchase-order/documents', [PurchaseOrderDocumentController::class, 'index'])
         ->name('purchase_order.documents.index');
     Route::prefix('purchase-order/{purchasOrder}')->group(function () {
@@ -237,7 +237,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/search-item', [ItemController::class, 'search']);
 
     // purchase invoice
-    Route::resource('purchase_invoice', 'PurchaseInvoiceController');
+    Route::resource('purchase_invoice', 'PurchaseInvoiceController')->middleware('permission:purchase_invoice.access');
     Route::get('purchase-invoice/documents', [PurchaseInvoiceDocumentController::class, 'index'])
         ->name('purchase_invoice.documents.index');
     Route::prefix('purchase-invoice/{purchaseInvoice}')->group(function () {
@@ -249,7 +249,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     // payment
-    Route::resource('payment', 'PaymentController');
+    Route::resource('payment', 'PaymentController')->middleware('permission:payment_purchase.access');
 
 
     // end purchases menu
@@ -381,7 +381,7 @@ Route::middleware(['auth'])->group(function () {
     // end project menu
 
     // maintenance menu
-    Route::resource('start_new_year', 'StartNewYearController');
+    Route::resource('start_new_year', 'StartNewYearController')->middleware('permission:year_book.access');
 
     Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::get('/start-new-year', [AccountingController::class, 'showStartNewYear'])->name('start_new_year')->middleware('permission:start_new_year.access');
@@ -394,7 +394,7 @@ Route::middleware(['auth'])->group(function () {
     // end maintenance menu
 
     // taxes menu
-    Route::resource('taxes', 'TaxesController');
+    Route::resource('taxes', 'TaxesController')->middleware('permission:taxes.access');
 
     // end taxes menu
 });

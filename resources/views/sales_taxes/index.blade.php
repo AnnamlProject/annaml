@@ -21,11 +21,12 @@
                             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
-
-                        <a href="{{ route('sales_taxes.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add Sales Taxes
-                        </a>
+                        @can('sales_taxes.create')
+                            <a href="{{ route('sales_taxes.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add Sales Taxes
+                            </a>
+                        @endcan
                     </div>
 
                 </div>
@@ -61,23 +62,27 @@
 
                                     <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('sales_taxes.edit', $item->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form id="delete-form-{{ $item->id }}"
-                                                action="{{ route('sales_taxes.destroy', $item->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
+                                            @can('sales_taxes.update')
+                                                <a href="{{ route('sales_taxes.edit', $item->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                            @can('sales_taxes.delete')
+                                                <form id="delete-form-{{ $item->id }}"
+                                                    action="{{ route('sales_taxes.destroy', $item->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
 
-                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                                <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                    class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

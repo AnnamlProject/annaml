@@ -27,14 +27,16 @@
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
                         <!-- Add Button -->
-                        <a href="{{ route('departemen.create') }}"
-                            class="inline-flex items-center px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg shadow-sm hover:bg-blue-600">
-                            <i class="fas fa-plus mr-2"></i> Tambah Departement
-                        </a>
-                        <a href="{{ route('departemen.assign') }}"
-                            class="inline-flex items-center px-4 py-2.5 bg-green-500 text-white font-medium rounded-lg shadow-sm hover:bg-blue-600">
-                            <i class="fas fa-plus mr-2"></i> Assign Accounts
-                        </a>
+                        @can('departement.create')
+                            <a href="{{ route('departemen.create') }}"
+                                class="inline-flex items-center px-4 py-2.5 bg-blue-500 text-white font-medium rounded-lg shadow-sm hover:bg-blue-600">
+                                <i class="fas fa-plus mr-2"></i> Tambah Departement
+                            </a>
+                            <a href="{{ route('departemen.assign') }}"
+                                class="inline-flex items-center px-4 py-2.5 bg-green-500 text-white font-medium rounded-lg shadow-sm hover:bg-blue-600">
+                                <i class="fas fa-plus mr-2"></i> Assign Accounts
+                            </a>
+                        @endcan
                     </div>
                 </div>
 
@@ -77,28 +79,35 @@
 
                                     <td class="px-2 py-1 text-center whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('departemen.show', $departemen->id) }}"
-                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('departemen.edit', $departemen->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form id="delete-form-{{ $departemen->id }}"
-                                                action="{{ route('departemen.destroy', $departemen->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
+                                            @can('departement.view')
+                                                <a href="{{ route('departemen.show', $departemen->id) }}"
+                                                    class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endcan
+                                            @can('departement.update')
+                                                <a href="{{ route('departemen.edit', $departemen->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
 
-                                            <button type="button" onclick="confirmDelete({{ $departemen->id }})"
-                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            @can('departement.delete')
+                                                <form id="delete-form-{{ $departemen->id }}"
+                                                    action="{{ route('departemen.destroy', $departemen->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+
+                                                <button type="button" onclick="confirmDelete({{ $departemen->id }})"
+                                                    class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
 
                                         </div>
                                     </td>

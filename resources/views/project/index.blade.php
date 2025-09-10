@@ -14,7 +14,7 @@
                     style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
-                        Project
+                        Specpose
                     </h3>
                     <div class="flex flex-wrap gap-2">
 
@@ -24,10 +24,13 @@
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
                         <!-- Add Button -->
-                        <a href="{{ route('project.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add Specpose
-                        </a>
+
+                        @can('specpose.create')
+                            <a href="{{ route('project.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add Specpose
+                            </a>
+                        @endcan
                     </div>
                 </div>
 
@@ -73,28 +76,36 @@
                                     <td class="px-2 py-1 text-center">{{ $item->status }}</td>
                                     <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('project.show', $item->id) }}"
-                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('project.edit', $item->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form id="delete-form-{{ $item->id }}"
-                                                action="{{ route('project.destroy', $item->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
+                                            @can('specpose.view')
+                                                <a href="{{ route('project.show', $item->id) }}"
+                                                    class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endcan
 
-                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            @can('specpose.update')
+                                                <a href="{{ route('project.edit', $item->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+
+                                            @can('specpose.delete')
+                                                <form id="delete-form-{{ $item->id }}"
+                                                    action="{{ route('project.destroy', $item->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+
+                                                <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                    class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
         $this->call(AbsensiSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(PermissionAsset::class);
+        $this->call(PermisssionSetup::class);
+        $this->call(PermissionSales::class);
+        $this->call(PermissionReport::class);
         // cekcek
     }
 }

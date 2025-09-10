@@ -17,10 +17,12 @@
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- Add Button -->
-                        <a href="{{ route('PaymentMethod.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add Payment Method
-                        </a>
+                        @can('payment_method.create')
+                            <a href="{{ route('PaymentMethod.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add Payment Method
+                            </a>
+                        @endcan
                     </div>
                 </div>
                 <div class="relative overflow-x-auto" style="max-height: calc(100vh - 250px); overflow-y: auto;">
@@ -48,26 +50,36 @@
                                     <td class="px-2 py-1 text-center">{{ $item->nama_jenis }}</td>
                                     <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('PaymentMethod.show', $item->id) }}"
-                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('PaymentMethod.edit', $item->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('PaymentMethod.destroy', $item->id) }}" method="POST"
-                                                onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
+                                            @can('payment_method.view')
+                                                <a href="{{ route('PaymentMethod.show', $item->id) }}"
+                                                    class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endcan
+
+                                            @can('payment_method.update')
+                                                <a href="{{ route('PaymentMethod.edit', $item->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+
+                                            @can('payment_method.delete')
+                                                <form id="delete-form-{{ $item->id }}"
+                                                    action="{{ route('PaymentMethod.destroy', $item->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+
+                                                <button type="button" onclick="confirmDelete({{ $item->id }})"
                                                     class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                    title="Hapus">
+                                                    title="Delete">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
-                                            </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

@@ -17,10 +17,12 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Numbering Account List
                     </h3>
-                    <a href="{{ route('numbering_account.create') }}"
-                        class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                        <i class="fas fa-plus mr-2"></i> Add Numbering Account
-                    </a>
+                    @can('numbering.create')
+                        <a href="{{ route('numbering_account.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i> Add Numbering Account
+                        </a>
+                    @endcan
                 </div>
 
                 <!-- Table Container -->
@@ -52,15 +54,17 @@
                                     <td class="px-2 py-1 text-center font-medium text-gray-900">
                                         {{ $numberingAccounts->nomor_akun_akhir }}
                                     </td>
-                                    <td class="px-2 py-1 text-right">
-                                        <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('numbering_account.show', $numberingAccounts->id) }}"
-                                                class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-50 transition-colors"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                    @can('numbering.view')
+                                        <td class="px-2 py-1 text-right">
+                                            <div class="flex justify-end space-x-3">
+                                                <a href="{{ route('numbering_account.show', $numberingAccounts->id) }}"
+                                                    class="text-indigo-600 hover:text-indigo-800 p-2 rounded-full hover:bg-indigo-50 transition-colors"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    @endcan
                                 </tr>
                             @empty
                                 <tr>

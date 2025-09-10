@@ -33,10 +33,12 @@
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
                         <!-- Add Button -->
-                        <a href="{{ route('klasifikasiAkun.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add Klasifikasi Akun
-                        </a>
+                        @can('klasifikasi_akun.create')
+                            <a href="{{ route('klasifikasiAkun.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add Klasifikasi Akun
+                            </a>
+                        @endcan
                     </div>
                 </div>
 
@@ -100,28 +102,34 @@
                                     <td class="px-2 py-1 text-center">{{ $akun->deskripsi }}</td>
                                     <td class="px-2 py-1 text-center">
                                         <div class="flex justify-end space-x-3">
-                                            <a href="{{ route('klasifikasiAkun.show', $akun->id) }}"
-                                                class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                                                title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('klasifikasiAkun.edit', $akun->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form id="delete-form-{{ $akun->id }}"
-                                                action="{{ route('klasifikasiAkun.destroy', $akun->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
+                                            @can('klasifikasi_akun.view')
+                                                <a href="{{ route('klasifikasiAkun.show', $akun->id) }}"
+                                                    class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            @endcan
+                                            @can('klasifikasi_akun.update')
+                                                <a href="{{ route('klasifikasiAkun.edit', $akun->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                            @can('klasifikasi_akun.delete')
+                                                <form id="delete-form-{{ $akun->id }}"
+                                                    action="{{ route('klasifikasiAkun.destroy', $akun->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
 
-                                            <button type="button" onclick="confirmDelete({{ $akun->id }})"
-                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                                <button type="button" onclick="confirmDelete({{ $akun->id }})"
+                                                    class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

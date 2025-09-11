@@ -103,7 +103,9 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2 text-center">{{ $item->tanggal ?? 'Tidak Ada' }}</td>
+                                <td class="px-4 py-2 text-center">
+                                    {{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d M Y') : '-' }}
+                                </td>
                                 <td class="px-4 py-2 text-center">{{ $item->unitKerja->nama_unit }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->wahana->nama_wahana }}</td>
                                 <td class="px-4 py-2 text-center">{{ number_format($item->realisasi) }}</td>

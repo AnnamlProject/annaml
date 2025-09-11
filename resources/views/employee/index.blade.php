@@ -251,8 +251,8 @@
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->tempat_lahir }}
                                         </div>
                                     </td>
-                                    <td class="px-4 py-2 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $Karyawan->tanggal_lahir }}</div>
+                                    <td class="px-4 py-2 text-center whitespace-nowrap">
+                                        {{ $Karyawan->tanggal_lahir ? \Carbon\Carbon::parse($Karyawan->tanggal_lahir)->format('d M Y') : '-' }}
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->jenis_kelamin }}
@@ -294,10 +294,13 @@
                                             {{ $Karyawan->jabatan->nama_jabatan ?? '-' }}</div>
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $Karyawan->tanggal_masuk }}</div>
+                                        <div class="text-sm text-gray-900">
+                                            {{ $Karyawan->tanggal_masuk ? \Carbon\Carbon::parse($Karyawan->tanggal_masuk)->format('d M Y') : '-' }}
+                                        </div>
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ $Karyawan->tanggal_keluar }}
+                                        <div class="text-sm text-gray-900">
+                                            {{ $Karyawan->tanggal_keluar ? \Carbon\Carbon::parse($Karyawan->tanggal_keluar)->format('d M Y') : '-' }}
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">

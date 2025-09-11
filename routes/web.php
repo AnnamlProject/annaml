@@ -9,6 +9,7 @@ use App\Http\Controllers\CoaSearchController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartemenAkunController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\EmployeeOffDayController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IncomeStatementController;
@@ -32,9 +33,11 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\SalesInvoiceDocumentController;
 use App\Http\Controllers\SalesOrderDocumentController;
+use App\Http\Controllers\ShiftKaryawanWahanaController;
 use App\Http\Controllers\SlipGajiController;
 use App\Http\Controllers\TargetUnitController;
 use App\Http\Controllers\TargetWahanaController;
+use App\Http\Controllers\WahanaController;
 use App\SalesInvoiceDocument;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -312,6 +315,16 @@ Route::middleware(['auth'])->group(function () {
 
     // shift karyawan wahana
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
+
+    Route::get('/wahana/by-unit/{unit}', [WahanaController::class, 'byUnit'])
+        ->name('wahana.byUnit');
+
+
+    Route::get('/shift-wahana/assignments', [ShiftKaryawanWahanaController::class, 'listByUnitDate'])
+        ->name('shift_wahana.assignments'); // ?unit_id=..&tanggal=YYYY-MM-DD
+    Route::get('/off-days', [EmployeeOffDayController::class, 'index'])->name('off_days.index');     // ?tanggal=YYYY-MM-DD&unit_id=optional
+    Route::post('/off-days', [EmployeeOffDayController::class, 'store'])->name('off_days.store');    // {employee_id[], tanggal, catatan?}
+    Route::delete('/off-days/{off}', [EmployeeOffDayController::class, 'destroy'])->name('off_days.destroy');
 
     // jenis hari
     Route::resource('jenis_hari', 'JenisHariController')->middleware('permission:jenis_hari.access');

@@ -21,6 +21,7 @@ class ShiftKaryawanWahana extends Model
         'persentase_jam',
         'status',
         'keterangan',
+        'posisi'
     ];
     // Relasi ke Karyawan
     public function karyawan()

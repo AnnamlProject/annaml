@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    < class="py-10">
+    <div class="py-10">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
@@ -98,110 +98,109 @@
                 </table>
             </div>
         </div>
-        </div>
-        <!-- File Modal -->
-        <div id="fileModal"
-            class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
-            <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
-                    <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
-                </h3>
-                <div class="space-y-3 text-sm text-gray-700">
-                    <a href="{{ asset('template/template_jabatan_import.xlsx') }}" download
-                        class="block hover:bg-gray-50 p-2 rounded-lg">
-                        <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
-                    </a>
-                    <a href="" class="block hover:bg-gray-50 p-2 rounded-lg">
-                        <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
-                    </a>
-                    <form action="" method="POST" enctype="multipart/form-data" class="space-y-2">
-                        @csrf
-                        <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
-                        <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>
-                        <button type="submit"
-                            class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
-                            <i class="fas fa-file-upload mr-1"></i> Import
-                        </button>
-                    </form>
-                </div>
-                <div class="mt-4 text-right">
-                    <button onclick="document.getElementById('fileModal').classList.add('hidden')"
-                        class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
-                </div>
+    </div>
+    <!-- File Modal -->
+    <div id="fileModal"
+        class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
+            </h3>
+            <div class="space-y-3 text-sm text-gray-700">
+                <a href="{{ asset('template/template_jabatan_import.xlsx') }}" download
+                    class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
+                </a>
+                <a href="" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
+                </a>
+                <form action="" method="POST" enctype="multipart/form-data" class="space-y-2">
+                    @csrf
+                    <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
+                    <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>
+                    <button type="submit" class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
+                        <i class="fas fa-file-upload mr-1"></i> Import
+                    </button>
+                </form>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="document.getElementById('fileModal').classList.add('hidden')"
+                    class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
             </div>
         </div>
+    </div>
 
-        <style>
-            /* Improved sticky header implementation */
-            .sticky-header {
-                position: sticky;
-                top: 0;
-                z-index: 20;
-                backdrop-filter: blur(5px);
-                background-color: rgba(255, 255, 255, 0.9);
-            }
+    <style>
+        /* Improved sticky header implementation */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
 
-            /* Table header sticky positioning */
-            table thead {
-                position: sticky;
-                top: 68px;
-                /* Height of the sticky-header */
-                z-index: 10;
-            }
+        /* Table header sticky positioning */
+        table thead {
+            position: sticky;
+            top: 68px;
+            /* Height of the sticky-header */
+            z-index: 10;
+        }
 
-            /* Beautiful scrollbar */
-            .overflow-x-auto::-webkit-scrollbar {
-                height: 8px;
-            }
+        /* Beautiful scrollbar */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
 
-            .overflow-x-auto::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 10px;
-            }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
 
-            .overflow-x-auto::-webkit-scrollbar-thumb {
-                background: #c1c1c1;
-                border-radius: 10px;
-            }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
 
-            .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-                background: #a1a1a1;
-            }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
 
-            /* Smooth transitions */
-            tr {
-                transition: background-color 0.2s ease;
+        /* Smooth transitions */
+        tr {
+            transition: background-color 0.2s ease;
+        }
+    </style>
+    <script>
+        document.getElementById('menu-button').addEventListener('click', function() {
+            document.getElementById('dropdown-menu').classList.toggle('hidden');
+        });
+
+        window.addEventListener('click', function(e) {
+            const button = document.getElementById('menu-button');
+            const menu = document.getElementById('dropdown-menu');
+            if (!button.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
             }
-        </style>
-        <script>
-            document.getElementById('menu-button').addEventListener('click', function() {
-                document.getElementById('dropdown-menu').classList.toggle('hidden');
+        });
+    </script>
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const rows = document.querySelectorAll('tbody tr');
+
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+
+            rows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+
+                const matchSearch = rowText.includes(searchValue);
+
             });
+        }
 
-            window.addEventListener('click', function(e) {
-                const button = document.getElementById('menu-button');
-                const menu = document.getElementById('dropdown-menu');
-                if (!button.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add('hidden');
-                }
-            });
-        </script>
-        <script>
-            const searchInput = document.getElementById('searchInput');
-            const rows = document.querySelectorAll('tbody tr');
-
-            function filterTable() {
-                const searchValue = searchInput.value.toLowerCase();
-
-                rows.forEach(row => {
-                    const rowText = row.innerText.toLowerCase();
-
-                    const matchSearch = rowText.includes(searchValue);
-
-                    row.style.display = (matchSearch) ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('keyup', filterTable);
-        </script>
-    @endsection
+        searchInput.addEventListener('keyup', filterTable);
+        row.style.display = (matchSearch) ? '' : 'none';
+    </script>
+@endsection

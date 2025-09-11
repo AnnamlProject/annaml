@@ -140,7 +140,7 @@
                                         <div class="text-sm font-medium text-gray-900">{{ $item->source }}</div>
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $item->tanggal }}</div>
+                                        {{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d M Y') : '-' }}
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $item->comment }}</div>

@@ -83,7 +83,10 @@ class ShiftKaryawanWahanaController extends Controller
         $unitkerja = UnitKerja::select('nama_unit')->distinct()->orderBy('nama_unit')->pluck('nama_unit');
         $jenis_hari = JenisHari::select('nama')->distinct()->orderBy('nama')->pluck('nama');
         $wahana = Wahana::select('nama_wahana')->distinct()->orderBy('nama_wahana')->pluck('nama_wahana');
-        return view('shift_karyawan.index', compact('data', 'unitkerja', 'jenis_hari', 'wahana'));
+        $karyawan = Employee::all();
+        $unitKerja = UnitKerja::all();
+        $jenisHari = JenisHari::all();
+        return view('shift_karyawan.index', compact('data', 'unitkerja', 'jenis_hari', 'wahana', 'unitKerja', 'karyawan', 'jenisHari'));
     }
     public function create()
     {
@@ -104,7 +107,8 @@ class ShiftKaryawanWahanaController extends Controller
             'jam_mulai'     => 'required|date_format:H:i',
             'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
             'status'        => 'required|in:Penetapan,Perubahan,Tambahan',
-            'keterangan'    => 'nullable|string'
+            'keterangan'    => 'nullable|string',
+            'posisi'        => 'required|in:petugas_1,petugas_2,petugas_3,petugas_4,pengganti'
         ]);
 
         // Hitung lama jam kerja
@@ -140,7 +144,8 @@ class ShiftKaryawanWahanaController extends Controller
                 'lama_jam'       => $lamaJam,
                 'persentase_jam' => $persentase,
                 'status'         => $request->status,
-                'keterangan'     => $request->keterangan
+                'keterangan'     => $request->keterangan,
+                'posisi' => $request->posisi,
             ]);
 
             // Buat bonus pending
@@ -189,7 +194,9 @@ class ShiftKaryawanWahanaController extends Controller
             'jam_mulai'     => 'required|date_format:H:i',
             'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
             'status'        => 'required|in:Penetapan,Perubahan,Tambahan',
-            'keterangan'    => 'nullable|string'
+            'keterangan'    => 'nullable|string',
+            'posisi'        => 'required|in:petugas_1,petugas_2,petugas_3,petugas_4,pengganti'
+
         ]);
 
         // Hitung lama jam
@@ -227,7 +234,8 @@ class ShiftKaryawanWahanaController extends Controller
                 'lama_jam'       => $lamaJam,
                 'persentase_jam' => $persentase,
                 'status'         => $request->status,
-                'keterangan'     => $request->keterangan
+                'keterangan'     => $request->keterangan,
+                'posisi'     => $request->posisi
             ]);
 
             // Update bonus yang terkait shift ini (jika ada)
@@ -256,5 +264,36 @@ class ShiftKaryawanWahanaController extends Controller
         $shift_karyawan->delete();
 
         return redirect()->route('shift_karyawan.index')->with('success', ' Data berhasil dihapus.');
+    }
+    public function listByUnitDate(Request $request)
+    {
+        $unitId  = $request->get('unit_id');
+        $tanggal = $request->get('tanggal');
+
+        if (!$unitId || !$tanggal) {
+            return response()->json(['assignments' => []]); // aman-aman saja kembalikan kosong
+        }
+
+        $rows = ShiftKaryawanWahana::query()
+            ->select([
+                'shift_karyawan_wahanas.wahana_id',
+                'shift_karyawan_wahanas.posisi', // pastikan ada kolom ini di DB
+                'employees.id as employee_id',
+                'employees.nama_karyawan as employee_name',
+            ])
+            ->join('employees', 'employees.id', '=', 'shift_karyawan_wahanas.employee_id')
+            ->where('shift_karyawan_wahanas.unit_kerja_id', $unitId)
+            ->whereDate('shift_karyawan_wahanas.tanggal', $tanggal)
+            ->get();
+
+        $assignments = [];
+        foreach ($rows as $r) {
+            $assignments[$r->wahana_id][$r->posisi] = [
+                'employee_id' => $r->employee_id,
+                'name'        => $r->employee_name,
+            ];
+        }
+
+        return response()->json(['assignments' => $assignments]);
     }
 }

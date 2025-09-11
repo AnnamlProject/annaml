@@ -117,6 +117,28 @@
                             Tambahan</option>
                     </select>
                 </div>
+                <div class="mb-2">
+                    <label for="posisi" class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
+                    <select name="posisi" id="posisi" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Pilih--</option>
+                        <option value="petugas_1"
+                            {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_1' ? 'selected' : '' }}>
+                            Petugas 1</option>
+                        <option value="petugas_2"
+                            {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_2' ? 'selected' : '' }}>
+                            Petugas 2</option>
+                        <option value="petugas_3"
+                            {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_3' ? 'selected' : '' }}>
+                            Petugas 3</option>
+                        <option value="petugas_4"
+                            {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_4' ? 'selected' : '' }}>
+                            Petugas 4</option>
+                        <option value="pengganti"
+                            {{ old('posisi', $shift_karyawan->posisi ?? '') == 'pengganti' ? 'selected' : '' }}>
+                            Pengganti</option>
+                    </select>
+                </div>
             </div>
             <div class="mb-2">
                 <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>

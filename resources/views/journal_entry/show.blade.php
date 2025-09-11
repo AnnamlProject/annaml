@@ -12,7 +12,7 @@
                 </div>
                 <div>
                     <strong>Tanggal:</strong>
-                    <p>{{ \Carbon\Carbon::parse($journal->tanggal)->format('d-m-Y') }}</p>
+                    <p>{{ \Carbon\Carbon::parse($journal->tanggal)->format('d M Y') }}</p>
                 </div>
                 <div>
                     <strong>Comment:</strong>

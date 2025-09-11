@@ -144,4 +144,13 @@ class WahanaController extends Controller
 
         return redirect()->route('wahana.index')->with('success', ' Data berhasil dihapus.');
     }
+    public function byUnit($unitId)
+    {
+        // asumsi kolom foreign key: wahanas.unit_kerja_id
+        $wahanas = Wahana::where('unit_kerja_id', $unitId)
+            ->orderBy('nama_wahana')
+            ->get(['id', 'nama_wahana']);
+
+        return response()->json($wahanas);
+    }
 }

@@ -686,64 +686,64 @@
                                             @mouseenter="subOpen = true" @mouseleave="subOpen = false">
                                             @can('level_karyawan.access')
                                                 <a href="{{ route('LevelKaryawan.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
                                                     Level</a>
                                             @endcan
                                             @can('jabatan.access')
                                                 <a href="{{ route('jabatan.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
                                                 </a>
                                             @endcan
                                             @can('komponen_penghasilan.access')
                                                 <a href="{{ route('komponen_penghasilan.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
                                                     Components By Level
                                                 </a>
                                             @endcan
                                             @can('unit.access')
                                                 <a href="{{ route('unit_kerja.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
                                                 </a>
                                             @endcan
                                             @can('wahana.access')
                                                 <a href="{{ route('wahana.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana(Rides)
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana(Rides)
                                                 </a>
                                             @endcan
                                             @can('ptkp.access')
                                                 <a href="{{ route('ptkp.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
 
                                                 </a>
                                             @endcan
                                             @can('employee.access')
                                                 <a href="{{ route('employee.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                                     Employee Profiles
                                                 </a>
                                             @endcan
                                             @can('komposisi_gaji.access')
                                                 <a href="{{ route('komposisi_gaji.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                                     Income Components By Employee
                                                 </a>
                                             @endcan
                                             @can('jenis_hari.access')
                                                 <a href="{{ route('jenis_hari.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Type
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Type
                                                     Of Days
 
                                                 </a>
                                             @endcan
                                             @can('jam_kerja.access')
                                                 <a href="{{ route('jam_kerja.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Working
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Working
                                                     Hours
                                                 </a>
                                             @endcan
                                             @can('target_unit.access')
                                                 <a href="{{ route('target_unit.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
                                                     Target
                                                     By Unit
                                                 </a>
@@ -751,7 +751,7 @@
 
                                             @can('target_wahana.access')
                                                 <a href="{{ route('target_wahana.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
                                                     Target
                                                     By Wahana
                                                 </a>
@@ -760,7 +760,7 @@
 
                                             @can('shift_karyawan.access')
                                                 <a href="{{ route('shift_karyawan.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Personnel
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Personnel
                                                     Scheduling
 
                                                 </a>
@@ -768,20 +768,20 @@
 
                                             @can('transaksi_wahana.access')
                                                 <a href="{{ route('transaksi_wahana.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Input
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Input
                                                     Sales Achievement
 
                                                 </a>
                                             @endcan
                                             @can('bonus_karyawan.access')
                                                 <a href="{{ route('bonus_karyawan.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
                                                     Bonus Update
                                                 </a>
                                             @endcan
                                             @can('tax_rates.access')
                                                 <a href="{{ route('tax_rates.index') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
                                                     (Tax Rates)
                                                 </a>
                                             @endcan

@@ -13,9 +13,12 @@ use App\Exports\KomponenPenghasilanExport;
 use App\Exports\ProjectExport;
 use App\Exports\PtkpExport;
 use App\Exports\TangibleAssetExport;
+use App\Exports\TargetUnitExport;
 use App\Exports\TaxRatesExport;
+use App\Exports\TransaksiWahanaExport;
 use App\Exports\VendorsExport;
 use App\Exports\WahanaExport;
+use App\TransaksiWahana;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -73,5 +76,13 @@ class ExportController extends Controller
     public function exportKomponenPenghasilan()
     {
         return Excel::download(new KomponenPenghasilanExport, 'komponen_penghasilan.xlsx');
+    }
+    public function exportTargetUnit()
+    {
+        return Excel::download(new TargetUnitExport, 'target_unit.xlsx');
+    }
+    public function exportTransaksiWahana()
+    {
+        return Excel::download(new TransaksiWahanaExport, 'transaksi_wahana.xlsx');
     }
 }

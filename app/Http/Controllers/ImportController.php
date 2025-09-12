@@ -14,6 +14,9 @@ use App\Imports\KomponenPenghasilanImport;
 use App\Imports\ProjectImport;
 use App\Imports\PtkpImport;
 use App\Imports\TangibleAssetImport;
+use App\Imports\TargetUnitImport;
+use App\Imports\TargetWahanaImport;
+use App\Imports\TransaksiWahanaImport;
 use App\Imports\VendorsImport;
 use App\Imports\WahanaImport;
 use Illuminate\Http\Request;
@@ -187,6 +190,54 @@ class ImportController extends Controller
             Excel::import(new KomponenPenghasilanImport, $request->file('file'));
 
             return back()->with('success', 'Data Komponen Penghasilan berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
+    }
+    public function importTargetUnit(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new TargetUnitImport, $request->file('file'));
+
+            return back()->with('success', 'Data target unit berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
+    }
+    public function importTargetWahana(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new TargetWahanaImport, $request->file('file'));
+
+            return back()->with('success', 'Data target wahana berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
+    }
+    public function importTransaksiWahana(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new TransaksiWahanaImport, $request->file('file'));
+
+            return back()->with('success', 'Data transaksi wahana berhasil diimpor.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         } catch (\Throwable $e) {

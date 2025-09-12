@@ -305,13 +305,18 @@ Route::middleware(['auth'])->group(function () {
     // target wahana
     Route::resource('target_wahana', 'TargetWahanaController')->middleware('permission:target_wahana.access');
     Route::get('/wahana-by-unit/{id}', [TargetWahanaController::class, 'getWahanaByUnit']);
+    Route::post('/import/TargetWahana', [ImportController::class, 'importTargetWahana'])->name('import.TargetWahana');
 
     // target unit
     Route::resource('target_unit', 'TargetUnitController')->middleware('permission:target_unit.access');
     Route::get('/komponen-by-level/{id}', [TargetUnitController::class, 'getKomponenByLevel']);
+    Route::get('/export/TargetUnit', [ExportController::class, 'exportTargetUnit'])->name('export.TargetUnit');
+    Route::post('/import/TargetUnit', [ImportController::class, 'importTargetUnit'])->name('import.TargetUnit');
 
     // transaksi Wahana
     Route::resource('transaksi_wahana', 'TransaksiWahanaController')->middleware('permission:transaksi_wahana.access');
+    Route::get('/export/TransaksiWahana', [ExportController::class, 'exportTransaksiWahana'])->name('export.TransaksiWahana');
+    Route::post('/import/TransaksiWahana', [ImportController::class, 'importTransaksiWahana'])->name('import.TransaksiWahana');
 
     // shift karyawan wahana
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');

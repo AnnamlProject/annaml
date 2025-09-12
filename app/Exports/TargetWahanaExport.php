@@ -19,7 +19,7 @@ class TargetWahanaExport implements FromView
 
     public function view(): View
     {
-        $query = TargetWahana::with(['wahana.unitKerja', 'jenisHari']);
+        $query = TargetWahana::with(['wahana.unitKerja', 'jenis_hari']);
 
         if ($this->request->filled('unit_id')) {
             $query->whereHas('wahana', fn($q) => $q->where('unit_kerja_id', $this->request->unit_id));

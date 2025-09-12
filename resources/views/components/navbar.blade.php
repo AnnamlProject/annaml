@@ -590,6 +590,27 @@
                                     </a>
                                 @endcan
 
+                                @can('Build from Bom.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
+                                        From BOM
+                                    </a>
+                                @endcan
+
+                                @can('Build from item assembly.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
+                                        From Item Assembly
+                                    </a>
+                                @endcan
+
+                                @can('Transfer inventory.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transfer
+                                        Inventory
+                                    </a>
+                                @endcan
+
                             </div>
                         </div>
                     @endcan

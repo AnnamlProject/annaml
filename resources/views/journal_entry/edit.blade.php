@@ -47,7 +47,8 @@
                                     <th class="border px-4 py-3 w-[30%]">Accounts</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Debits</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Credits</th>
-                                    <th class="border px-4 py-3 w-[45%] text-center">Comment</th>
+                                    <th class="border px-4 py-3 w-[35%] text-center">Comment</th>
+                                    <th class="border px-4 py-3 w-[10%] text-center">Project</th>
                                     <th class="border px-4 py-3 w-[5%] text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -65,18 +66,25 @@
 
                                     <tr class="item-row" data-index="{{ $i }}">
                                         <td class="border px-2 py-1">
+                                            {{-- Select akun --}}
                                             <select class="item-select w-full border rounded"
                                                 name="items[{{ $i }}][kode_akun]"
                                                 data-index="{{ $i }}">
                                                 <option value="{{ $detail->kode_akun }}" selected>
                                                     {{ $detail->kode_akun }} -
                                                     {{ $detail->chartOfAccount->nama_akun ?? '-' }}
+                                                    @if ($detail->departemenAkun)
+                                                        - {{ $detail->departemenAkun->departemen->deskripsi ?? '-' }}
+                                                    @endif
                                                 </option>
                                             </select>
-                                        </td>
-                                        <td class="border px-2 py-1">
+
+                                            {{-- hidden departemen --}}
                                             <input type="hidden" name="items[{{ $i }}][departemen_akun_id]"
-                                                value="{{ $detail->departemen_akun_id }}" />
+                                                class="departemen-akun" value="{{ $detail->departemen_akun_id }}">
+                                        </td>
+
+                                        <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][debits]"
                                                 class="money-input debit-input w-full border rounded px-2 py-1 text-right"
                                                 value="{{ number_format($detail->debits, 0, ',', '.') }}" />
@@ -90,6 +98,19 @@
                                             <input type="text" name="items[{{ $i }}][comment]"
                                                 class="w-full border rounded px-2 py-1" value="{{ $detail->comment }}" />
                                         </td>
+                                        <td class="border px-2 py-1">
+                                            <select class="w-full border rounded"
+                                                name="items[{{ $i }}][project_id]">
+                                                <option value="">-- Pilih Project --</option>
+                                                @foreach ($projects as $prj)
+                                                    <option value="{{ $prj->id }}"
+                                                        {{ $detail->project_id == $prj->id ? 'selected' : '' }}>
+                                                        {{ $prj->nama_project }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+
                                         <td class="border px-2 py-1 text-center">
                                             <button type="button"
                                                 class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
@@ -154,41 +175,36 @@
         function updateTotals() {
             let totalDebit = 0,
                 totalCredit = 0;
-
             document.querySelectorAll('.debit-input').forEach(input => {
                 totalDebit += parseNumber(input.value);
             });
             document.querySelectorAll('.credit-input').forEach(input => {
                 totalCredit += parseNumber(input.value);
             });
-
             document.getElementById('total-debit').innerText = formatNumber(totalDebit);
             document.getElementById('total-credit').innerText = formatNumber(totalCredit);
         }
 
         function generateRow() {
             return `
-            <tr class="item-row">
-                <td class="border px-2 py-1">
-                    <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
-                </td>
-                <td class="border px-2 py-1">
-                    <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
-                    <input type="text" name="items[][debits]"
-                           class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
-                </td>
-                <td class="border px-2 py-1">
-                    <input type="text" name="items[][credits]"
-                           class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
-                </td>
-                <td class="border px-2 py-1">
-                    <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
-                </td>
-                <td class="border px-2 py-1 text-center">
-                    <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
-                </td>
-            </tr>
-        `;
+    <tr class="item-row">
+        <td class="border px-2 py-1">
+            <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
+            <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
+        </td>
+        <td class="border px-2 py-1">
+            <input type="text" name="items[][debits]" class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+        </td>
+        <td class="border px-2 py-1">
+            <input type="text" name="items[][credits]" class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+        </td>
+        <td class="border px-2 py-1">
+            <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
+        </td>
+        <td class="border px-2 py-1 text-center">
+            <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
+        </td>
+    </tr>`;
         }
 
         function reindexRows() {
@@ -216,17 +232,19 @@
                     processResults: data => {
                         let results = [];
                         data.forEach(item => {
+                            // akun tanpa departemen
                             results.push({
-                                id: item.id,
+                                id: item.kode_akun,
                                 text: `${item.kode_akun} - ${item.nama_akun}`,
                                 kode_akun: item.kode_akun,
                                 departemen_akun_id: null
                             });
+                            // akun dengan departemen
                             if (item.daftar_departemen) {
                                 item.daftar_departemen.forEach(dept => {
                                     results.push({
-                                        id: `d-${dept.id}`,
-                                        text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
+                                        id: item.kode_akun,
+                                        text: `${item.kode_akun} - ${item.nama_akun} - ${dept.deskripsi}`,
                                         kode_akun: item.kode_akun,
                                         departemen_akun_id: dept.id
                                     });

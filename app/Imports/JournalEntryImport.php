@@ -6,6 +6,7 @@ use App\ChartOfAccount;
 use App\DepartemenAkun;
 use App\JournalEntry;
 use App\JournalEntryDetail;
+use App\Project;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Collection;
@@ -146,13 +147,26 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     $kodeResolved = $row['_resolved_kode_akun']
                         ?? (isset($row['kode_akun']) ? trim((string)$row['kode_akun']) : null);
 
+                    // ====== Cek project (opsional) ======
+                    $projectValue = $row['project'] ?? null;
+                    $project = null;
+                    if (!empty($projectValue)) {
+                        $project = Project::where('nama_project', $projectValue)->first();
+                        if (!$project) {
+                            $this->skippedGroups[] = [
+                                'reason' => "Project '{$projectValue}' tidak ditemukan. Diset NULL."
+                            ];
+                        }
+                    }
+
                     JournalEntryDetail::create([
                         'journal_entry_id'   => $journalEntry->id,
                         'departemen_akun_id' => $departemenAkun ? $departemenAkun->id : null,
-                        'kode_akun'          => $kodeResolved, // ← hasil resolve aman
+                        'kode_akun'          => $kodeResolved,
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,
                         'comment'            => $row['comment_line'] ?? null,
+                        'project_id'         => $project ? $project->id : null, // ← tambahan
                     ]);
                 }
             }

@@ -76,7 +76,8 @@
                                     <th class="border px-4 py-3 text-center w-[30%]">Accounts</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
-                                    <th class="border px-4 py-3 text-center w-[45%]">Comment</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Comment</th>
+                                    <th class="border px-4 py-3 text-center w-[20]">Project</th>
                                     <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
                             </thead>
@@ -185,6 +186,14 @@
           <td class="border px-2 py-1">
             <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
           </td>
+                <td class="border px-2 py-1">
+                <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
+                    <option value="">-- Pilih Project --</option>
+                    @foreach ($project as $prj)
+                        <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
+                    @endforeach
+                </select>
+            </td>
           <td class="border px-2 py-1 text-center">
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
           </td>

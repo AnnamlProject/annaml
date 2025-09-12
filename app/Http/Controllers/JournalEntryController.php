@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DepartemenAkun;
 use App\JournalEntry;
 use App\JournalEntryDetail;
+use App\Project;
 use App\StartNewYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +51,8 @@ class JournalEntryController extends Controller
     {
         $departemenAkun = DepartemenAkun::all();
         $periodeBuku = StartNewYear::all();
-        return view('journal_entry.create', compact('departemenAkun', 'periodeBuku'));
+        $project = Project::all();
+        return view('journal_entry.create', compact('departemenAkun', 'periodeBuku', 'project'));
     }
     public function getAutoData(Request $request)
     {
@@ -201,6 +203,7 @@ class JournalEntryController extends Controller
             'items.*.debits' => 'nullable|numeric',
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
+            'items.*.project_id' => 'nullable|exists:projects,id'
         ]);
 
         // Hitung total debit & kredit
@@ -234,6 +237,7 @@ class JournalEntryController extends Controller
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
+                    'project_id' => $item['project_id'] ?? null
                 ]);
             }
 
@@ -334,9 +338,10 @@ class JournalEntryController extends Controller
     }
     public function edit($id)
     {
-        $journalEntry = JournalEntry::with(['details.chartOfAccount', 'details.departemenAkun.departemen'])->findOrFail($id);
+        $journalEntry = JournalEntry::with(['details.chartOfAccount', 'details.departemenAkun.departemen', 'details.project'])->findOrFail($id);
 
-        return view('journal_entry.edit', compact('journalEntry'));
+        $projects = Project::all();
+        return view('journal_entry.edit', compact('journalEntry', 'projects'));
     }
     public function update(Request $request, $id)
     {
@@ -350,7 +355,7 @@ class JournalEntryController extends Controller
         })->values()->all();
 
         $request->merge(['items' => $cleanedItems]);
-
+        // dd($request->all());
         // Validasi dasar
         $request->validate([
             'source' => 'required|string|max:255',
@@ -362,6 +367,8 @@ class JournalEntryController extends Controller
             'items.*.debits' => 'nullable|numeric',
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
+            'items.*.project_id' => 'nullable|exists:projects,id'
+
         ]);
 
         // ===== Tambahkan validasi manual di sini =====
@@ -401,6 +408,7 @@ class JournalEntryController extends Controller
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
+                    'project_id' => $item['project_id'] ?? null
                 ]);
             }
 

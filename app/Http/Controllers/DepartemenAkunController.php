@@ -28,10 +28,11 @@ class DepartemenAkunController extends Controller
                 'nama_departemen' => optional(optional($item->departemenAkun->first())->departemen)->deskripsi ?? '-',
                 'daftar_departemen' => $item->departemenAkun->map(function ($d) {
                     return [
-                        'id' => $d->departemen_id,
+                        'id' => $d->id, // <-- ini id pivot dari tabel departemen_akuns
                         'deskripsi' => optional($d->departemen)->deskripsi ?? '-'
                     ];
                 })
+
             ];
         }));
     }

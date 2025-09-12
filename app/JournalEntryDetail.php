@@ -13,7 +13,8 @@ class JournalEntryDetail extends Model
         'debits',
         'credits',
         'comment',
-        'kode_akun'
+        'kode_akun',
+        'project_id'
     ];
 
     protected static function booted()
@@ -66,5 +67,9 @@ class JournalEntryDetail extends Model
     public function departemenAkun()
     {
         return $this->belongsTo(DepartemenAkun::class, 'departemen_akun_id');
+    }
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
     }
 }

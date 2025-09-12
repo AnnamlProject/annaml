@@ -49,6 +49,25 @@ class PermissionInventory extends Seeder
             'inventory.update',
             'inventory.delete',
 
+
+            'Build from Bom.access',
+            'Build from Bom.create',
+            'Build from Bom.view',
+            'Build from Bom.update',
+            'Build from Bom.delete',
+
+            'Build from item assembly.access',
+            'Build from item assembly.create',
+            'Build from item assembly.view',
+            'Build from item assembly.update',
+            'Build from item assembly.delete',
+
+            'Transfer inventory.access',
+            'Transfer inventory.create',
+            'Transfer inventory.view',
+            'Transfer inventory.update',
+            'Transfer inventory.delete',
+
         ];
 
         foreach ($permissions as $permission) {

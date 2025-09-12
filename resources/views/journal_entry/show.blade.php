@@ -32,6 +32,7 @@
                             <th class="border px-4 py-2 text-right">Debit</th>
                             <th class="border px-4 py-2 text-right">Kredit</th>
                             <th class="border px-4 py-2">Comment</th>
+                            <th class="border px-4 py-2">Project</th>
                         </tr>
                     </thead>
                     @php
@@ -67,6 +68,9 @@
                                 <td class="border px-4 py-2">
                                     {{ $detail->comment ?? '-' }}
                                 </td>
+                                <td class="border px-4 py-2">
+                                    {{ $detail->project->nama_project ?? 'Tidak Ada' }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -76,6 +80,7 @@
                             <td class="border px-4 py-2 text-right">{{ number_format($totalDebit, 2, ',', '.') }}</td>
                             <td class="border px-4 py-2 text-right">{{ number_format($totalKredit, 2, ',', '.') }}</td>
                             <td class="border px-4 py-2"></td>
+                            <td></td>
                         </tr>
                     </tfoot>
 

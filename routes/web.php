@@ -320,6 +320,8 @@ Route::middleware(['auth'])->group(function () {
 
     // shift karyawan wahana
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
+    Route::get('/export/ShiftKaryawan', [ExportController::class, 'exportShiftKaryawan'])->name('export.ShiftKaryawan');
+    Route::post('/import/ShiftKaryawan', [ImportController::class, 'importShiftKaryawan'])->name('import.ShiftKaryawan');
 
     Route::get('/wahana/by-unit/{unit}', [WahanaController::class, 'byUnit'])
         ->name('wahana.byUnit');

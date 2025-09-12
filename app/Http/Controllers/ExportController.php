@@ -12,6 +12,7 @@ use App\Exports\KlasifikasiAkunExport;
 use App\Exports\KomponenPenghasilanExport;
 use App\Exports\ProjectExport;
 use App\Exports\PtkpExport;
+use App\Exports\ShiftKaryawanExport;
 use App\Exports\TangibleAssetExport;
 use App\Exports\TargetUnitExport;
 use App\Exports\TaxRatesExport;
@@ -84,5 +85,9 @@ class ExportController extends Controller
     public function exportTransaksiWahana()
     {
         return Excel::download(new TransaksiWahanaExport, 'transaksi_wahana.xlsx');
+    }
+    public function exportShiftKaryawan()
+    {
+        return Excel::download(new ShiftKaryawanExport, 'shift_karyawan.xlsx');
     }
 }

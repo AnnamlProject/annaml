@@ -2,6 +2,7 @@
 
 @section('content')
     <div class="py-10">
+
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8" x-data="{ tab: '{{ request('view', 'tabel') }}' }">
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
@@ -18,6 +19,10 @@
                     </h3>
 
                     <div class="flex flex-wrap gap-2">
+                        <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
+                            class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-file-export text-blue-500 mr-2"></i> File
+                        </button>
                         <button onclick="document.getElementById('filterPanel').classList.toggle('hidden')"
                             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-filter text-gray-500 mr-2"></i> Filter
@@ -117,6 +122,39 @@
                     </div>
                 </form>
             </div>
+            <!-- File Modal -->
+            <div id="fileModal"
+                class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
+                    </h3>
+                    <div class="space-y-3 text-sm text-gray-700">
+                        <a href="{{ asset('template/template_import_shift_karyawan.xlsx') }}" download
+                            class="block hover:bg-gray-50 p-2 rounded-lg">
+                            <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
+                        </a>
+                        <a href="{{ route('export.ShiftKaryawan') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
+                            <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
+                        </a>
+                        <form action="{{ route('import.ShiftKaryawan') }}" method="POST" enctype="multipart/form-data"
+                            class="space-y-2">
+                            @csrf
+                            <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
+                            <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1"
+                                required>
+                            <button type="submit"
+                                class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
+                                <i class="fas fa-file-upload mr-1"></i> Import
+                            </button>
+                        </form>
+                    </div>
+                    <div class="mt-4 text-right">
+                        <button onclick="document.getElementById('fileModal').classList.add('hidden')"
+                            class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
+                    </div>
+                </div>
+            </div>
 
             {{-- TAB TABEL --}}
             <div x-show="tab === 'tabel'" class="relative overflow-x-auto"
@@ -148,7 +186,8 @@
                                 Status</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Keterangan</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Aksi
                             </th>
                         </tr>
                     </thead>

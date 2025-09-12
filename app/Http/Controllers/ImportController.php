@@ -13,6 +13,7 @@ use App\Imports\KlasifikasiAkunImport;
 use App\Imports\KomponenPenghasilanImport;
 use App\Imports\ProjectImport;
 use App\Imports\PtkpImport;
+use App\Imports\ShiftKaryawanImport;
 use App\Imports\TangibleAssetImport;
 use App\Imports\TargetUnitImport;
 use App\Imports\TargetWahanaImport;
@@ -238,6 +239,22 @@ class ImportController extends Controller
             Excel::import(new TransaksiWahanaImport, $request->file('file'));
 
             return back()->with('success', 'Data transaksi wahana berhasil diimpor.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
+        }
+    }
+    public function importShiftKaryawan(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+
+        try {
+            Excel::import(new ShiftKaryawanImport, $request->file('file'));
+
+            return back()->with('success', 'Data shift karyawan wahana berhasil diimpor.');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         } catch (\Throwable $e) {

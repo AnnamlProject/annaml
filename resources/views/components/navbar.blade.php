@@ -889,7 +889,7 @@
                                             x-transition:leave-end="opacity-0 translate-x-1"
                                             class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                             @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                            @can('rekap_abensi.access')
+                                            @can('rekap_absensi.access')
                                                 <a href="{{ route('report.absensi.filter') }}"
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                                     Rekap Absensi Pegawai
@@ -1505,11 +1505,16 @@
                                                 class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Year
                                                 Book</a>
                                         @endcan
-                                        @can('klasifikasi_akun.access')
+                                        @can('numbering_account.access')
                                             <a href="{{ route('klasifikasiAkun.index') }}"
                                                 class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Numbering
 
                                             </a>
+                                        @endcan
+                                        @can('klasifikasi_akun.access')
+                                            <a href="{{ route('klasifikasiAkun.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Account
+                                                Classification</a>
                                         @endcan
                                         @can('chart_of_account.access')
                                             <a href="{{ route('chartOfAccount.index') }}" @click="open = false"
@@ -2126,7 +2131,7 @@
                                     <div x-data="{ subOpen: false }">
                                         <button @click="subOpen = !subOpen"
                                             class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
-                                            Setup
+                                            Process
                                             <svg class="w-4 h-4 transform transition-transform duration-200"
                                                 :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -2177,7 +2182,7 @@
                                     <div x-data="{ subOpen: false }">
                                         <button @click="subOpen = !subOpen"
                                             class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
-                                            Setup
+                                            Report
                                             <svg class="w-4 h-4 transform transition-transform duration-200"
                                                 :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -2188,7 +2193,7 @@
 
                                         <!-- Level 2: Company Sub-submenu -->
                                         <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
-                                            @can('rekap_abensi.access')
+                                            @can('rekap_absensi.access')
                                                 <a href="{{ route('report.absensi.filter') }}"
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                                                     Rekap Absensi Pegawai

@@ -38,7 +38,7 @@
                             class="absolute left-2 mt-2 w-60 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
                             <!-- Company Submenu -->
-                            @can('general.access')
+                            @can('company.access')
                                 <div class="relative" x-data="{ subOpen: false }">
                                     <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                         class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
@@ -686,7 +686,7 @@
                                 class="absolute left-2 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
                                 <!-- Company Submenu -->
-                                @can('setup.access')
+                                @can('setup_payroll.access')
                                     <div class="relative" x-data="{ subOpen: false }">
                                         <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                             class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
@@ -814,7 +814,7 @@
 
 
                                 <!-- Reports Submenu -->
-                                @can('process.access')
+                                @can('process_payroll.access')
                                     <div class="relative" x-data="{ subOpen: false }">
                                         <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                             class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
@@ -1270,7 +1270,7 @@
                                 class="absolute left-2 mt-2 w-60 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
 
                                 <!-- Company Submenu -->
-                                @can('sales_document')
+                                @can('sales_document.access')
                                     <div class="relative" x-data="{ subOpen: false }">
                                         <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
                                             class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
@@ -1452,73 +1452,1151 @@
                         <div x-show="open" x-collapse class="pl-4 space-y-1">
 
                             <!-- Company with Sub-submenu -->
-                            <div x-data="{ subOpen: false }">
-                                <button @click="subOpen = !subOpen"
-                                    class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
-                                    Company
-                                    <svg class="w-4 h-4 transform transition-transform duration-200"
-                                        :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
+                            @can('company.access')
+                                <div x-data="{ subOpen: false }">
+                                    <button @click="subOpen = !subOpen"
+                                        class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                        Company
+                                        <svg class="w-4 h-4 transform transition-transform duration-200"
+                                            :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
 
-                                <!-- Level 2: Company Sub-submenu -->
-                                <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
-                                    <a href="{{ route('setting.index') }}"
-                                        class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Settings</a>
-                                    <a href="{{ $company ? route('company_profile.show', $company->id) : route('company_profile.create') }}"
-                                        class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Company
-                                        Profile</a>
-                                    <a href="{{ $taxpayers ? route('taxpayers_company.show', $taxpayers->id) : route('taxpayers_company.create') }}"
-                                        class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Taxpayer
-                                        Profile</a>
+                                    <!-- Level 2: Company Sub-submenu -->
+                                    <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                        @can('setting_setup.access')
+                                            <a href="{{ route('setting.index') }}"
+                                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Settings</a>
+                                        @endcan
+                                        @can('company_profile.access')
+                                            <a href="{{ $company ? route('company_profile.show', $company->id) : route('company_profile.create') }}"
+                                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Company
+                                                Profile</a>
+                                        @endcan
+                                        @can('taxpayers_company.access')
+                                            <a href="{{ $taxpayers ? route('taxpayers_company.show', $taxpayers->id) : route('taxpayers_company.create') }}"
+                                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Taxpayer
+                                                Profile</a>
+                                        @endcan
+                                    </div>
                                 </div>
+                            @endcan
+                            {{-- general menu --}}
+                            @can('general.access')
+                                <div x-data="{ subOpen: false }">
+                                    <button @click="subOpen = !subOpen"
+                                        class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                        General
+                                        <svg class="w-4 h-4 transform transition-transform duration-200"
+                                            :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Level 2: Company Sub-submenu -->
+                                    <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                        @can('year_book.access')
+                                            <a href="{{ route('start_new_year.index') }}"
+                                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Year
+                                                Book</a>
+                                        @endcan
+                                        @can('klasifikasi_akun.access')
+                                            <a href="{{ route('klasifikasiAkun.index') }}"
+                                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-100 rounded-md">Numbering
+
+                                            </a>
+                                        @endcan
+                                        @can('chart_of_account.access')
+                                            <a href="{{ route('chartOfAccount.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Chart
+                                                of Accounts</a>
+                                        @endcan
+                                        @can('departement.access')
+                                            @if ($currentDept === 'Accounting')
+                                                <a href="{{ route('departemen.index') }}" @click="open = false"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Departments
+                                                </a>
+                                            @elseif ($currentDept === '-' || is_null($currentDept))
+                                                <a href="{{ route('setting_departement.edit') }}" @click="open = false"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Departments
+                                                </a>
+                                            @else
+                                                <a href="#"
+                                                    onclick="alert('Menu ini hanya aktif saat mode departemen Accounting')"
+                                                    @click="open = false"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Departments
+                                                </a>
+                                            @endif
+                                        @endcan
+                                        @can('linked_account_setup.access')
+                                            <a href="{{ route('linkedAccount.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Linked
+                                                Account</a>
+                                        @endcan
+                                        @can('sales_taxes.access')
+                                            <a href="{{ route('sales_taxes.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                - Taxes
+                                            </a>
+                                        @endcan
+                                    </div>
+                                </div>
+                            @endcan
+                            {{-- report setup --}}
+                            @can('reports_setup.access')
+                                <div x-data="{ subOpen: false }">
+                                    <button @click="subOpen = !subOpen"
+                                        class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                        Reports
+                                        <svg class="w-4 h-4 transform transition-transform duration-200"
+                                            :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+
+                                    <!-- Level 2: Company Sub-submenu -->
+                                    <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                        @can('report_account.access')
+                                            <a href="{{ route('report.account') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Account
+                                                List</a>
+                                        @endcan
+                                        @can('report_klasifikasi_akun.access')
+                                            <a href="{{ route('report.klasifikasi') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Account
+                                                Classification List</a>
+                                        @endcan
+                                        @can('report_departemen_account.access')
+                                            <a href="{{ route('report.departemen-akun') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Department
+                                                Accounts List</a>
+                                        @endcan
+                                    </div>
+                                </div>
+                            @endcan
+                            <a href="{{ route('users.index') }}" @click="open = false"
+                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                Users & Roles
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- sales mobile --}}
+
+                    @can('sales.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Sales
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setup_sales.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('linked_account_sales.access')
+                                                <a href="{{ route('linkedAccountSales.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Linked
+                                                    Accounts</a>
+                                            @endcan
+
+                                            @can('option_sales.access')
+                                                <a href="{{ route('sales_option.create') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
+                                                </a>
+                                            @endcan
+
+                                            @can('sales_discount.access')
+                                                <a href="{{ route('sales_discount.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Sales Discount
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                {{-- general menu --}}
+                                @can('data.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Data
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('payment_method.access')
+                                                <a href="{{ route('PaymentMethod.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payment
+                                                    Method</a>
+                                            @endcan
+                                            @can('customers.access')
+                                                <a href="{{ route('customers.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Customers</a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                {{-- report setup --}}
+                                @can('sales.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Sales
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('sales_orders.access')
+                                                <a href="{{ route('sales_order.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Orders</a>
+                                            @endcan
+                                            @can('sales_invoice.access')
+                                                <a href="{{ route('sales_invoice.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Invoices
+                                                </a>
+                                            @endcan
+
+                                            @can('sales_person.access')
+                                                <a href="{{ route('employee.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Person
+                                                </a>
+                                            @endcan
+                                            @can('deposits.access')
+                                                <a href="{{ route('sales_deposits.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Deposits</a>
+                                            @endcan
+                                            @can('receipts.access')
+                                                <a href="{{ route('receipts.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Receipts</a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
                             </div>
-
-                            <!-- Other Setup Items -->
-                            <a href="#"
-                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md">General</a>
-                            <a href="#"
-                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md">Reports</a>
                         </div>
-                    </div>
+                    @endcan
 
-                    <!-- Journal Entry with Submenu -->
-                    <div x-data="{ open: false }">
-                        <button @click="open = !open"
-                            class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
-                            Journal Entry
-                            <svg class="w-4 h-4 transform transition-transform duration-200"
-                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div x-show="open" x-collapse class="pl-4 space-y-1">
-                            <a href="#"
-                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md">General
-                                Journal</a>
-                            <a href="#"
-                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md">Create
-                                Entry</a>
-                            <a href="#"
-                                class="block px-3 py-2 text-sm text-gray-600 hover:bg-blue-50 rounded-md">Edit
-                                Entry</a>
+                    {{-- purchase --}}
+                    @can('purchase.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Purchases
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setup_purchase.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('option_purchase.access')
+                                                <a href="{{ route('purchases_options.create') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
+                                                </a>
+                                            @endcan
+
+                                            @can('linked_account_purchase.access')
+                                                <a href="{{ route('linkedAccountPurchases.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Linked
+                                                    Account
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                {{-- general menu --}}
+                                @can('purchase.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Purchases
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('purchase_order.access')
+                                                <a href="{{ route('purchase_order.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchases
+                                                    Orders
+                                                </a>
+                                            @endcan
+
+                                            @can('purchase_invoice.access')
+                                                <a href="{{ route('purchase_invoice.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
+                                                    Invoice
+                                                </a>
+                                            @endcan
+
+                                            @can('prepayment_purchase.access')
+                                                <a href="#"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Prepayments
+                                                </a>
+                                            @endcan
+
+                                            @can('payment_purchase.access')
+                                                <a href="{{ route('payment.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payments
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('vendor.access')
+                                    <a href="{{ route('vendors.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Vendors
+
+                                    </a>
+                                @endcan
+                            </div>
                         </div>
-                    </div>
+                    @endcan
 
-                    <!-- Report -->
-                    <a href="#"
-                        class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md">Report</a>
+
+                    {{-- inventory --}}
+                    @can('inventory.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Inventory
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setting_inventory.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setting
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('options_inventory.access')
+                                                <a href="{{ $options_inventory ? route('options_inventory.edit', $options_inventory->id) : route('options_inventory.create') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Options</a>
+                                            @endcan
+
+                                            @can('price_list_inventory.access')
+                                                <a href="{{ route('price_list_inventory.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Price List</a>
+                                            @endcan
+
+                                            @can('lokasi_inventory.access')
+                                                <a href="{{ route('lokasi_inventory.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Locations</a>
+                                            @endcan
+
+                                            @can('kategori_inventory.access')
+                                                <a href="{{ route('item_category.index') }}"
+                                                    class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Categories</a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+
+                                @can('inventory.access')
+                                    <a href="{{ route('inventory.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Inventory
+                                        & Service
+                                    </a>
+                                @endcan
+
+                                @can('Build from Bom.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
+                                        From BOM
+                                    </a>
+                                @endcan
+
+                                @can('Build from item assembly.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
+                                        From Item Assembly
+                                    </a>
+                                @endcan
+
+                                @can('Transfer inventory.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Transfer
+                                        Inventory
+                                    </a>
+                                @endcan
+
+                            </div>
+                        </div>
+                    @endcan
+
+                    {{-- budgeting --}}
+                    @can('budgeting.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Budgeting
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setting_inventory.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Budgeting
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            <a href="{{ route('intangible_asset.index') }}"
+                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                Budget
+
+                                            </a>
+                                            <a href="{{ route('intangible_asset.index') }}"
+                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                Submission
+
+                                            </a>
+                                            <a href="{{ route('intangible_asset.index') }}"
+                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                Disbursement
+
+                                            </a>
+                                            <a href="{{ route('intangible_asset.index') }}"
+                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                Realization
+
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
+                    {{-- payroll --}}
+                    @can('payroll.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Payroll
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setup_payroll.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('level_karyawan.access')
+                                                <a href="{{ route('LevelKaryawan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    Level</a>
+                                            @endcan
+                                            @can('jabatan.access')
+                                                <a href="{{ route('jabatan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Position
+                                                </a>
+                                            @endcan
+                                            @can('komponen_penghasilan.access')
+                                                <a href="{{ route('komponen_penghasilan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
+                                                    Components By Level
+                                                </a>
+                                            @endcan
+                                            @can('unit.access')
+                                                <a href="{{ route('unit_kerja.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens
+                                                </a>
+                                            @endcan
+                                            @can('wahana.access')
+                                                <a href="{{ route('wahana.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Wahana(Rides)
+                                                </a>
+                                            @endcan
+                                            @can('ptkp.access')
+                                                <a href="{{ route('ptkp.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">PTKP
+
+                                                </a>
+                                            @endcan
+                                            @can('employee.access')
+                                                <a href="{{ route('employee.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Employee Profiles
+                                                </a>
+                                            @endcan
+                                            @can('komposisi_gaji.access')
+                                                <a href="{{ route('komposisi_gaji.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Income Components By Employee
+                                                </a>
+                                            @endcan
+                                            @can('jenis_hari.access')
+                                                <a href="{{ route('jenis_hari.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Type
+                                                    Of Days
+
+                                                </a>
+                                            @endcan
+                                            @can('jam_kerja.access')
+                                                <a href="{{ route('jam_kerja.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Working
+                                                    Hours
+                                                </a>
+                                            @endcan
+                                            @can('target_unit.access')
+                                                <a href="{{ route('target_unit.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Target
+                                                    By Unit
+                                                </a>
+                                            @endcan
+
+                                            @can('target_wahana.access')
+                                                <a href="{{ route('target_wahana.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                    Target
+                                                    By Wahana
+                                                </a>
+                                            @endcan
+
+
+                                            @can('shift_karyawan.access')
+                                                <a href="{{ route('shift_karyawan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Personnel
+                                                    Scheduling
+
+                                                </a>
+                                            @endcan
+
+                                            @can('transaksi_wahana.access')
+                                                <a href="{{ route('transaksi_wahana.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Input
+                                                    Sales Achievement
+
+                                                </a>
+                                            @endcan
+                                            @can('bonus_karyawan.access')
+                                                <a href="{{ route('bonus_karyawan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Employee
+                                                    Bonus Update
+                                                </a>
+                                            @endcan
+                                            @can('tax_rates.access')
+                                                <a href="{{ route('tax_rates.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">TER
+                                                    (Tax Rates)
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('process_payroll.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('pembayaran_gaji.access')
+                                                <a href="{{ route('pembayaran_gaji.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Salary Calculations Staff
+                                                </a>
+                                            @endcan
+
+                                            @can('pembayaran_gaji_nonstaff.access')
+                                                <a href="{{ route('pembayaran_gaji_nonstaff.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Salary Calculations Non Staff
+                                                </a>
+                                            @endcan
+
+                                            @can('slip.access')
+                                                <a href="{{ route('slip.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Salary Slip Staff</a>
+                                            @endcan
+
+                                            @can('slip_gaji_nonstaff.access')
+                                                <a href="{{ route('slip.nonStaff.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Salary Slip Non Staff</a>
+                                            @endcan
+
+                                            @can('absensi.access')
+                                                <a href="{{ route('absensi.form') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Absensi
+                                                    Pegawai
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+
+                                @can('report_payroll.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('rekap_abensi.access')
+                                                <a href="{{ route('report.absensi.filter') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Rekap Absensi Pegawai
+                                                </a>
+                                            @endcan
+                                            @can('rekap_target_wahana.access')
+                                                <a href="{{ route('report.target_wahana.filter') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                    Rekap Target Wahana
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
+
+
+                    {{-- asset --}}
+                    @can('asset.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Asset
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('setup_asset.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Setup
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('kategori_asset.access')
+                                                <a href="{{ route('kategori_asset.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Category
+                                                    Asset
+                                                </a>
+                                            @endcan
+                                            @can('lokasi_asset.access')
+                                                <a href="{{ route('lokasi.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Location
+                                                    Asset
+                                                </a>
+                                            @endcan
+
+                                            @can('masa_manfaat.access')
+                                                <a href="{{ route('masa_manfaat.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Masa
+                                                    Manfaat
+
+                                                </a>
+                                            @endcan
+                                            @can('metode_penyusutan.access')
+                                                <a href="{{ route('metode_penyusutan.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Metode
+                                                    Penyusutan
+                                                </a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('tangible_asset.access')
+                                    <a href="{{ route('tangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Tangible
+                                        Asset
+                                    </a>
+                                @endcan
+
+                                @can('intangible_asset.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Intangible
+                                        Asset
+                                    </a>
+                                @endcan
+
+                                @can('monthly_process.access')
+                                    <a href=""
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Monthly
+                                        Process
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
+
+
+                    {{-- specpose --}}
+                    @can('specpose.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Specpose
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('specpose.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Specpose
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('specpose.create')
+                                                <a href="{{ route('project.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Data
+                                                    Specpose</a>
+                                            @endcan
+
+                                            @can('specpose.create')
+                                                <a href="{{ route('project.create') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Specpose</a>
+                                            @endcan
+
+                                            @can('specpose.update')
+                                                <a href="{{ route('project.edit_project') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Edit
+                                                    Specpose</a>
+                                            @endcan
+
+                                            @can('specpose.view')
+                                                <a href="{{ route('project.view_project') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">View
+                                                    Specpose</a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('report_specpose.access')
+                                    <a href="#"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Reports</a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
+
+
+                    {{-- journal entry --}}
+                    @can('journal_entry.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Journal Entry
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('specpose.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            General Journal
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            @can('journal_entry.data')
+                                                <a href="{{ route('journal_entry.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Data
+                                                    Journal Entry</a>
+                                            @endcan
+                                            @can('journal_entry.create')
+                                                <a href="{{ route('journal_entry.create') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Journal Entry</a>
+                                            @endcan
+
+                                            @can('journal_entry.update')
+                                                <a href="{{ route('journal_entry.filter_journal_entry') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Edit
+                                                    Journal Entry</a>
+                                            @endcan
+
+                                            @can('journal_entry.view')
+                                                <a href="{{ route('journal_entry.view_journal_entry') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">View
+                                                    Journal Entry</a>
+                                            @endcan
+                                        </div>
+                                    </div>
+                                @endcan
+
+                            </div>
+                        </div>
+                    @endcan
+                    @can('report_menu.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Report
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                @can('buku_besar.access')
+                                    <a href="{{ route('buku_besar.filter_buku_besar') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Buku
+                                        Besar</a>
+                                @endcan
+
+                                @can('trial_balance.access')
+                                    <a href="{{ route('trial_balance.filter_trial_balance') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Trial
+                                        Balance</a>
+                                @endcan
+
+                                @can('income_statement.access')
+                                    <a href="{{ route('income_statement.filter_income_statement') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
+                                        Statement</a>
+                                @endcan
+
+                                @can('income_statement_departement.access')
+                                    <a href="#"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
+                                        Statement Department</a>
+                                @endcan
+
+                            </div>
+                        </div>
+                    @endcan
+
+                    @can('documents.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Documents
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                <!-- Company with Sub-submenu -->
+                                @can('sales_document.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Sales
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            <a href="{{ route('sales_orders.documents.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                Order</a>
+                                            <a href="{{ route('sales_invoice.documents.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                                Invoice</a>
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('purchases_document.access')
+                                    <div x-data="{ subOpen: false }">
+                                        <button @click="subOpen = !subOpen"
+                                            class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
+                                            Purchase
+                                            <svg class="w-4 h-4 transform transition-transform duration-200"
+                                                :class="{ 'rotate-180': subOpen }" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Level 2: Company Sub-submenu -->
+                                        <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
+                                            <a href="{{ route('purchase_order.documents.index') }}" @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
+                                                Order</a>
+                                            <a href="{{ route('purchase_invoice.documents.index') }}"
+                                                @click="open = false"
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
+                                                Invoice
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('taxes.access')
+                                    <a href="{{ route('taxes.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                        Taxes
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcan
+
+                    @can('maintenance.access')
+
+                        <div x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="w-full flex justify-between items-center px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md focus:outline-none">
+                                Maintenance
+                                <svg class="w-4 h-4 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Level 1: Setup Submenu -->
+                            <div x-show="open" x-collapse class="pl-4 space-y-1">
+
+                                @can('start_new_year.access')
+                                    <a href="{{ route('accounting.start_new_year') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Start
+                                        New Year
+                                    </a>
+                                @endcan
+
+                                @can('log_activity.access')
+                                    <a href="{{ route('activity_log.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Log
+                                        Activity
+                                    </a>
+                                @endcan
+
+                            </div>
+                        </div>
+                    @endcan
+
 
                     <!-- Profile & Logout -->
                     <div class="border-t border-gray-200 pt-2">
                         <a href="#"
-                            class="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md">Profile</a>
-                        <a href="#" class="block px-3 py-2 text-red-600 hover:bg-red-50 rounded-md">Logout</a>
+                            class="block px-2 py-1 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md">Profile</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="lock px-2 py-1 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md">Logout</button>
+                        </form>
                     </div>
                 </div>
             </div>

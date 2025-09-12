@@ -32,7 +32,7 @@
                             <th class="border px-4 py-2 text-right">Debit</th>
                             <th class="border px-4 py-2 text-right">Kredit</th>
                             <th class="border px-4 py-2">Comment</th>
-                            <th class="border px-4 py-2">Project</th>
+                            <th class="border px-4 py-2">Specpose</th>
                         </tr>
                     </thead>
                     @php

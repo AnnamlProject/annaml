@@ -12,7 +12,7 @@ class PermissionSeeder extends Seeder
             // payroll 
             'payroll.access',
             // setup
-            'setup.access',
+            'setup_payroll.access',
             // level karyawan modul
             'level_karyawan.access',
             'level_karyawan.create',
@@ -133,7 +133,7 @@ class PermissionSeeder extends Seeder
             'jam_kerja.delete',
 
             // process
-            'process.access',
+            'process_payroll.access',
 
             // report 
             'report_payroll.access',

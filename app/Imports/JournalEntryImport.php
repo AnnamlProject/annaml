@@ -148,7 +148,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                         ?? (isset($row['kode_akun']) ? trim((string)$row['kode_akun']) : null);
 
                     // ====== Cek project (opsional) ======
-                    $projectValue = $row['project'] ?? null;
+                    $projectValue = $row['specpose'] ?? null;
                     $project = null;
                     if (!empty($projectValue)) {
                         $project = Project::where('nama_project', $projectValue)->first();

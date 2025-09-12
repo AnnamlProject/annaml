@@ -48,7 +48,7 @@
                                     <th class="border px-4 py-3 w-[10%] text-center">Debits</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Credits</th>
                                     <th class="border px-4 py-3 w-[35%] text-center">Comment</th>
-                                    <th class="border px-4 py-3 w-[10%] text-center">Project</th>
+                                    <th class="border px-4 py-3 w-[10%] text-center">Specpose</th>
                                     <th class="border px-4 py-3 w-[5%] text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -101,7 +101,7 @@
                                         <td class="border px-2 py-1">
                                             <select class="w-full border rounded"
                                                 name="items[{{ $i }}][project_id]">
-                                                <option value="">-- Pilih Project --</option>
+                                                <option value="">-- Pilih Specpose --</option>
                                                 @foreach ($projects as $prj)
                                                     <option value="{{ $prj->id }}"
                                                         {{ $detail->project_id == $prj->id ? 'selected' : '' }}>
@@ -201,6 +201,14 @@
         <td class="border px-2 py-1">
             <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
         </td>
+                  <td class="border px-2 py-1">
+                <select name="items[][project_id]" class="w-full border rounded px-2 py-1">
+                    <option value="">-- Pilih Specpose --</option>
+                    @foreach ($projects as $prj)
+                        <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
+                    @endforeach
+                </select>
+            </td>
         <td class="border px-2 py-1 text-center">
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
         </td>

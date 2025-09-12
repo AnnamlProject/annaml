@@ -77,7 +77,7 @@
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
                                     <th class="border px-4 py-3 text-center w-[15%]">Comment</th>
-                                    <th class="border px-4 py-3 text-center w-[20]">Project</th>
+                                    <th class="border px-4 py-3 text-center w-[20]">Specpose</th>
                                     <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
                             </thead>
@@ -188,7 +188,7 @@
           </td>
                 <td class="border px-2 py-1">
                 <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
-                    <option value="">-- Pilih Project --</option>
+                    <option value="">-- Pilih Specpose --</option>
                     @foreach ($project as $prj)
                         <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                     @endforeach

@@ -16,6 +16,7 @@ use App\Http\Controllers\IncomeStatementController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\KomposisiGajiController;
+use App\Http\Controllers\NeracaController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SettingDepartementController;
@@ -143,6 +144,10 @@ Route::middleware(['auth'])->group(function () {
 
     // report
 
+    // neraca
+    Route::get('filter_neraca', [NeracaController::class, 'neracaFilter'])->name('neraca.filter_neraca')->middleware('permission:neraca.access');
+    Route::get('neraca_report', [NeracaController::class, 'neracaReport'])->name('neraca.neraca_report');
+
     // buku besar
     Route::get('filter_buku_besar', [BukuBesarController::class, 'bukuBesarFilter'])->name('buku_besar.filter_buku_besar')->middleware('permission:buku_besar.access');
     Route::get('/laporan/buku-besar', [BukuBesarController::class, 'bukuBesarReport'])->name('buku_besar.buku_besar_report');
@@ -154,6 +159,9 @@ Route::middleware(['auth'])->group(function () {
     // income statement
     Route::get('filter_income_statement', [IncomeStatementController::class, 'incomeStatementFilter'])->name('income_statement.filter_income_statement')->middleware('permission:income_statement.access');
     Route::get('income_statement', [IncomeStatementController::class, 'incomeStatementReport'])->name('income_statement.income_statement_report');
+
+    Route::get('filter_income_statement_departement', [IncomeStatementController::class, 'incomeStatementFilterDepartement'])->name('income_statement.filter_income_statement_departement');
+    Route::get('income_satetement_departement', [IncomeStatementController::class, 'incomeStatementDepartement'])->name('income_statement.income_statement_departement');
 
 
 
@@ -262,6 +270,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('lokasi_inventory', 'LokasiInventoryController')->middleware('permission:lokasi_inventory.access');
     Route::resource('price_list_inventory', 'PriceListInventoryController')->middleware('permission:price_list_inventory.access');
     Route::resource('options_inventory', 'OptionsInventoryController')->middleware('permission:options_inventory.access');
+
+    Route::resource('build_of_bom', 'BuildOfBomController')->middleware('permission:Build from Bom.access');
+    Route::get('/items/{id}/info', [ItemController::class, 'info'])->name('items.info');
+    Route::get('/items/{id}/bom', [ItemController::class, 'bom'])->name('items.bom');
+
+
 
     // end inventory  menu
 

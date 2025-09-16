@@ -32,8 +32,9 @@ class Item extends Model
 
     public function vendors()
     {
-        return $this->hasMany(ItemVendor::class);
+        return $this->hasOne(ItemVendor::class, 'item_id');
     }
+
 
     public function accounts()
     {

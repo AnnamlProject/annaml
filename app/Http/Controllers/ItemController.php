@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\chartOfAccount;
 use App\Item;
+use App\ItemBuild;
 use App\itemCategory;
 use App\PriceListInventory;
 use Illuminate\Http\Request;
@@ -178,5 +179,41 @@ class ItemController extends Controller
                 'purchase_price' => $item->purchase_price
             ];
         }));
+    }
+    public function info($id)
+    {
+        $item = Item::with(['quantities', 'units'])->findOrFail($id);
+
+        return response()->json([
+            'description'   => $item->item_description,
+            'unit'          => optional($item->units)->unit_of_measure ?? '-',
+            'current_stock' => $item->quantities->sum('on_hand_qty'),
+        ]);
+    }
+    public function bom($id)
+    {
+        $itemBuild = ItemBuild::with(['details.item.quantities'])->where('item_id', $id)->first();
+
+        if (!$itemBuild) {
+            return response()->json(['details' => []]);
+        }
+
+        return response()->json([
+            'build_quantity' => $itemBuild->build_quantity,
+            'additional_costs' => $itemBuild->additional_costs,
+            'details' => $itemBuild->details->map(function ($d) {
+                $unitCost = optional($d->item->quantities->first())->on_hand_value ?? 0;
+                $amount   = $unitCost * $d->quantity;
+
+                return [
+                    'component_id' => $d->item_id,
+                    'description'  => $d->description ?? $d->item->item_description,
+                    'unit'         => $d->unit,
+                    'quantity'     => $d->quantity,
+                    'unit_cost'    => $unitCost,
+                    'amount'       => $amount,
+                ];
+            }),
+        ]);
     }
 }

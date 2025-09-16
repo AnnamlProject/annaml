@@ -72,12 +72,18 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
                     if (!$resolved) {
                         $invalidAkun = true;
+                        $this->skippedGroups[] = [
+                            'reason' => "Akun tidak ditemukan. Kode: '{$kodeExcel}', Nama: '{$namaExcel}'"
+                        ];
                     } elseif ($resolved === 'MISMATCH') {
                         $akunMismatch = true;
+                        $this->skippedGroups[] = [
+                            'reason' => "Kode dan Nama akun tidak cocok. Kode: '{$kodeExcel}', Nama: '{$namaExcel}'"
+                        ];
                     } else {
-                        // OK, gunakan $resolved->kode_akun saat save detail
                         $row['_resolved_kode_akun'] = $resolved->kode_akun;
                     }
+
 
                     // ====== Validasi Departemen (opsional) ======
                     $departemenValue = $row['departemen'] ?? null;

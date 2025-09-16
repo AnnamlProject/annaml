@@ -24,9 +24,9 @@
                         <tr>
                             <td>{{ $row['kode_akun'] }}</td>
                             <td>{{ $row['nama_akun'] }}</td>
-                            <td>{{ number_format($row['saldo'], 0) }}</td>
+                            <td>{{ number_format($row['saldo'], 2, ',', '.') }}</td>
                             @foreach ($departemens as $dept)
-                                <td>{{ number_format($row['per_departemen'][$dept] ?? 0, 0) }}</td>
+                                <td>{{ number_format($row['per_departemen'][$dept] ?? 0, 2, ',', '.') }}</td>
                             @endforeach
                         </tr>
                     @endforeach

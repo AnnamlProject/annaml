@@ -281,11 +281,15 @@
                 </div>
 
                 {{-- Vendors (inventory & service) --}}
+                {{-- Vendors Inventory --}}
                 <div id="vendors" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        @php $currentVendorId = old('vendor_id', optional($item->vendors->first())->vendor_id); @endphp
-                        <select name="vendor_id" id="vendor_id"
+                        @php
+                            $currentVendorId = old('vendor_id_inventory', optional($item->vendors)->vendor_id);
+                        @endphp
+
+                        <select name="vendor_id_inventory" id="vendor_id_inventory"
                             class="w-full border rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -298,10 +302,14 @@
                     </div>
                 </div>
 
+                {{-- Vendors Service --}}
                 <div id="vendorsService" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        <select name="vendor_id" id="vendor_id"
+                        @php
+                            $currentVendorId = old('vendor_id_service', optional($item->vendors)->vendor_id);
+                        @endphp
+                        <select name="vendor_id_service" id="vendor_id_service"
                             class="w-full border rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -313,6 +321,7 @@
                         </select>
                     </div>
                 </div>
+
 
                 {{-- Linked COA (inventory) --}}
                 @php $acc = $item->accounts; @endphp
@@ -393,12 +402,14 @@
 
                             @forelse ($details as $i => $d)
                                 <tr data-index="{{ $i }}">
+
                                     <td>
                                         <select name="build[{{ $i }}][item_id]"
                                             class="item-select form-select w-full border rounded px-2 py-1 text-sm">
                                             <option value="">-- Pilih Item --</option>
                                             @foreach ($items as $it)
-                                                <option value="{{ $it->id }}" data-unit=""
+                                                <option value="{{ $it->id }}"
+                                                    data-unit="{{ $it->units->unit_of_measure ?? '' }}"
                                                     data-description="{{ $it->item_description }}"
                                                     {{ (string) old("build.$i.item_id", $d->item_id) === (string) $it->id ? 'selected' : '' }}>
                                                     {{ $it->item_description }}
@@ -409,8 +420,9 @@
                                     <td>
                                         <input type="text" name="build[{{ $i }}][unit]"
                                             value="{{ old("build.$i.unit", $d->unit) }}"
-                                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm">
                                     </td>
+
                                     <td>
                                         <input type="text" name="build[{{ $i }}][description]"
                                             value="{{ old("build.$i.description", $d->description) }}"
@@ -437,7 +449,8 @@
                                             class="item-select form-select w-full border rounded px-2 py-1 text-sm">
                                             <option value="">-- Pilih Item --</option>
                                             @foreach ($items as $it)
-                                                <option value="{{ $it->id }}" data-unit=""
+                                                <option value="{{ $it->id }}"
+                                                    data-unit="{{ $it->units->unit_of_measure ?? '' }}"
                                                     data-description="{{ $it->item_description }}">
                                                     {{ $it->item_description }}
                                                 </option>
@@ -446,7 +459,7 @@
                                     </td>
                                     <td>
                                         <input type="text" name="build[0][unit]"
-                                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm">
                                     </td>
                                     <td>
                                         <input type="text" name="build[0][description]"
@@ -729,25 +742,40 @@
 
             function rowTemplate(i) {
                 return `
-            <tr data-index="${i}">
-                <td>
-                    <select name="build[${i}][item_id]" class="item-select form-select w-full border rounded px-2 py-1 text-sm">
-                        <option value="">-- Pilih Item --</option>
-                        @foreach ($items as $it)
-                            <option value="{{ $it->id }}" data-unit="" data-description="{{ $it->item_description }}">
-                                {{ $it->item_description }}
-                            </option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="text" name="build[${i}][unit]" class="unit-input form-input w-full border rounded px-2 py-1 text-sm" readonly></td>
-                <td><input type="text" name="build[${i}][description]" class="desc-input form-input w-full border rounded px-2 py-1 text-sm" readonly></td>
-                <td><input type="number" name="build[${i}][quantity]" class="qty-input form-input w-full border rounded px-2 py-1 text-sm" min="0" step="1"></td>
-                <td class="px-4 py-2 border text-center">
-                    <button type="button" class="remove-row-build bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
-                </td>
-            </tr>`;
+                <tr data-index="${i}">
+                    <td>
+                        <select name="build[${i}][item_id]" 
+                            class="item-select form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Item --</option>
+                            @foreach ($items as $it)
+                                <option value="{{ $it->id }}"
+                                    data-unit="{{ $it->units->unit_of_measure ?? '' }}"
+                                    data-description="{{ $it->item_description }}">
+                                    {{ $it->item_description }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="build[${i}][unit]" 
+                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm">
+                    </td>
+                    <td>
+                        <input type="text" name="build[${i}][description]" 
+                            class="desc-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                    </td>
+                    <td>
+                        <input type="number" name="build[${i}][quantity]" 
+                            class="qty-input form-input w-full border rounded px-2 py-1 text-sm" min="0" step="1">
+                    </td>
+                    <td class="px-4 py-2 border text-center">
+                        <button type="button" class="remove-row-build bg-red-500 text-white px-2 py-1 rounded text-xs">
+                            Hapus
+                        </button>
+                    </td>
+                </tr>`;
             }
+
 
             if (addRowBtn) {
                 addRowBtn.addEventListener("click", function() {

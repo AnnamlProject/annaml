@@ -37,13 +37,13 @@
                                     // Parent key untuk JavaScript toggle
                                     switch ($account->level_indent) {
                                         case 1:
-                                            $parentKode = substr($account->kode_akun, 0, 1) . '0000';
+                                            $parentKode = substr($account->kode_akun, 0, 1);
                                             break;
                                         case 2:
-                                            $parentKode = substr($account->kode_akun, 0, 2) . '000';
+                                            $parentKode = substr($account->kode_akun, 0, 2);
                                             break;
                                         case 3:
-                                            $parentKode = substr($account->kode_akun, 0, 3) . '00';
+                                            $parentKode = substr($account->kode_akun, 0, 3);
                                             break;
                                         default:
                                             $parentKode = '';
@@ -69,7 +69,8 @@
                                     }
                                 @endphp
                                 <tr class="akun-row {{ $rowBg }}" data-kode="{{ $account->kode_akun }}"
-                                    data-level="{{ strtolower($account->level_akun) }}" data-parent="{{ $parentKode }}">
+                                    data-level="{{ strtolower($account->level_akun) }}"
+                                    data-parent="{{ $account->parent_prefix ?? '' }}">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             @if ($account->has_child)
@@ -144,13 +145,13 @@
             }
         });
     </script>
-
     <script>
         function toggleChild(kodeInduk) {
             const btn = document.getElementById('btn-' + kodeInduk);
             const isExpand = btn.innerText === '➕';
 
-            const children = document.querySelectorAll(`tr[data-parent="${kodeInduk}"]`);
+            // Cari semua row dengan parent = prefix kodeInduk
+            const children = document.querySelectorAll(`tr[data-parent^="${kodeInduk}"]`);
 
             children.forEach(row => {
                 if (isExpand) {
@@ -168,7 +169,7 @@
         }
 
         function collapseRecursive(kodeInduk) {
-            const children = document.querySelectorAll(`tr[data-parent="${kodeInduk}"]`);
+            const children = document.querySelectorAll(`tr[data-parent^="${kodeInduk}"]`);
             children.forEach(row => {
                 row.style.display = 'none';
                 const kode = row.getAttribute('data-kode');

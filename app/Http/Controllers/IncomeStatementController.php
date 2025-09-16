@@ -119,12 +119,20 @@ class IncomeStatementController extends Controller
     }
     public function incomeStatementDepartement(Request $request)
     {
-        // Ambil data departemen (ID dan nama)
+        // Ambil semua departemen induk
         $departemens = Departement::select('id', 'deskripsi')->get();
 
         $tanggalAwal = $request->start_date;
         $tanggalAkhir = $request->end_date;
         $selectedAccounts = $request->selected_accounts;
+
+        // Ambil departemen terpilih dari request (kalau ada)
+        $selectedDepartemens = $request->selected_departemens ? explode(',', $request->selected_departemens) : [];
+
+        if (!empty($selectedDepartemens)) {
+            // Filter hanya departemen yang dipilih
+            $departemens = $departemens->whereIn('deskripsi', $selectedDepartemens);
+        }
 
         // Proses akun terpilih
         $kodeAkunTerpilih = [];
@@ -150,7 +158,7 @@ class IncomeStatementController extends Controller
         $totalBeban = 0;
 
         foreach ($accounts as $account) {
-            // Ambil semua jurnal detail untuk akun dan periode ini
+            // Ambil semua jurnal detail untuk akun & periode ini
             $entries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
                 ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
                     $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
@@ -160,7 +168,7 @@ class IncomeStatementController extends Controller
             $totalDebit = $entries->sum('debits');
             $totalKredit = $entries->sum('credits');
 
-            // Hitung saldo utama
+            // Hitung saldo utama akun
             $saldoUtama = 0;
             if (strtolower($account->tipe_akun) === 'pendapatan') {
                 $saldoUtama = $totalKredit - $totalDebit;
@@ -170,11 +178,14 @@ class IncomeStatementController extends Controller
                 $totalBeban += $saldoUtama;
             }
 
-            // Hitung per departemen
+            // Hitung per departemen induk
             $perDepartemen = [];
             foreach ($departemens as $departemen) {
                 $departemenEntries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
-                    ->where('departemen_akun_id', $departemen->id)
+                    ->whereHas('departemenAkun', function ($q) use ($departemen) {
+                        // relasi departemenAkun -> departemen
+                        $q->where('departemen_id', $departemen->id);
+                    })
                     ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
                         $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
                     })
@@ -193,10 +204,10 @@ class IncomeStatementController extends Controller
 
             if ($saldoUtama != 0) {
                 $incomeStatement[] = [
-                    'kode_akun' => $account->kode_akun,
-                    'nama_akun' => $account->nama_akun,
-                    'tipe_akun' => $account->tipe_akun,
-                    'saldo' => $saldoUtama,
+                    'kode_akun'     => $account->kode_akun,
+                    'nama_akun'     => $account->nama_akun,
+                    'tipe_akun'     => $account->tipe_akun,
+                    'saldo'         => $saldoUtama,
                     'per_departemen' => $perDepartemen,
                 ];
             }
@@ -207,11 +218,11 @@ class IncomeStatementController extends Controller
         return view('income_statement.income_statement_departement', [
             'incomeStatement' => $incomeStatement,
             'totalPendapatan' => $totalPendapatan,
-            'totalBeban' => $totalBeban,
-            'labaBersih' => $labaBersih,
-            'start_date' => $tanggalAwal,
-            'end_date' => $tanggalAkhir,
-            'departemens' => $departemens->pluck('deskripsi'),
+            'totalBeban'      => $totalBeban,
+            'labaBersih'      => $labaBersih,
+            'start_date'      => $tanggalAwal,
+            'end_date'        => $tanggalAkhir,
+            'departemens'     => $departemens->pluck('deskripsi'),
         ]);
     }
 }

@@ -72,7 +72,7 @@
                 </div>
 
                 {{-- Quantities Tab --}}
-                <div id="quantities" class="tab-content">
+                <div id="quantities">
                     <h3 class="font-semibold text-lg mb-2">Quantities</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
@@ -225,7 +225,7 @@
                 <div id="vendors" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        <select name="vendor_id" id="vendor_id"
+                        <select name="vendor_id_inventory" id="vendor_id"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -239,7 +239,7 @@
                 <div id="vendorsService" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        <select name="vendor_id" id="vendor_id"
+                        <select name="vendor_id_service" id="vendor_id"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -366,7 +366,7 @@
 
                                 <td>
                                     <input type="text" name="build[0][unit]"
-                                        class="unit-input form-input w-full border rounded px-2 py-1 text-sm" readonly>
+                                        class="unit-input form-input w-full border rounded px-2 py-1 text-sm">
                                 </td>
 
                                 <td>
@@ -627,7 +627,7 @@
                     <input type="text" 
                            name="build[${i}][unit]"
                            class="unit-input form-input w-full border rounded px-2 py-1 text-sm" 
-                           readonly>
+                           >
                 </td>
                 <td>
                     <input type="text" 

@@ -47,6 +47,7 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         // ===== 1) VALIDASI DASAR =====
+        // dd($request->all());
         $rules = [
             'item_number' => ['required', 'string', 'max:100', Rule::unique('items', 'item_number')],
             'item_description'   => ['required', 'string', 'max:255'],
@@ -176,22 +177,36 @@ class InventoryController extends Controller
             }
 
             // ===== 2d) Item Units =====
-            // Checkbox akan bernilai "1" jika dicentang, null jika tidak
+            // Checkbox akan bernilai true jika dicentang
             $sellingSame = $request->has('selling_same_as_stocking');
             $buyingSame  = $request->has('buying_same_as_stocking');
 
             ItemUnit::create([
-                'item_id'                   => $item->id,
-                'selling_same_as_stocking'  => $sellingSame,
-                'selling_unit'              => $sellingSame ? null : $request->input('selling_unit'),
-                'selling_relationship'      => $sellingSame ? null : $request->input('selling_relationship'),
+                'item_id'                  => $item->id,
 
-                'buying_same_as_stocking'   => $buyingSame,
-                'buying_unit'               => $buyingSame ? null : $request->input('buying_unit'),
-                'buying_relationship'       => $buyingSame ? null : $request->input('buying_relationship'),
+                // Selling
+                'selling_same_as_stocking' => $sellingSame,
+                'selling_unit'             => $sellingSame
+                    ? $request->input('stocking_unit')
+                    : $request->input('selling_unit'),
+                'selling_relationship'     => $sellingSame
+                    ? 1
+                    : $request->input('selling_relationship'),
 
-                'unit_of_measure'           => $request->input('unit_of_measure'), // stok utama
+                // Buying
+                'buying_same_as_stocking'  => $buyingSame,
+                'buying_unit'              => $buyingSame
+                    ? $request->input('stocking_unit')
+                    : $request->input('buying_unit'),
+                'buying_relationship'      => $buyingSame
+                    ? 1
+                    : $request->input('buying_relationship'),
+
+                // Stocking / unit utama
+                'unit_of_measure'          => $request->input('unit_of_measure')
+                    ?: $request->input('stocking_unit'),
             ]);
+
 
             // ===== 2e) Item Prices (pricing array dari Inventory/Service) =====
             $pricing = collect($request->input('pricing', []))
@@ -207,15 +222,17 @@ class InventoryController extends Controller
                     'price'          => (float) ($row['price'] ?? 0),
                 ]);
             }
-
             // ===== 2f) Item Vendor (opsional) =====
-            if ($request->filled('vendor_id')) {
+            $vendorId = $request->input('vendor_id_inventory') ?? $request->input('vendor_id_service');
+
+            if ($vendorId) {
                 ItemVendor::create([
                     'item_id'        => $item->id,
-                    'vendor_id'      => $request->input('vendor_id'),
-                    'vendor_contact' => null, // isi jika ada field kontak di form
+                    'vendor_id'      => $vendorId,
+                    'vendor_contact' => null, // isi kalau ada field kontak di form
                 ]);
             }
+
 
             // ===== 2g) Item Accounts =====
             // Inventory: asset, revenue, cogs, variance (required)
@@ -488,20 +505,37 @@ class InventoryController extends Controller
                 $qty->reorder_to_order     = $request->input('reorder_to_order');
                 $qty->save();
             }
-
             // 5) UNITS: upsert satu baris
             $sellingSame = $request->has('selling_same_as_stocking');
             $buyingSame  = $request->has('buying_same_as_stocking');
 
             $unit = ItemUnit::firstOrNew(['item_id' => $inventory->id]);
+
+            // Selling
             $unit->selling_same_as_stocking = $sellingSame;
-            $unit->selling_unit             = $sellingSame ? null : $request->input('selling_unit');
-            $unit->selling_relationship     = $sellingSame ? null : $request->input('selling_relationship');
-            $unit->buying_same_as_stocking  = $buyingSame;
-            $unit->buying_unit              = $buyingSame ? null : $request->input('buying_unit');
-            $unit->buying_relationship      = $buyingSame ? null : $request->input('buying_relationship');
-            $unit->unit_of_measure = $request->input('unit_of_measure') ?: null;
+            $unit->selling_unit             = $sellingSame
+                ? $request->input('stocking_unit')
+                : $request->input('selling_unit');
+            $unit->selling_relationship     = $sellingSame
+                ? 1 // kalau sama persis, relationship default = 1
+                : $request->input('selling_relationship');
+
+            // Buying
+            $unit->buying_same_as_stocking = $buyingSame;
+            $unit->buying_unit             = $buyingSame
+                ? $request->input('stocking_unit')
+                : $request->input('buying_unit');
+            $unit->buying_relationship     = $buyingSame
+                ? 1
+                : $request->input('buying_relationship');
+
+            // Stocking / Unit of Measure
+            $unit->unit_of_measure = $request->input('unit_of_measure')
+                ?: $request->input('stocking_unit')
+                ?: null;
+
             $unit->save();
+
 
             // 6) PRICES: sync (hapus lama → insert baru)
             ItemPrice::where('item_id', $inventory->id)->delete();
@@ -515,16 +549,30 @@ class InventoryController extends Controller
                 ]);
             }
 
-            // 7) VENDOR: upsert (satu vendor per item sesuai form kamu)
-            if ($request->filled('vendor_id')) {
+            // ===== 7) VENDOR: upsert (satu vendor per item sesuai form kamu) =====
+            $vendorId = $request->input('vendor_id_inventory') ?? $request->input('vendor_id_service');
+
+            if ($vendorId) {
                 $iv = ItemVendor::firstOrNew(['item_id' => $inventory->id]);
-                $iv->vendor_id = $request->input('vendor_id');
-                // $iv->vendor_contact = ... (jika ada field)
+                $iv->vendor_id = $vendorId;
+                // $iv->vendor_contact = $request->input('vendor_contact'); // kalau ada field
                 $iv->save();
             } else {
-                // jika kosongkan vendor, hapus relasi vendor
+                // jika user kosongkan vendor, hapus relasi vendor
                 ItemVendor::where('item_id', $inventory->id)->delete();
             }
+
+            // // Debugging
+            // dd([
+            //     'vendor_id_inventory' => $request->input('vendor_id_inventory'),
+            //     'vendor_id_service'   => $request->input('vendor_id_service'),
+            //     'vendorId dipakai'    => $vendorId,
+            //     'record vendor (relasi hasOne)' => $inventory->vendor,
+            //     'record vendor (relasi hasMany)' => $inventory->vendors,
+            //     'record vendor (query manual)' => ItemVendor::where('item_id', $inventory->id)->first(),
+            // ]);
+
+
 
             // 8) ACCOUNTS: upsert satu baris
             $accountsPayload = [

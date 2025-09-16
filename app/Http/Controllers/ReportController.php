@@ -9,6 +9,7 @@ use App\JenisHari;
 use App\TargetWahana;
 use App\UnitKerja;
 use App\Wahana;
+use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use SebastianBergmann\CodeCoverage\Report\Xml\Unit;
 class ReportController extends Controller
 {
     //
+
     public function reportAccount()
     {
         $chartOfAccounts = ChartOfAccount::with('klasifikasiAkun')
@@ -54,34 +56,43 @@ class ReportController extends Controller
             ]);
         }
 
-
         foreach ($chartOfAccounts as $coa) {
-            // Normalisasi level akun (hapus isi dalam tanda kurung jika ada)
+            // Normalisasi level akun (hapus isi dalam tanda kurung kalau ada)
             $coa->level_akun = strtoupper(trim(preg_replace('/\s*\(.*?\)/', '', $coa->level_akun)));
 
-            // Hitung indentasi level (untuk margin di blade)
+            // Hitung level indent dari panjang digit signifikan
             $coa->level_indent = $this->getLevelIndent($coa->kode_akun);
 
-            // Deteksi apakah memiliki child
+            // Tentukan parent prefix (berdasarkan level_indent - 1)
+            $coa->parent_prefix = $this->getParentKode($coa->kode_akun, $coa->level_indent - 1);
+
+            // Deteksi apakah punya child
             $coa->has_child = $chartOfAccounts->contains(function ($child) use ($coa) {
-                return $child->kode_akun !== $coa->kode_akun &&
-                    $this->getLevelIndent($child->kode_akun) > $coa->level_indent &&
-                    substr($child->kode_akun, 0, $this->getKodePrefixLength($coa->level_indent)) ===
-                    substr($coa->kode_akun, 0, $this->getKodePrefixLength($coa->level_indent));
+                // Header (level 0) tidak punya parent → skip
+                if ($coa->level_indent < 0) {
+                    return false;
+                }
+
+                // Prefix parent berdasarkan level indent
+                $prefix = substr($coa->kode_akun, 0, $coa->level_indent);
+
+                return $child->kode_akun !== $coa->kode_akun
+                    && Str::startsWith($child->kode_akun, $prefix)
+                    && $this->getLevelIndent($child->kode_akun) > $coa->level_indent;
             });
         }
 
         return view('report.account', compact('chartOfAccounts'));
     }
 
-
+    /**
+     * Hitung level akun berdasarkan jumlah digit signifikan (tanpa trailing zero)
+     */
     private function getLevelIndent($kodeAkun)
     {
-        // Buang trailing zero
         $kodeSignifikan = rtrim($kodeAkun, '0');
         $panjang = strlen($kodeSignifikan);
 
-        // Tentukan level berdasarkan panjang digit signifikan
         switch ($panjang) {
             case 1:
                 return 0; // HEADER
@@ -94,20 +105,16 @@ class ReportController extends Controller
         }
     }
 
-    private function getKodePrefixLength($levelIndent)
+    /**
+     * Ambil kode parent berdasarkan prefix sesuai level indent
+     */
+    private function getParentKode($kodeAkun, $levelIndent)
     {
-        // Kembalikan jumlah digit yang dipakai untuk identifikasi parent
-        switch ($levelIndent) {
-            case 0:
-                return 1;
-            case 1:
-                return 2;
-            case 2:
-                return 3;
-            default:
-                return 4;
-        }
+        if ($levelIndent <= 0) return null;
+
+        return substr($kodeAkun, 0, $levelIndent);
     }
+
 
     public function reportKlasifikasi()
     {

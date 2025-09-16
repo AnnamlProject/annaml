@@ -54,13 +54,14 @@
 
                     {{-- Select Account --}}
                     <div class="sm:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Select Departemen</label>
 
                         {{-- Input hidden untuk kirim array akun terpilih --}}
-                        <input type="hidden" name="selected_accounts" id="selected_accounts">
+                        <input type="hidden" name="selected_departemens" id="selected_departemens">
+
 
                         <!-- Search Input -->
-                        <input type="text" id="search-account" placeholder="Cari akun..."
+                        <input type="text" id="search-account" placeholder="Cari departemen..."
                             class="border p-2 rounded mb-3 w-full" />
 
                         <!-- Table Container -->
@@ -71,18 +72,18 @@
                                         <th class="px-4 py-2">
                                             <input type="checkbox" id="select-all" class="form-checkbox">
                                         </th>
-                                        <th class="px-4 py-2">Account</th>
+                                        <th class="px-4 py-2">Departemen</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($account as $akun)
+                                    @foreach ($departemens as $item)
                                         <tr class="border-b hover:bg-gray-50">
                                             <td class="px-4 py-2">
                                                 <input type="checkbox" class="account-checkbox form-checkbox"
-                                                    value="{{ $akun->kode_akun }} - {{ $akun->nama_akun }}">
+                                                    value="{{ $item->kode }} - {{ $item->deskripsi }}">
                                             </td>
                                             <td class="px-4 py-2">
-                                                {{ $akun->kode_akun }} - {{ $akun->nama_akun }}
+                                                {{ $item->kode }} - {{ $item->deskripsi }}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -118,28 +119,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const selectAll = document.getElementById('select-all');
-            const checkboxes = document.querySelectorAll('.account-checkbox');
-            const hiddenInput = document.getElementById('selected_accounts');
+            const deptCheckboxes = document.querySelectorAll('.account-checkbox');
+            const hiddenDeptInput = document.getElementById('selected_departemens');
 
-            // Toggle all checkboxes
-            selectAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateSelectedAccounts();
-            });
-
-            // Update hidden input when individual checkbox changes
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', updateSelectedAccounts);
-            });
-
-            function updateSelectedAccounts() {
+            function updateSelectedDepts() {
                 const selected = [];
-                checkboxes.forEach(cb => {
-                    if (cb.checked) selected.push(cb.value);
+                deptCheckboxes.forEach(cb => {
+                    if (cb.checked) selected.push(cb.value.split(' - ')[1]); // ambil deskripsi saja
                 });
-                hiddenInput.value = selected.join(',');
+                hiddenDeptInput.value = selected.join(',');
             }
+
+            deptCheckboxes.forEach(cb => cb.addEventListener('change', updateSelectedDepts));
         });
     </script>
     <!-- Script for Search and Select All -->

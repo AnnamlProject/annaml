@@ -23,4 +23,8 @@ class ItemBuild extends Model
     {
         return $this->hasMany(InventoryBuildComponent::class);
     }
+    public function details()
+    {
+        return $this->hasMany(ItemBuildDetail::class);
+    }
 }

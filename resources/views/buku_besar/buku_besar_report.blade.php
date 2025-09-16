@@ -32,11 +32,11 @@
                                 $saldoBerjalan = $startingBalances[$kodeAkun] ?? 0;
                             @endphp
 
-                            <h3 class="text-lg font-bold mb-2">
+                            <h3 class="text-xs font-bold mb-2">
                                 {{ $kodeAkun }} - {{ $namaAkun }}
                             </h3>
 
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto text-xs leading-tight">
                                 <table style="table-layout: fixed; width: 100%;">
                                     <thead class="bg-gray-100">
                                         <tr>
@@ -53,9 +53,9 @@
                                     <tbody>
                                         {{-- Baris saldo awal --}}
                                         <tr class="bg-gray-50 ">
-                                            <td class="px-3 py-2 border text-center" colspan="3"></td>
-                                            <td class="px-3 py-2 border tex-center" colspan="2"></td>
-                                            <td class="px-3 py-2 border text-right">
+                                            <td class="px-2 py-1 border text-center" colspan="3"></td>
+                                            <td class="px-2 py-1 border tex-center" colspan="2"></td>
+                                            <td class="px-2 py-1 border text-right">
                                                 {{ number_format($saldoBerjalan, 2, ',', '.') }}
                                             </td>
                                         </tr>
@@ -80,33 +80,33 @@
                                                 }
                                             @endphp
                                             <tr>
-                                                <td class="px-3 py-2 border">{{ optional($row->journalEntry)->tanggal }}
+                                                <td class="px-2 py-1 border">{{ optional($row->journalEntry)->tanggal }}
                                                 </td>
-                                                <td class="px-3 py-2 border">
+                                                <td class="px-2 py-1 border">
                                                     @if ($showComment == 'transaction_comment')
                                                         {{ optional($row->journalEntry)->comment ?? '-' }}
                                                     @else
                                                         {{ $row->comment ?? '-' }}
                                                     @endif
                                                 </td>
-                                                <td class="px-3 py-2 border">
+                                                <td class="px-2 py-1 border">
                                                     {{ optional($row->journalEntry)->source ?? '-' }}
                                                 </td>
-                                                <td class="px-3 py-2 border text-right">
+                                                <td class="px-2 py-1 border text-right">
                                                     {{ number_format($debit, 2, ',', '.') }}</td>
-                                                <td class="px-3 py-2 border text-right">
+                                                <td class="px-2 py-1 border text-right">
                                                     {{ number_format($kredit, 2, ',', '.') }}</td>
-                                                <td class="px-3 py-2 border text-right">
+                                                <td class="px-2 py-1 border text-right">
                                                     {{ number_format($saldoBerjalan, 2, ',', '.') }}</td>
                                             </tr>
                                         @endforeach
 
 
                                         <tr class="bg-gray-100 font-semibold">
-                                            <td colspan="3" class="px-3 py-2 text-right">Total</td>
-                                            <td class="px-3 py-2 text-right">{{ number_format($totalDebit, 2, ',', '.') }}
+                                            <td colspan="3" class="px-2 py-1 text-right">Total</td>
+                                            <td class="px-2 py-1 text-right">{{ number_format($totalDebit, 2, ',', '.') }}
                                             </td>
-                                            <td class="px-3 py-2 text-right">{{ number_format($totalKredit, 2, ',', '.') }}
+                                            <td class="px-2 py-1 text-right">{{ number_format($totalKredit, 2, ',', '.') }}
                                             </td>
                                             <td></td>
                                         </tr>
@@ -115,6 +115,44 @@
                             </div>
                         </div>
                     @endforeach
+                    <div class="mt-6 border-t pt-4 text-xs">
+                        <table class="w-full border text-xs">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-2 py-1 border text-left">Kategori</th>
+                                    <th class="px-2 py-1 border text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-2 py-1 border">Pendapatan</td>
+                                    <td class="px-2 py-1 border text-right">
+                                        {{ number_format($totalByType['pendapatan'], 2, ',', '.') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border">Kewajiban</td>
+                                    <td class="px-2 py-1 border text-right">
+                                        {{ number_format($totalByType['kewajiban'], 2, ',', '.') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-2 py-1 border">Ekuitas</td>
+                                    <td class="px-2 py-1 border text-right">
+                                        {{ number_format($totalByType['ekuitas'], 2, ',', '.') }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-200 font-bold">
+                                <tr>
+                                    <td class="px-2 py-1 border">Grand Total</td>
+                                    <td class="px-2 py-1 border text-right">
+                                        {{ number_format($totalByType['pendapatan'] + $totalByType['kewajiban'] + $totalByType['ekuitas'], 2, ',', '.') }}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 @else
                     <p class="text-gray-500">Tidak ada data untuk ditampilkan.</p>
                 @endif

@@ -19,6 +19,7 @@ class PermissionReport extends Seeder
             'trial_balance.access',
             'income_statement.access',
             'income_statement_departement.access',
+            'neraca.access',
 
             'documents.access',
             'sales_document.access',

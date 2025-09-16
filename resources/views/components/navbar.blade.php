@@ -591,7 +591,7 @@
                                 @endcan
 
                                 @can('Build from Bom.access')
-                                    <a href=""
+                                    <a href="{{ route('build_of_bom.index') }}"
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
                                         From BOM
                                     </a>
@@ -1231,6 +1231,11 @@
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Trial
                                         Balance</a>
                                 @endcan
+                                @can('neraca.access')
+                                    <a href="{{ route('neraca.filter_neraca') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Neraca
+                                    </a>
+                                @endcan
 
                                 @can('income_statement.access')
                                     <a href="{{ route('income_statement.filter_income_statement') }}"
@@ -1239,7 +1244,7 @@
                                 @endcan
 
                                 @can('income_statement_departement.access')
-                                    <a href="#"
+                                    <a href="{{ route('income_statement.filter_income_statement_departement') }}"
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
                                         Statement Department</a>
                                 @endcan
@@ -1905,7 +1910,7 @@
                                 @endcan
 
                                 @can('Build from Bom.access')
-                                    <a href=""
+                                    <a href="{{ route('build_of_bom.index') }}"
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Build
                                         From BOM
                                     </a>
@@ -2470,7 +2475,7 @@
                                 @endcan
 
                                 @can('income_statement_departement.access')
-                                    <a href="#"
+                                    <a href="{{ route('income_statement.filter_income_statement_departement') }}"
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Income
                                         Statement Department</a>
                                 @endcan

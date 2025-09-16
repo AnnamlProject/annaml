@@ -14,24 +14,23 @@
 
                 @if ($rows->count() > 0)
                     @php
-                        $grouped = $rows->groupBy('chartOfAccount.nama_akun');
+                        // Ambil isi koleksi dari paginator, baru di-group
+                        $grouped = $rows->getCollection()->groupBy('chartOfAccount.nama_akun');
                     @endphp
 
                     @foreach ($grouped as $namaAkun => $akunRows)
                         @php
                             $totalDebit = $akunRows->sum('debits');
                             $totalKredit = $akunRows->sum('credits');
+
+                            $akunPertama = $akunRows->first();
+                            $kodeAkun = $akunPertama->chartOfAccount->kode_akun ?? '-';
+                            $namaAkun = $akunPertama->chartOfAccount->nama_akun ?? '-';
+                            $saldoBerjalan = $startingBalances[$kodeAkun] ?? 0;
+                            $tipeAkun = strtolower($akunPertama->chartOfAccount->tipe_akun ?? '');
                         @endphp
 
-
                         <div class="mb-6">
-                            @php
-                                $akunPertama = $akunRows->first();
-                                $kodeAkun = $akunPertama->chartOfAccount->kode_akun ?? '-';
-                                $namaAkun = $akunPertama->chartOfAccount->nama_akun ?? '-';
-                                $saldoBerjalan = $startingBalances[$kodeAkun] ?? 0;
-                            @endphp
-
                             <h3 class="text-xs font-bold mb-2">
                                 {{ $kodeAkun }} - {{ $namaAkun }}
                             </h3>
@@ -48,25 +47,16 @@
                                             <th class="w-24 px-2 py-1 border text-right">Balance</th>
                                         </tr>
                                     </thead>
-
-
                                     <tbody>
                                         {{-- Baris saldo awal --}}
-                                        <tr class="bg-gray-50 ">
-                                            <td class="px-2 py-1 border text-center" colspan="3"></td>
-                                            <td class="px-2 py-1 border tex-center" colspan="2"></td>
+                                        <tr class="bg-gray-50">
+                                            <td colspan="5" class="px-2 py-1 border text-center">Saldo Awal</td>
                                             <td class="px-2 py-1 border text-right">
                                                 {{ number_format($saldoBerjalan, 2, ',', '.') }}
                                             </td>
                                         </tr>
 
                                         {{-- Transaksi --}}
-                                        @php
-                                            $saldoBerjalan = $startingBalances[$kodeAkun] ?? 0;
-                                            $tipeAkun = strtolower($akunPertama->chartOfAccount->tipe_akun ?? '');
-
-                                        @endphp
-
                                         @foreach ($akunRows as $row)
                                             @php
                                                 $debit = $row->debits;
@@ -90,8 +80,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-2 py-1 border">
-                                                    {{ optional($row->journalEntry)->source ?? '-' }}
-                                                </td>
+                                                    {{ optional($row->journalEntry)->source ?? '-' }}</td>
                                                 <td class="px-2 py-1 border text-right">
                                                     {{ number_format($debit, 2, ',', '.') }}</td>
                                                 <td class="px-2 py-1 border text-right">
@@ -100,7 +89,6 @@
                                                     {{ number_format($saldoBerjalan, 2, ',', '.') }}</td>
                                             </tr>
                                         @endforeach
-
 
                                         <tr class="bg-gray-100 font-semibold">
                                             <td colspan="3" class="px-2 py-1 text-right">Total</td>
@@ -115,6 +103,13 @@
                             </div>
                         </div>
                     @endforeach
+
+                    {{-- Pagination Links --}}
+                    <div class="mt-4">
+                        {{ $rows->links() }}
+                    </div>
+
+                    {{-- Total Keseluruhan --}}
                     <div class="mt-6 border-t pt-4 text-xs">
                         <table class="w-full border text-xs">
                             <thead class="bg-gray-100">
@@ -127,20 +122,17 @@
                                 <tr>
                                     <td class="px-2 py-1 border">Pendapatan</td>
                                     <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['pendapatan'], 2, ',', '.') }}
-                                    </td>
+                                        {{ number_format($totalByType['pendapatan'], 2, ',', '.') }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-2 py-1 border">Kewajiban</td>
                                     <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['kewajiban'], 2, ',', '.') }}
-                                    </td>
+                                        {{ number_format($totalByType['kewajiban'], 2, ',', '.') }}</td>
                                 </tr>
                                 <tr>
                                     <td class="px-2 py-1 border">Ekuitas</td>
                                     <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['ekuitas'], 2, ',', '.') }}
-                                    </td>
+                                        {{ number_format($totalByType['ekuitas'], 2, ',', '.') }}</td>
                                 </tr>
                             </tbody>
                             <tfoot class="bg-gray-200 font-bold">

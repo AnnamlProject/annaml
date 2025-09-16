@@ -79,13 +79,16 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($account as $akun)
-                                        <tr class="border-b hover:bg-gray-50">
+                                        <tr class="border-b hover:bg-gray-50" data-level="{{ $akun->level_akun }}"
+                                            data-tipe="{{ strtolower($akun->tipe_akun) }}">
                                             <td class="px-4 py-2">
                                                 <input type="checkbox" class="account-checkbox form-checkbox"
                                                     value="{{ $akun->kode_akun }} - {{ $akun->nama_akun }}">
                                             </td>
                                             <td class="px-4 py-2">
                                                 {{ $akun->kode_akun }} - {{ $akun->nama_akun }}
+                                                {{-- <span class="text-xs text-gray-400">({{ $akun->level_akun }},
+                                                    {{ $akun->tipe_akun }})</span> --}}
                                             </td>
                                         </tr>
                                     @endforeach
@@ -93,7 +96,6 @@
                             </table>
                         </div>
                     </div>
-
 
                     {{-- Sort By --}}
                     <div>
@@ -141,32 +143,43 @@
                             <i class="fas fa-undo mr-2"></i> Reset
                         </a>
                     </div>
-
                 </form>
-
             </div>
         </div>
     </div>
-    <div>
 
-
-    </div>
-
+    {{-- Script --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectAll = document.getElementById('select-all');
             const checkboxes = document.querySelectorAll('.account-checkbox');
             const hiddenInput = document.getElementById('selected_accounts');
 
-            // Toggle all checkboxes
+            // Toggle semua checkbox
             selectAll.addEventListener('change', function() {
                 checkboxes.forEach(cb => cb.checked = this.checked);
                 updateSelectedAccounts();
             });
 
-            // Update hidden input when individual checkbox changes
+            // Saat checkbox akun diklik
             checkboxes.forEach(cb => {
-                cb.addEventListener('change', updateSelectedAccounts);
+                cb.addEventListener('change', function() {
+                    const row = cb.closest('tr');
+                    const level = row.dataset.level;
+                    const tipe = row.dataset.tipe;
+
+                    // Kalau akun ini level Header → toggle semua akun dengan tipe sama
+                    if (level && level.toLowerCase() === 'header') {
+                        const allSameType = document.querySelectorAll(
+                            `#account-table tbody tr[data-tipe="${tipe}"] .account-checkbox`
+                        );
+                        allSameType.forEach(cb2 => {
+                            cb2.checked = cb.checked;
+                        });
+                    }
+
+                    updateSelectedAccounts();
+                });
             });
 
             function updateSelectedAccounts() {
@@ -177,9 +190,7 @@
                 hiddenInput.value = selected.join(',');
             }
         });
-    </script>
-    <!-- Script for Search and Select All -->
-    <script>
+
         // Search/filter functionality
         document.getElementById('search-account').addEventListener('keyup', function() {
             var keyword = this.value.toLowerCase();
@@ -188,14 +199,6 @@
             rows.forEach(function(row) {
                 var text = row.innerText.toLowerCase();
                 row.style.display = text.includes(keyword) ? '' : 'none';
-            });
-        });
-
-        // Select all checkboxes
-        document.getElementById('select-all').addEventListener('change', function() {
-            var checkboxes = document.querySelectorAll('.account-checkbox');
-            checkboxes.forEach(function(checkbox) {
-                checkbox.checked = event.target.checked;
             });
         });
     </script>

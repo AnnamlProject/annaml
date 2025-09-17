@@ -46,6 +46,16 @@
                             class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
                             required>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Show Account Number</label>
+                        <div class="space-y-1">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="show_account_number" value="show_account_number"
+                                    class="text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Show Account Number</span>
+                            </label>
+                        </div>
+                    </div>
                     {{-- Tombol Filter --}}
                     <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                         <button type="submit"
@@ -58,7 +68,6 @@
                             <i class="fas fa-undo mr-2"></i> Reset
                         </a>
                     </div>
-
                 </form>
 
             </div>

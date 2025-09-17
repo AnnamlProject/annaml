@@ -18,12 +18,11 @@ class NeracaController extends Controller
     {
         $tanggalAkhir = $request->end_date;
         $siteTitle = Setting::where('key', 'site_title')->value('value');
+        $showAccountNumber = $request->has('show_account_number'); // ⬅️ tangkap checkbox
 
-        // Ambil akun Aset, Kewajiban, Ekuitas (tanpa level X dulu)
         $accounts = ChartOfAccount::whereIn('tipe_akun', ['Aset', 'Kewajiban', 'Ekuitas'])
-            ->where('level_akun', '!=', 'X') // ⬅️ exclude akun laba tahun berjalan
+            ->where('level_akun', '!=', 'X')
             ->get();
-
 
         $neraca = [];
 
@@ -41,9 +40,9 @@ class NeracaController extends Controller
             $totalCredit = $saldo->total_credit ?? 0;
 
             if ($akun->tipe_akun === 'Aset') {
-                $endingBalance = $totalDebit - $totalCredit; // normal debit
-            } else { // Kewajiban & Ekuitas
-                $endingBalance = $totalCredit - $totalDebit; // normal kredit
+                $endingBalance = $totalDebit - $totalCredit;
+            } else {
+                $endingBalance = $totalCredit - $totalDebit;
             }
 
             $neraca[$akun->tipe_akun][] = [
@@ -54,19 +53,16 @@ class NeracaController extends Controller
             ];
         }
 
-        // Hitung grand total
         $grandTotalAset = collect($neraca['Aset'] ?? [])->sum('saldo');
         $grandTotalKewajiban = collect($neraca['Kewajiban'] ?? [])->sum('saldo');
         $grandTotalEkuitas = collect($neraca['Ekuitas'] ?? [])->sum('saldo');
 
-        // ========================================
-        // 🔹 Hitung Laba Tahun Berjalan (Income Statement)
-        // ========================================
+        // hitung laba tahun berjalan
         $akunPendapatan = ChartOfAccount::where('tipe_akun', 'Pendapatan')->get();
-        $akunBeban      = ChartOfAccount::where('tipe_akun', 'Beban')
-            ->where('is_income_tax', '!=', 1) // beban selain pajak
+        $akunBeban = ChartOfAccount::where('tipe_akun', 'Beban')
+            ->where('is_income_tax', '!=', 1)
             ->get();
-        $akunPajak      = ChartOfAccount::where('is_income_tax', 1)->get();
+        $akunPajak = ChartOfAccount::where('is_income_tax', 1)->get();
 
         $totalPendapatan = 0;
         foreach ($akunPendapatan as $akun) {
@@ -113,9 +109,6 @@ class NeracaController extends Controller
         $labaSebelumPajak = $totalPendapatan - $totalBeban;
         $labaTahunBerjalan = $labaSebelumPajak - $totalPajak;
 
-        // ========================================
-        // 🔹 Tambahkan Laba Tahun Berjalan ke Ekuitas
-        // ========================================
         $akunLaba = ChartOfAccount::where('level_akun', 'X')->first();
         if ($akunLaba) {
             $neraca['Ekuitas'][] = [
@@ -137,6 +130,7 @@ class NeracaController extends Controller
             'labaSebelumPajak' => $labaSebelumPajak,
             'totalPajak' => $totalPajak,
             'labaTahunBerjalan' => $labaTahunBerjalan,
+            'showAccountNumber' => $showAccountNumber, // ⬅️ kirim ke view
         ]);
     }
 }

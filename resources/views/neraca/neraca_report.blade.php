@@ -60,7 +60,7 @@
                     {{ number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.') }}
                 </span>
             </div>
-
+            {{-- 
             <div
                 class="mt-3 font-semibold
             @if ($grandTotalAset == $grandTotalKewajiban + $grandTotalEkuitas) text-green-600
@@ -70,7 +70,7 @@
                 @else
                     ⚠️ Neraca tidak seimbang
                 @endif
-            </div>
+            </div> --}}
         </div>
     </div>
 @endsection

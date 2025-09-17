@@ -20,7 +20,10 @@ class NeracaController extends Controller
         $siteTitle = Setting::where('key', 'site_title')->value('value');
 
         // Ambil akun Aset, Kewajiban, Ekuitas (tanpa level X dulu)
-        $accounts = ChartOfAccount::whereIn('tipe_akun', ['Aset', 'Kewajiban', 'Ekuitas'])->get();
+        $accounts = ChartOfAccount::whereIn('tipe_akun', ['Aset', 'Kewajiban', 'Ekuitas'])
+            ->where('level_akun', '!=', 'X') // ⬅️ exclude akun laba tahun berjalan
+            ->get();
+
 
         $neraca = [];
 

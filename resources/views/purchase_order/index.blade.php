@@ -81,7 +81,7 @@
                                         <td class="px-6 py-4">{{ $item->vendor->nama_vendors ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
                                         <td class="px-6 py-4">{{ $item->shipping_address }}</td>
-                                        <td class="px-6 py-4">{{ $item->freight }}</td>
+                                        <td class="px-6 py-4">{{ number_format($item->freight, 2, ',', '.') }}</td>
                                         <td class="px-6 py-4">{{ $item->early_payment_terms }}</td>
                                         <td class="px-6 py-4">{{ $item->messages }}</td>
                                         <td class="px-6 py-4 text-right">

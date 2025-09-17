@@ -29,14 +29,43 @@ class PurchaseOrderController extends Controller
         $accounts = chartOfAccount::all(); // akun-akun untuk entri jurnal
         return view('purchase_order.create', compact('vendor', 'jenis_pembayaran',  'items', 'accounts'));
     }
+    private function generateKodeOrder()
+    {
+        $today = now()->format('Ymd'); // format tanggal: 20250917
+        $prefix = 'PO-' . $today . '-';
+
+        // Cari order terakhir yang ada pada tanggal hari ini
+        $last = \App\PurchaseOrder::where('order_number', 'like', $prefix . '%')
+            ->orderBy('order_number', 'desc')
+            ->first();
+
+        if ($last && preg_match('/' . $prefix . '(\d+)/', $last->order_number, $matches)) {
+            $number = (int) $matches[1] + 1;
+        } else {
+            $number = 1;
+        }
+
+        return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
     public function store(Request $request)
     {
+        // Cek apakah checkbox auto_generate dicentang
+        if ($request->has('auto_generate')) {
+            $order_number = $this->generateKodeOrder();
+        } else {
+            // Validasi order_number manual
+            $request->validate([
+                'order_number' => 'unique:purchase_orders,order_number',
+            ]);
+            $order_number = $request->order_number;
+        }
         // ✅ VALIDASI FORM INPUT
         $request->validate([
             'order_number'         => 'required|unique:purchase_orders,order_number',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
             'vendor_id'          => 'required|exists:vendors,id',
+            'account_id' => 'requird|exists:payment_method_details,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
@@ -63,10 +92,11 @@ class PurchaseOrderController extends Controller
         try {
             // ✅ Simpan data utama ke tabel sales_orders
             $purchaseOrder = PurchaseOrder::create([
-                'order_number'         => $request->order_number,
+                'order_number'         => $order_number,
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
                 'vendor_id'          => $request->vendor_id,
+                'account_id' => $request->account_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $request->freight,
@@ -108,7 +138,7 @@ class PurchaseOrderController extends Controller
     {
         // Ambil sales order beserta relasi terkait
         $purchaseOrder = PurchaseOrder::with([
-            'customer',
+            'vendor',
             'jenisPembayaran',
             'details.item',
             'details.account'

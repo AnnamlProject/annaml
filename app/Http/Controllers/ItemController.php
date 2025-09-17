@@ -159,24 +159,47 @@ class ItemController extends Controller
     }
     public function search(Request $request)
     {
+        $context = $request->get('context', 'sales'); // default ke sales kalau tidak ada
+
         $items = Item::with('quantities', 'units', 'accounts')
             ->where('item_description', 'like', '%' . $request->q . '%')
             ->orWhere('item_number', 'like', '%' . $request->q . '%')
             ->get();
 
-        return response()->json($items->map(function ($item) {
+        return response()->json($items->map(function ($item) use ($context) {
+            // Tentukan account sesuai context
+            switch ($context) {
+                case 'purchase':
+                    $accountId   = $item->accounts->asset_account_id ?? $item->accounts->expense_account_id ?? null;
+                    $accountName = optional($item->accounts->assetAccount)->nama_akun
+                        ?? optional($item->accounts->expenseAccount)->nama_akun
+                        ?? '-';
+                    break;
+
+                case 'sales':
+                    $accountId   = $item->accounts->revenue_account_id ?? null;
+                    $accountName = optional($item->accounts->revenueAccount)->nama_akun ?? '-';
+                    break;
+
+                default:
+                    $accountId   = $item->accounts->cogs_account_id ?? null;
+                    $accountName = optional($item->accounts->cogsAccount)->nama_akun ?? '-';
+                    break;
+            }
+
             return [
-                'id'            => $item->id,
-                'item_number'   => $item->item_number,
+                'id'              => $item->id,
+                'item_number'     => $item->item_number,
                 'item_description' => $item->item_description,
-                'on_hand_qty'   => $item->quantities->sum('on_hand_qty'), // ✅ pakai sum
-                'unit'          => $item->units->buying_unit ?? '-',
-                'tax_rate'      => $item->tax_rate,
-                'account_id'    => $item->accounts->cogs_account_id ?? null,
-                'account_name'  => optional($item->accounts->account)->nama_akun ?? '-',
+                'on_hand_qty'     => $item->quantities->sum('on_hand_qty'),
+                'unit'            => $item->units->buying_unit ?? '-',
+                'tax_rate'        => $item->tax_rate,
+                'account_id'      => $accountId,
+                'account_name'    => $accountName,
             ];
         }));
     }
+
 
     public function info($id)
     {

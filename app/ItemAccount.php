@@ -24,4 +24,28 @@ class ItemAccount extends Model
     {
         return $this->belongsTo(chartOfAccount::class);
     }
+    public function assetAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'asset_account_id');
+    }
+
+    public function revenueAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'revenue_account_id');
+    }
+
+    public function expenseAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'expense_account_id');
+    }
+
+    public function cogsAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'cogs_account_id');
+    }
+
+    public function varianceAccount()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'variance_account_id');
+    }
 }

@@ -36,8 +36,8 @@
                                 <p>{{ \Carbon\Carbon::parse($purchaseOrder->shipping_date)->format('d M Y') }}</p>
                             </div>
                             <div>
-                                <strong>Customer:</strong>
-                                <p>{{ $purchaseOrder->customer->nama_customers ?? '-' }}</p>
+                                <strong>Vendor:</strong>
+                                <p>{{ $purchaseOrder->vendor->nama_vendors ?? '-' }}</p>
                             </div>
 
                             <div>
@@ -85,7 +85,7 @@
                                 <tbody>
                                     @foreach ($purchaseOrder->details as $item)
                                         <tr>
-                                            <td class="border px-3 py-2">{{ $item->item->item_name ?? '-' }}</td>
+                                            <td class="border px-3 py-2">{{ $item->item_number ?? '-' }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->order }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>

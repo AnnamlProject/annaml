@@ -1,28 +1,24 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Exports;
 
 use App\ChartOfAccount;
-use App\Exports\NeracaExport;
 use App\JournalEntryDetail;
-use App\Setting;
-use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Contracts\View\View;
+use Maatwebsite\Excel\Concerns\FromView;
 
-class NeracaController extends Controller
+class NeracaExport implements FromView
 {
-    //
-    public function neracaFilter()
-    {
-        return view('neraca.filter_neraca');
-    }
-    public function neracaReport(Request $request)
-    {
-        $tanggalAkhir = $request->end_date;
-        $siteTitle = Setting::where('key', 'site_title')->value('value');
-        $showAccountNumber = $request->has('show_account_number'); // ⬅️ tangkap checkbox
+    protected $tanggalAkhir;
 
+    public function __construct($tanggalAkhir)
+    {
+        $this->tanggalAkhir = $tanggalAkhir;
+    }
+
+    public function view(): View
+    {
+        // ambil data sama seperti di neracaReport()
         $accounts = ChartOfAccount::whereIn('tipe_akun', ['Aset', 'Kewajiban', 'Ekuitas'])
             ->where('level_akun', '!=', 'X')
             ->get();
@@ -31,9 +27,9 @@ class NeracaController extends Controller
 
         foreach ($accounts as $akun) {
             $saldo = JournalEntryDetail::where('kode_akun', $akun->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAkhir) {
-                    if ($tanggalAkhir) {
-                        $q->where('tanggal', '<=', $tanggalAkhir);
+                ->whereHas('journalEntry', function ($q) {
+                    if ($this->tanggalAkhir) {
+                        $q->where('tanggal', '<=', $this->tanggalAkhir);
                     }
                 })
                 ->selectRaw('SUM(debits) as total_debit, SUM(credits) as total_credit')
@@ -60,7 +56,7 @@ class NeracaController extends Controller
         $grandTotalKewajiban = collect($neraca['Kewajiban'] ?? [])->sum('saldo');
         $grandTotalEkuitas = collect($neraca['Ekuitas'] ?? [])->sum('saldo');
 
-        // hitung laba tahun berjalan
+        // hitung laba tahun berjalan (sama dengan controller)
         $akunPendapatan = ChartOfAccount::where('tipe_akun', 'Pendapatan')->get();
         $akunBeban = ChartOfAccount::where('tipe_akun', 'Beban')
             ->where('is_income_tax', '!=', 1)
@@ -70,9 +66,9 @@ class NeracaController extends Controller
         $totalPendapatan = 0;
         foreach ($akunPendapatan as $akun) {
             $saldo = JournalEntryDetail::where('kode_akun', $akun->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAkhir) {
-                    if ($tanggalAkhir) {
-                        $q->where('tanggal', '<=', $tanggalAkhir);
+                ->whereHas('journalEntry', function ($q) {
+                    if ($this->tanggalAkhir) {
+                        $q->where('tanggal', '<=', $this->tanggalAkhir);
                     }
                 })
                 ->selectRaw('SUM(debits) as total_debit, SUM(credits) as total_credit')
@@ -84,9 +80,9 @@ class NeracaController extends Controller
         $totalBeban = 0;
         foreach ($akunBeban as $akun) {
             $saldo = JournalEntryDetail::where('kode_akun', $akun->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAkhir) {
-                    if ($tanggalAkhir) {
-                        $q->where('tanggal', '<=', $tanggalAkhir);
+                ->whereHas('journalEntry', function ($q) {
+                    if ($this->tanggalAkhir) {
+                        $q->where('tanggal', '<=', $this->tanggalAkhir);
                     }
                 })
                 ->selectRaw('SUM(debits) as total_debit, SUM(credits) as total_credit')
@@ -98,9 +94,9 @@ class NeracaController extends Controller
         $totalPajak = 0;
         foreach ($akunPajak as $akun) {
             $saldo = JournalEntryDetail::where('kode_akun', $akun->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAkhir) {
-                    if ($tanggalAkhir) {
-                        $q->where('tanggal', '<=', $tanggalAkhir);
+                ->whereHas('journalEntry', function ($q) {
+                    if ($this->tanggalAkhir) {
+                        $q->where('tanggal', '<=', $this->tanggalAkhir);
                     }
                 })
                 ->selectRaw('SUM(debits) as total_debit, SUM(credits) as total_credit')
@@ -123,33 +119,15 @@ class NeracaController extends Controller
             $grandTotalEkuitas += $labaTahunBerjalan;
         }
 
-        return view('neraca.neraca_report', [
+        return view('neraca.neraca_excel', [
             'neraca' => $neraca,
-            'tanggalAkhir' => $tanggalAkhir,
-            'siteTitle' => $siteTitle,
             'grandTotalAset' => $grandTotalAset,
             'grandTotalKewajiban' => $grandTotalKewajiban,
             'grandTotalEkuitas' => $grandTotalEkuitas,
             'labaSebelumPajak' => $labaSebelumPajak,
             'totalPajak' => $totalPajak,
             'labaTahunBerjalan' => $labaTahunBerjalan,
-            'showAccountNumber' => $showAccountNumber, // ⬅️ kirim ke view
+            'tanggalAkhir' => $this->tanggalAkhir,
         ]);
-    }
-    public function export(Request $request)
-    {
-        $format = $request->get('format', 'excel');
-        $tanggalAkhir = $request->get('end_date');
-
-        if ($format === 'excel') {
-            return Excel::download(new NeracaExport($tanggalAkhir), 'neraca.xlsx');
-        } elseif ($format === 'pdf') {
-            $pdf = PDF::loadView('neraca.export_pdf', [
-                // data neraca sama dengan view biasa
-            ]);
-            return $pdf->download('neraca.pdf');
-        }
-
-        return back()->with('error', 'Format export tidak dikenali.');
     }
 }

@@ -85,10 +85,21 @@
 
                         <!-- Order Number -->
                         <div>
-                            <label for="order_number" class="block text-gray-700 font-medium mb-1">Order Number</label>
-                            <input type="text" name="order_number" required
-                                value="{{ old('order_number', $purchase_order->order_number ?? '') }}"
-                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <label for="order_number" class="block text-gray-700 font-medium mb-1">Order
+                                Number</label>
+                            <input type="text" id="order_number" name="order_number"
+                                value="{{ old('order_number', $sales_order->order_number ?? '') }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <label class="inline-flex items-center mt-2">
+                                <input type="checkbox" id="auto_generate" name="auto_generate" value="1"
+                                    class="form-checkbox text-blue-600" onchange="toggleAutoGenerate()">
+                                <span class="ml-2 text-sm text-gray-700">Generate Order Number secara otomatis</span>
+                            </label>
+
+                            @error('order_number')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Date Order -->
@@ -218,7 +229,30 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <script>
+        function toggleAutoGenerate() {
+            const checkbox = document.getElementById('auto_generate');
+            const invoiceInput = document.getElementById('order_number');
 
+            if (checkbox.checked) {
+                invoiceInput.readOnly = true;
+                invoiceInput.value = 'Auto-generated'; // opsional: tampilkan teks dummy
+            } else {
+                invoiceInput.readOnly = false;
+                invoiceInput.value = '';
+            }
+        }
+
+        // Jalankan saat halaman dimuat
+        window.onload = function() {
+            toggleAutoGenerate();
+
+            // Tambahkan value agar checkbox bisa dikenali server
+            const autoCheckbox = document.getElementById('auto_generate');
+            autoCheckbox.name = "auto_generate";
+            autoCheckbox.value = 1;
+        };
+    </script>
 
     <script>
         (function() {
@@ -332,7 +366,8 @@
                     dataType: 'json',
                     delay: 250,
                     data: params => ({
-                        q: params.term
+                        q: params.term,
+                        context: 'purchase' // ⬅️ ini kunci biar controller tahu ini untuk purchase
                     }),
                     processResults: data => ({
                         results: data.map(item => ({
@@ -340,13 +375,11 @@
                             text: `${item.item_number} - ${item.item_description}`,
                             item_description: item.item_description,
                             unit: item.unit,
-                            purchase_price: item.purchase_price ??
-                                0, // kalau tidak ada, default 0
+                            purchase_price: item.purchase_price ?? 0,
                             tax_rate: item.tax_rate,
                             account_id: item.account_id,
                             account_name: item.account_name,
-                            stock_quantity: item
-                                .on_hand_qty // ✅ pakai on_hand_qty dari controller
+                            stock_quantity: item.on_hand_qty
                         }))
                     }),
                     cache: true
@@ -359,11 +392,12 @@
                 $(`.tax-${index}`).val(data.tax_rate);
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
-                $(`.qty-${index}`).val(data.stock_quantity); // stok dari on_hand_qty
+                $(`.qty-${index}`).val(data.stock_quantity);
                 calculateAmount(index);
                 calculateBackOrder(index);
             });
         }
+
 
         function attachEvents(index) {
             $(`.qty-${index}, .order-${index}, .tax-${index}`).on('input change', function() {

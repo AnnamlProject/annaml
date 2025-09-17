@@ -2,7 +2,10 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-6">
-        <h1 class="text-xl font-bold mb-4">LAPORAN LABA RUGI</h1>
+        <h1 class="text-xl font-bold mb-2">
+            {{ $siteTitle }}
+        </h1>
+        <h3 class="text-xl font-bold mb-4">LAPORAN LABA RUGI</h3>
         <p class="text-gray-600 mb-6">
             Periode: {{ \Carbon\Carbon::parse($start_date)->format('d M Y') }} -
             {{ \Carbon\Carbon::parse($end_date)->format('d M Y') }}

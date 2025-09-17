@@ -2,33 +2,36 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-6">
-        <h1 class="text-xl font-bold mb-2">
-            {{ $siteTitle }}
-        </h1>
-        <h5 class="text-xl font-bold mb-2">
-            Neraca / Balance Sheet
-        </h5>
-        <p class="text-gray-600 mb-6">
-            Per {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
-        </p>
-
         {{-- Tombol Export --}}
-        <div class="mb-6 flex gap-2">
+        <div class="mb-6 flex justify-end gap-2">
             <a href="{{ route('neraca.export', ['end_date' => $tanggalAkhir, 'format' => 'excel']) }}"
                 class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">
-                <i class="fas fa-file-excel mr-1"></i> Export Excel
+                <i class="fas fa-file-excel mr-1"></i> Export to Excel
             </a>
             <a href="{{ route('neraca.export', ['end_date' => $tanggalAkhir, 'format' => 'pdf']) }}"
                 class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
-                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                <i class="fas fa-file-pdf mr-1"></i> Export to PDF
             </a>
         </div>
+
+        <h1 class="text-xl mt-5 font-bold mb-2 uppercase">
+            {{ $siteTitle }}
+        </h1>
+        <h5 class="text-xl font-bold mb-2">
+            NERACA
+        </h5>
+        <p class="text-gray-600 mb-6 uppercase">
+            PER {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
+        </p>
+
+
+
 
         {{-- Looping tiap kelompok akun --}}
         @foreach (['Aset', 'Kewajiban', 'Ekuitas'] as $tipe)
             @if (!empty($neraca[$tipe]))
                 <div class="mb-8">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ strtoupper($tipe) }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 uppercase mb-2">{{ strtoupper($tipe) }}</h2>
                     <div class="space-y-1 text-sm">
                         @php
                             $total = 0;

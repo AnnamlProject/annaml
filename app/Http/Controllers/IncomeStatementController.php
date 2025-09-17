@@ -6,6 +6,7 @@ use App\ChartOfAccount;
 use App\Departemen;
 use App\Departement;
 use App\JournalEntryDetail;
+use App\Setting;
 use Illuminate\Http\Request;
 
 class IncomeStatementController extends Controller
@@ -21,6 +22,8 @@ class IncomeStatementController extends Controller
     {
         $tanggalAwal  = $request->start_date;
         $tanggalAkhir = $request->end_date;
+        $siteTitle = Setting::where('key', 'site_title')->value('value');
+
 
         // Ambil semua akun Pendapatan & Beban, urut kode_akun
         $accounts = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
@@ -127,6 +130,7 @@ class IncomeStatementController extends Controller
 
         return view('income_statement.income_statement_report', [
             'groupsPendapatan' => $groupsPendapatan,
+            'siteTitle' => $siteTitle,
             'groupsBeban'      => $groupsBeban,
             'totalPendapatan'  => $totalPendapatan,
             'totalBeban'       => $totalBeban,

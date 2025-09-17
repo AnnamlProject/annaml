@@ -13,12 +13,7 @@
                 </div>
 
                 @if ($rows->count() > 0)
-                    @php
-                        // Ambil isi koleksi dari paginator, baru di-group
-                        $grouped = $rows->getCollection()->groupBy('chartOfAccount.nama_akun');
-                    @endphp
-
-                    @foreach ($grouped as $namaAkun => $akunRows)
+                    @foreach ($groupedByAccount as $namaAkun => $akunRows)
                         @php
                             $totalDebit = $akunRows->sum('debits');
                             $totalKredit = $akunRows->sum('credits');
@@ -62,7 +57,6 @@
                                                 $debit = $row->debits;
                                                 $kredit = $row->credits;
 
-                                                // Rumus saldo berjalan berdasarkan tipe akun
                                                 if (in_array($tipeAkun, ['aset', 'beban'])) {
                                                     $saldoBerjalan += $debit - $kredit;
                                                 } else {
@@ -80,21 +74,27 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-2 py-1 border">
-                                                    {{ optional($row->journalEntry)->source ?? '-' }}</td>
+                                                    {{ optional($row->journalEntry)->source ?? '-' }}
+                                                </td>
                                                 <td class="px-2 py-1 border text-right">
-                                                    {{ number_format($debit, 2, ',', '.') }}</td>
+                                                    {{ number_format($debit, 2, ',', '.') }}
+                                                </td>
                                                 <td class="px-2 py-1 border text-right">
-                                                    {{ number_format($kredit, 2, ',', '.') }}</td>
+                                                    {{ number_format($kredit, 2, ',', '.') }}
+                                                </td>
                                                 <td class="px-2 py-1 border text-right">
-                                                    {{ number_format($saldoBerjalan, 2, ',', '.') }}</td>
+                                                    {{ number_format($saldoBerjalan, 2, ',', '.') }}
+                                                </td>
                                             </tr>
                                         @endforeach
 
                                         <tr class="bg-gray-100 font-semibold">
                                             <td colspan="3" class="px-2 py-1 text-right">Total</td>
-                                            <td class="px-2 py-1 text-right">{{ number_format($totalDebit, 2, ',', '.') }}
+                                            <td class="px-2 py-1 text-right">
+                                                {{ number_format($totalDebit, 2, ',', '.') }}
                                             </td>
-                                            <td class="px-2 py-1 text-right">{{ number_format($totalKredit, 2, ',', '.') }}
+                                            <td class="px-2 py-1 text-right">
+                                                {{ number_format($totalKredit, 2, ',', '.') }}
                                             </td>
                                             <td></td>
                                         </tr>
@@ -103,48 +103,6 @@
                             </div>
                         </div>
                     @endforeach
-
-                    {{-- Pagination Links --}}
-                    <div class="mt-4">
-                        {{ $rows->links() }}
-                    </div>
-
-                    {{-- Total Keseluruhan --}}
-                    <div class="mt-6 border-t pt-4 text-xs">
-                        <table class="w-full border text-xs">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-2 py-1 border text-left">Kategori</th>
-                                    <th class="px-2 py-1 border text-right">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="px-2 py-1 border">Pendapatan</td>
-                                    <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['pendapatan'], 2, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-2 py-1 border">Kewajiban</td>
-                                    <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['kewajiban'], 2, ',', '.') }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-2 py-1 border">Ekuitas</td>
-                                    <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['ekuitas'], 2, ',', '.') }}</td>
-                                </tr>
-                            </tbody>
-                            <tfoot class="bg-gray-200 font-bold">
-                                <tr>
-                                    <td class="px-2 py-1 border">Grand Total</td>
-                                    <td class="px-2 py-1 border text-right">
-                                        {{ number_format($totalByType['pendapatan'] + $totalByType['kewajiban'] + $totalByType['ekuitas'], 2, ',', '.') }}
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
                 @else
                     <p class="text-gray-500">Tidak ada data untuk ditampilkan.</p>
                 @endif

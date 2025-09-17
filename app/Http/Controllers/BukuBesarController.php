@@ -40,7 +40,7 @@ class BukuBesarController extends Controller
         }
 
         // ======================
-        // 1. Query utama (periode) dengan PAGINATION
+        // 1. Query utama (periode) TANPA paginate
         // ======================
         $rows = JournalEntryDetail::select(
             'journal_entry_details.id',
@@ -60,7 +60,7 @@ class BukuBesarController extends Controller
                 $q->whereIn('journal_entry_details.kode_akun', $selectedAccountCodes);
             })
             ->orderBy('journal_entries.tanggal', 'asc')
-            ->paginate(100); // <=== ini pagination
+            ->get(); // ✅ langsung Collection
 
         // ======================
         // 2. Query saldo awal (sebelum start_date)
@@ -96,9 +96,9 @@ class BukuBesarController extends Controller
         }
 
         // ======================
-        // 3. Grouping by account
+        // 3. Grouping by account (langsung Collection)
         // ======================
-        $groupedByAccount = $rows->getCollection()->groupBy(function ($item) {
+        $groupedByAccount = $rows->groupBy(function ($item) {
             return $item->chartOfAccount->nama_akun ?? 'Tanpa Akun';
         });
 

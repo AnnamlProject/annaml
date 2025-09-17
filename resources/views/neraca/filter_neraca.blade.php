@@ -56,6 +56,17 @@
                             </label>
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hide Accounts With Zero Balance
+                        </label>
+                        <div class="space-y-1">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="hide_account_with_zero" value="hide_account_with_zero"
+                                    class="text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm">Hide Accounts With Zero Balance</span>
+                            </label>
+                        </div>
+                    </div>
                     {{-- Tombol Filter --}}
                     <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                         <button type="submit"

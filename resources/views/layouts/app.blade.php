@@ -8,11 +8,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('image/favicon/favicon.ico') }}">
 
-
     {{-- CSS --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    {{-- AlpineJS + Collapse Plugin --}}
+    <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     {{-- Fonts --}}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
@@ -55,31 +57,19 @@
         .bg-primary {
             background-color: white;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
+
+
 </head>
 
 <body class="m-0 p-0 font-sans antialiased bg-white text-gray-800 min-h-screen overflow-y-auto">
 
-    {{-- Loading Overlay --}}
-    {{-- <div id="loading-overlay"
-        class="fixed inset-0 bg-white bg-opacity-90 backdrop-blur-md z-50 flex items-center justify-center hidden">
-        <div class="flex flex-col items-center space-y-4 animate-pulse">
-            <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                </circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2
-                         5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824
-                         3 7.938l3-2.647z"></path>
-            </svg>
-            <p class="text-gray-600 font-medium">Mohon tunggu...</p>
-        </div>
-    </div> --}}
-
     {{-- Navbar --}}
-
     @include('components.navbar')
-
 
     {{-- Main Content --}}
     <main class="m-0 p-0">
@@ -90,7 +80,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-
     {{-- Scripts --}}
     <script>
         // Mobile menu toggle
@@ -98,24 +87,28 @@
             const mobileMenu = document.getElementById('mobile-menu');
             const backdrop = document.getElementById('mobile-sidebar-backdrop');
 
-            mobileMenu.classList.toggle('hidden');
-            mobileMenu.classList.toggle('transform');
-            mobileMenu.classList.toggle('translate-x-full');
-            backdrop.classList.toggle('hidden');
-
-            document.body.classList.toggle('overflow-hidden', !mobileMenu.classList.contains('hidden'));
+            if (mobileMenu && backdrop) {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('transform');
+                mobileMenu.classList.toggle('translate-x-full');
+                backdrop.classList.toggle('hidden');
+                document.body.classList.toggle('overflow-hidden',
+                    !mobileMenu.classList.contains('hidden'));
+            }
         }
 
-        // Simulate loading
+        // Simulate loading overlay
         document.addEventListener('DOMContentLoaded', () => {
             const loadingOverlay = document.getElementById('loading-overlay');
-            loadingOverlay.classList.remove('hidden');
-            setTimeout(() => {
-                loadingOverlay.classList.add('hidden');
-            }, 1000);
+            if (loadingOverlay) {
+                loadingOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 1000);
+            }
         });
 
-        // Turbo Smooth Scroll (if using Turbo)
+        // Turbo Smooth Scroll
         document.addEventListener('turbo:render', function() {
             window.scrollTo({
                 top: 0,
@@ -126,9 +119,13 @@
         // Toggle Sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('hidden');
+            if (sidebar) {
+                sidebar.classList.toggle('hidden');
+            }
         }
     </script>
+
+    {{-- SweetAlert Session --}}
     <script>
         @if (session('success'))
             Swal.fire({
@@ -146,7 +143,6 @@
             });
         @endif
     </script>
-
 
     <script>
         function confirmDelete(id) {
@@ -166,6 +162,7 @@
             });
         }
     </script>
+
     {{-- Stack scripts --}}
     @stack('scripts')
 </body>

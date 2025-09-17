@@ -68,7 +68,7 @@
                             <select name="level_akun"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
-                                @foreach (['Header', 'Grup Account', 'Account', 'Sub Account', 'X'] as $level)
+                                @foreach (['HEADER', 'GRUP ACCOUNT', 'ACCOUNT', 'SUB ACCOUNT', 'X'] as $level)
                                     <option value="{{ $level }}"
                                         {{ (old('level_akun') ?? '') == $level ? 'selected' : '' }}>
                                         {{ ucfirst($level) }}
@@ -119,6 +119,24 @@
                                     Inactive Account
                                 </label>
                             </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="is_income_tax" class="block text-gray-700 font-medium mb-1">Pajak</label>
+                            <select name="is_income_tax" id="is_income_tax" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih --</option>
+                                <option value="Tunai"
+                                    {{ old('is_income_tax', $data->is_income_tax ?? '') == '1' ? 'selected' : '' }}>
+                                    Ya</option>
+                                <option value="Non Tunai"
+                                    {{ old('is_income_tax', $data->is_income_tax ?? '') == '0' ? 'selected' : '' }}>
+                                    Tidak
+                                </option>
+                            </select>
+                            @error('is_income_tax')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Catatan -->

@@ -5,8 +5,7 @@
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div id="tabs" class="type-section">
                 <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
-                    <li><a href="#select_item" class="tab-link active">Select Item</a></li>
-                    <li><a href="#process_build" class="tab-link">Process Build</a></li>
+                    <li><a href="#select_item" class="tab-link active">Process Build</a></li>
                     <li><a href="#journal_report" class="tab-link">Journal Report</a></li>
                 </ul>
             </div>
@@ -21,15 +20,9 @@
 
                     <!-- Tab Content -->
                     <div id="select_item" class="tab-content">
-                        <h2 class="text-lg font-semibold mb-4">Select Item</h2>
-                        @include('build_of_bom.partials._select_item')
-                    </div>
-
-                    <div id="process_build" class="tab-content hidden">
                         <h2 class="text-lg font-semibold mb-4">Process Build</h2>
                         @include('build_of_bom.partials._select_item')
                     </div>
-
                     <div id="journal_report" class="tab-content hidden">
                         <h2 class="text-lg font-semibold mb-4">Journal Report</h2>
                         @include('build_of_bom.partials._select_item')

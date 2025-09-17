@@ -14,10 +14,16 @@ class BukuBesarController extends Controller
 
     public function bukuBesarFilter(Request $request)
     {
+        // $account = ChartOfAccount::whereIn('kode_akun', function ($q) {
+        //     $q->select('kode_akun')
+        //         ->from('journal_entry_details')
+        //         ->distinct();
+        // })->get();
         $account = ChartOfAccount::all();
 
         return view('buku_besar.filter_buku_besar', compact('account'));
     }
+
     public function bukuBesarReport(Request $request)
     {
         $accounts = ChartOfAccount::all();

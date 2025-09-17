@@ -14,7 +14,8 @@ class PurchaseOrder extends Model
         'shipping_address',
         'shipping_date',
         'jenis_pembayaran_id',
-        'customer_id',
+        'vendor_id',
+        'account_id',
         'freight',
         'early_payment_terms',
         'messages',
@@ -24,10 +25,6 @@ class PurchaseOrder extends Model
     {
         return $this->belongsTo(PaymentMethod::class);
     }
-    public function customer()
-    {
-        return $this->belongsTo(Customers::class);
-    }
     public function details()
     {
         return $this->hasMany(PurchaseOrderDetail::class);
@@ -35,5 +32,13 @@ class PurchaseOrder extends Model
     public function documents()
     {
         return $this->hasMany(PurchaseOrderDocument::class);
+    }
+    public function vendor()
+    {
+        return $this->belongsTo(Vendors::class);
+    }
+    public function paymentMethodDetail()
+    {
+        return $this->belongsTo(PaymentMethodDetail::class);
     }
 }

@@ -63,6 +63,7 @@ class ChartOfAccountController extends Controller
             'catatan' => 'nullable|string',
             'catatan_pajak' => 'nullable|string',
             'klasifikasi_id' => 'required|exists:klasifikasi_akuns,id',
+            'is_income_tax' => 'nullable|in:on,1,0',
         ]);
 
         // Ambil jumlah digit dari numbering_accounts berdasarkan tipe akun
@@ -95,6 +96,7 @@ class ChartOfAccountController extends Controller
             'catatan' => $request->catatan,
             'catatan_pajak' => $request->catatan_pajak,
             'klasifikasi_id' => $request->klasifikasi_id,
+            'is_income_tax' => $request->is_income_tax
         ]);
 
         return redirect()->route('chartOfAccount.index')->with('success', 'Chart of Account berhasil ditambahkan.');
@@ -112,6 +114,7 @@ class ChartOfAccountController extends Controller
             'allow_project_allocation' => 'nullable|boolean',
             'catatan' => 'nullable|string',
             'catatan_pajak' => 'nullable|string',
+            'is_income_tax' => 'nullable|in:on,1,0',
         ]);
 
         // Ambil jumlah digit dari numbering_accounts berdasarkan tipe akun
@@ -142,6 +145,7 @@ class ChartOfAccountController extends Controller
             'allow_project_allocation' => $request->has('allow_project_allocation'),
             'catatan' => $request->catatan,
             'catatan_pajak' => $request->catatan_pajak,
+            'is_income_tax' => $request->is_income_tax
         ]);
 
         return redirect()->route('chartOfAccount.index')->with('success', 'Chart of Account berhasil diperbarui.');

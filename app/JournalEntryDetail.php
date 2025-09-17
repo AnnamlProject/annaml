@@ -32,12 +32,22 @@ class JournalEntryDetail extends Model
 
     protected static function handleStartNewYear($detail)
     {
-        // Ambil tahun transaksi
-        $tahunTransaksi = \Carbon\Carbon::parse($detail->journalEntry->tanggal)->format('Y');
+        $tanggalTransaksi = \Carbon\Carbon::parse($detail->journalEntry->tanggal);
+        $tahunTransaksi   = $tanggalTransaksi->format('Y');
+        $tahunSekarang    = now()->format('Y');
 
+        // Cari periode berjalan (misalnya dari tabel start_new_years)
+        $periodeAktif = \App\StartNewYear::where('tahun', $tahunTransaksi)->first();
 
-        // Tahun aktif sekarang
-        $tahunSekarang = now()->format('Y');
+        // Kalau tidak ada periode, hentikan
+        if (!$periodeAktif) {
+            return;
+        }
+
+        // Jika tanggal transaksi = tanggal akhir periode, skip
+        if ($tanggalTransaksi->isSameDay(\Carbon\Carbon::parse($periodeAktif->akhir_periode))) {
+            return;
+        }
 
         // Kalau transaksinya bukan tahun sebelumnya, tidak perlu update
         if ($tahunTransaksi != $tahunSekarang - 1) {
@@ -48,6 +58,7 @@ class JournalEntryDetail extends Model
         app(\App\Services\StartNewYearService::class)
             ->updateLabaTahunBerjalan($tahunTransaksi);
     }
+
 
     // Relasi: setiap detail milik satu journal entry
     public function journalEntry()

@@ -78,7 +78,7 @@
                         <div>
                             <label class="block">Location</label>
                             <select name="location_id" id="location_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Location --</option>
                                 @foreach ($lokasiInventory as $g)
                                     <option value="{{ $g->id }}">
@@ -90,42 +90,42 @@
                         <div>
                             <label class="block">On Hand Quantity</label>
                             <input type="number" name="on_hand_qty"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">On Hand Value</label>
                             <input type="number" step="0.01" name="on_hand_value"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Pending Orders Quantity</label>
                             <input type="number" name="pending_orders_qty"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Pending Orders Value</label>
                             <input type="number" step="0.01" name="pending_orders_value"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Purchase Order Quantity</label>
                             <input type="number" name="purchase_order_qty"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Sales Order Quantity</label>
                             <input type="number" name="sales_order_qty"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Minimum Level</label>
                             <input type="number" name="reorder_minimum"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">To Order</label>
                             <input type="number" name="reorder_to_order"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
                         </div>
                     </div>
                 </div>

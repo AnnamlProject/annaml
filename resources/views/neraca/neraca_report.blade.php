@@ -6,19 +6,11 @@
             {{ $siteTitle }}
         </h1>
         <h5 class="text-xl font-bold mb-2">
-            Neraca /Balance Sheet
+            Neraca / Balance Sheet
         </h5>
         <p class="text-gray-600 mb-6">
             Per {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
         </p>
-
-
-
-        @php
-            $grandTotalAset = 0;
-            $grandTotalKewajiban = 0;
-            $grandTotalEkuitas = 0;
-        @endphp
 
         {{-- Looping untuk tiap kelompok (Aset, Kewajiban, Ekuitas) --}}
         @foreach (['Aset', 'Kewajiban', 'Ekuitas'] as $tipe)
@@ -31,6 +23,9 @@
                             <div class="flex items-center">
                                 <span class="flex-1">
                                     {{ $akun['kode_akun'] }} - {{ $akun['nama_akun'] }}
+                                    @if ($akun['level_akun'] === 'X')
+                                        <span class="text-xs text-gray-500"></span>
+                                    @endif
                                 </span>
                                 <span class="w-32 text-right font-mono">
                                     {{ number_format($akun['saldo'], 2, ',', '.') }}
@@ -46,18 +41,6 @@
                             </span>
                         </div>
                     </div>
-
-                    @php
-                        if ($tipe === 'Aset') {
-                            $grandTotalAset = $total;
-                        }
-                        if ($tipe === 'Kewajiban') {
-                            $grandTotalKewajiban = $total;
-                        }
-                        if ($tipe === 'Ekuitas') {
-                            $grandTotalEkuitas = $total;
-                        }
-                    @endphp
                 </div>
             @endif
         @endforeach
@@ -81,9 +64,7 @@
             <div
                 class="mt-3 font-semibold
             @if ($grandTotalAset == $grandTotalKewajiban + $grandTotalEkuitas) text-green-600
-            @else
-                text-red-600 @endif
-        ">
+            @else text-red-600 @endif">
                 @if ($grandTotalAset == $grandTotalKewajiban + $grandTotalEkuitas)
                     ✅ Neraca seimbang
                 @else

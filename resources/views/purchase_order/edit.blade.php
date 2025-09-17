@@ -35,13 +35,13 @@
                             </select>
                         </div>
                         <div>
-                            <label class="font-medium text-gray-700 block mb-1">Customer</label>
-                            <select name="customer_id" required
+                            <label class="font-medium text-gray-700 block mb-1">Vendor</label>
+                            <select name="vendor_id" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">
-                                @foreach ($customers as $cust)
-                                    <option value="{{ $cust->id }}"
-                                        {{ $purchaseOrder->customer_id == $cust->id ? 'selected' : '' }}>
-                                        {{ $cust->nama_customers }}
+                                @foreach ($vendors as $vendor)
+                                    <option value="{{ $vendor->id }}"
+                                        {{ $purchaseOrder->vendor_id == $vendor->id ? 'selected' : '' }}>
+                                        {{ $vendor->nama_vendors }}
                                     </option>
                                 @endforeach
                             </select>

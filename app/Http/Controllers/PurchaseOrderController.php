@@ -8,6 +8,7 @@ use App\Item;
 use App\PaymentMethod;
 use App\PurchaseOrder;
 use App\PurchaseOrderDetail;
+use App\Vendors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,16 +18,16 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $data = PurchaseOrder::with(['jenisPembayaran', 'customer'])->paginate(10);
+        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor'])->paginate(10);
         return view('purchase_order.index', compact('data'));
     }
     public function create()
     {
-        $customer = Customers::all();
+        $vendor = Vendors::all();
         $jenis_pembayaran = PaymentMethod::all();
         $items = Item::all(); // semua item yang bisa dipilih
         $accounts = chartOfAccount::all(); // akun-akun untuk entri jurnal
-        return view('purchase_order.create', compact('customer', 'jenis_pembayaran',  'items', 'accounts'));
+        return view('purchase_order.create', compact('vendor', 'jenis_pembayaran',  'items', 'accounts'));
     }
     public function store(Request $request)
     {
@@ -35,7 +36,7 @@ class PurchaseOrderController extends Controller
             'order_number'         => 'required|unique:purchase_orders,order_number',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
-            'customer_id'          => 'required|exists:customers,id',
+            'vendor_id'          => 'required|exists:vendors,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
@@ -65,7 +66,7 @@ class PurchaseOrderController extends Controller
                 'order_number'         => $request->order_number,
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
-                'customer_id'          => $request->customer_id,
+                'vendor_id'          => $request->vendor_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $request->freight,
@@ -118,12 +119,12 @@ class PurchaseOrderController extends Controller
     public function edit($id)
     {
         $purchaseOrder = PurchaseOrder::with('details')->findOrFail($id);
-        $customers = Customers::all();
+        $vendors = Vendors::all();
         $jenis_pembayaran = PaymentMethod::all();
         $items = Item::all(); // semua item yang bisa dipilih
 
 
-        return view('purchase_order.edit', compact('purchaseOrder', 'customers', 'jenis_pembayaran', 'items'));
+        return view('purchase_order.edit', compact('purchaseOrder', 'vendors', 'jenis_pembayaran', 'items'));
     }
     public function update(Request $request, $id)
     {
@@ -131,7 +132,7 @@ class PurchaseOrderController extends Controller
             'order_number'         => 'required|string',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
-            'customer_id'          => 'required|exists:customers,id',
+            'vendor_id'          => 'required|exists:vendors,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
@@ -161,7 +162,7 @@ class PurchaseOrderController extends Controller
                 'order_number'         => $request->order_number,
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
-                'customer_id'          => $request->customer_id,
+                'vendor_id'          => $request->vendor_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $request->freight,

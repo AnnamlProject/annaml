@@ -159,27 +159,25 @@ class ItemController extends Controller
     }
     public function search(Request $request)
     {
-        $items = Item::with('account')
-            ->where('item_name', 'like', '%' . $request->q . '%')
+        $items = Item::with('quantities', 'units', 'accounts')
+            ->where('item_description', 'like', '%' . $request->q . '%')
             ->orWhere('item_number', 'like', '%' . $request->q . '%')
             ->get();
 
         return response()->json($items->map(function ($item) {
             return [
-                'id' => $item->id,
-                'item_number' => $item->item_number,
-                'item_name' => $item->item_name,
-                'stock_quantity' => $item->stock_quantity,
-                'unit' => $item->unit,
-                'base_price' => $item->base_price,
-                'price' => $item->price,
-                'tax_rate' => $item->tax_rate,
-                'account_id' => $item->account_id,
-                'account_name' => $item->account->nama_akun ?? '-',
-                'purchase_price' => $item->purchase_price
+                'id'            => $item->id,
+                'item_number'   => $item->item_number,
+                'item_description' => $item->item_description,
+                'on_hand_qty'   => $item->quantities->sum('on_hand_qty'), // ✅ pakai sum
+                'unit'          => $item->units->buying_unit ?? '-',
+                'tax_rate'      => $item->tax_rate,
+                'account_id'    => $item->accounts->cogs_account_id ?? null,
+                'account_name'  => optional($item->accounts->account)->nama_akun ?? '-',
             ];
         }));
     }
+
     public function info($id)
     {
         $item = Item::with(['quantities', 'units'])->findOrFail($id);
@@ -202,8 +200,9 @@ class ItemController extends Controller
             'build_quantity' => $itemBuild->build_quantity,
             'additional_costs' => $itemBuild->additional_costs,
             'details' => $itemBuild->details->map(function ($d) {
-                $unitCost = optional($d->item->quantities->first())->on_hand_value ?? 0;
-                $amount   = $unitCost * $d->quantity;
+                $unitCost  = optional($d->item->quantities->first())->on_hand_value ?? 0;
+                $amount    = $unitCost * $d->quantity;
+                $available = $d->item->quantities->sum('on_hand_qty'); // stok komponen
 
                 return [
                     'component_id' => $d->item_id,
@@ -212,6 +211,7 @@ class ItemController extends Controller
                     'quantity'     => $d->quantity,
                     'unit_cost'    => $unitCost,
                     'amount'       => $amount,
+                    'available'    => $available,
                 ];
             }),
         ]);

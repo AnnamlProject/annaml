@@ -24,17 +24,17 @@
                     @endif
 
                     <div class="grid grid-cols-4 gap-2 text-xs">
-                        <!-- Customers -->
+                        <!-- Vendor -->
                         <div>
-                            <label for="customers" class="block text-gray-700 font-medium mb-1">Customers</label>
-                            <select name="customer_id"
+                            <label for="Vendor" class="block text-gray-700 font-medium mb-1">Vendor</label>
+                            <select name="vendor_id"
                                 class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 required>
-                                <option value="">-- Customers --</option>
-                                @foreach ($customer as $level)
+                                <option value="">-- Vendor --</option>
+                                @foreach ($vendor as $level)
                                     <option value="{{ $level->id }}"
-                                        {{ old('customer_id', $purchase_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_customers }}
+                                        {{ old('vendor_id', $purchase_order->vendor_id ?? '') == $level->id ? 'selected' : '' }}>
+                                        {{ $level->nama_vendors }}
                                     </option>
                                 @endforeach
                             </select>
@@ -44,22 +44,32 @@
                         </div>
 
                         <!-- Payment Method -->
-                        <div>
-                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method</label>
-                            <select name="jenis_pembayaran_id"
-                                class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Payment Method --</option>
-                                @foreach ($jenis_pembayaran as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_jenis }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('jenis_pembayaran_id')
-                                <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {{-- Kolom Kiri: Payment Method --}}
+                            <div>
+                                <label class="block font-medium mb-1">Payment Method</label>
+                                <select id="jenis_pembayaran_id" name="jenis_pembayaran_id"
+                                    class="w-full border rounded px-2 py-1 text-sm" required>
+                                    <option value="">-- Payment Method --</option>
+                                    @foreach ($jenis_pembayaran as $level)
+                                        <option value="{{ $level->id }}"
+                                            {{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ $level->nama_jenis }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Kolom Kanan: Account (otomatis terisi, 1 saja) --}}
+                            <div id="pm-account-panel"
+                                class="{{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
+                                <label class="block font-medium mb-1">Account</label>
+                                <select id="pm-account-id" name="account_detail_coa_id"
+                                    class="w-full border rounded px-2 py-1 text-sm">
+                                    <option value="">-- Pilih Account --</option>
+                                </select>
+                            </div>
+
                         </div>
 
                         <!-- Shipping Address -->
@@ -208,6 +218,78 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+
+    <script>
+        (function() {
+            const $pmSelect = $('#jenis_pembayaran_id');
+            const $panel = $('#pm-account-panel');
+            const $disp = $('#pm-account-display');
+            const $hiddenId = $('#pm-account-id');
+
+            function clearAccount() {
+                $disp.val('');
+                $hiddenId.val('');
+                $panel.addClass('hidden');
+            }
+
+            function setAccount(a) {
+                const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
+                $disp.val(text);
+                $hiddenId.val(a.account_id || '');
+                $panel.removeClass('hidden');
+            }
+
+            function pickOne(accounts) {
+                if (!accounts || !accounts.length) return null;
+                // 1) cari default
+                const def = accounts.find(x => x.is_default);
+                if (def) return def;
+                // 2) kalau tidak ada default, ambil yang pertama
+                return accounts[0];
+            }
+
+            function loadPMAccounts(pmId) {
+                if (!pmId) {
+                    clearAccount();
+                    return;
+                }
+
+                $.getJSON("{{ route('payment-methods.accounts', ['id' => 'PM_ID']) }}".replace('PM_ID', pmId))
+                    .done(function(res) {
+                        const $select = $('#pm-account-id');
+                        $select.empty().append('<option value="">-- Pilih Account --</option>');
+
+                        (res.accounts || []).forEach(function(a) {
+                            const text =
+                                `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
+                            $select.append(`<option value="${a.account_id}">${text}</option>`);
+                        });
+
+                        // kalau form edit, bisa auto-select berdasarkan value lama
+                        const oldVal =
+                            "{{ old('account_detail_coa_id', $sales_order->account_detail_coa_id ?? '') }}";
+                        if (oldVal) $select.val(oldVal);
+
+                        $panel.removeClass('hidden');
+                    })
+                    .fail(function() {
+                        clearAccount();
+                        alert('Gagal memuat account dari Payment Method.');
+                    });
+            }
+
+
+            // on change
+            $pmSelect.on('change', function() {
+                loadPMAccounts($(this).val());
+            });
+
+            // initial load (untuk edit form)
+            const initial = $pmSelect.val();
+            if (initial) loadPMAccounts(initial);
+        })();
+    </script>
     <script>
         let rowIndex = 0;
 
@@ -255,27 +337,29 @@
                     processResults: data => ({
                         results: data.map(item => ({
                             id: item.id,
-                            text: `${item.item_number} - ${item.item_name}`,
-                            item_name: item.item_name,
+                            text: `${item.item_number} - ${item.item_description}`,
+                            item_description: item.item_description,
                             unit: item.unit,
-                            purchase_price: item.purchase_price,
+                            purchase_price: item.purchase_price ??
+                                0, // kalau tidak ada, default 0
                             tax_rate: item.tax_rate,
                             account_id: item.account_id,
                             account_name: item.account_name,
-                            stock_quantity: item.stock_quantity
+                            stock_quantity: item
+                                .on_hand_qty // ✅ pakai on_hand_qty dari controller
                         }))
                     }),
                     cache: true
                 }
             }).on('select2:select', function(e) {
                 const data = e.params.data;
-                $(`.desc-${index}`).val(data.item_name);
+                $(`.desc-${index}`).val(data.item_description);
                 $(`.unit-${index}`).val(data.unit);
                 $(`.price-${index}`).val(formatNumber(data.purchase_price));
                 $(`.tax-${index}`).val(data.tax_rate);
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
-                $(`.qty-${index}`).val(data.stock_quantity);
+                $(`.qty-${index}`).val(data.stock_quantity); // stok dari on_hand_qty
                 calculateAmount(index);
                 calculateBackOrder(index);
             });
@@ -384,6 +468,5 @@
             $('#grand-tax').val(cleanNumber($('#grand-tax').val()).toFixed(2));
         });
     </script>
-
 
 @endsection

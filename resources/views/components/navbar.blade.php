@@ -468,7 +468,7 @@
                                             x-transition:leave-end="opacity-0 translate-x-1"
                                             class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                             @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                            @can('purchase_order')
+                                            @can('purchase_order.access')
                                                 <a href="{{ route('purchase_order.index') }}"
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchases
                                                     Orders

@@ -20,6 +20,7 @@ class chartOfAccount extends Model
         'catatan',
         'catatan_pajak',
         'klasifikasi_id',
+        'is_income_tax'
     ];
     public function children()
     {

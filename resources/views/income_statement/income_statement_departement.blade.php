@@ -6,11 +6,10 @@
             <h1 class="text-2xl font-bold">Departmental Income Statement</h1>
             <p class="text-gray-600">Periode: {{ $start_date }} s/d {{ $end_date }}</p>
         </div>
-
         <div class="bg-white shadow rounded-lg overflow-hidden">
             <table class="table-auto w-full">
                 <thead>
-                    <tr>
+                    <tr class="text-center">
                         <th>Kode Akun</th>
                         <th>Nama Akun</th>
                         <th>Total</th>
@@ -22,11 +21,12 @@
                 <tbody>
                     @foreach ($incomeStatement as $row)
                         <tr>
-                            <td>{{ $row['kode_akun'] }}</td>
+                            <td class="text-center">{{ $row['kode_akun'] }}</td>
                             <td>{{ $row['nama_akun'] }}</td>
-                            <td>{{ number_format($row['saldo'], 2, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($row['saldo'], 2, ',', '.') }}</td>
                             @foreach ($departemens as $dept)
-                                <td>{{ number_format($row['per_departemen'][$dept] ?? 0, 2, ',', '.') }}</td>
+                                <td class="text-right">{{ number_format($row['per_departemen'][$dept] ?? 0, 2, ',', '.') }}
+                                </td>
                             @endforeach
                         </tr>
                     @endforeach

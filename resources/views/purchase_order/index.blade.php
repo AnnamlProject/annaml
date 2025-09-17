@@ -50,7 +50,7 @@
                                         Shipping Date</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Customer</th>
+                                        Vendor</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Payment Method</th>
@@ -78,7 +78,7 @@
                                         <td class="px-6 py-4">{{ $item->order_number }}</td>
                                         <td class="px-6 py-4">{{ $item->date_order }}</td>
                                         <td class="px-6 py-4">{{ $item->shipping_date }}</td>
-                                        <td class="px-6 py-4">{{ $item->customer->nama_customers }}</td>
+                                        <td class="px-6 py-4">{{ $item->vendor->nama_vendors ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
                                         <td class="px-6 py-4">{{ $item->shipping_address }}</td>
                                         <td class="px-6 py-4">{{ $item->freight }}</td>

@@ -17,7 +17,9 @@ class HapusKolomCustomerIdInPurchaseInvoices extends Migration
             //
             // hapus relasi lama
             if (Schema::hasColumn('purchase_invoices', 'customer_id')) {
-                $table->dropConstrainedForeignId('customer_id');
+                // Nama constraint biasanya "purchase_orders_customer_id_foreign"
+                $table->dropForeign(['customer_id']);
+                $table->dropColumn('customer_id');
             }
 
             // tambahkan kolom baru dengan relasi

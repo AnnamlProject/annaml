@@ -14,9 +14,10 @@ class HapusCustomerInPurchaseOrders extends Migration
     public function up()
     {
         Schema::table('purchase_orders', function (Blueprint $table) {
-            // hapus relasi lama
             if (Schema::hasColumn('purchase_orders', 'customer_id')) {
-                $table->dropConstrainedForeignId('customer_id');
+                // Nama constraint biasanya "purchase_orders_customer_id_foreign"
+                $table->dropForeign(['customer_id']);
+                $table->dropColumn('customer_id');
             }
 
             // tambahkan kolom baru dengan relasi

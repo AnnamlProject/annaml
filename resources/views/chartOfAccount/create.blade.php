@@ -126,10 +126,10 @@
                             <select name="is_income_tax" id="is_income_tax" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
-                                <option value="Tunai"
+                                <option value="1"
                                     {{ old('is_income_tax', $data->is_income_tax ?? '') == '1' ? 'selected' : '' }}>
                                     Ya</option>
-                                <option value="Non Tunai"
+                                <option value="0"
                                     {{ old('is_income_tax', $data->is_income_tax ?? '') == '0' ? 'selected' : '' }}>
                                     Tidak
                                 </option>

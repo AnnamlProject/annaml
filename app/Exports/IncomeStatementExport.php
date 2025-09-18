@@ -76,9 +76,11 @@ class IncomeStatementExport implements FromView
             $totalKredit = $entry->total_kredit ?? 0;
 
             $tipe  = strtolower($account->tipe_akun);
-            $saldo = ($tipe === 'pendapatan')
-                ? ($totalKredit - $totalDebit)   // normal kredit
-                : ($totalDebit  - $totalKredit); // normal debit
+            if (strtolower($account->tipe_akun) === 'pendapatan') {
+                $saldo = $totalKredit;   // pendapatan → total kredit
+            } else {
+                $saldo = $totalDebit;    // beban → total debit
+            }
 
             if ($saldo != 0) {
                 $currentGroup['akun'][] = [

@@ -5,9 +5,15 @@ namespace App\Http\Controllers;
 use App\ChartOfAccount;
 use App\Departemen;
 use App\Departement;
+use App\Exports\IncomeStatementDepartementExport;
+use App\Exports\IncomeStatementExport;
 use App\JournalEntryDetail;
 use App\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IncomeStatementController extends Controller
 {
@@ -78,7 +84,7 @@ class IncomeStatementController extends Controller
             $totalKredit = $entries->sum('credits');
 
             $tipe  = strtolower($account->tipe_akun);
-            $saldo = ($tipe === 'pendapatan')
+            $saldo = ($tipe === 'Pendapatan')
                 ? ($totalKredit - $totalDebit)   // Pendapatan: normal kredit
                 : ($totalDebit  - $totalKredit); // Beban:    normal debit
 
@@ -100,8 +106,8 @@ class IncomeStatementController extends Controller
         }
 
         // Pisahkan menjadi bagian Pendapatan vs Beban
-        $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'pendapatan'));
-        $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'beban'));
+        $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'Pendapatan'));
+        $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'Beban'));
 
         // Hitung total global per tipe (BUKAN per grup)
         $totalPendapatan = array_sum(array_column($groupsPendapatan, 'saldo_group'));
@@ -137,8 +143,8 @@ class IncomeStatementController extends Controller
             'labaSebelumPajak' => $labaSebelumPajak,
             'bebanPajak'       => $bebanPajak,
             'labaSetelahPajak' => $labaSetelahPajak,
-            'start_date'       => $tanggalAwal,
-            'end_date'         => $tanggalAkhir,
+            'tanggalAwal'       => $tanggalAwal,
+            'tanggalAkhir'         => $tanggalAkhir,
         ]);
     }
 
@@ -256,5 +262,130 @@ class IncomeStatementController extends Controller
             'end_date'        => $tanggalAkhir,
             'departemens'     => $departemens->pluck('deskripsi'),
         ]);
+    }
+    public function export(Request $request)
+    {
+        $format       = $request->get('format', 'excel');
+        $tanggalAwal  = $request->get('start_date') ?: now()->startOfMonth()->toDateString();
+        $tanggalAkhir = $request->get('end_date')   ?: now()->toDateString();
+
+        $periodeFormatted = \Carbon\Carbon::parse($tanggalAwal)->translatedFormat('d M Y')
+            . '_sampai_' . \Carbon\Carbon::parse($tanggalAkhir)->translatedFormat('d M Y');
+
+        if ($format === 'excel') {
+            $fileName = "income_statement_{$periodeFormatted}.xlsx";
+            return Excel::download(new IncomeStatementExport($tanggalAwal, $tanggalAkhir), $fileName);
+        }
+
+        if ($format === 'pdf') {
+            $incomeData = $this->buildIncomeStatement($tanggalAwal, $tanggalAkhir);
+
+            $fileName = "income_statement_{$periodeFormatted}.pdf";
+            $pdf = Pdf::loadView('income_statement.pdf', [
+                'incomeData'      => $incomeData['akun'],
+                'totalPendapatan' => $incomeData['totalPendapatan'],
+                'totalBeban'      => $incomeData['totalBeban'],
+                'labaBersih'      => $incomeData['labaBersih'],
+                'start_date'      => $tanggalAwal,
+                'end_date'        => $tanggalAkhir,
+            ])->setPaper('A4', 'portrait');
+
+            return $pdf->download($fileName);
+        }
+
+        return back()->with('error', 'Format export tidak dikenali.');
+    }
+
+    private function buildIncomeStatement(string $tanggalAwal, string $tanggalAkhir): array
+    {
+        $accounts = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
+            ->orderBy('kode_akun')
+            ->get();
+
+        $incomeStatement = [];
+        $totalPendapatan = 0;
+        $totalBeban = 0;
+
+        foreach ($accounts as $account) {
+            $entries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
+                ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
+                    $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+                })
+                ->get();
+
+            $totalDebit  = $entries->sum('debits');
+            $totalKredit = $entries->sum('credits');
+
+            $saldoUtama = 0;
+            if (strtolower($account->tipe_akun) === 'pendapatan') {
+                $saldoUtama = $totalKredit - $totalDebit;
+                $totalPendapatan += $saldoUtama;
+            } else {
+                $saldoUtama = $totalDebit - $totalKredit;
+                $totalBeban += $saldoUtama;
+            }
+
+            if ($saldoUtama != 0) {
+                $incomeStatement[] = [
+                    'kode_akun' => $account->kode_akun,
+                    'nama_akun' => $account->nama_akun,
+                    'tipe_akun' => $account->tipe_akun,
+                    'saldo'     => $saldoUtama,
+                ];
+            }
+        }
+
+        $labaBersih = $totalPendapatan - $totalBeban;
+
+        return [
+            'akun'           => $incomeStatement,
+            'totalPendapatan' => $totalPendapatan,
+            'totalBeban'     => $totalBeban,
+            'labaBersih'     => $labaBersih,
+        ];
+    }
+    public function exportDepartemen(Request $request)
+    {
+        $format      = $request->get('format', 'excel');
+        $start_date  = $request->get('start_date') ?: now()->startOfMonth()->toDateString();
+        $end_date    = $request->get('end_date')   ?: now()->toDateString();
+
+        $periodeFormatted = \Carbon\Carbon::parse($start_date)->translatedFormat('d M Y')
+            . '_sampai_' . \Carbon\Carbon::parse($end_date)->translatedFormat('d M Y');
+
+        if ($format === 'excel') {
+            $fileName = "income_statement_departement_{$periodeFormatted}.xlsx";
+            return \Maatwebsite\Excel\Facades\Excel::download(
+                new \App\Exports\IncomeStatementDepartementExport($start_date, $end_date),
+                $fileName
+            );
+        }
+
+        if ($format === 'pdf') {
+            $export = new \App\Exports\IncomeStatementDepartementExport($start_date, $end_date);
+            $view   = $export->view()->render(); // 🔹 gunakan view dari export
+
+            $fileName = "income_statement_departement_{$periodeFormatted}.pdf";
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($view)->setPaper('A4', 'landscape');
+
+            return $pdf->download($fileName);
+        }
+
+        return back()->with('error', 'Format export tidak dikenali.');
+    }
+
+    public function exportDepartementPdf(Request $request)
+    {
+        $start_date  = $request->start_date ?: now()->startOfMonth()->toDateString();
+        $end_date    = $request->end_date   ?: now()->toDateString();
+
+        // gunakan export class yang tadi dibuat
+        $export = new \App\Exports\IncomeStatementDepartementExport($start_date, $end_date);
+        $view   = $export->view()->render();
+
+        $fileName = "income_statement_departement_{$start_date}_to_{$end_date}.pdf";
+
+        $pdf = Pdf::loadHTML($view)->setPaper('A4', 'landscape');
+        return $pdf->download($fileName);
     }
 }

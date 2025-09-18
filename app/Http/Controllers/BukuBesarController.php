@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\ChartOfAccount;
+use App\Exports\BukuBesarExport;
 use App\JournalEntry;
 use App\JournalEntryDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class BukuBesarController extends Controller
 {
@@ -23,12 +27,11 @@ class BukuBesarController extends Controller
 
         return view('buku_besar.filter_buku_besar', compact('account'));
     }
-
-    public function bukuBesarReport(Request $request)
+    private function getBukuBesarData(Request $request)
     {
         $accounts = ChartOfAccount::all();
 
-        // Ambil kode akun dari checkbox input (dalam format: "kode - nama")
+        // Ambil kode akun dari checkbox input (format: "kode - nama")
         $selectedAccountsRaw = explode(',', $request->selected_accounts ?? '');
         $selectedAccountCodes = [];
 
@@ -40,7 +43,7 @@ class BukuBesarController extends Controller
         }
 
         // ======================
-        // 1. Query utama (periode) TANPA paginate
+        // 1. Query utama (tanpa paginate)
         // ======================
         $rows = JournalEntryDetail::select(
             'journal_entry_details.id',
@@ -60,13 +63,12 @@ class BukuBesarController extends Controller
                 $q->whereIn('journal_entry_details.kode_akun', $selectedAccountCodes);
             })
             ->orderBy('journal_entries.tanggal', 'asc')
-            ->get(); // ✅ langsung Collection
+            ->get();
 
         // ======================
-        // 2. Query saldo awal (sebelum start_date)
+        // 2. Hitung saldo awal
         // ======================
         $saldoAwalPerAkun = [];
-
         if ($request->filled('start_date')) {
             $saldoAwal = JournalEntryDetail::select(
                 'journal_entry_details.kode_akun',
@@ -96,7 +98,7 @@ class BukuBesarController extends Controller
         }
 
         // ======================
-        // 3. Grouping by account (langsung Collection)
+        // 3. Grouping by account
         // ======================
         $groupedByAccount = $rows->groupBy(function ($item) {
             return $item->chartOfAccount->nama_akun ?? 'Tanpa Akun';
@@ -121,7 +123,7 @@ class BukuBesarController extends Controller
             }
         }
 
-        return view('buku_besar.buku_besar_report', [
+        return [
             'accounts'          => $accounts,
             'details'           => $rows,
             'rows'              => $rows,
@@ -131,6 +133,31 @@ class BukuBesarController extends Controller
             'end_date'          => $request->end_date,
             'startingBalances'  => $saldoAwalPerAkun,
             'totalByType'       => $totalByType,
-        ]);
+        ];
+    }
+    public function bukuBesarReport(Request $request)
+    {
+        return view('buku_besar.buku_besar_report', $this->getBukuBesarData($request));
+    }
+    public function export(Request $request)
+    {
+        // ambil data sama seperti bukuBesarReport
+        $data = $this->getBukuBesarData($request);
+
+        if ($request->format === 'excel') {
+            return Excel::download(new BukuBesarExport(
+                $data['rows'],
+                $data['startingBalances'],
+                $data['groupedByAccount'],
+                $data['totalByType'],
+                $request->start_date,
+                $request->end_date
+            ), 'buku_besar.xlsx');
+        } elseif ($request->format === 'pdf') {
+            $pdf = PDf::loadView('buku_besar.export_pdf', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('buku_besar.pdf');
+        }
+
+        return back();
     }
 }

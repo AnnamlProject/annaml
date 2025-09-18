@@ -4,6 +4,26 @@
     <div class="py-8">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="mb-6 flex justify-end gap-2">
+                    <a href="{{ route('buku_besar.export', [
+                        'start_date' => $start_date,
+                        'end_date' => $end_date,
+                        'format' => 'excel',
+                    ]) }}"
+                        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">
+                        <i class="fas fa-file-excel mr-1"></i> Export Excel
+                    </a>
+
+                    <a href="{{ route('buku_besar.export', [
+                        'start_date' => $start_date,
+                        'end_date' => $end_date,
+                        'format' => 'pdf',
+                    ]) }}"
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
+                        <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                    </a>
+                </div>
+
                 <div class="mb-4">
                     <p class="text-sm">
                         <span class="font-semibold">Periode:</span>

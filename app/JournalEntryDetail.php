@@ -14,7 +14,8 @@ class JournalEntryDetail extends Model
         'credits',
         'comment',
         'kode_akun',
-        'project_id'
+        'project_id',
+        'pajak'
     ];
 
     protected static function booted()

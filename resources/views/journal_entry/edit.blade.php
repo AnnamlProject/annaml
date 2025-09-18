@@ -47,8 +47,9 @@
                                     <th class="border px-4 py-3 w-[30%]">Accounts</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Debits</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Credits</th>
-                                    <th class="border px-4 py-3 w-[35%] text-center">Comment</th>
+                                    <th class="border px-4 py-3 w-[25%] text-center">Comment</th>
                                     <th class="border px-4 py-3 w-[10%] text-center">Specpose</th>
+                                    <th class="border px-4 py-3 w-[10%] text-center">Pajak</th>
                                     <th class="border px-4 py-3 w-[5%] text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -109,6 +110,12 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <input type="hidden" name="items[{{ $i }}][pajak]" value="0">
+                                            <input type="checkbox" name="items[{{ $i }}][pajak]" value="1"
+                                                class="w-full border rounded px-2 py-1"
+                                                {{ old("items.$i.pajak", $detail->pajak ?? 0) ? 'checked' : '' }}>
                                         </td>
 
                                         <td class="border px-2 py-1 text-center">
@@ -208,6 +215,10 @@
                         <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                     @endforeach
                 </select>
+            </td>
+             <td class="border px-2 py-1">
+                <input type="hidden" name="items[${index}][pajak]" value="0">
+                <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
             </td>
         <td class="border px-2 py-1 text-center">
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>

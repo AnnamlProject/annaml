@@ -174,11 +174,14 @@ class ItemController extends Controller
                     $accountName = optional($item->accounts->assetAccount)->nama_akun
                         ?? optional($item->accounts->expenseAccount)->nama_akun
                         ?? '-';
+
+                    $unit = $item->units->selling_unit ?? '-';
                     break;
 
                 case 'sales':
                     $accountId   = $item->accounts->revenue_account_id ?? null;
                     $accountName = optional($item->accounts->revenueAccount)->nama_akun ?? '-';
+                    $unit = $item->units->buying_unit ?? '-';
                     break;
 
                 default:
@@ -192,7 +195,7 @@ class ItemController extends Controller
                 'item_number'     => $item->item_number,
                 'item_description' => $item->item_description,
                 'on_hand_qty'     => $item->quantities->sum('on_hand_qty'),
-                'unit'            => $item->units->buying_unit ?? '-',
+                'unit'            => $unit,
                 'tax_rate'        => $item->tax_rate,
                 'account_id'      => $accountId,
                 'account_name'    => $accountName,

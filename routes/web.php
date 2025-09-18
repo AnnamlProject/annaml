@@ -153,17 +153,22 @@ Route::middleware(['auth'])->group(function () {
     // buku besar
     Route::get('filter_buku_besar', [BukuBesarController::class, 'bukuBesarFilter'])->name('buku_besar.filter_buku_besar')->middleware('permission:buku_besar.access');
     Route::get('/laporan/buku-besar', [BukuBesarController::class, 'bukuBesarReport'])->name('buku_besar.buku_besar_report');
+    Route::get('/buku_besar/export', [BukuBesarController::class, 'export'])->name('buku_besar.export');
+
 
     // Trial Balance
     Route::get('filter_trial_balance', [TrialBalanceController::class, 'trialBalanceFilter'])->name('trial_balance.filter_trial_balance')->middleware('permission:trial_balance.access');
     Route::get('trial_balance_report', [TrialBalanceController::class, 'trialBalanceReport'])->name('trial_balance.trial_balance_report');
+    Route::get('/trial_balance/export', [TrialBalanceController::class, 'export'])->name('trial_balance.export');
 
     // income statement
     Route::get('filter_income_statement', [IncomeStatementController::class, 'incomeStatementFilter'])->name('income_statement.filter_income_statement')->middleware('permission:income_statement.access');
     Route::get('income_statement', [IncomeStatementController::class, 'incomeStatementReport'])->name('income_statement.income_statement_report');
+    Route::get('/income_statement/export', [IncomeStatementController::class, 'export'])->name('income_statement.export');
 
     Route::get('filter_income_statement_departement', [IncomeStatementController::class, 'incomeStatementFilterDepartement'])->name('income_statement.filter_income_statement_departement');
     Route::get('income_satetement_departement', [IncomeStatementController::class, 'incomeStatementDepartement'])->name('income_statement.income_statement_departement');
+    Route::get('/income_statement_departement/export', [IncomeStatementController::class, 'exportDepartemen'])->name('income_statement_departement.export');
 
 
 

@@ -53,7 +53,7 @@
                                     <option value="">-- Payment Method --</option>
                                     @foreach ($jenis_pembayaran as $level)
                                         <option value="{{ $level->id }}"
-                                            {{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
                                             {{ $level->nama_jenis }}
                                         </option>
                                     @endforeach
@@ -62,7 +62,7 @@
 
                             {{-- Kolom Kanan: Account (otomatis terisi, 1 saja) --}}
                             <div id="pm-account-panel"
-                                class="{{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
+                                class="{{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
                                 <label class="block font-medium mb-1">Account</label>
                                 <select id="pm-account-id" name="account_detail_coa_id"
                                     class="w-full border rounded px-2 py-1 text-sm">
@@ -88,7 +88,7 @@
                             <label for="order_number" class="block text-gray-700 font-medium mb-1">Order
                                 Number</label>
                             <input type="text" id="order_number" name="order_number"
-                                value="{{ old('order_number', $sales_order->order_number ?? '') }}"
+                                value="{{ old('order_number', $purchase_order->order_number ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                             <label class="inline-flex items-center mt-2">
@@ -302,7 +302,7 @@
 
                         // kalau form edit, bisa auto-select berdasarkan value lama
                         const oldVal =
-                            "{{ old('account_detail_coa_id', $sales_order->account_detail_coa_id ?? '') }}";
+                            "{{ old('account_detail_coa_id', $purchase_order->account_detail_coa_id ?? '') }}";
                         if (oldVal) $select.val(oldVal);
 
                         $panel.removeClass('hidden');
@@ -386,6 +386,7 @@
                 }
             }).on('select2:select', function(e) {
                 const data = e.params.data;
+                console.log("Data dari server:", data);
                 $(`.desc-${index}`).val(data.item_description);
                 $(`.unit-${index}`).val(data.unit);
                 $(`.price-${index}`).val(formatNumber(data.purchase_price));

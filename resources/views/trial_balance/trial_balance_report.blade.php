@@ -1,8 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="max-w-full mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow-md rounded px-6 py-4">
+            <div class="mb-6 flex justify-end gap-2">
+                <a href="{{ route('trial_balance.export', ['end_date' => $tanggalAkhir, 'format' => 'excel']) }}"
+                    class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">
+                    <i class="fas fa-file-excel mr-1"></i> Export Excel
+                </a>
+                <a href="{{ route('trial_balance.export', ['end_date' => $tanggalAkhir, 'format' => 'pdf']) }}"
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
+                    <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                </a>
+            </div>
             <h2 class="text-2xl font-bold mb-4">Trial Balance</h2>
 
             <form method="GET" action="{{ route('trial_balance.trial_balance_report') }}" class="mb-4">

@@ -2,6 +2,16 @@
 
 @section('content')
     <div class="container mx-auto px-4">
+        <div class="mb-6 mt-4 flex justify-end gap-2">
+            <a href="{{ route('income_statement_departement.export', ['start_date' => $start_date, 'end_date' => $end_date, 'format' => 'excel']) }}"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">
+                <i class="fas fa-file-excel mr-1"></i> Export Excel
+            </a>
+            <a href="{{ route('income_statement_departement.export', ['start_date' => $start_date, 'end_date' => $end_date, 'format' => 'pdf']) }}"
+                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
+                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+            </a>
+        </div>
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold">Departmental Income Statement</h1>
             <p class="text-gray-600">Periode: {{ $start_date }} s/d {{ $end_date }}</p>

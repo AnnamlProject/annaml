@@ -63,7 +63,7 @@
                                 <td class="px-6 py-4">{{ $item->order_number }}</td>
                                 <td class="px-6 py-4">{{ $item->date_order }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_date }}</td>
-                                <td class="px-6 py-4">{{ $item->customer->nama_customers }}</td>
+                                <td class="px-6 py-4">{{ $item->customer->nama_customers ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_address }}</td>
                                 <td class="px-6 py-4">{{ $item->salesPerson->nama_karyawan ?? '-' }}</td>

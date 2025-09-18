@@ -73,11 +73,12 @@
                         <table class="min-w-full table-auto border-collapse text-base text-left bg-white">
                             <thead class="bg-gray-100 text-gray-700 font-semibold sticky top-0 z-10">
                                 <tr>
-                                    <th class="border px-4 py-3 text-center w-[30%]">Accounts</th>
+                                    <th class="border px-4 py-3 text-center w-[20%]">Accounts</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
                                     <th class="border px-4 py-3 text-center w-[15%]">Comment</th>
-                                    <th class="border px-4 py-3 text-center w-[20]">Specpose</th>
+                                    <th class="border px-4 py-3 text-center w-[25%]">Specpose</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Pajak</th>
                                     <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
                             </thead>
@@ -193,6 +194,10 @@
                         <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                     @endforeach
                 </select>
+            </td>
+            <td class="border px-2 py-1">
+                <input type="hidden" name="items[${index}][pajak]" value="0">
+                <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
             </td>
           <td class="border px-2 py-1 text-center">
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>

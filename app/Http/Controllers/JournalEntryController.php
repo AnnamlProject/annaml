@@ -203,7 +203,8 @@ class JournalEntryController extends Controller
             'items.*.debits' => 'nullable|numeric',
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
-            'items.*.project_id' => 'nullable|exists:projects,id'
+            'items.*.project_id' => 'nullable|exists:projects,id',
+            'items.*.pajak' => 'nullable|boolean'
         ]);
 
         // Hitung total debit & kredit
@@ -237,7 +238,8 @@ class JournalEntryController extends Controller
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
-                    'project_id' => $item['project_id'] ?? null
+                    'project_id' => $item['project_id'] ?? null,
+                    'pajak' => $item['pajak']
                 ]);
             }
 
@@ -367,7 +369,9 @@ class JournalEntryController extends Controller
             'items.*.debits' => 'nullable|numeric',
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
-            'items.*.project_id' => 'nullable|exists:projects,id'
+            'items.*.project_id' => 'nullable|exists:projects,id',
+            'items.*.pajak' => 'nullable|boolean'
+
 
         ]);
 
@@ -408,7 +412,8 @@ class JournalEntryController extends Controller
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
-                    'project_id' => $item['project_id'] ?? null
+                    'project_id' => $item['project_id'] ?? null,
+                    'pajak' => $item['pajak']
                 ]);
             }
 

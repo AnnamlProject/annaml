@@ -2,13 +2,23 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-6">
+        <div class="mb-6 flex justify-end gap-2">
+            <a href="{{ route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'excel']) }}"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">
+                <i class="fas fa-file-excel mr-1"></i> Export Excel
+            </a>
+            <a href="{{ route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'pdf']) }}"
+                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm font-medium">
+                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+            </a>
+        </div>
         <h1 class="text-xl font-bold mb-2">
             {{ $siteTitle }}
         </h1>
         <h3 class="text-xl font-bold mb-4">LAPORAN LABA RUGI</h3>
         <p class="text-gray-600 mb-6">
-            Periode: {{ \Carbon\Carbon::parse($start_date)->format('d M Y') }} -
-            {{ \Carbon\Carbon::parse($end_date)->format('d M Y') }}
+            Periode: {{ \Carbon\Carbon::parse($tanggalAwal)->format('d M Y') }} -
+            {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
         </p>
 
         {{-- =======================

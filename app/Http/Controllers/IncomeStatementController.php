@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class IncomeStatementController extends Controller
@@ -23,130 +24,135 @@ class IncomeStatementController extends Controller
         return view('income_statement.filter_income_statement');
     }
 
-
     public function incomeStatementReport(Request $request)
     {
-        $tanggalAwal  = $request->start_date;
-        $tanggalAkhir = $request->end_date;
+        // 🔹 Ambil tanggal, default jika tidak ada
+        $tanggalAwal  = $request->start_date ?: now()->startOfMonth()->toDateString();
+        $tanggalAkhir = $request->end_date   ?: now()->toDateString();
+
+        // 🔹 Debugging: lihat request masuk
+        Log::info('Income Statement Request', $request->all());
+        // Atau bisa pakai dd()
+        // dd($request->all(), $tanggalAwal, $tanggalAkhir);
+
         $siteTitle = Setting::where('key', 'site_title')->value('value');
 
-
-        // Ambil semua akun Pendapatan & Beban, urut kode_akun
-        $accounts = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
-            ->orderBy('kode_akun')
+        // 🔹 Ambil semua akun Pendapatan & Beban langsung dengan agregasi
+        $akunRekap = DB::table('journal_entry_details as jed')
+            ->join('journal_entries as je', 'je.id', '=', 'jed.journal_entry_id')
+            ->join('chart_of_accounts as coa', 'coa.kode_akun', '=', 'jed.kode_akun')
+            ->select(
+                'jed.kode_akun',
+                'coa.nama_akun',
+                'coa.tipe_akun',
+                'coa.level_akun',
+                DB::raw('SUM(jed.debits) as total_debit'),
+                DB::raw('SUM(jed.credits) as total_kredit')
+            )
+            ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban'])
+            ->whereBetween('je.tanggal', [$tanggalAwal, $tanggalAkhir])
+            ->groupBy('jed.kode_akun', 'coa.nama_akun', 'coa.tipe_akun', 'coa.level_akun')
+            ->orderBy('jed.kode_akun')
             ->get();
 
-        $groups = []; // array kumpulan grup {group, tipe, akun[], saldo_group}
+        // 🔹 Debugging: cek hasil query
+        Log::info('Rekap Akun Income Statement', $akunRekap->toArray());
+
+        $groups = [];
         $currentGroup = null;
 
-        foreach ($accounts as $account) {
-            // Mulai grup baru saat ketemu level GROUP ACCOUNT
-            if ($account->level_akun === 'GROUP ACCOUNT') {
-                // Push grup sebelumnya
+        foreach ($akunRekap as $row) {
+            if ($row->level_akun === 'GROUP ACCOUNT') {
                 if ($currentGroup && !empty($currentGroup['akun'])) {
                     $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
                     $groups[] = $currentGroup;
                 }
 
                 $currentGroup = [
-                    'group' => $account->nama_akun,
-                    'tipe'  => strtolower($account->tipe_akun), // 'pendapatan' atau 'beban'
-                    'akun'  => [],
+                    'group'       => $row->nama_akun,
+                    'tipe'        => strtolower(trim($row->tipe_akun)),
+                    'akun'        => [],
                     'saldo_group' => 0,
                 ];
                 continue;
             }
 
-            // Lewati HEADER
-            if ($account->level_akun === 'HEADER') {
+            if ($row->level_akun === 'HEADER') {
                 continue;
             }
 
-            // Jika belum ada grup tapi ada akun, masukkan ke "Tanpa Grup"
             if (!$currentGroup) {
                 $currentGroup = [
-                    'group' => 'Tanpa Grup',
-                    'tipe'  => strtolower($account->tipe_akun),
-                    'akun'  => [],
+                    'group'       => 'Tanpa Grup',
+                    'tipe'        => strtolower(trim($row->tipe_akun)),
+                    'akun'        => [],
                     'saldo_group' => 0,
                 ];
             }
 
-            // Hitung saldo akun pada periode
-            $entries = JournalEntryDetail::with('journalEntry')
-                ->where('kode_akun', $account->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
-                    $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
-                })
-                ->get();
-
-            $totalDebit  = $entries->sum('debits');
-            $totalKredit = $entries->sum('credits');
-
-            $tipe  = strtolower($account->tipe_akun);
-            $saldo = ($tipe === 'Pendapatan')
-                ? ($totalKredit - $totalDebit)   // Pendapatan: normal kredit
-                : ($totalDebit  - $totalKredit); // Beban:    normal debit
+            // 🔹 Hitung saldo sesuai tipe akun
+            $tipe = strtolower(trim($row->tipe_akun));
+            $saldo = ($tipe === 'pendapatan')
+                ? ($row->total_kredit - $row->total_debit)
+                : ($row->total_debit - $row->total_kredit);
 
             if ($saldo != 0) {
                 $currentGroup['akun'][] = [
-                    'kode_akun'  => $account->kode_akun,
-                    'nama_akun'  => $account->nama_akun,
-                    'tipe_akun'  => $account->tipe_akun,
-                    'level_akun' => $account->level_akun,
+                    'kode_akun'  => $row->kode_akun,
+                    'nama_akun'  => $row->nama_akun,
+                    'tipe_akun'  => $row->tipe_akun,
+                    'level_akun' => $row->level_akun,
                     'saldo'      => $saldo,
                 ];
             }
         }
 
-        // Push grup terakhir
         if ($currentGroup && !empty($currentGroup['akun'])) {
             $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
             $groups[] = $currentGroup;
         }
 
-        // Pisahkan menjadi bagian Pendapatan vs Beban
-        $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'Pendapatan'));
-        $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'Beban'));
+        $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'pendapatan'));
+        $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'beban'));
 
-        // Hitung total global per tipe (BUKAN per grup)
         $totalPendapatan = array_sum(array_column($groupsPendapatan, 'saldo_group'));
         $totalBeban      = array_sum(array_column($groupsBeban, 'saldo_group'));
-
-        // Laba sebelum pajak
         $labaSebelumPajak = $totalPendapatan - $totalBeban;
 
-        // Beban Pajak Penghasilan: akun bernama persis "Pajak Penghasilan Badan"
-        $akunPajak  = ChartOfAccount::where('is_income_tax', 1)->first();
+        // 🔹 Beban pajak (jika ada)
+        $akunPajak = ChartOfAccount::where('is_income_tax', 1)->first();
         $bebanPajak = 0;
 
         if ($akunPajak) {
-            $entriesPajak = JournalEntryDetail::with('journalEntry')
-                ->where('kode_akun', $akunPajak->kode_akun)
-                ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
-                    $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
-                })
-                ->get();
+            $rowPajak = DB::table('journal_entry_details as jed')
+                ->join('journal_entries as je', 'je.id', '=', 'jed.journal_entry_id')
+                ->select(
+                    DB::raw('SUM(jed.debits) as total_debit'),
+                    DB::raw('SUM(jed.credits) as total_kredit')
+                )
+                ->where('jed.kode_akun', $akunPajak->kode_akun)
+                ->whereBetween('je.tanggal', [$tanggalAwal, $tanggalAkhir])
+                ->first();
 
-            // Pajak adalah beban → normal debit
-            $bebanPajak = $entriesPajak->sum('debits') - $entriesPajak->sum('credits');
+            $bebanPajak = ($rowPajak->total_debit ?? 0) - ($rowPajak->total_kredit ?? 0);
         }
 
         $labaSetelahPajak = $labaSebelumPajak - $bebanPajak;
 
         return view('income_statement.income_statement_report', [
             'groupsPendapatan' => $groupsPendapatan,
-            'siteTitle' => $siteTitle,
             'groupsBeban'      => $groupsBeban,
             'totalPendapatan'  => $totalPendapatan,
             'totalBeban'       => $totalBeban,
             'labaSebelumPajak' => $labaSebelumPajak,
             'bebanPajak'       => $bebanPajak,
             'labaSetelahPajak' => $labaSetelahPajak,
-            'tanggalAwal'       => $tanggalAwal,
-            'tanggalAkhir'         => $tanggalAkhir,
+            'siteTitle'        => $siteTitle,
+            'tanggalAwal'      => $tanggalAwal,
+            'tanggalAkhir'     => $tanggalAkhir,
         ]);
     }
+
 
     public function incomeStatementFilterDepartement()
     {

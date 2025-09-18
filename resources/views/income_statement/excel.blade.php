@@ -72,7 +72,7 @@
         {{-- ==========================
              RINGKASAN AKHIR
         =========================== --}}
-        <tr>
+        {{-- <tr>
             <td colspan="2" style="padding-top:10px;"></td>
         </tr>
         <tr style="font-weight:bold;">
@@ -86,6 +86,6 @@
         <tr style="font-weight:bold;">
             <td>LABA BERSIH SETELAH PAJAK</td>
             <td style="text-align: right;">{{ number_format($labaSetelahPajak, 2, ',', '.') }}</td>
-        </tr>
+        </tr> --}}
     </tbody>
 </table>

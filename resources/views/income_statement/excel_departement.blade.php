@@ -51,15 +51,14 @@
                 </tr>
             @endif
         @endforeach
-        <tr style="font-weight:bold;">
+        {{-- <tr style="font-weight:bold;">
             <td colspan="{{ 2 + count($departemens) }}">TOTAL BEBAN</td>
             <td style="text-align:right;">{{ number_format($totalBeban, 2, ',', '.') }}</td>
         </tr>
 
-        {{-- Laba Bersih --}}
         <tr style="font-weight:bold; background:#eee;">
             <td colspan="{{ 2 + count($departemens) }}">LABA BERSIH</td>
             <td style="text-align:right;">{{ number_format($labaBersih, 2, ',', '.') }}</td>
-        </tr>
+        </tr> --}}
     </tbody>
 </table>

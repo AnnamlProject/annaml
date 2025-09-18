@@ -25,7 +25,7 @@ class IncomeStatementDepartementExport implements FromView
         // 🔹 Ambil semua departemen
         $departemens = Departement::select('id', 'deskripsi')->orderBy('id')->get();
 
-        // 🔹 Ambil saldo per akun × per departemen (sekali query)
+        // 🔹 Ambil saldo per akun × per departemen
         $entriesDept = JournalEntryDetail::select(
             'journal_entry_details.kode_akun',
             'departemen_akuns.departemen_id',
@@ -63,13 +63,14 @@ class IncomeStatementDepartementExport implements FromView
         foreach ($accounts as $account) {
             $tipe = strtolower($account->tipe_akun);
 
-            // Total saldo akun
+            // Total saldo akun (pakai normal balance, bukan bruto)
             $entryTotal   = $entriesTotal->get($account->kode_akun);
             $totalDebit   = $entryTotal->total_debit ?? 0;
             $totalKredit  = $entryTotal->total_kredit ?? 0;
+
             $saldoUtama   = ($tipe === 'pendapatan')
-                ? ($totalKredit - $totalDebit)
-                : ($totalDebit - $totalKredit);
+                ? ($totalKredit - $totalDebit)   // normal kredit
+                : ($totalDebit - $totalKredit);  // normal debit
 
             if ($saldoUtama == 0) {
                 continue;
@@ -81,23 +82,23 @@ class IncomeStatementDepartementExport implements FromView
                 $totalBeban += $saldoUtama;
             }
 
-            // Breakdown per departemen
+            // Breakdown per departemen (pakai normal balance juga)
             $perDepartemen = [];
             $entriesPerDept = $entriesDept->get($account->kode_akun) ?? collect();
 
             foreach ($departemens as $dept) {
-                $row = $entriesPerDept->firstWhere('departemen_id', $dept->id);
-                $d   = $row->total_debit ?? 0;
-                $c   = $row->total_kredit ?? 0;
+                $row   = $entriesPerDept->firstWhere('departemen_id', $dept->id);
+                $d     = $row->total_debit ?? 0;
+                $c     = $row->total_kredit ?? 0;
                 $nilai = ($tipe === 'pendapatan') ? ($c - $d) : ($d - $c);
                 $perDepartemen[$dept->deskripsi] = $nilai;
             }
 
             $incomeStatement[] = [
-                'kode_akun'     => $account->kode_akun,
-                'nama_akun'     => $account->nama_akun,
-                'tipe_akun'     => $account->tipe_akun,
-                'saldo'         => $saldoUtama,
+                'kode_akun'      => $account->kode_akun,
+                'nama_akun'      => $account->nama_akun,
+                'tipe_akun'      => $account->tipe_akun,
+                'saldo'          => $saldoUtama,
                 'per_departemen' => $perDepartemen,
             ];
         }

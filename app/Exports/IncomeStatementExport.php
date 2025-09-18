@@ -63,7 +63,7 @@ class IncomeStatementExport implements FromView
 
             if (!$currentGroup) {
                 $currentGroup = [
-                    'group'       => 'Tanpa Grup',
+                    'group'       => '',
                     'tipe'        => strtolower($account->tipe_akun),
                     'akun'        => [],
                     'saldo_group' => 0,

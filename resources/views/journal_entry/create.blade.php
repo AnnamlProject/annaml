@@ -76,10 +76,10 @@
                                     <th class="border px-4 py-3 text-center w-[20%]">Accounts</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Comment</th>
+                                    <th class="border px-4 py-3 text-center w-[30%]">Comment</th>
                                     <th class="border px-4 py-3 text-center w-[25%]">Specpose</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Pajak</th>
-                                    <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
+                                    <th class="border px-4 py-3 text-center w-[3%]">Fiscorr</th>
+                                    <th class="border px-4 py-3 text-center w-[2%]">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="item-table-body" class="bg-white">
@@ -187,28 +187,35 @@
           <td class="border px-2 py-1">
             <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
           </td>
-                <td class="border px-2 py-1">
-                <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
-                    <option value="">-- Pilih Specpose --</option>
-                    @foreach ($project as $prj)
-                        <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
-                    @endforeach
-                </select>
-            </td>
-            <td class="border px-2 py-1">
-                <input type="hidden" name="items[${index}][pajak]" value="0">
-                <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
-            </td>
-          <td class="border px-2 py-1 text-center">
+          <td class="border px-2 py-1">
+            <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
+                <option value="">-- Pilih Specpose --</option>
+                @foreach ($project as $prj)
+                    <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
+                @endforeach
+            </select>
+          </td>
+          <td class="border px-2 py-1">
+            <input type="hidden" name="items[${index}][pajak]" value="0">
+            <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
+          </td>
+          <td class="border px-2 py-1 text-center space-x-1">
+            <button type="button" class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600" data-index="${index}">+</button>
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
           </td>
         </tr>
       `;
             }
 
-            function addRowWithData(data = null) {
+            function addRowWithData(data = null, insertAfterIndex = null) {
                 const newRow = generateRow(rowIndex);
-                $('#item-table-body').append(newRow);
+
+                if (insertAfterIndex !== null) {
+                    $(`tr[data-index="${insertAfterIndex}"]`).after(newRow);
+                } else {
+                    $('#item-table-body').append(newRow);
+                }
+
                 attachSelect2(rowIndex);
 
                 if (data) {
@@ -326,86 +333,20 @@
                 updateTotals();
             });
 
+            // Hapus row
             $(document).on('click', '.remove-row', function() {
                 const index = $(this).data('index');
                 $(`tr[data-index="${index}"]`).remove();
                 updateTotals();
             });
 
-            // Perubahan penting: hanya refresh tabel kalau success = true
-            $('#tanggal').on('change', function() {
-                let tanggal = $(this).val();
-
-                $.ajax({
-                    url: '/journal-entry/auto-data',
-                    type: 'GET',
-                    data: {
-                        tanggal
-                    },
-                    success: function(res) {
-                        if (res.success && res.entries && res.entries.length > 0) {
-                            $('#item-table-body').empty();
-                            rowIndex = 0;
-                            res.entries.forEach(e => addRowWithData(e));
-                            updateTotals();
-                        }
-                        // kalau success = false → tabel tetap, tidak dihapus
-                    }
-                });
+            // Tambah row setelah row tertentu
+            $(document).on('click', '.add-row', function() {
+                const index = $(this).data('index');
+                addRowWithData(null, index);
             });
 
-            window.confirmCancel = function(event) {
-                event.preventDefault();
-                let isFilled = false;
-                $('#journal-entry-form input[type="text"], #journal-entry-form input[type="date"]').each(
-                    function() {
-                        if ($(this).val().trim() !== '') isFilled = true;
-                    });
-
-                if (isFilled) {
-                    Swal.fire({
-                        title: 'Yakin batal?',
-                        text: "Data yang sudah diisi akan hilang.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Ya, Batal',
-                        cancelButtonText: 'Tidak'
-                    }).then(result => {
-                        if (result.isConfirmed) {
-                            window.location.href = "{{ route('journal_entry.index') }}";
-                        }
-                    });
-                } else {
-                    window.location.href = "{{ route('journal_entry.index') }}";
-                }
-            }
-
-            $('#journal-entry-form').on('submit', function(e) {
-                unformatAllCurrencyInputs();
-                let totalDebit = 0,
-                    totalCredit = 0;
-
-                $(this).find('input[name^="items"][name$="[debits]"]').each(function() {
-                    totalDebit += parseFloat($(this).val()) || 0;
-                });
-                $(this).find('input[name^="items"][name$="[credits]"]').each(function() {
-                    totalCredit += parseFloat($(this).val()) || 0;
-                });
-
-                if (totalDebit === 0 || totalCredit === 0) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validasi Gagal',
-                        text: 'Debit dan Credit harus ada, tidak boleh hanya salah satu.',
-                        confirmButtonColor: '#3085d6',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-
+            // Inisialisasi awal
             for (let i = 0; i < 30; i++) {
                 addRowWithData();
             }

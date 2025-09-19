@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class JournalEntryDetail extends Model
 {
@@ -18,47 +19,79 @@ class JournalEntryDetail extends Model
         'pajak'
     ];
 
-    protected static function booted()
-    {
-        // Trigger ketika data diubah atau dibuat
-        static::saved(function ($detail) {
-            self::handleStartNewYear($detail);
-        });
+    // protected static function booted()
+    // {
+    //     // Trigger ketika data diubah atau dibuat
+    //     static::saved(function ($detail) {
+    //         self::handleStartNewYear($detail);
+    //     });
 
-        // Trigger ketika data dihapus
-        static::deleted(function ($detail) {
-            self::handleStartNewYear($detail);
-        });
-    }
+    //     // Trigger ketika data dihapus
+    //     static::deleted(function ($detail) {
+    //         self::handleStartNewYear($detail);
+    //     });
+    // }
 
-    protected static function handleStartNewYear($detail)
-    {
-        $tanggalTransaksi = \Carbon\Carbon::parse($detail->journalEntry->tanggal);
-        $tahunTransaksi   = $tanggalTransaksi->format('Y');
-        $tahunSekarang    = now()->format('Y');
+    // protected static function handleStartNewYear($detail)
+    // {
+    //     $tanggalTransaksi = \Carbon\Carbon::parse($detail->journalEntry->tanggal);
+    //     $tahunTransaksi   = $tanggalTransaksi->format('Y');
+    //     $tahunSekarang    = now()->format('Y');
 
-        // Cari periode berjalan (misalnya dari tabel start_new_years)
-        $periodeAktif = \App\StartNewYear::where('tahun', $tahunTransaksi)->first();
+    //     // Cari periode berjalan
+    //     $periodeAktif = \App\StartNewYear::where('tahun', $tahunTransaksi)->first();
 
-        // Kalau tidak ada periode, hentikan
-        if (!$periodeAktif) {
-            return;
-        }
+    //     Log::info('[StartNewYear] Debug', [
+    //         'tanggal_transaksi' => $tanggalTransaksi->toDateString(),
+    //         'tahun_transaksi'   => $tahunTransaksi,
+    //         'tahun_sekarang'    => $tahunSekarang,
+    //         'periode_ditemukan' => $periodeAktif ? 'YA' : 'TIDAK',
+    //         'akhir_periode'     => $periodeAktif->akhir_periode ?? null,
+    //     ]);
 
-        // Jika tanggal transaksi = tanggal akhir periode, skip
-        if ($tanggalTransaksi->isSameDay(\Carbon\Carbon::parse($periodeAktif->akhir_periode))) {
-            return;
-        }
 
-        // Kalau transaksinya bukan tahun sebelumnya, tidak perlu update
-        if ($tahunTransaksi != $tahunSekarang - 1) {
-            return;
-        }
+    //     if (!$periodeAktif) {
+    //         dump(['step' => 'STOP - Tidak ada periode aktif']);
+    //         return;
+    //     }
 
-        // Panggil service untuk update jurnal awal tahun
-        app(\App\Services\StartNewYearService::class)
-            ->updateLabaTahunBerjalan($tahunTransaksi);
-    }
+    //     $tanggalClosing = \Carbon\Carbon::parse($periodeAktif->akhir_periode)->addDay();
+
+    //     dump([
+    //         'step'            => 'Hitung tanggal closing',
+    //         'akhir_periode'   => $periodeAktif->akhir_periode,
+    //         'tanggal_closing' => $tanggalClosing->toDateString(),
+    //     ]);
+
+    //     // Hanya jalan kalau transaksi tepat di tanggal closing
+    //     if (!$tanggalTransaksi->isSameDay($tanggalClosing)) {
+    //         dump([
+    //             'step'              => 'STOP - Bukan tanggal closing',
+    //             'tanggal_transaksi' => $tanggalTransaksi->toDateString(),
+    //             'tanggal_closing'   => $tanggalClosing->toDateString(),
+    //         ]);
+    //         return;
+    //     }
+
+    //     // Guard tambahan
+    //     if ($tahunTransaksi != $tanggalClosing->format('Y')) {
+    //         dump([
+    //             'step'              => 'STOP - Tahun transaksi tidak cocok',
+    //             'tahun_transaksi'   => $tahunTransaksi,
+    //             'tahun_closing'     => $tanggalClosing->format('Y'),
+    //         ]);
+    //         return;
+    //     }
+
+    //     // Eksekusi service
+    //     dump([
+    //         'step'          => 'EKSEKUSI updateLabaTahunBerjalan',
+    //         'tahun_ditutup' => $periodeAktif->tahun,
+    //     ]);
+
+    //     app(\App\Services\StartNewYearService::class)
+    //         ->updateLabaTahunBerjalan($periodeAktif->tahun);
+    // }
 
 
     // Relasi: setiap detail milik satu journal entry

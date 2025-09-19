@@ -214,6 +214,10 @@
                     <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                 </a>
 
+                <a href="{{ route('export.journal_entry') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
+                </a>
+
                 <form action="{{ route('import.journal_entry') }}" method="POST" enctype="multipart/form-data"
                     class="space-y-2">
                     @csrf

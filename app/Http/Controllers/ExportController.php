@@ -8,6 +8,7 @@ use App\Exports\DepartemenExport;
 use App\Exports\EmployeeExport;
 use App\Exports\IntangibleAssetExport;
 use App\Exports\ItemsExport;
+use App\Exports\JournalEntryExport;
 use App\Exports\KlasifikasiAkunExport;
 use App\Exports\KomponenPenghasilanExport;
 use App\Exports\ProjectExport;
@@ -89,5 +90,9 @@ class ExportController extends Controller
     public function exportShiftKaryawan()
     {
         return Excel::download(new ShiftKaryawanExport, 'shift_karyawan.xlsx');
+    }
+    public function exportJournalEntry()
+    {
+        return Excel::download(new JournalEntryExport, 'journal_entry.xlsx');
     }
 }

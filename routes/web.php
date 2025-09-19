@@ -133,6 +133,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('journal_entry', 'JournalEntryController')->middleware('permission:journal_entry.access');
 
     Route::post('/import/journal_entry', [ImportController::class, 'importjournal_entry'])->name('import.journal_entry');
+    Route::get('/export/journal_entry', [ExportController::class, 'exportJournalEntry'])->name('export.journal_entry');
+
 
     Route::get('/search-account', [DepartemenAkunController::class, 'search']);
 

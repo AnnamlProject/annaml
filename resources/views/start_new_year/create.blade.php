@@ -37,10 +37,11 @@
                             <input type="date" name="akhir_periode"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline:ring-2 focus:ring-blue-500"
                                 placeholder="Masukkan Akhir Periode .....">
+                            <input type="hidden" name="status" value="Opening">
                         </div>
 
                         <!-- Jenis -->
-                        <div class="mb-4">
+                        {{-- <div class="mb-4">
                             <label for="status" class="block text-gray-700 font-medium mb-1">Status</label>
                             <select name="status" id="status" required
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -51,7 +52,7 @@
                             @error('status')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
-                        </div>
+                        </div> --}}
                     </div>
 
                     <!-- Submit -->
@@ -60,6 +61,10 @@
                             class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
                             Simpan
                         </button>
+                        <a href="{{ route('start_new_year.index') }}"
+                            class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
+                            Cancel
+                        </a>
                     </div>
                 </form>
             </div>

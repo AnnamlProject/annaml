@@ -47,8 +47,12 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-2 py-1 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
                                 <td class="px-2 py-1 text-center">{{ $item->tahun }}</td>
-                                <td class="px-2 py-1 text-center">{{ $item->awal_periode }}</td>
-                                <td class="px-2 py-1 text-center">{{ $item->akhir_periode }}</td>
+                                <td class="px-2 py-1 text-center">
+                                    {{ $item->awal_periode ? \Carbon\Carbon::parse($item->awal_periode)->format('d M Y') : '-' }}
+                                </td>
+                                <td class="px-2 py-1 text-center">
+                                    {{ $item->akhir_periode ? \Carbon\Carbon::parse($item->akhir_periode)->format('d M Y') : '-' }}
+                                </td>
                                 <td class="px-2 py-1 text-center">{{ $item->status }}</td>
                                 <td class="px-2 py-1 text-right">
                                     <div class="flex justify-end space-x-3">

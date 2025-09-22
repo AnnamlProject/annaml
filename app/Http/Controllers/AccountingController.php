@@ -24,15 +24,15 @@ class AccountingController extends Controller
         }
 
         $tahun = $periodeAktif->tahun;
-        $tanggalPenutupan = $periodeAktif->akhir_periode; // gunakan tanggal akhir periode sebagai tanggal jurnal penutupan
+
+        // Closing dibuat H+1 (awal tahun baru)
+        $tanggalClosing = date('Y-m-d', strtotime($periodeAktif->akhir_periode . ' +1 day'));
 
         // Ambil data jurnal detail tahun berjalan
-        $query = DB::table('journal_entry_details as d')
+        $entries = DB::table('journal_entry_details as d')
             ->join('journal_entries as j', 'd.journal_entry_id', '=', 'j.id')
-            ->whereYear('j.tanggal', $tahun);
-
-        $entries = $query
             ->join('chart_of_accounts as coa', 'd.kode_akun', '=', 'coa.kode_akun')
+            ->whereYear('j.tanggal', $tahun)
             ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban']) // hanya akun nominal
             ->select(
                 'd.kode_akun',
@@ -52,8 +52,8 @@ class AccountingController extends Controller
             return $item;
         });
 
-        // Hitung selisih (Laba / Rugi)
-        $totalDebit = $entries->sum('total_debit');
+        // Hitung laba/rugi
+        $totalDebit  = $entries->sum('total_debit');
         $totalCredit = $entries->sum('total_credit');
 
         if ($totalDebit > $totalCredit) {
@@ -67,7 +67,7 @@ class AccountingController extends Controller
             $creditLaba = 0;
         }
 
-        // Ambil akun Laba Tahun Berjalan & Laba Ditahan
+        // Ambil akun
         $akunLabaTahunBerjalan = DB::table('chart_of_accounts')->where('level_akun', 'X')->first();
         $akunLabaDitahan = DB::table('chart_of_accounts')
             ->where('tipe_akun', 'Ekuitas')
@@ -80,58 +80,56 @@ class AccountingController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Jurnal penutup pendapatan & beban ke Laba Tahun Berjalan
+            // 1. Jurnal penutup
             $closingJournalId = DB::table('journal_entries')->insertGetId([
-                'source' => 'start_new_year',
-                'tanggal' => $tanggalPenutupan,
-                'comment' => 'Start New Year - Penutupan Buku',
+                'source'     => 'START NEW YEAR',
+                'tanggal'    => $tanggalClosing,
+                'comment'    => 'Start New Year - Penutupan Buku',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
             foreach ($entries as $item) {
                 DB::table('journal_entry_details')->insert([
-                    'journal_entry_id' => $closingJournalId,
-                    'departemen_akun_id' => null,
-                    'kode_akun' => $item->kode_akun,
-                    'debits' => $item->total_debit,
-                    'credits' => $item->total_credit,
-                    'comment' => 'Penutupan akun ' . $item->nama_akun,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'journal_entry_id'    => $closingJournalId,
+                    'departemen_akun_id'  => null,
+                    'kode_akun'           => $item->kode_akun,
+                    'debits'              => $item->total_debit,
+                    'credits'             => $item->total_credit,
+                    'comment'             => 'Penutupan akun ' . $item->nama_akun,
+                    'created_at'          => now(),
+                    'updated_at'          => now(),
                 ]);
             }
 
             if ($debitLaba > 0) {
                 DB::table('journal_entry_details')->insert([
                     'journal_entry_id' => $closingJournalId,
-                    'departemen_akun_id' => null,
-                    'kode_akun' => $akunLabaTahunBerjalan->kode_akun,
-                    'debits' => $debitLaba,
-                    'credits' => 0,
-                    'comment' => 'Laba tahun berjalan (debit)',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'kode_akun'        => $akunLabaTahunBerjalan->kode_akun,
+                    'debits'           => $debitLaba,
+                    'credits'          => 0,
+                    'comment'          => 'Laba tahun berjalan (debit)',
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
                 ]);
             }
             if ($creditLaba > 0) {
                 DB::table('journal_entry_details')->insert([
                     'journal_entry_id' => $closingJournalId,
-                    'departemen_akun_id' => null,
-                    'kode_akun' => $akunLabaTahunBerjalan->kode_akun,
-                    'debits' => 0,
-                    'credits' => $creditLaba,
-                    'comment' => 'Laba tahun berjalan (kredit)',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'kode_akun'        => $akunLabaTahunBerjalan->kode_akun,
+                    'debits'           => 0,
+                    'credits'          => $creditLaba,
+                    'comment'          => 'Laba tahun berjalan (kredit)',
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
                 ]);
             }
 
-            // 2. Pindahkan Laba Tahun Berjalan ke Laba Ditahan
+            // 2. Jurnal pemindahan laba ke laba ditahan
             $transferJournalId = DB::table('journal_entries')->insertGetId([
-                'source' => 'start_new_year',
-                'tanggal' => $tanggalPenutupan,
-                'comment' => 'Pemindahan Laba Tahun Berjalan ke Laba Ditahan',
+                'source'     => 'START NEW YEAR',
+                'tanggal'    => $tanggalClosing,
+                'comment'    => 'Pemindahan Laba Tahun Berjalan ke Laba Ditahan',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -141,21 +139,21 @@ class AccountingController extends Controller
                 DB::table('journal_entry_details')->insert([
                     [
                         'journal_entry_id' => $transferJournalId,
-                        'kode_akun' => $akunLabaTahunBerjalan->kode_akun,
-                        'debits' => $creditLaba,
-                        'credits' => 0,
-                        'comment' => 'Pemindahan laba tahun berjalan',
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'kode_akun'        => $akunLabaTahunBerjalan->kode_akun,
+                        'debits'           => $creditLaba,
+                        'credits'          => 0,
+                        'comment'          => 'Pemindahan laba tahun berjalan',
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
                     ],
                     [
                         'journal_entry_id' => $transferJournalId,
-                        'kode_akun' => $akunLabaDitahan->kode_akun,
-                        'debits' => 0,
-                        'credits' => $creditLaba,
-                        'comment' => 'Pemindahan ke laba ditahan',
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'kode_akun'        => $akunLabaDitahan->kode_akun,
+                        'debits'           => 0,
+                        'credits'          => $creditLaba,
+                        'comment'          => 'Pemindahan ke laba ditahan',
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
                     ]
                 ]);
             } elseif ($debitLaba > 0) {
@@ -163,21 +161,21 @@ class AccountingController extends Controller
                 DB::table('journal_entry_details')->insert([
                     [
                         'journal_entry_id' => $transferJournalId,
-                        'kode_akun' => $akunLabaDitahan->kode_akun,
-                        'debits' => $debitLaba,
-                        'credits' => 0,
-                        'comment' => 'Pemindahan rugi tahun berjalan',
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'kode_akun'        => $akunLabaDitahan->kode_akun,
+                        'debits'           => $debitLaba,
+                        'credits'          => 0,
+                        'comment'          => 'Pemindahan rugi tahun berjalan',
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
                     ],
                     [
                         'journal_entry_id' => $transferJournalId,
-                        'kode_akun' => $akunLabaTahunBerjalan->kode_akun,
-                        'debits' => 0,
-                        'credits' => $debitLaba,
-                        'comment' => 'Pemindahan rugi tahun berjalan',
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'kode_akun'        => $akunLabaTahunBerjalan->kode_akun,
+                        'debits'           => 0,
+                        'credits'          => $debitLaba,
+                        'comment'          => 'Pemindahan rugi tahun berjalan',
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
                     ]
                 ]);
             }
@@ -187,18 +185,17 @@ class AccountingController extends Controller
                 ->where('id', $periodeAktif->id)
                 ->update(['status' => 'Closing']);
 
-            // 4. Buat periode baru
-            // Awal periode baru adalah hari setelah akhir periode lama
-            $awalPeriodeBaru = date('Y-m-d', strtotime($tanggalPenutupan . ' +1 day'));
-            $akhirPeriodeBaru = date('Y-m-d', strtotime($awalPeriodeBaru . ' +1 year -1 day')); // 1 tahun -1 hari
+            // 4. Buat periode baru (awal = tanggalClosing)
+            $awalPeriodeBaru  = $tanggalClosing;
+            $akhirPeriodeBaru = date('Y-m-d', strtotime($awalPeriodeBaru . ' +1 year -1 day'));
 
             DB::table('start_new_years')->insert([
-                'tahun' => $tahun + 1,
-                'awal_periode' => $awalPeriodeBaru,
+                'tahun'         => $tahun + 1,
+                'awal_periode'  => $awalPeriodeBaru,
                 'akhir_periode' => $akhirPeriodeBaru,
-                'status' => 'Opening',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'status'        => 'Opening',
+                'created_at'    => now(),
+                'updated_at'    => now(),
             ]);
 
             DB::commit();

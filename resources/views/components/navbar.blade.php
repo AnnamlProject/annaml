@@ -114,8 +114,8 @@
                                         @endcan
                                         @can('chart_of_account.access')
                                             <a href="{{ route('chartOfAccount.index') }}" @click="open = false"
-                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Chart
-                                                of Accounts</a>
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                Accounts</a>
                                         @endcan
                                         @can('departement.access')
                                             @if ($currentDept === 'Accounting')
@@ -1523,8 +1523,8 @@
                                         @endcan
                                         @can('chart_of_account.access')
                                             <a href="{{ route('chartOfAccount.index') }}" @click="open = false"
-                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Chart
-                                                of Accounts</a>
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                Accounts</a>
                                         @endcan
                                         @can('departement.access')
                                             @if ($currentDept === 'Accounting')

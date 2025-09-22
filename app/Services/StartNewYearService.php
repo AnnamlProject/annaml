@@ -21,13 +21,13 @@ class StartNewYearService
 
             // 2. Cari jurnal Start New Year
             $jurnal = JournalEntry::where('tanggal', "{$tahunBaru}-01-01")
-                ->where('source', 'start_new_year')
+                ->where('source', 'START NEW YEAR')
                 ->first();
 
             // 3. Kalau belum ada, buat
             if (!$jurnal) {
                 $jurnal = JournalEntry::create([
-                    'source'    => 'start_new_year',
+                    'source'    => 'START NEW YEAR',
                     'tanggal'   => "{$tahunBaru}-01-01",
                     'comment'   => 'Start New Year - Laba Tahun Berjalan',
                 ]);

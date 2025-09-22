@@ -120,6 +120,9 @@
 
                                         <td class="border px-2 py-1 text-center">
                                             <button type="button"
+                                                class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
+
+                                            <button type="button"
                                                 class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
                                         </td>
                                     </tr>
@@ -141,12 +144,7 @@
                     </div>
 
                     {{-- Tombol Add Row --}}
-                    <div class="mb-6">
-                        <button type="button" id="add-row"
-                            class="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                            + Tambah Row
-                        </button>
-                    </div>
+
 
                     {{-- Actions --}}
                     <div class="mt-6 flex justify-end gap-4">
@@ -194,21 +192,21 @@
 
         function generateRow() {
             return `
-    <tr class="item-row">
-        <td class="border px-2 py-1">
-            <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
-            <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
-        </td>
-        <td class="border px-2 py-1">
-            <input type="text" name="items[][debits]" class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
-        </td>
-        <td class="border px-2 py-1">
-            <input type="text" name="items[][credits]" class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
-        </td>
-        <td class="border px-2 py-1">
-            <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
-        </td>
-                  <td class="border px-2 py-1">
+        <tr class="item-row">
+            <td class="border px-2 py-1">
+                <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
+                <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
+            </td>
+            <td class="border px-2 py-1">
+                <input type="text" name="items[][debits]" class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+            </td>
+            <td class="border px-2 py-1">
+                <input type="text" name="items[][credits]" class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+            </td>
+            <td class="border px-2 py-1">
+                <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
+            </td>
+            <td class="border px-2 py-1">
                 <select name="items[][project_id]" class="w-full border rounded px-2 py-1">
                     <option value="">-- Pilih Specpose --</option>
                     @foreach ($projects as $prj)
@@ -216,14 +214,15 @@
                     @endforeach
                 </select>
             </td>
-             <td class="border px-2 py-1">
-                <input type="hidden" name="items[${index}][pajak]" value="0">
-                <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
+            <td class="border px-2 py-1">
+                <input type="hidden" name="items[][pajak]" value="0">
+                <input type="checkbox" name="items[][pajak]" class="w-full border rounded px-2 py-1" value="1">
             </td>
-        <td class="border px-2 py-1 text-center">
-            <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
-        </td>
-    </tr>`;
+            <td class="border px-2 py-1 text-center">
+                <button type="button" class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
+                <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
+            </td>
+        </tr>`;
         }
 
         function reindexRows() {
@@ -251,14 +250,12 @@
                     processResults: data => {
                         let results = [];
                         data.forEach(item => {
-                            // akun tanpa departemen
                             results.push({
                                 id: item.kode_akun,
                                 text: `${item.kode_akun} - ${item.nama_akun}`,
                                 kode_akun: item.kode_akun,
                                 departemen_akun_id: null
                             });
-                            // akun dengan departemen
                             if (item.daftar_departemen) {
                                 item.daftar_departemen.forEach(dept => {
                                     results.push({
@@ -286,6 +283,7 @@
                 attachSelect2($(this));
             });
 
+            // Tambah row ke paling bawah (tetap ada)
             $('#add-row').click(function() {
                 $('#item-table-body').append(generateRow());
                 reindexRows();
@@ -293,18 +291,31 @@
                 attachSelect2($('#item-table-body tr:last .item-select'));
             });
 
+            // Tambah row di bawah baris yang ditekan "+"
+            $(document).on('click', '.add-row', function() {
+                const currentRow = $(this).closest('tr');
+                const newRow = $(generateRow());
+                currentRow.after(newRow);
+                reindexRows();
+                updateTotals();
+                attachSelect2(newRow.find('.item-select'));
+            });
+
+            // Hapus row
             $(document).on('click', '.remove-row', function() {
                 $(this).closest('tr').remove();
                 reindexRows();
                 updateTotals();
             });
 
+            // Format angka & update total
             $(document).on('input', '.money-input', function() {
                 const raw = this.value.replace(/[^0-9]/g, '');
                 this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
                 updateTotals();
             });
 
+            // Normalisasi input sebelum submit
             $('#journal-entry-form').on('submit', function() {
                 document.querySelectorAll('.money-input').forEach(input => {
                     const raw = input.value.replace(/\./g, '');

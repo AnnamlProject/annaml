@@ -71,21 +71,21 @@
                             <table class="min-w-full text-sm text-left text-gray-700" id="account-table">
                                 <thead class="bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th class="px-4 py-2">
+                                        <th class="px-2 py-1">
                                             <input type="checkbox" id="select-all" class="form-checkbox">
                                         </th>
-                                        <th class="px-4 py-2">Account</th>
+                                        <th class="px-2 py-1">Account</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($account as $akun)
-                                        <tr class="border-b hover:bg-gray-50" data-level="{{ $akun->level_akun }}"
+                                        <tr class="hover:bg-gray-50" data-level="{{ $akun->level_akun }}"
                                             data-tipe="{{ strtolower($akun->tipe_akun) }}">
-                                            <td class="px-4 py-2">
+                                            <td class="px-2 py-1">
                                                 <input type="checkbox" class="account-checkbox form-checkbox"
                                                     value="{{ $akun->kode_akun }} - {{ $akun->nama_akun }}">
                                             </td>
-                                            <td class="px-4 py-2">
+                                            <td class="px-2 py-1">
                                                 {{ $akun->kode_akun }} - {{ $akun->nama_akun }}
                                                 {{-- <span class="text-xs text-gray-400">({{ $akun->level_akun }},
                                                     {{ $akun->tipe_akun }})</span> --}}
@@ -135,7 +135,7 @@
                     <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                         <button type="submit"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md shadow hover:bg-blue-700">
-                            <i class="fas fa-filter mr-2"></i> Filter
+                            <i class="fas fa-filter mr-2"></i> Ok
                         </button>
 
                         <a href=""

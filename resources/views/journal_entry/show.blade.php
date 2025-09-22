@@ -91,7 +91,7 @@
 
         <!-- Tombol Kembali -->
         <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <a href="{{ route('journal_entry.view_journal_entry') }}"
+            <a href="{{ route('journal_entry.index') }}"
                 class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>
@@ -102,17 +102,17 @@
                     <i class="fas fa-edit mr-2"></i> Edit
                 </a>
 
-                <form id="delete-form-{{ $journal->id }}" action="{{ route('journal_entry.destroy', $journal->id) }}"
+                {{-- <form id="delete-form-{{ $journal->id }}" action="{{ route('journal_entry.destroy', $journal->id) }}"
                     method="POST" style="display: none;">
                     @csrf
                     @method('DELETE')
-                </form>
+                </form> --}}
 
-                <button type="button" onclick="confirmDelete({{ $journal->id }})"
+                {{-- <button type="button" onclick="confirmDelete({{ $journal->id }})"
                     class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
                     title="Delete">
                     <i class="fas fa-trash"></i>
-                </button>
+                </button> --}}
             </div>
         </div>
     </div>

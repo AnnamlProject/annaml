@@ -23,7 +23,7 @@ class BukuBesarExport implements FromView
     {
         return view('buku_besar.export_excel', [
             'rows'             => $this->rows,
-            'startingBalances' => $this->saldoAwalPerAkun,
+            'saldoAwalPerAkun' => $this->saldoAwalPerAkun,
             'groupedByAccount' => $this->groupedByAccount,
             'totalByType'      => $this->totalByType,
             'start_date'       => $this->start_date,

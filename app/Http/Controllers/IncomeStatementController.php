@@ -30,39 +30,38 @@ class IncomeStatementController extends Controller
         $tanggalAkhir = $request->end_date;
         $siteTitle    = Setting::where('key', 'site_title')->value('value');
 
-        // 🔹 Query mutasi per akun langsung pakai SQL group by
-        $rows = DB::table('journal_entry_details as jed')
-            ->leftJoin('journal_entries as je', 'je.id', '=', 'jed.journal_entry_id')
-            ->leftJoin('chart_of_accounts as coa', 'coa.kode_akun', '=', 'jed.kode_akun')
+        // 🔹 Ambil mutasi per akun
+        $entries = DB::table('journal_entry_details as jed')
+            ->join('journal_entries as je', 'je.id', '=', 'jed.journal_entry_id')
             ->select(
                 'jed.kode_akun',
-                'coa.nama_akun',
-                'coa.tipe_akun',
-                'coa.level_akun',
                 DB::raw('SUM(jed.debits) as total_debit'),
                 DB::raw('SUM(jed.credits) as total_kredit')
             )
-            ->whereIn('coa.tipe_akun', ['Pendapatan', 'Beban'])
             ->whereBetween('je.tanggal', [$tanggalAwal, $tanggalAkhir])
-            ->groupBy('jed.kode_akun', 'coa.nama_akun', 'coa.tipe_akun', 'coa.level_akun')
-            ->orderBy('jed.kode_akun')
+            ->groupBy('jed.kode_akun')
+            ->get()
+            ->keyBy('kode_akun');
+
+        // 🔹 Ambil master akun (supaya rapi & konsisten)
+        $accounts = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
+            ->orderBy('kode_akun')
             ->get();
 
-        // 🔹 Kelompokkan ke dalam grup (GROUP ACCOUNT / SUB ACCOUNT)
         $groups = [];
         $currentGroup = null;
 
-        foreach ($rows as $row) {
-            // Grup baru kalau level akun = GROUP ACCOUNT
-            if ($row->level_akun === 'GROUP ACCOUNT') {
+        foreach ($accounts as $account) {
+            // Mulai grup baru kalau level GROUP ACCOUNT
+            if ($account->level_akun === 'GROUP ACCOUNT') {
                 if ($currentGroup && !empty($currentGroup['akun'])) {
                     $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
                     $groups[] = $currentGroup;
                 }
 
                 $currentGroup = [
-                    'group'       => $row->nama_akun,
-                    'tipe'        => strtolower($row->tipe_akun),
+                    'group'       => $account->nama_akun,
+                    'tipe'        => strtolower($account->tipe_akun),
                     'akun'        => [],
                     'saldo_group' => 0,
                 ];
@@ -70,45 +69,46 @@ class IncomeStatementController extends Controller
             }
 
             // Skip HEADER
-            if ($row->level_akun === 'HEADER') {
+            if ($account->level_akun === 'HEADER') {
                 continue;
             }
 
             if (!$currentGroup) {
                 $currentGroup = [
                     'group'       => '',
-                    'tipe'        => strtolower($row->tipe_akun),
+                    'tipe'        => strtolower($account->tipe_akun),
                     'akun'        => [],
                     'saldo_group' => 0,
                 ];
             }
 
-            // 🔹 Hitung saldo mutasi (bukan saldo akhir)
-            $saldo = 0;
-            if (strtolower($row->tipe_akun) === 'pendapatan') {
-                $saldo = $row->total_kredit; // tampilkan total kredit
-            } else {
-                $saldo = $row->total_debit;  // tampilkan total debit
-            }
+            // 🔹 Ambil saldo dari hasil mutasi
+            $entry = $entries->get($account->kode_akun);
+            $totalDebit  = $entry->total_debit ?? 0;
+            $totalKredit = $entry->total_kredit ?? 0;
+
+            $saldo = strtolower($account->tipe_akun) === 'pendapatan'
+                ? $totalKredit
+                : $totalDebit;
 
             if ($saldo != 0) {
                 $currentGroup['akun'][] = [
-                    'kode_akun'  => $row->kode_akun,
-                    'nama_akun'  => $row->nama_akun,
-                    'tipe_akun'  => $row->tipe_akun,
-                    'level_akun' => $row->level_akun,
+                    'kode_akun'  => $account->kode_akun,
+                    'nama_akun'  => $account->nama_akun,
+                    'tipe_akun'  => $account->tipe_akun,
+                    'level_akun' => $account->level_akun,
                     'saldo'      => $saldo,
                 ];
             }
         }
 
-        // Push grup terakhir
+        // Tutup grup terakhir
         if ($currentGroup && !empty($currentGroup['akun'])) {
             $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
             $groups[] = $currentGroup;
         }
 
-        // 🔹 Pisahkan Pendapatan vs Beban
+        // 🔹 Pisahkan pendapatan vs beban
         $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'pendapatan'));
         $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'beban'));
 
@@ -121,7 +121,7 @@ class IncomeStatementController extends Controller
         $akunPajak  = ChartOfAccount::where('is_income_tax', 1)->first();
         $bebanPajak = 0;
         if ($akunPajak) {
-            $entryPajak = $rows->firstWhere('kode_akun', $akunPajak->kode_akun);
+            $entryPajak = $entries->get($akunPajak->kode_akun);
             if ($entryPajak) {
                 $bebanPajak = ($entryPajak->total_debit ?? 0) - ($entryPajak->total_kredit ?? 0);
             }
@@ -143,6 +143,7 @@ class IncomeStatementController extends Controller
         ]);
     }
 
+
     public function incomeStatementFilterDepartement()
     {
         $departemens = Departement::all();
@@ -152,20 +153,22 @@ class IncomeStatementController extends Controller
     }
     public function incomeStatementDepartement(Request $request)
     {
-        // Ambil semua departemen induk
-        $departemens = Departement::select('id', 'deskripsi')->get();
+        // Semua departemen untuk header
+        $allDepartemens = Departement::select('id', 'kode', 'deskripsi')->get();
 
         $tanggalAwal  = $request->start_date;
         $tanggalAkhir = $request->end_date;
         $selectedAccounts = $request->selected_accounts;
 
         // Ambil departemen terpilih dari request (kalau ada)
-        $selectedDepartemens = $request->selected_departemens ? explode(',', $request->selected_departemens) : [];
+        $selectedDepartemens = $request->selected_departemens
+            ? explode(',', $request->selected_departemens)
+            : [];
 
-        if (!empty($selectedDepartemens)) {
-            // Filter hanya departemen yang dipilih
-            $departemens = $departemens->whereIn('deskripsi', $selectedDepartemens);
-        }
+        // Untuk body laporan → kalau ada yang dipilih pakai filter, kalau kosong pakai semua
+        $filteredDepartemens = !empty($selectedDepartemens)
+            ? Departement::whereIn('id', $selectedDepartemens)->get()
+            : $allDepartemens;
 
         // Proses akun terpilih
         $kodeAkunTerpilih = [];
@@ -176,7 +179,6 @@ class IncomeStatementController extends Controller
             }, $kodeAkunTerpilih);
         }
 
-        // Ambil akun-akun pendapatan dan beban
         $accountsQuery = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
             ->orderBy('kode_akun');
 
@@ -191,7 +193,6 @@ class IncomeStatementController extends Controller
         $totalBeban = 0;
 
         foreach ($accounts as $account) {
-            // Ambil semua jurnal detail untuk akun & periode ini
             $entries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
                 ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
                     $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
@@ -202,18 +203,16 @@ class IncomeStatementController extends Controller
             $totalDebit  = $entries->total_debit ?? 0;
             $totalKredit = $entries->total_kredit ?? 0;
 
-            // 🔹 Hitung saldo mutasi (bruto)
             if (strtolower($account->tipe_akun) === 'pendapatan') {
-                $saldoUtama = $totalKredit;   // ambil total kredit (pendapatan)
+                $saldoUtama = $totalKredit;
                 $totalPendapatan += $saldoUtama;
             } else {
-                $saldoUtama = $totalDebit;    // ambil total debit (beban)
+                $saldoUtama = $totalDebit;
                 $totalBeban += $saldoUtama;
             }
 
-            // 🔹 Hitung per departemen induk
             $perDepartemen = [];
-            foreach ($departemens as $departemen) {
+            foreach ($filteredDepartemens as $departemen) {
                 $departemenEntries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
                     ->whereHas('departemenAkun', function ($q) use ($departemen) {
                         $q->where('departemen_id', $departemen->id);
@@ -230,7 +229,7 @@ class IncomeStatementController extends Controller
                     $nilai = $departemenEntries->total_debit ?? 0;
                 }
 
-                $perDepartemen[$departemen->deskripsi] = $nilai;
+                $perDepartemen[$departemen->id] = $nilai;
             }
 
             if ($saldoUtama != 0) {
@@ -247,15 +246,18 @@ class IncomeStatementController extends Controller
         $labaBersih = $totalPendapatan - $totalBeban;
 
         return view('income_statement.income_statement_departement', [
-            'incomeStatement' => $incomeStatement,
-            'totalPendapatan' => $totalPendapatan,
-            'totalBeban'      => $totalBeban,
-            'labaBersih'      => $labaBersih,
-            'start_date'      => $tanggalAwal,
-            'end_date'        => $tanggalAkhir,
-            'departemens'     => $departemens->pluck('deskripsi'),
+            'incomeStatement'    => $incomeStatement,
+            'totalPendapatan'    => $totalPendapatan,
+            'totalBeban'         => $totalBeban,
+            'labaBersih'         => $labaBersih,
+            'start_date'         => $tanggalAwal,
+            'end_date'           => $tanggalAkhir,
+            'allDepartemens'     => $allDepartemens,     // untuk header (selalu semua)
+            'filteredDepartemens' => $filteredDepartemens // untuk body (tergantung pilihan)
         ]);
     }
+
+
 
     public function export(Request $request)
     {
@@ -301,6 +303,7 @@ class IncomeStatementController extends Controller
         $totalBeban = 0;
 
         foreach ($accounts as $account) {
+            // Ambil semua transaksi akun ini di periode
             $entries = JournalEntryDetail::where('kode_akun', $account->kode_akun)
                 ->whereHas('journalEntry', function ($q) use ($tanggalAwal, $tanggalAkhir) {
                     $q->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
@@ -310,13 +313,16 @@ class IncomeStatementController extends Controller
             $totalDebit  = $entries->sum('debits');
             $totalKredit = $entries->sum('credits');
 
-            $saldoUtama = 0;
+            // 🔹 Hitung saldo sesuai tipe akun
             if (strtolower($account->tipe_akun) === 'pendapatan') {
-                $saldoUtama = $account->total_kredit; // tampilkan total kredit
+                $saldoUtama = $totalKredit;   // pendapatan pakai kredit
+                $totalPendapatan += $saldoUtama;
             } else {
-                $saldoUtama = $account->total_debit;  // tampilkan total debit
+                $saldoUtama = $totalDebit;    // beban pakai debit
+                $totalBeban += $saldoUtama;
             }
 
+            // Hanya tampilkan akun yang punya saldo
             if ($saldoUtama != 0) {
                 $incomeStatement[] = [
                     'kode_akun' => $account->kode_akun,
@@ -330,12 +336,13 @@ class IncomeStatementController extends Controller
         $labaBersih = $totalPendapatan - $totalBeban;
 
         return [
-            'akun'           => $incomeStatement,
+            'akun'            => $incomeStatement,
             'totalPendapatan' => $totalPendapatan,
-            'totalBeban'     => $totalBeban,
-            'labaBersih'     => $labaBersih,
+            'totalBeban'      => $totalBeban,
+            'labaBersih'      => $labaBersih,
         ];
     }
+
     public function exportDepartemen(Request $request)
     {
         $format      = $request->get('format', 'excel');

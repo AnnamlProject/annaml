@@ -18,7 +18,10 @@ class JournalEntryExport implements FromCollection, WithHeadings
             'details.chartOfAccount',
             'details.departemenAkun.departemen',
             'details.project'
-        ])->get();
+        ])
+            ->orderBy('tanggal', 'asc') // bisa 'desc' kalau mau terbaru duluan
+            ->get();
+
 
         // Flatten agar setiap detail jadi 1 row
         return $data->flatMap(function ($entry) {
@@ -52,7 +55,7 @@ class JournalEntryExport implements FromCollection, WithHeadings
             'Debits',
             'Credits',
             'Comment Line',
-            'project'
+            'Specpose'
 
         ];
     }

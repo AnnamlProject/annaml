@@ -96,7 +96,7 @@
     <table>
         <thead>
             <tr>
-                <th colspan="2" class="section-title">Pendapatan</th>
+                <th colspan="2" class="section-title">PENDAPATAN</th>
             </tr>
         </thead>
         <tbody>
@@ -112,7 +112,7 @@
                 </tr>
             @endforelse
             <tr class="total-row">
-                <td>Total Pendapatan</td>
+                <td>TOTAL PENDAPATAN</td>
                 <td class="text-right">{{ number_format($totalPendapatan, 2, ',', '.') }}</td>
             </tr>
         </tbody>
@@ -124,7 +124,7 @@
     <table>
         <thead>
             <tr>
-                <th colspan="2" class="section-title">Beban</th>
+                <th colspan="2" class="section-title">BEBAN</th>
             </tr>
         </thead>
         <tbody>
@@ -140,7 +140,7 @@
                 </tr>
             @endforelse
             <tr class="total-row">
-                <td>Total Beban</td>
+                <td>TOTAL BEBAN</td>
                 <td class="text-right">{{ number_format($totalBeban, 2, ',', '.') }}</td>
             </tr>
         </tbody>
@@ -152,7 +152,7 @@
     <table>
         <tbody>
             <tr class="final">
-                <td>Laba Bersih</td>
+                <td>LABA SEBELUM PAJAK PENGHASILAN</td>
                 <td class="text-right">{{ number_format($labaBersih, 2, ',', '.') }}</td>
             </tr>
         </tbody>

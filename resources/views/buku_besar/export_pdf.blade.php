@@ -58,8 +58,8 @@
                     <td>{{ \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') }}</td>
                     <td>{{ $row->kode_akun }}</td>
                     <td>{{ $row->chartOfAccount->nama_akun ?? '-' }}</td>
-                    <td style="text-align: right;">{{ number_format($row->debits, 0, ',', '.') }}</td>
-                    <td style="text-align: right;">{{ number_format($row->credits, 0, ',', '.') }}</td>
+                    <td style="text-align: right;">{{ number_format($row->debits, 2, ',', '.') }}</td>
+                    <td style="text-align: right;">{{ number_format($row->credits, 2, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>

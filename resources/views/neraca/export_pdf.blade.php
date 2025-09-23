@@ -65,12 +65,12 @@
                     @foreach ($neraca['Aset'] ?? [] as $row)
                         <tr>
                             <td>{{ $row['nama_akun'] }}</td>
-                            <td class="text-right">{{ number_format($row['saldo'], 0, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($row['saldo'], 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                     <tr class="bold">
                         <td>Total Aset</td>
-                        <td class="text-right">{{ number_format($grandTotalAset, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($grandTotalAset, 2, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>
@@ -82,12 +82,12 @@
                     @foreach ($neraca['Kewajiban'] ?? [] as $row)
                         <tr>
                             <td>{{ $row['nama_akun'] }}</td>
-                            <td class="text-right">{{ number_format($row['saldo'], 0, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($row['saldo'], 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                     <tr class="bold">
                         <td>Total Kewajiban</td>
-                        <td class="text-right">{{ number_format($grandTotalKewajiban, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($grandTotalKewajiban, 2, ',', '.') }}</td>
                     </tr>
                 </table>
 
@@ -96,12 +96,12 @@
                     @foreach ($neraca['Ekuitas'] ?? [] as $row)
                         <tr>
                             <td>{{ $row['nama_akun'] }}</td>
-                            <td class="text-right">{{ number_format($row['saldo'], 0, ',', '.') }}</td>
+                            <td class="text-right">{{ number_format($row['saldo'], 2, ',', '.') }}</td>
                         </tr>
                     @endforeach
                     <tr class="bold">
                         <td>Total Ekuitas</td>
-                        <td class="text-right">{{ number_format($grandTotalEkuitas, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($grandTotalEkuitas, 2, ',', '.') }}</td>
                     </tr>
                 </table>
             </td>
@@ -112,12 +112,12 @@
     <table style="width:100%;">
         <tr>
             <td class="w-50 bold">Total Aset</td>
-            <td class="w-50 bold text-right">{{ number_format($grandTotalAset, 0, ',', '.') }}</td>
+            <td class="w-50 bold text-right">{{ number_format($grandTotalAset, 2, ',', '.') }}</td>
         </tr>
         <tr>
             <td class="w-50 bold">Total Kewajiban + Ekuitas</td>
             <td class="w-50 bold text-right">
-                {{ number_format($grandTotalKewajiban + $grandTotalEkuitas, 0, ',', '.') }}</td>
+                {{ number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.') }}</td>
         </tr>
     </table>
 </body>

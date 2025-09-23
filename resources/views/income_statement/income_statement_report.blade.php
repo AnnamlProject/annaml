@@ -62,10 +62,10 @@
                 </div>
             </div>
         </div>
-        <h1 class="text-xl font-bold mb-2">
+        <h1 class="text-2xl font-bold mb-2">
             {{ $siteTitle }}
         </h1>
-        <h3 class="text-xl font-bold mb-4">LAPORAN LABA RUGI</h3>
+        <h3 class="text-2xl font-bold mb-4">LAPORAN LABA RUGI</h3>
         <p class="text-gray-600 mb-6">
             Periode: {{ \Carbon\Carbon::parse($tanggalAwal)->format('d M Y') }} -
             {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
@@ -75,11 +75,11 @@
          Bagian PENDAPATAN
     ======================== --}}
         @if (!empty($groupsPendapatan))
-            <h2 class="text-xl font-semibold text-gray-900 mb-3">PENDAPATAN</h2>
+            <h2 class="text-sm font-semibold text-gray-900 mb-3">PENDAPATAN</h2>
             @foreach ($groupsPendapatan as $group)
                 <div class="mb-4">
-                    <h3 class="text-base font-semibold text-gray-800 mb-1">{{ $group['group'] }}</h3>
-                    <table class="w-full text-xs">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $group['group'] }}</h3>
+                    <table class="w-full text-sm">
                         <tbody>
                             @foreach ($group['akun'] as $akun)
                                 <tr>
@@ -107,7 +107,7 @@
             @endforeach
 
             {{-- Total global Pendapatan (semua grup pendapatan) --}}
-            <div class="flex justify-between font-bold text-gray-900 text-base mt-2 mb-8 border-t pt-2">
+            <div class="flex justify-between font-bold text-gray-900 text-sm mt-2 mb-8 border-t pl-4 pr-4 py-2">
                 <span>TOTAL PENDAPATAN</span>
                 <span>{{ number_format($totalPendapatan, 2, ',', '.') }}</span>
             </div>
@@ -117,17 +117,19 @@
          Bagian BEBAN
     ==================== --}}
         @if (!empty($groupsBeban))
-            <h2 class="text-xl font-semibold text-gray-900 mb-3">BEBAN</h2>
+            <h2 class="text-sm font-semibold text-gray-900 mb-3">BEBAN</h2>
             @foreach ($groupsBeban as $group)
                 <div class="mb-4">
-                    <h3 class="text-base font-semibold text-gray-800 mb-1">{{ $group['group'] }}</h3>
-                    <table class="w-full text-xs">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-1">{{ $group['group'] }}</h3>
+                    <table class="w-full text-sm">
                         <tbody>
                             @foreach ($group['akun'] as $akun)
                                 <tr>
                                     <td class="pl-4 pr-4 py-1 text-gray-700">
                                         <div class="flex justify-between">
-                                            <span>{{ $akun['kode_akun'] }} - {{ $akun['nama_akun'] }}</span>
+                                            <span><a
+                                                    href="{{ route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $akun['kode_akun']]) }}">{{ $akun['kode_akun'] }}
+                                                    - {{ $akun['nama_akun'] }}</a></span>
                                             <span>{{ number_format($akun['saldo'], 2, ',', '.') }}</span>
                                         </div>
                                     </td>
@@ -147,7 +149,7 @@
             @endforeach
 
             {{-- Total global Beban (semua grup beban) --}}
-            <div class="flex justify-between font-bold text-gray-900 text-base mt-2 mb-8 border-t pt-2">
+            <div class="flex justify-between font-bold text-gray-900 text-sm mt-2 mb-8 border-t pl-4 pr-4 py-2">
                 <span>TOTAL BEBAN</span>
                 <span>{{ number_format($totalBeban, 2, ',', '.') }}</span>
             </div>
@@ -157,15 +159,15 @@
          RINGKASAN AKHIR
     =========================== --}}
         <div class="mt-4 border-t pt-4">
-            <div class="flex justify-between font-bold text-gray-900 text-sm mt-2">
+            <div class="flex justify-between font-bold text-gray-900 text-sm mt-2 pl-4 pr-4 py-2">
                 <span>LABA SEBELUM PAJAK PENGHASILAN</span>
                 <span>{{ number_format($labaSebelumPajak, 2, ',', '.') }}</span>
             </div>
-            <div class="flex justify-between font-bold text-gray-900 text-sm mt-4">
+            <div class="flex justify-between font-bold text-gray-900 text-sm mt-4 pl-4 pr-4 py-2">
                 <span>BEBAN PAJAK PENGHASILAN</span>
                 <span>{{ number_format($bebanPajak, 2, ',', '.') }}</span>
             </div>
-            <div class="flex justify-between font-bold text-gray-900 text-sm mt-4">
+            <div class="flex justify-between font-bold text-gray-900 text-sm mt-4 pl-4 pr-4 py-2">
                 <span>LABA BERSIH SETELAH PAJAK PENGHASILAN</span>
                 <span>{{ number_format($labaSetelahPajak, 2, ',', '.') }}</span>
             </div>

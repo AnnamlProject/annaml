@@ -43,14 +43,28 @@
                         <div class="space-y-3 text-sm text-gray-700">
                             <form method="GET" action="{{ route('buku_besar.buku_besar_report') }}"
                                 class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="periode" class="block text-sm font-semibold text-gray-700 mb-1">Periode
+                                        Buku</label>
+                                    <select name="periode_buku" id="periode"
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">---Pilih---</option>
+                                        @foreach ($tahun_buku as $item)
+                                            <option value="{{ $item->id }}" data-tahun="{{ trim($item->tahun) }}"
+                                                {{ request('periode_buku') == $item->id ? 'selected' : '' }}>
+                                                {{ $item->tahun }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
                                 {{-- Tanggal Awal --}}
                                 <div>
                                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                         Awal</label>
                                     <input type="date" id="start_date" name="start_date"
-                                        value="{{ request('start_date') }}"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                                        value="{{ request('start_date', \Carbon\Carbon::parse($start_date)->format('Y-m-d')) }}"
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required>
                                 </div>
 
@@ -58,23 +72,21 @@
                                 <div>
                                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                         Akhir</label>
-                                    <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                                    <input type="date" id="end_date" name="end_date"
+                                        value="{{ request('end_date', \Carbon\Carbon::parse($end_date)->format('Y-m-d')) }}"
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required>
                                 </div>
 
                                 {{-- Select Account --}}
                                 <div class="sm:col-span-3">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
+                                    <input type="hidden" name="selected_accounts" id="selected_accounts"
+                                        value="{{ request('selected_accounts') }}">
 
-                                    {{-- Input hidden untuk kirim array akun terpilih --}}
-                                    <input type="hidden" name="selected_accounts" id="selected_accounts">
-
-                                    <!-- Search Input -->
                                     <input type="text" id="search-account" placeholder="Cari akun..."
                                         class="border p-2 rounded mb-3 w-full" />
 
-                                    <!-- Table Container -->
                                     <div class="border rounded shadow-sm max-h-60 overflow-y-auto">
                                         <table class="min-w-full text-sm text-left text-gray-700" id="account-table">
                                             <thead class="bg-gray-100 sticky top-0">
@@ -89,7 +101,6 @@
                                                 @php
                                                     $selectedAccounts = explode(',', request('selected_accounts', ''));
                                                 @endphp
-
                                                 @foreach ($accounts as $akun)
                                                     <tr class="hover:bg-gray-50" data-level="{{ $akun->level_akun }}"
                                                         data-tipe="{{ strtolower($akun->tipe_akun) }}">
@@ -118,14 +129,12 @@
                                                 {{ request('sort_by') == 'transaction_number' ? 'checked' : '' }}>
                                             <span class="ml-2 text-sm">Transaction Number</span>
                                         </label>
-
                                         <label class="inline-flex items-center">
                                             <input type="radio" name="sort_by" value="date"
                                                 class="text-blue-600 focus:ring-blue-500"
                                                 {{ request('sort_by') == 'date' ? 'checked' : '' }}>
                                             <span class="ml-2 text-sm">Date</span>
                                         </label>
-
                                     </div>
                                 </div>
 
@@ -153,7 +162,6 @@
                                         class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md shadow hover:bg-blue-700">
                                         <i class="fas fa-filter mr-2"></i> Ok
                                     </button>
-
                                     <a href=""
                                         class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 font-medium text-sm rounded-md hover:bg-gray-200">
                                         <i class="fas fa-undo mr-2"></i> Reset
@@ -185,7 +193,7 @@
                             $akunPertama = $akunRows->first();
                             $kodeAkun = $akunPertama->chartOfAccount->kode_akun ?? '-';
                             $namaAkun = $akunPertama->chartOfAccount->nama_akun ?? '-';
-                            $saldoBerjalan = $startingBalances[$kodeAkun] ?? 0;
+                            $saldoBerjalan = $saldoAwalPerAkun[$kodeAkun] ?? 0;
                             $tipeAkun = strtolower($akunPertama->chartOfAccount->tipe_akun ?? '');
                         @endphp
 
@@ -276,6 +284,51 @@
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const periodeSelect = document.getElementById('periode');
+            const tanggalInput = document.getElementById('start_date');
+            const tanggalAkhir = document.getElementById('end_date');
+
+            // helper untuk ganti tahun tapi pertahankan bulan/hari
+            function gantiTahun(dateStr, tahunBaru) {
+                if (!dateStr) return '';
+                const parts = dateStr.split('-'); // [YYYY, MM, DD]
+                return `${tahunBaru}-${parts[1]}-${parts[2]}`;
+            }
+
+            function setRangeFromOption(option) {
+                const tahun = option?.getAttribute('data-tahun')?.trim();
+                if (/^\d{4}$/.test(tahun)) {
+                    tanggalInput.min = `${tahun}-01-01`;
+                    tanggalInput.max = `${tahun}-12-31`;
+                    tanggalAkhir.min = `${tahun}-01-01`;
+                    tanggalAkhir.max = `${tahun}-12-31`;
+
+                    // Ganti tahun saja, bulan & tanggal tetap
+                    tanggalInput.value = gantiTahun(tanggalInput.value, tahun) || `${tahun}-01-01`;
+                    tanggalAkhir.value = gantiTahun(tanggalAkhir.value, tahun) || `${tahun}-12-31`;
+                } else {
+                    tanggalInput.min = tanggalInput.max = '';
+                    tanggalAkhir.min = tanggalAkhir.max = '';
+                    tanggalInput.value = '';
+                    tanggalAkhir.value = '';
+                }
+            }
+
+            // Saat select berubah
+            periodeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                setRangeFromOption(selectedOption);
+            });
+
+            // Saat pertama kali load
+            const selectedOption = periodeSelect.options[periodeSelect.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                setRangeFromOption(selectedOption);
+            }
+        });
+    </script>
     <script>
         document.getElementById('menu-button').addEventListener('click', function() {
             document.getElementById('dropdown-menu').classList.toggle('hidden');

@@ -34,7 +34,7 @@ class TrialBalanceController extends Controller
                 ->whereHas('journalEntry', function ($q) use ($tanggalAkhir) {
                     $q->where('tanggal', '<=', $tanggalAkhir);
                 })
-                ->orderBy('kode_akun', 'asc')
+                ->orderBy('kode_akun')
                 ->get();
 
             $totalDebit = $entries->sum('debits');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\ChartOfAccount;
 use App\Exports\BukuBesarExport;
 use App\JournalEntryDetail;
+use App\StartNewYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,12 +16,14 @@ class BukuBesarController extends Controller
     public function bukuBesarFilter(Request $request)
     {
         $account = ChartOfAccount::all();
-        return view('buku_besar.filter_buku_besar', compact('account'));
+        $tahun_buku = StartNewYear::all();
+        return view('buku_besar.filter_buku_besar', compact('account', 'tahun_buku'));
     }
 
     private function getBukuBesarData(Request $request)
     {
         $accounts = ChartOfAccount::all();
+        $tahun_buku = StartNewYear::all();
 
         // Ambil kode akun dari input
         $selectedAccountsRaw = explode(',', $request->selected_accounts ?? '');
@@ -110,6 +113,7 @@ class BukuBesarController extends Controller
             'end_date'         => $request->end_date,
             'saldoAwalPerAkun' => $saldoAwalPerAkun,
             'totalByType'      => $totalByType,
+            'tahun_buku' => $tahun_buku,
             'showComment'      => $request->show_comment ?? 'transaction_comment', // ✅ tambahkan lagi
         ];
     }

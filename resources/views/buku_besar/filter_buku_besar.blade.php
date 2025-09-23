@@ -39,11 +39,24 @@
                 <form method="GET" action="{{ route('buku_besar.buku_besar_report') }}"
                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 
+                    <div>
+                        <label for="periode" class="block text-sm font-semibold text-gray-700 mb-1">Periode Buku</label>
+                        <select name="periode_buku" id="periode"
+                            class="w-3/6 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">---Pilih---</option>
+                            @foreach ($tahun_buku as $item)
+                                <option value="{{ $item->id }}" data-tahun="{{ trim($item->tahun) }}">
+                                    {{ $item->tahun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Tanggal Awal --}}
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
                         <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
                     </div>
 
@@ -51,7 +64,7 @@
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
                         <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
                     </div>
 
@@ -148,6 +161,38 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const periodeSelect = document.getElementById('periode');
+            const tanggalInput = document.getElementById('start_date');
+            const tanggalAkhir = document.getElementById('end_date');
+
+            periodeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const tahun = selectedOption.getAttribute('data-tahun')?.trim();
+
+                if (/^\d{4}$/.test(tahun)) {
+                    // Set batas minimal & maksimal
+                    tanggalInput.min = `${tahun}-01-01`;
+                    tanggalInput.max = `${tahun}-12-31`;
+                    tanggalAkhir.min = `${tahun}-01-01`;
+                    tanggalAkhir.max = `${tahun}-12-31`;
+
+                    // Isi otomatis awal & akhir tahun
+                    tanggalInput.value = `${tahun}-01-01`;
+                    tanggalAkhir.value = `${tahun}-12-31`;
+                } else {
+                    // Reset kalau user pilih "---Pilih---"
+                    tanggalInput.min = '';
+                    tanggalInput.max = '';
+                    tanggalAkhir.min = '';
+                    tanggalAkhir.max = '';
+                    tanggalInput.value = '';
+                    tanggalAkhir.value = '';
+                }
+            });
+        });
+    </script>
     {{-- Script --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {

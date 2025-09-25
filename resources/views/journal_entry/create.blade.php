@@ -73,14 +73,16 @@
                         <table class="min-w-full table-auto border-collapse text-base text-left bg-white">
                             <thead class="bg-gray-100 text-gray-700 font-semibold sticky top-0 z-10">
                                 <tr>
-                                    <th class="border px-4 py-3 text-center w-[20%]">Accounts</th>
+                                    <th class="border px-4 py-3 text-center w-[18%]">Accounts</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
-                                    <th class="border px-4 py-3 text-center w-[30%]">Comment</th>
-                                    <th class="border px-4 py-3 text-center w-[25%]">Specpose</th>
-                                    <th class="border px-4 py-3 text-center w-[3%]">Fiscorr</th>
-                                    <th class="border px-4 py-3 text-center w-[2%]">Aksi</th>
+                                    <th class="border px-4 py-3 text-center w-[20%]">Comment</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
+                                    <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
+
                             </thead>
                             <tbody id="item-table-body" class="bg-white">
 
@@ -172,17 +174,19 @@
 
             function generateRow(index) {
                 return `
-        <tr class="item-row" data-index="${index}">
+        <tr class="item-row" data-index="${index}" data-tipe-akun="">
           <td class="border px-2 py-1">
             <select class="item-select w-full border rounded" data-index="${index}"></select>
           </td>
           <td class="border px-2 py-1">
             <input type="hidden" name="items[${index}][kode_akun]" class="kode_akun-${index}" />
             <input type="hidden" name="items[${index}][departemen_akun_id]" class="departemen-akun-${index}" />
-            <input type="text" name="items[${index}][debits]" class="money-input w-full border rounded px-2 py-1 text-right debit-${index}" inputmode="numeric" />
+            <input type="text" name="items[${index}][debits]" 
+                   class="money-input w-full border rounded px-2 py-1 text-right debit-${index}" inputmode="numeric" />
           </td>
           <td class="border px-2 py-1">
-            <input type="text" name="items[${index}][credits]" class="money-input w-full border rounded px-2 py-1 text-right credit-${index}" inputmode="numeric" />
+            <input type="text" name="items[${index}][credits]" 
+                   class="money-input w-full border rounded px-2 py-1 text-right credit-${index}" inputmode="numeric" />
           </td>
           <td class="border px-2 py-1">
             <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
@@ -195,16 +199,16 @@
                 @endforeach
             </select>
           </td>
-          <td class="border px-2 py-1">
+          <td class="border px-2 py-1 text-center">
             <input type="hidden" name="items[${index}][pajak]" value="0">
-            <input type="checkbox" name="items[${index}][pajak]" class="w-full border rounded px-2 py-1" value="1">
+            <input type="checkbox" class="pajak-checkbox" name="items[${index}][pajak]" value="1">
           </td>
+          <td class="border px-2 py-1 penyesuaian-col text-center">-</td>
           <td class="border px-2 py-1 text-center space-x-1">
             <button type="button" class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600" data-index="${index}">+</button>
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
           </td>
-        </tr>
-      `;
+        </tr>`;
             }
 
             function addRowWithData(data = null, insertAfterIndex = null) {
@@ -250,9 +254,9 @@
                                     id: item.id,
                                     text: `${item.kode_akun} - ${item.nama_akun}`,
                                     kode_akun: item.kode_akun,
-                                    departemen_akun_id: null
+                                    departemen_akun_id: null,
+                                    tipe_akun: item.tipe_akun
                                 });
-
                                 if (item.daftar_departemen && item.daftar_departemen.length >
                                     0) {
                                     item.daftar_departemen.forEach(dept => {
@@ -261,7 +265,9 @@
                                             text: `${item.kode_akun} - ${item.nama_akun} ${dept.deskripsi}`,
                                             kode_akun: item.kode_akun,
                                             departemen_akun_id: dept.id,
-                                            deskripsi_departemen: dept.deskripsi
+                                            deskripsi_departemen: dept
+                                                .deskripsi,
+                                            tipe_akun: item.tipe_akun
                                         });
                                     });
                                 }
@@ -271,12 +277,12 @@
                             };
                         },
                         cache: true
-                    },
-                    templateResult: data => data.text
+                    }
                 }).on('select2:select', function(e) {
                     const data = e.params.data;
                     $(`.kode_akun-${index}`).val(data.kode_akun);
                     $(`.departemen-akun-${index}`).val(data.departemen_akun_id ?? '');
+                    $(`tr[data-index="${index}"]`).attr('data-tipe-akun', data.tipe_akun);
 
                     $.ajax({
                         url: '/journal-entry/auto-data',
@@ -298,39 +304,62 @@
                 });
             }
 
+            // Format angka + hitung ulang total
             function formatNumberInput(input) {
                 const raw = input.value.replace(/[^0-9]/g, '');
                 input.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
             }
 
-            function unformatAllCurrencyInputs() {
-                document.querySelectorAll('.money-input').forEach(input => {
-                    const raw = input.value.replace(/\./g, '');
-                    input.value = raw === '' ? '' : parseFloat(raw);
-                });
-            }
-
             function updateTotals() {
                 let totalDebit = 0;
                 let totalCredit = 0;
-
                 document.querySelectorAll('input[name^="items"][name$="[debits]"]').forEach(input => {
                     let val = parseFloat(input.value.replace(/\./g, '')) || 0;
                     totalDebit += val;
                 });
-
                 document.querySelectorAll('input[name^="items"][name$="[credits]"]').forEach(input => {
                     let val = parseFloat(input.value.replace(/\./g, '')) || 0;
                     totalCredit += val;
                 });
-
                 $('#total-debit').text(new Intl.NumberFormat('id-ID').format(totalDebit));
                 $('#total-credit').text(new Intl.NumberFormat('id-ID').format(totalCredit));
             }
 
+            // ✅ Tambahin event untuk format angka saat user input
             $(document).on('input', '.money-input', function() {
                 formatNumberInput(this);
                 updateTotals();
+            });
+
+            // Checkbox pajak → kolom tambahan
+            $(document).on('change', '.pajak-checkbox', function() {
+                const row = $(this).closest('tr');
+                const tipeAkun = row.attr('data-tipe-akun');
+                const col = row.find('.penyesuaian-col');
+                const idx = row.data('index');
+
+                if (this.checked) {
+                    let html = `
+                <div class="flex flex-col space-y-1">
+                    <select name="items[${idx}][penyesuaian_fiskal]" class="w-full border rounded px-2 py-1">
+            `;
+                    if (tipeAkun === 'Pendapatan') {
+                        html += '<option value="non_tax">Non Tax Object</option>';
+                        html += '<option value="pph_final">PPH Final</option>';
+                    } else if (tipeAkun === 'Beban') {
+                        html += '<option value="koreksi_plus">Koreksi Positif</option>';
+                        html += '<option value="koreksi_minus">Koreksi Negatif</option>';
+                    } else {
+                        html += '<option value="">-</option>';
+                    }
+                    html += `</select>
+                    <input type="text" name="items[${idx}][kode_fiscal]" placeholder="Kode Fiscal" class="w-full border rounded px-2 py-1" />
+                </div>
+            `;
+                    col.html(html);
+                } else {
+                    col.text('-');
+                }
             });
 
             // Hapus row

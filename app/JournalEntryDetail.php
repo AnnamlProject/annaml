@@ -16,7 +16,9 @@ class JournalEntryDetail extends Model
         'comment',
         'kode_akun',
         'project_id',
-        'pajak'
+        'pajak',
+        'penyesuaian_fiskal',
+        'kode_fiscal',
     ];
 
     // protected static function booted()

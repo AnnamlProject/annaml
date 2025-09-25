@@ -44,13 +44,17 @@
                         <table class="min-w-full table-auto border-collapse text-base text-left bg-white">
                             <thead class="bg-gray-100 text-gray-700 font-semibold sticky top-0 z-10">
                                 <tr>
-                                    <th class="border px-4 py-3 w-[30%]">Accounts</th>
-                                    <th class="border px-4 py-3 w-[10%] text-center">Debits</th>
-                                    <th class="border px-4 py-3 w-[10%] text-center">Credits</th>
-                                    <th class="border px-4 py-3 w-[25%] text-center">Comment</th>
-                                    <th class="border px-4 py-3 w-[10%] text-center">Specpose</th>
-                                    <th class="border px-4 py-3 w-[10%] text-center">Pajak</th>
-                                    <th class="border px-4 py-3 w-[5%] text-center">Aksi</th>
+                                <tr>
+                                    <th class="border px-4 py-3 text-center w-[18%]">Accounts</th>
+                                    <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
+                                    <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
+                                    <th class="border px-4 py-3 text-center w-[20%]">Comment</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
+                                    <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
+                                    <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
+                                </tr>
+
                                 </tr>
                             </thead>
                             <tbody id="item-table-body" class="bg-white">
@@ -65,7 +69,8 @@
                                         $totalKredit += $detail->credits;
                                     @endphp
 
-                                    <tr class="item-row" data-index="{{ $i }}">
+                                    <tr class="item-row" data-index="{{ $i }}"
+                                        data-tipe-akun="{{ $detail->chartOfAccount->tipe_akun ?? '' }}">
                                         <td class="border px-2 py-1">
                                             {{-- Select akun --}}
                                             <select class="item-select w-full border rounded"
@@ -111,11 +116,39 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td class="border px-2 py-1">
+
+                                        <td class="border px-2 py-1 text-center">
                                             <input type="hidden" name="items[{{ $i }}][pajak]" value="0">
                                             <input type="checkbox" name="items[{{ $i }}][pajak]" value="1"
-                                                class="w-full border rounded px-2 py-1"
+                                                class="pajak-checkbox"
                                                 {{ old("items.$i.pajak", $detail->pajak ?? 0) ? 'checked' : '' }}>
+                                        </td>
+                                        <td class="border px-2 py-1 penyesuaian-col text-center">
+                                            @if ($detail->penyesuaian_fiskal || $detail->kode_fiscal)
+                                                <div class="flex flex-col space-y-1">
+                                                    <select name="items[{{ $i }}][penyesuaian_fiskal]"
+                                                        class="w-full border rounded px-2 py-1">
+                                                        <option value="">-- Pilih --</option>
+                                                        <option value="non_tax"
+                                                            {{ $detail->penyesuaian_fiskal == 'non_tax' ? 'selected' : '' }}>
+                                                            Non Tax Object</option>
+                                                        <option value="pph_final"
+                                                            {{ $detail->penyesuaian_fiskal == 'pph_final' ? 'selected' : '' }}>
+                                                            PPH Final</option>
+                                                        <option value="koreksi_plus"
+                                                            {{ $detail->penyesuaian_fiskal == 'koreksi_plus' ? 'selected' : '' }}>
+                                                            Koreksi Positif</option>
+                                                        <option value="koreksi_minus"
+                                                            {{ $detail->penyesuaian_fiskal == 'koreksi_minus' ? 'selected' : '' }}>
+                                                            Koreksi Negatif</option>
+                                                    </select>
+                                                    <input type="text" name="items[{{ $i }}][kode_fiscal]"
+                                                        value="{{ $detail->kode_fiscal }}" placeholder="Kode Fiscal"
+                                                        class="w-full border rounded px-2 py-1" />
+                                                </div>
+                                            @else
+                                                -
+                                            @endif
                                         </td>
 
                                         <td class="border px-2 py-1 text-center">
@@ -165,59 +198,55 @@
 
 @push('scripts')
     <script>
+        let rowIndex = $('#item-table-body tr').length || 0;
+
         function parseNumber(value) {
             if (!value) return 0;
             return parseFloat(value.replace(/\./g, '').replace(',', '.')) || 0;
         }
 
         function formatNumber(value) {
-            return new Intl.NumberFormat('id-ID', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(value);
+            return new Intl.NumberFormat('id-ID').format(value);
         }
 
         function updateTotals() {
             let totalDebit = 0,
                 totalCredit = 0;
-            document.querySelectorAll('.debit-input').forEach(input => {
-                totalDebit += parseNumber(input.value);
-            });
-            document.querySelectorAll('.credit-input').forEach(input => {
-                totalCredit += parseNumber(input.value);
-            });
+            document.querySelectorAll('.debit-input').forEach(input => totalDebit += parseNumber(input.value));
+            document.querySelectorAll('.credit-input').forEach(input => totalCredit += parseNumber(input.value));
             document.getElementById('total-debit').innerText = formatNumber(totalDebit);
             document.getElementById('total-credit').innerText = formatNumber(totalCredit);
         }
 
-        function generateRow() {
+        function generateRow(index) {
             return `
-        <tr class="item-row">
+        <tr class="item-row" data-index="${index}" data-tipe-akun="">
             <td class="border px-2 py-1">
-                <select class="item-select w-full border rounded" name="items[][kode_akun]"></select>
-                <input type="hidden" name="items[][departemen_akun_id]" class="departemen-akun">
+                <select class="item-select w-full border rounded" name="items[${index}][kode_akun]" data-index="${index}"></select>
+                <input type="hidden" name="items[${index}][departemen_akun_id]" class="departemen-akun">
             </td>
             <td class="border px-2 py-1">
-                <input type="text" name="items[][debits]" class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+                <input type="text" name="items[${index}][debits]" class="money-input debit-input w-full border rounded px-2 py-1 text-right" value="0"/>
             </td>
             <td class="border px-2 py-1">
-                <input type="text" name="items[][credits]" class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
+                <input type="text" name="items[${index}][credits]" class="money-input credit-input w-full border rounded px-2 py-1 text-right" value="0"/>
             </td>
             <td class="border px-2 py-1">
-                <input type="text" name="items[][comment]" class="w-full border rounded px-2 py-1"/>
+                <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1"/>
             </td>
             <td class="border px-2 py-1">
-                <select name="items[][project_id]" class="w-full border rounded px-2 py-1">
+                <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
                     <option value="">-- Pilih Specpose --</option>
                     @foreach ($projects as $prj)
                         <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                     @endforeach
                 </select>
             </td>
-            <td class="border px-2 py-1">
-                <input type="hidden" name="items[][pajak]" value="0">
-                <input type="checkbox" name="items[][pajak]" class="w-full border rounded px-2 py-1" value="1">
+            <td class="border px-2 py-1 text-center">
+                <input type="hidden" name="items[${index}][pajak]" value="0">
+                <input type="checkbox" class="pajak-checkbox" name="items[${index}][pajak]" value="1">
             </td>
+            <td class="border px-2 py-1 penyesuaian-col text-center">-</td>
             <td class="border px-2 py-1 text-center">
                 <button type="button" class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
                 <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
@@ -231,7 +260,7 @@
                 $(row).find('input, select').each(function() {
                     const name = $(this).attr('name');
                     if (name) {
-                        $(this).attr('name', name.replace(/\[\d*\]/, `[${i}]`));
+                        $(this).attr('name', name.replace(/\[\d+\]/, `[${i}]`));
                     }
                 });
             });
@@ -254,7 +283,8 @@
                                 id: item.kode_akun,
                                 text: `${item.kode_akun} - ${item.nama_akun}`,
                                 kode_akun: item.kode_akun,
-                                departemen_akun_id: null
+                                departemen_akun_id: null,
+                                tipe_akun: item.tipe_akun
                             });
                             if (item.daftar_departemen) {
                                 item.daftar_departemen.forEach(dept => {
@@ -262,7 +292,8 @@
                                         id: item.kode_akun,
                                         text: `${item.kode_akun} - ${item.nama_akun} - ${dept.deskripsi}`,
                                         kode_akun: item.kode_akun,
-                                        departemen_akun_id: dept.id
+                                        departemen_akun_id: dept.id,
+                                        tipe_akun: item.tipe_akun
                                     });
                                 });
                             }
@@ -274,55 +305,84 @@
                 }
             }).on('select2:select', function(e) {
                 const data = e.params.data;
-                $(this).closest('tr').find('.departemen-akun').val(data.departemen_akun_id ?? '');
+                const row = $(this).closest('tr');
+                row.find('.departemen-akun').val(data.departemen_akun_id ?? '');
+                row.attr('data-tipe-akun', data.tipe_akun ?? '');
             });
         }
 
+        // Pajak → kolom penyesuaian fiskal
+        $(document).on('change', '.pajak-checkbox', function() {
+            const row = $(this).closest('tr');
+            const tipeAkun = row.attr('data-tipe-akun');
+            const col = row.find('.penyesuaian-col');
+            const idx = row.data('index');
+
+            if (this.checked) {
+                let html = `
+                <div class="flex flex-col space-y-1">
+                    <select name="items[${idx}][penyesuaian_fiskal]" class="w-full border rounded px-2 py-1">
+                        ${tipeAkun === 'Pendapatan'
+                            ? `<option value="non_tax">Non Tax Object</option><option value="pph_final">PPH Final</option>`
+                            : tipeAkun === 'Beban'
+                                ? `<option value="koreksi_plus">Koreksi Positif</option><option value="koreksi_minus">Koreksi Negatif</option>`
+                                : `<option value="">-</option>`}
+                    </select>
+                    <input type="text" name="items[${idx}][kode_fiscal]" placeholder="Kode Fiscal" class="w-full border rounded px-2 py-1"/>
+                </div>`;
+                col.html(html);
+            } else {
+                col.text('-');
+            }
+        });
+
+        // Tambah row ke bawah tabel
+        $('#add-row').click(function() {
+            $('#item-table-body').append(generateRow(rowIndex));
+            attachSelect2($('#item-table-body tr:last .item-select'));
+            rowIndex++;
+            reindexRows();
+            updateTotals();
+        });
+
+        // Tambah row di bawah baris tertentu
+        $(document).on('click', '.add-row', function() {
+            const currentRow = $(this).closest('tr');
+            const newRow = $(generateRow(rowIndex));
+            currentRow.after(newRow);
+            attachSelect2(newRow.find('.item-select'));
+            rowIndex++;
+            reindexRows();
+            updateTotals();
+        });
+
+        // Hapus row
+        $(document).on('click', '.remove-row', function() {
+            $(this).closest('tr').remove();
+            reindexRows();
+            updateTotals();
+        });
+
+        // Format angka & update total
+        $(document).on('input', '.money-input', function() {
+            const raw = this.value.replace(/[^0-9]/g, '');
+            this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
+            updateTotals();
+        });
+
+        // Normalisasi sebelum submit
+        $('#journal-entry-form').on('submit', function() {
+            document.querySelectorAll('.money-input').forEach(input => {
+                const raw = input.value.replace(/\./g, '');
+                input.value = raw === '' ? '' : parseFloat(raw);
+            });
+        });
+
+        // Init awal
         $(document).ready(function() {
             $('.item-select').each(function() {
                 attachSelect2($(this));
             });
-
-            // Tambah row ke paling bawah (tetap ada)
-            $('#add-row').click(function() {
-                $('#item-table-body').append(generateRow());
-                reindexRows();
-                updateTotals();
-                attachSelect2($('#item-table-body tr:last .item-select'));
-            });
-
-            // Tambah row di bawah baris yang ditekan "+"
-            $(document).on('click', '.add-row', function() {
-                const currentRow = $(this).closest('tr');
-                const newRow = $(generateRow());
-                currentRow.after(newRow);
-                reindexRows();
-                updateTotals();
-                attachSelect2(newRow.find('.item-select'));
-            });
-
-            // Hapus row
-            $(document).on('click', '.remove-row', function() {
-                $(this).closest('tr').remove();
-                reindexRows();
-                updateTotals();
-            });
-
-            // Format angka & update total
-            $(document).on('input', '.money-input', function() {
-                const raw = this.value.replace(/[^0-9]/g, '');
-                this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
-                updateTotals();
-            });
-
-            // Normalisasi input sebelum submit
-            $('#journal-entry-form').on('submit', function() {
-                document.querySelectorAll('.money-input').forEach(input => {
-                    const raw = input.value.replace(/\./g, '');
-                    input.value = raw === '' ? '' : parseFloat(raw);
-                });
-            });
-
             updateTotals();
         });
     </script>

@@ -24,6 +24,7 @@ class DepartemenAkunController extends Controller
                 'id' => $item->id,
                 'kode_akun' => $item->kode_akun,
                 'nama_akun' => $item->nama_akun,
+                'tipe_akun' => $item->tipe_akun,
                 'departemen_id' => optional($item->departemenAkun->first())->departemen_id,
                 'nama_departemen' => optional(optional($item->departemenAkun->first())->departemen)->deskripsi ?? '-',
                 'daftar_departemen' => $item->departemenAkun->map(function ($d) {

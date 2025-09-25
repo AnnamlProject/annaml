@@ -20,6 +20,8 @@ class PermissionReport extends Seeder
             'income_statement.access',
             'income_statement_departement.access',
             'neraca.access',
+            'fiscal.access',
+            'perhitungan_pajak_penghasilan.access',
 
             'documents.access',
             'sales_document.access',

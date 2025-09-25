@@ -11,6 +11,7 @@ use App\Http\Controllers\DepartemenAkunController;
 use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\EmployeeOffDayController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IncomeStatementController;
 use App\Http\Controllers\ItemController;
@@ -23,6 +24,8 @@ use App\Http\Controllers\SettingDepartementController;
 use App\Http\Controllers\TrialBalanceController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PembayaranGajiController;
+use App\Http\Controllers\PerhitunganPajakPenghasilan;
+use App\Http\Controllers\PerhitunganPajakPenghasilanController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseInvoiceController;
@@ -145,6 +148,16 @@ Route::middleware(['auth'])->group(function () {
 
 
     // report
+
+    // fiscal
+    Route::get('fiscal', [FiscalController::class, 'fiscal'])->name('fiscal.fiscal_report')->middleware('permission:fiscal.access');
+
+    Route::get('perhitungan_pajak_penghasilan', [PerhitunganPajakPenghasilanController::class, 'index'])->name('perhitungan_pajak_penghasilan.index')->middleware('permission:perhitungan_pajak_penghasilan.access');
+    Route::post('/perhitungan-pajak/kredit-pajak/store', [PerhitunganPajakPenghasilanController::class, 'store'])->name('perhitungan_pajak.saveKreditPajak');
+    Route::post('/perhitungan-pajak/kredit-pajak/store', [PerhitunganPajakPenghasilanController::class, 'store'])->name('perhitungan_pajak.saveKreditPajak');
+    Route::put('/perhitungan-pajak/kredit-pajak/{id}', [PerhitunganPajakPenghasilanController::class, 'update'])->name('perhitungan_pajak.updateKreditPajak');
+
+
 
     // neraca
     Route::get('filter_neraca', [NeracaController::class, 'neracaFilter'])->name('neraca.filter_neraca')->middleware('permission:neraca.access');

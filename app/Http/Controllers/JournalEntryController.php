@@ -204,7 +204,9 @@ class JournalEntryController extends Controller
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
             'items.*.project_id' => 'nullable|exists:projects,id',
-            'items.*.pajak' => 'nullable|boolean'
+            'items.*.pajak' => 'nullable|boolean',
+            'items.*.penyesuaian_fiskal' => 'nullable|string',
+            'items.*.kode_fiscal' => 'nullable|string',
         ]);
 
         // Hitung total debit & kredit
@@ -239,7 +241,9 @@ class JournalEntryController extends Controller
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
                     'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak']
+                    'pajak' => $item['pajak'],
+                    'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
+                    'kode_fiscal' => $item['kode_fiscal'] ?? null
                 ]);
             }
 
@@ -370,7 +374,9 @@ class JournalEntryController extends Controller
             'items.*.credits' => 'nullable|numeric',
             'items.*.comment' => 'nullable|string',
             'items.*.project_id' => 'nullable|exists:projects,id',
-            'items.*.pajak' => 'nullable|boolean'
+            'items.*.pajak' => 'nullable|boolean',
+            'items.*.penyesuaian_fiskal' => 'nullable|string',
+            'items.*.kode_fiscal' => 'nullable|string',
 
 
         ]);
@@ -413,7 +419,9 @@ class JournalEntryController extends Controller
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
                     'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak']
+                    'pajak' => $item['pajak'],
+                    'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
+                    'kode_fiscal' => $item['kode_fiscal'] ?? null
                 ]);
             }
 

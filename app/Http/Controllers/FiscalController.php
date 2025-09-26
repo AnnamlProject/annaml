@@ -23,6 +23,7 @@ class FiscalController extends Controller
                 'kode_fiscal',
                 'comment'
             )
+            ->orderBy('kode_akun')
             ->get();
         // Group by kode_akun
         $grouped = $details->groupBy('kode_akun');

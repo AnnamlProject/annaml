@@ -54,7 +54,8 @@ class PerhitunganPajakPenghasilanController extends Controller
         $pph22 = $kredit->pph_22 ?? 0;
         $pph23 = $kredit->pph_23 ?? 0;
         $pph24 = $kredit->pph_24 ?? 0;
-        $pph25Total = optional($kredit->pph25)->sum('nilai') ?? 0;
+        $pph25Total = optional(optional($kredit)->pph25)->sum('nilai') ?? 0;
+
 
         $pphTerutang = $summary['pkp'] * 0.22;
 

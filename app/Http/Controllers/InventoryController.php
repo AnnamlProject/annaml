@@ -120,6 +120,13 @@ class InventoryController extends Controller
             $rules['expense_account_id'][]  = 'nullable';
         }
 
+        // Wajib akun (kalau kamu mau enforce saat edit, bisa ganti nullable→required)
+        if ($request->type === 'inventory') {
+            // tetap nullable sesuai versi store terakhir kamu
+        } else {
+            // service
+        }
+
         $validated = $request->validate($rules);
 
         // ===== 2) SIMPAN DALAM TRANSAKSI =====
@@ -161,20 +168,25 @@ class InventoryController extends Controller
                 'reorder_to_order'
             ]);
 
-            if ($anyQuantityFilled) {
-                ItemQuantities::create([
-                    'item_id'               => $item->id,
-                    'location_id'           => $request->input('location_id'),
-                    'on_hand_qty'           => (int) $request->input('on_hand_qty', 0),
-                    'on_hand_value'         => (float) $request->input('on_hand_value', 0),
-                    'pending_orders_qty'    => (int) $request->input('pending_orders_qty', 0),
-                    'pending_orders_value'  => (float) $request->input('pending_orders_value', 0),
-                    'purchase_order_qty'    => (int) $request->input('purchase_order_qty', 0),
-                    'sales_order_qty'       => (int) $request->input('sales_order_qty', 0),
-                    'reorder_minimum'       => $request->input('reorder_minimum'),
-                    'reorder_to_order'      => $request->input('reorder_to_order'),
-                ]);
+            if ($request->has('quantities')) {
+                foreach ($request->quantities as $row) {
+                    if (!empty($row['location_id'])) {
+                        ItemQuantities::create([
+                            'item_id'               => $item->id,
+                            'location_id'           => $row['location_id'],
+                            'on_hand_qty'           => (int) ($row['on_hand_qty'] ?? 0),
+                            'on_hand_value'         => (float) ($row['on_hand_value'] ?? 0),
+                            'pending_orders_qty'    => (int) ($row['pending_orders_qty'] ?? 0),
+                            'pending_orders_value'  => (float) ($row['pending_orders_value'] ?? 0),
+                            'purchase_order_qty'    => (int) ($row['purchase_order_qty'] ?? 0),
+                            'sales_order_qty'       => (int) ($row['sales_order_qty'] ?? 0),
+                            'reorder_minimum'       => (int) ($row['reorder_minimum'] ?? 0),
+                            'reorder_to_order'      => (int) ($row['reorder_to_order'] ?? 0),
+                        ]);
+                    }
+                }
             }
+
 
             // ===== 2d) Item Units =====
             // Checkbox akan bernilai true jika dicentang
@@ -240,7 +252,9 @@ class InventoryController extends Controller
             $accountsPayload = [
                 'item_id'            => $item->id,
                 'asset_account_id'   => $request->input('asset_account_id'),
-                'revenue_account_id' => $request->input('revenue_account_id'),
+                'revenue_account_id' => $item->type === 'inventory'
+                    ? $request->input('inventory_revenue_account_id')
+                    : $request->input('service_revenue_account_id'),
                 'cogs_account_id'    => $request->input('cogs_account_id'),
                 'variance_account_id' => $request->input('variance_account_id'),
                 'expense_account_id' => $request->input('expense_account_id'),
@@ -343,6 +357,7 @@ class InventoryController extends Controller
         $accounts           = ChartOfAccount::orderBy('kode_akun')->get();
         $items              = Item::orderBy('item_description')->get(['id', 'item_description']); // untuk tab Build (dropdown item)
         $taxes              = SalesTaxes::orderBy('name')->get();
+        $quantities = ItemQuantities::where('item_id', $item->id)->get();
 
         // 🔥 Ambil price list dari tabel master
         $priceListInventory = PriceListInventory::orderBy('description')->get();
@@ -373,6 +388,7 @@ class InventoryController extends Controller
             'pricingPrefill'     => $pricingPrefill,
             'selectedTaxIds'     => $selectedTaxIds,
             'exemptTaxIds'       => $exemptTaxIds,
+            'quantities' => $quantities
         ]);
     }
 
@@ -490,21 +506,28 @@ class InventoryController extends Controller
                 'reorder_to_order'
             ]);
 
-            if ($anyQuantityFilled) {
-                $qty = ItemQuantities::firstOrNew([
-                    'item_id'     => $inventory->id,
-                    'location_id' => $request->input('location_id'),
-                ]);
-                $qty->on_hand_qty          = (int) $request->input('on_hand_qty', 0);
-                $qty->on_hand_value        = (float) $request->input('on_hand_value', 0);
-                $qty->pending_orders_qty   = (int) $request->input('pending_orders_qty', 0);
-                $qty->pending_orders_value = (float) $request->input('pending_orders_value', 0);
-                $qty->purchase_order_qty   = (int) $request->input('purchase_order_qty', 0);
-                $qty->sales_order_qty      = (int) $request->input('sales_order_qty', 0);
-                $qty->reorder_minimum      = $request->input('reorder_minimum');
-                $qty->reorder_to_order     = $request->input('reorder_to_order');
-                $qty->save();
+            if ($request->has('quantities')) {
+                foreach ($request->quantities as $row) {
+                    if (!empty($row['location_id'])) {
+                        $qty = ItemQuantities::firstOrNew([
+                            'item_id'     => $inventory->id,
+                            'location_id' => $row['location_id'],
+                        ]);
+
+                        $qty->on_hand_qty          = (int) ($row['on_hand_qty'] ?? 0);
+                        $qty->on_hand_value        = (float) ($row['on_hand_value'] ?? 0);
+                        $qty->pending_orders_qty   = (int) ($row['pending_orders_qty'] ?? 0);
+                        $qty->pending_orders_value = (float) ($row['pending_orders_value'] ?? 0);
+                        $qty->purchase_order_qty   = (int) ($row['purchase_order_qty'] ?? 0);
+                        $qty->sales_order_qty      = (int) ($row['sales_order_qty'] ?? 0);
+                        $qty->reorder_minimum      = (int) ($row['reorder_minimum'] ?? 0);
+                        $qty->reorder_to_order     = (int) ($row['reorder_to_order'] ?? 0);
+
+                        $qty->save();
+                    }
+                }
             }
+
             // 5) UNITS: upsert satu baris
             $sellingSame = $request->has('selling_same_as_stocking');
             $buyingSame  = $request->has('buying_same_as_stocking');
@@ -578,18 +601,25 @@ class InventoryController extends Controller
             $accountsPayload = [
                 'item_id'            => $inventory->id,
                 'asset_account_id'   => $request->input('asset_account_id'),
-                'revenue_account_id' => $request->input('revenue_account_id'),
+                'revenue_account_id' => $inventory->type === 'inventory'
+                    ? $request->input('inventory_revenue_account_id')
+                    : $request->input('service_revenue_account_id'),
                 'cogs_account_id'    => $request->input('cogs_account_id'),
                 'variance_account_id' => $request->input('variance_account_id'),
                 'expense_account_id' => $request->input('expense_account_id'),
             ];
+
+            // Kosongkan field yang tidak relevan
             if ($inventory->type === 'inventory') {
                 $accountsPayload['expense_account_id'] = null;
-            } else {
+            } else { // service
                 $accountsPayload['asset_account_id']    = null;
                 $accountsPayload['cogs_account_id']     = null;
                 $accountsPayload['variance_account_id'] = null;
             }
+
+            // dd($request->input('revenue_account_id'));
+
 
             $acc = ItemAccount::firstOrNew(['item_id' => $inventory->id]);
             $acc->fill($accountsPayload)->save();

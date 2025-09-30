@@ -18,7 +18,7 @@ class PurchaseOrderDetail extends Model
         'unit',
         'item_description',
         'price',
-        'tax',
+        'tax_id',
         'tax_amount',
         'amount',
         'account_id',
@@ -32,6 +32,10 @@ class PurchaseOrderDetail extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id');
+    }
+    public function sales_taxes()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'tax_id');
     }
 
     public function account()

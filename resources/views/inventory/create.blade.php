@@ -52,7 +52,7 @@
                         <li><a href="#vendors" class="tab-link">Vendors</a></li>
                         <li><a href="#linked" class="tab-link">Linked COA</a></li>
                         <li><a href="#build" class="tab-link">Build</a></li>
-                        <li><a href="#statistics" class="tab-link">Statistics</a></li>
+                        {{-- <li><a href="#statistics" class="tab-link">Statistics</a></li> --}}
                         <li><a href="#taxes" class="tab-link">Taxes</a></li>
                         <li><a href="#description" class="tab-link">Description</a></li>
                         <li><a href="#picture" class="tab-link">Picture</a></li>
@@ -64,7 +64,7 @@
                         <li><a href="#pricingService" class="tab-link">Pricing</a></li>
                         <li><a href="#vendorsService" class="tab-link">Vendors</a></li>
                         <li><a href="#linkedService" class="tab-link">Linked COA</a></li>
-                        <li><a href="#statisticsService" class="tab-link">Statistics</a></li>
+                        {{-- <li><a href="#statisticsService" class="tab-link">Statistics</a></li> --}}
                         <li><a href="#taxesService" class="tab-link">Taxes</a></li>
                         <li><a href="#descriptionService" class="tab-link">Description</a></li>
                         <li><a href="#pictureService" class="tab-link">Picture</a></li>
@@ -72,63 +72,42 @@
                 </div>
 
                 {{-- Quantities Tab --}}
-                <div id="quantities">
-                    <h3 class="font-semibold text-lg mb-2">Quantities</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block">Location</label>
-                            <select name="location_id" id="location_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">-- Location --</option>
-                                @foreach ($lokasiInventory as $g)
-                                    <option value="{{ $g->id }}">
-                                        {{ $g->kode_lokasi }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block">On Hand Quantity</label>
-                            <input type="number" name="on_hand_qty"
-                                class="form-input w-full border bg-gray-50 bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">On Hand Value</label>
-                            <input type="number" step="0.01" name="on_hand_value"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">Pending Orders Quantity</label>
-                            <input type="number" name="pending_orders_qty"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">Pending Orders Value</label>
-                            <input type="number" step="0.01" name="pending_orders_value"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">Purchase Order Quantity</label>
-                            <input type="number" name="purchase_order_qty"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">Sales Order Quantity</label>
-                            <input type="number" name="sales_order_qty"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">Minimum Level</label>
-                            <input type="number" name="reorder_minimum"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
-                        </div>
-                        <div>
-                            <label class="block">To Order</label>
-                            <input type="number" name="reorder_to_order"
-                                class="form-input w-full border bg-gray-50 rounded px-2 py-1 text-sm" readonly />
+                <div id="quantities" class="tab-content">
+                    <h3 class="font-semibold text-lg mb-2">Quantities per Location</h3>
+
+                    <div id="quantities-wrapper">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border rounded p-4 mb-4">
+                            <div>
+                                <label class="block">Location</label>
+                                <select name="quantities[0][location_id]" class="w-full border rounded-lg px-4 py-2">
+                                    <option value="">-- Location --</option>
+                                    @foreach ($lokasiInventory as $g)
+                                        <option value="{{ $g->id }}">{{ $g->kode_lokasi }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block">On Hand Quantity</label>
+                                <input type="number" name="quantities[0][on_hand_qty]" value="0" readonly
+                                    class="form-input w-full border rounded px-2 py-1 text-sm" />
+                            </div>
+
+                            <div>
+                                <label class="block">On Hand Value</label>
+                                <input type="text" id="on_hand_display"
+                                    class="form-input w-full border rounded px-2 py-1 text-sm" value="0.00" readonly />
+                                <input type="hidden" id="on_hand_value" name="quantities[0][on_hand_value]" />
+                            </div>
                         </div>
                     </div>
+
+                    {{-- tombol tambah baris lokasi baru --}}
+                    <button type="button" onclick="addLocationRow()" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded">
+                        + Add Location
+                    </button>
                 </div>
+
 
                 {{-- Units Tab --}}
                 <div id="units" class="tab-content hidden">
@@ -153,7 +132,7 @@
                         <div>
                             <label class="block">Selling Unit (if different)</label>
                             <input type="text" id="selling_unit" name="selling_unit"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" readonly />
+                                class="form-input w-full bor    der rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Selling Relationship</label>
@@ -293,9 +272,11 @@
 
                         {{-- Revenue Account --}}
                         <div>
-                            <label for="revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
+                            <label for="inventory_revenue_account_id"
+                                class="block text-sm font-medium text-gray-700">Revenue
                                 Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <select name="inventory_revenue_account_id"
+                                class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Pendapatan --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}">
@@ -497,9 +478,11 @@
 
                         {{-- Revenue Account --}}
                         <div>
-                            <label for="revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
+                            <label for="service_revenue_account_id"
+                                class="block text-sm font-medium text-gray-700">Revenue
                                 Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <select name="service_revenue_account_id"
+                                class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Account --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}">
@@ -599,6 +582,19 @@
             </div>
         </form>
     </div>
+
+    <script>
+        document.getElementById('on_hand_display').addEventListener('input', function(e) {
+            let raw = e.target.value.replace(/,/g, '');
+            let num = parseFloat(raw);
+            if (!isNaN(num)) {
+                document.getElementById('on_hand_value').value = num.toFixed(2);
+                e.target.value = num.toLocaleString('en-US', {
+                    minimumFractionDigits: 2
+                });
+            }
+        });
+    </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Hitung index awal dari jumlah baris existing

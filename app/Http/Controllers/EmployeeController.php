@@ -206,4 +206,14 @@ class EmployeeController extends Controller
 
         return redirect()->route('employee.index')->with('success', ' Data berhasil dihapus.');
     }
+    public function search(Request $request)
+    {
+        $term = $request->q;
+        $employee = Employee::where('nama_karyawan', 'like', "%$term%")
+            ->select('id', 'nama_karyawan')
+            ->limit(20)
+            ->get();
+
+        return response()->json($employee);
+    }
 }

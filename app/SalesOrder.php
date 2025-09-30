@@ -17,7 +17,10 @@ class SalesOrder extends Model
         'sales_person_id',
         'freight',
         'early_payment_terms',
-        'messages'
+        'messages',
+        'payment_method_account_id',
+        'location_id',
+        'status_sales'
     ];
     public function jenisPembayaran()
     {
@@ -39,5 +42,17 @@ class SalesOrder extends Model
     public function documents()
     {
         return $this->hasMany(SalesOrderDocument::class);
+    }
+    public function paymentMethodDetail()
+    {
+        return $this->belongsTo(PaymentMethodDetail::class);
+    }
+    public function invoices()
+    {
+        return $this->hasMany(SalesInvoice::class);
+    }
+    public function locationInventory()
+    {
+        return $this->belongsTo(LocationInventory::class, 'location_id');
     }
 }

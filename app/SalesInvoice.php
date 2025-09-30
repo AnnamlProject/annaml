@@ -40,6 +40,10 @@ class SalesInvoice extends Model
     {
         return $this->belongsTo(SalesOrder::class);
     }
+    public function lokasi_inventory()
+    {
+        return $this->belongsTo(LocationInventory::class, 'location_id');
+    }
     public function documents()
     {
         return $this->hasMany(SalesInvoiceDocument::class);

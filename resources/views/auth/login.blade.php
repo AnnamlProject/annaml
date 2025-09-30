@@ -77,89 +77,83 @@
 <body class="bg-gradient-to-br from-white to-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
 
     <!-- Login Container -->
-    <div class="w-full max-w-md z-10 animate__animated animate__fadeInUp">
-        <div
-            class="bg-white rounded-xl shadow-xl overflow-hidden smooth-transition hover:shadow-2xl hover:-translate-y-1">
-            <!-- Header -->
-            <div class="text-white text-center p-6 bg-primary">
-                <div
-                    class="mx-auto w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md mb-4 animate__bounceIn">
+    <!-- Card utama -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+
+        <!-- Kiri: Form Login -->
+        <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+            <div class="text-center mb-6">
+                <div class="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center shadow-md mb-4">
                     <img src="{{ asset('storage/' . \App\Setting::get('logo', 'default.png')) }}" alt="Logo"
-                        class="h-12 w-12 transform hover:scale-110 smooth-transition">
+                        class="h-12 w-12">
                 </div>
-                <h4 class="text-xl font-bold mb-1 animate__fadeIn">Welcome Back!</h4>
-                <p class="text-blue-100 animate__fadeIn animate__delay-1s">Please login to continue</p>
+                <h4 class="text-2xl font-bold text-gray-800">Welcome Back!</h4>
+                <p class="text-gray-500 text-sm">Please login to continue</p>
             </div>
+            {{-- pesan status/error --}}
+            @if (session('status'))
+                <div id="statusMessage"
+                    class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded-lg opacity-0">
+                    <i class="bi bi-check-circle-fill mr-2"></i> {{ session('status') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div id="errorMessage"
+                    class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
+                    <i class="bi bi-exclamation-triangle-fill mr-2"></i> {{ session('error') }}
+                </div>
+            @endif
+            @if ($errors->any())
+                <div id="validationErrors"
+                    class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
+                    @foreach ($errors->all() as $error)
+                        <p><i class="bi bi-exclamation-circle-fill mr-2"></i> {{ $error }}</p>
+                    @endforeach
+                </div>
+            @endif
 
-            <!-- Body -->
-            <div class="p-6">
-                @if (session('status'))
-                    <div id="statusMessage"
-                        class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded-lg opacity-0">
-                        <i class="bi bi-check-circle-fill mr-2"></i> {{ session('status') }}
+            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                @csrf
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
+                        <i class="bi bi-person-fill"></i>
                     </div>
-                @endif
+                    <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
+                        placeholder="Email">
+                </div>
 
-                @if (session('error'))
-                    <div id="errorMessage"
-                        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
-                        <i class="bi bi-exclamation-triangle-fill mr-2"></i> {{ session('error') }}
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
+                        <i class="bi bi-lock-fill"></i>
                     </div>
-                @endif
+                    <input type="password" id="password" name="password" required
+                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
+                        placeholder="Password">
+                </div>
 
-                @if ($errors->any())
-                    <div id="validationErrors"
-                        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
-                        @foreach ($errors->all() as $error)
-                            <p><i class="bi bi-exclamation-circle-fill mr-2"></i> {{ $error }}</p>
-                        @endforeach
-                    </div>
-                @endif
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center text-sm text-gray-600">
+                        <input id="remember_me" name="remember" type="checkbox"
+                            class="h-4 w-4 text-secondary border-gray-300 rounded mr-2">
+                        Remember me
+                    </label>
+                </div>
 
-                <form method="POST" action="{{ route('login') }}" class="space-y-4">
-                    @csrf
-
-                    <div class="relative">
-                        <div
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-secondary">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" required
-                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary smooth-transition placeholder-gray-400"
-                            placeholder="Email">
-                    </div>
-
-                    <div class="relative">
-                        <div
-                            class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-secondary">
-                            <i class="bi bi-lock-fill"></i>
-                        </div>
-                        <input type="password" id="password" name="password" required
-                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary smooth-transition placeholder-gray-400"
-                            placeholder="Password">
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input id="remember_me" name="remember" type="checkbox"
-                                class="h-4 w-4 text-secondary border-gray-300 rounded smooth-transition">
-                            <label for="remember_me" class="ml-2 text-sm text-gray-700 smooth-transition">Remember
-                                me</label>
-                        </div>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-secondary hover:bg-opacity-90 text-white font-medium py-3 px-4 rounded-lg smooth-transition transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center">
-                        <i class="bi bi-box-arrow-in-right mr-2 smooth-transition"></i> Login
-                    </button>
-                </form>
-            </div>
+                <button type="submit"
+                    class="w-full bg-secondary text-white py-3 rounded-lg hover:bg-opacity-90 shadow-md flex items-center justify-center">
+                    <i class="bi bi-box-arrow-in-right mr-2"></i> Login
+                </button>
+            </form>
         </div>
 
-        <!-- Footer -->
-        <p class="text-center text-gray-600 mt-6 text-sm animate__fadeIn animate__delay-1s">
-            &copy; {{ date('Y') }} An Naml. All rights reserved.
-        </p>
+        <!-- Kanan: Gambar -->
+        <div class="w-full md:w-1/2 relative hidden md:block">
+            <img src="{{ asset('image/page_login.jpg') }}" alt="Login Banner" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
+            </div>
+        </div>
     </div>
 
     <script>

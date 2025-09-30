@@ -22,7 +22,7 @@
                     <!-- Informasi Utama purchase Order -->
                     <div x-show="tab === 'details'">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                             <div>
                                 <strong>Order Number:</strong>
                                 <p>{{ $purchaseOrder->order_number }}</p>
@@ -34,6 +34,10 @@
                             <div>
                                 <strong>Shipping Date:</strong>
                                 <p>{{ \Carbon\Carbon::parse($purchaseOrder->shipping_date)->format('d M Y') }}</p>
+                            </div>
+                            <div>
+                                <strong>Location Inventory:</strong>
+                                <p>{{ $purchaseOrder->locationInventory->kode_lokasi ?? '-' }}</p>
                             </div>
                             <div>
                                 <strong>Vendor:</strong>
@@ -48,10 +52,10 @@
                                 <strong>Shipping Address:</strong>
                                 <p>{{ $purchaseOrder->shipping_address }}</p>
                             </div>
-                            <div>
+                            {{-- <div>
                                 <strong>Freight:</strong>
                                 <p>{{ number_format($purchaseOrder->freight, 2) }}</p>
-                            </div>
+                            </div> --}}
                             <div>
                                 <strong>Early Payment Terms:</strong>
                                 <p>{{ $purchaseOrder->early_payment_terms }}</p>
@@ -74,38 +78,83 @@
                                         <th class="border px-3 py-2">Back Order</th>
                                         <th class="border px-3 py-2">Unit</th>
                                         <th class="border px-3 py-2">Description</th>
-                                        <th class="border px-3 py-2">Base Price</th>
-                                        <th class="border px-3 py-2">Discount</th>
+                                        {{-- <th class="border px-3 py-2">Discount</th> --}}
                                         <th class="border px-3 py-2">Price</th>
                                         <th class="border px-3 py-2">Amount</th>
                                         <th class="border px-3 py-2">Tax</th>
+                                        <th class="border px-3 py-2">Total Tax</th>
+                                        <th class="border px-3 py-2">Total Amount</th>
                                         <th class="border px-3 py-2">Account</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $total_tax = 0;
+                                        $amount = 0;
+                                        $subtotal = 0;
+                                    $total = 0; @endphp
                                     @foreach ($purchaseOrder->details as $item)
+                                        @php
+                                            $amount = $item->order * $item->price;
+                                            $total_tax += $item->tax_amount;
+                                            $subtotal += $amount;
+                                            $total = $subtotal + $total_tax + $purchaseOrder->freight;
+                                        @endphp
                                         <tr>
-                                            <td class="border px-3 py-2">{{ $item->item_number ?? '-' }}</td>
+                                            <td class="border px-3 py-2">{{ $item->item_description ?? '-' }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->order }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
                                             <td class="border px-3 py-2">{{ $item->item_description }}</td>
-                                            <td class="border px-3 py-2 text-right">
-                                                {{ number_format($item->base_price, 2) }}
-                                            </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->discount, 2) }}
-                                            </td>
+                                            {{-- <td class="border px-3 py-2 text-right">{{ number_format($item->discount, 2) }}
+                                            </td> --}}
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->price, 2) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->amount, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($amount, 2) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($item->tax, 2) }}%
+                                            <td class="border px-3 py-2 text-right">
+                                                {{ optional($item->sales_taxes)->rate ? $item->sales_taxes->rate . '%' : '-' }}
+                                            </td>
+
+                                            <td class="border px-3 py-2 text-right">
+                                                {{ number_format($item->tax_amount, 2) }}</td>
+                                            <td class="border px-3 py-2 text-right">
+                                                {{ number_format($item->amount, 2) }}
                                             </td>
                                             <td class="border px-3 py-2">{{ $item->account->nama_akun ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9"></td>
+                                        <td class="pr-3 text-right font-semibold">Subtotal :</td>
+                                        <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
+                                            {{ number_format($subtotal, 2) }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9"></td>
+                                        <td class="pr-3 text-right font-semibold">Total Tax :</td>
+                                        <td class="w-32 border rounded text-right px-2 py-1">
+                                            {{ number_format($total_tax, 2) }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9"></td>
+                                        <td class="pr-3 text-right font-semibold">Freight :</td>
+                                        <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
+                                            {{ number_format($purchaseOrder->freight, 2) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9"></td>
+                                        <td class="pr-3 text-right font-semibold">Total :</td>
+                                        <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
+                                            {{ number_format($total, 2) }}</td>
+
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     </div>

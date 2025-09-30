@@ -27,8 +27,10 @@
                                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Nama Akun</th>
                                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Nilai
                                     (Komersial)</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">TMOP</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">PPH Final</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">TTOP(Tidak
+                                    Termasuk Objek Pajak)</th>
+                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">PPH Bersifat
+                                    Final</th>
                                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Objek Pajak
                                     Tidak Final</th>
                                 <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Penyesuaian

@@ -77,9 +77,13 @@
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
                                     <th class="border px-4 py-3 text-center w-[20%]">Comment</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
-                                    <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    @can('specpose.access')
+                                        <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
+                                    @endcan
+                                    @can('fiscal.access')
+                                        <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
+                                        <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    @endcan
                                     <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
 
@@ -191,6 +195,8 @@
           <td class="border px-2 py-1">
             <input type="text" name="items[${index}][comment]" class="w-full border rounded px-2 py-1" />
           </td>
+          @can('specpose.access')
+          
           <td class="border px-2 py-1">
             <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
                 <option value="">-- Pilih Specpose --</option>
@@ -199,11 +205,16 @@
                 @endforeach
             </select>
           </td>
-          <td class="border px-2 py-1 text-center">
-            <input type="hidden" name="items[${index}][pajak]" value="0">
-            <input type="checkbox" class="pajak-checkbox" name="items[${index}][pajak]" value="1">
-          </td>
-          <td class="border px-2 py-1 penyesuaian-col text-center">-</td>
+          @endcan
+            @can('fiscal.access')
+                <td class="border px-2 py-1 text-center">
+                        <input type="hidden" name="items[${index}][pajak]" value="0">
+                        <input type="checkbox" class="pajak-checkbox" name="items[${index}][pajak]" value="1">
+                    </td>
+                    <td class="border px-2 py-1 penyesuaian-col text-center">-</td>
+            @endcan
+
+        
           <td class="border px-2 py-1 text-center space-x-1">
             <button type="button" class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600" data-index="${index}">+</button>
             <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>

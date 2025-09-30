@@ -5,10 +5,11 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                    bg-gradient-to-r from-indigo-500 to-blue-600 
-                     flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Build Of Bom
@@ -19,7 +20,7 @@
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button>
 
-                        @can('Build From Bom.create')
+                        @can('Build from Bom.create')
                             <a href="{{ route('build_of_bom.create') }}"
                                 class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
                                 <i class="fas fa-plus mr-2"></i> Add Build Of Bom
@@ -50,20 +51,20 @@
                     <thead class="bg-gray-50 sticky top-0 z-10">
                         <tr>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider ">
                                 #
                             </th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider ">
                                 Nama Item
                             </th>
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Qty To Build
                             </th>
 
                             <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Total Cost
                             </th>
 
@@ -84,30 +85,32 @@
                                     {{ $loop->iteration }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">{{ $item->item->item_description }}
+                                    <div class="text-sm font-medium text-gray-900 text-center">
+                                        {{ $item->item->item_description }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $item->qty_to_build }}</div>
+                                    <div class="text-sm text-gray-900 text-center">{{ $item->qty_to_build }}</div>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ number_format($item->total_cost) }}</div>
+                                    <div class="text-sm text-gray-900 text-right">{{ number_format($item->total_cost) }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $item->notes }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end space-x-3">
-                                        @can('Build From Bom.view')
-                                            <a href="{{ route('buld_of_bom.show', $item->kd_customers) }}"
+                                        @can('Build from Bom.view')
+                                            <a href="{{ route('build_of_bom.show', $item->id) }}"
                                                 class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
                                                 title="View">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endcan
 
-                                        @can('Build From Bom.update')
+                                        @can('Build from Bom.update')
                                             <a href="{{ route('build_of_bom.edit', $item->id) }}"
                                                 class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
                                                 title="Edit">
@@ -115,7 +118,7 @@
                                             </a>
                                         @endcan
 
-                                        @can('Build From Bom.delete')
+                                        @can('Build from Bom.delete')
                                             <form id="delete-form-{{ $item->id }}"
                                                 action="{{ route('build_of_bom.destroy', $item->id) }}" method="POST"
                                                 style="display: none;">

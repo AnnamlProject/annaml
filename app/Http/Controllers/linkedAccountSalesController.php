@@ -23,6 +23,7 @@ class linkedAccountSalesController extends Controller
         $akun2 = chartOfAccount::where('tipe_akun', 'Kewajiban')->get();
         $akun4 = chartOfAccount::where('tipe_akun', 'Pendapatan')->get();
         $accounts = chartOfAccount::where('tipe_akun', 'Ekuitas')->get();
+        $akun = chartOfAccount::all();
 
         // Ambil semua akun BANK dengan level ACCOUNT
         $bankAccounts = chartOfAccount::whereRaw('LOWER(nama_akun) LIKE ?', ['%bank%'])
@@ -31,6 +32,22 @@ class linkedAccountSalesController extends Controller
 
         // Ambil prefix dari kode_akun untuk digunakan sebagai acuan pencarian sub account
         $bankPrefixes = $bankAccounts->pluck('kode_akun');
+
+        $requiredCodes = [
+            'Principal Bank Account',
+            'Account Receivable',
+            'Default Revenue',
+            'Freight Revenue',
+            'Early Payment Discount',
+            'Prepaid Orders',
+        ];
+        // Ambil kode yang sudah ada di DB
+        $existingCodes = linkedAccounts::where('modul', 'sales')
+            ->pluck('kode')
+            ->toArray();
+
+        // Cari kode yang belum ada
+        $missingCodes = array_diff($requiredCodes, $existingCodes);
 
         // Ambil sub account berdasarkan prefix kode_akun
         $subBankAccounts = collect();
@@ -47,39 +64,39 @@ class linkedAccountSalesController extends Controller
             'akun1',
             'akun2',
             'akun4',
-            'subBankAccounts'
+            'akun',
+            'subBankAccounts',
+            'missingCodes'
         ));
     }
 
-
-
     public function store(Request $request)
     {
-        $request->validate([
-            'principal_bank_account_id' => 'required|exists:chart_of_accounts,id',
-            'account_receivable_id' => 'required|exists:chart_of_accounts,id',
-            'default_revenue_id' => 'required|exists:chart_of_accounts,id',
-            'freight_revenue_id' => 'required|exists:chart_of_accounts,id',
-            'early_payment_discount_id' => 'required|exists:chart_of_accounts,id',
-            'prepaid_order_id' => 'required|exists:chart_of_accounts,id',
-        ]);
+        $accounts = $request->input('accounts', []);
 
-        $data = [
-            'principal_bank_account'   => $request->principal_bank_account_id,
-            'account_receivable'       => $request->account_receivable_id,
-            'default_revenue'          => $request->default_revenue_id,
-            'freight_revenue'          => $request->freight_revenue_id,
-            'early_payment_discount'   => $request->early_payment_discount_id,
-            'prepaid_order'            => $request->prepaid_order_id,
-        ];
-
-        foreach ($data as $kode => $akun_id) {
+        foreach ($accounts as $kode => $akun_id) {
             linkedAccounts::updateOrInsert(
                 ['modul' => 'sales', 'kode' => $kode],
                 ['akun_id' => $akun_id, 'updated_at' => now()]
             );
         }
 
-        return redirect()->route('linkedAccountSales.index')->with('success', 'Linked Account Sales berhasil disimpan.');
+        return redirect()->route('linkedAccountSales.index')
+            ->with('success', 'Linked Account Sales berhasil disimpan.');
+    }
+    public function destroy($id)
+    {
+        $linkedAccount = linkedAccounts::findOrFail($id);
+
+        try {
+            $linkedAccount->delete();
+            return redirect()
+                ->route('linkedAccountSales.index')
+                ->with('success', 'Linked Account Sales berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('linkedAccountSales.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus: ' . $e->getMessage());
+        }
     }
 }

@@ -7,9 +7,11 @@ use App\Customers;
 use App\Employee;
 use App\Item;
 use App\jenis_pembayaran;
+use App\LocationInventory;
 use App\PaymentMethod;
 use App\SalesOrder;
 use App\SalesOrderDetail;
+use App\SalesTaxes;
 use Barryvdh\DomPDF\PDF as DomPDFPDF;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,7 @@ class SalesOrderController extends Controller
     //
     public function index()
     {
-        $data = SalesOrder::with(['customer', 'jenisPembayaran', 'salesPerson'])->latest()->paginate(5);
+        $data = SalesOrder::with(['customer', 'jenisPembayaran', 'salesPerson', 'locationInventory'])->orderBy('order_number', 'asc')->paginate(5);
 
         return view('sales_order.index', compact('data'));
     }
@@ -32,20 +34,55 @@ class SalesOrderController extends Controller
         $employee = Employee::all();
         $items = Item::all(); // semua item yang bisa dipilih
         $accounts = chartOfAccount::all(); // akun-akun untuk entri jurnal
-        return view('sales_order.create', compact('customer', 'jenis_pembayaran', 'employee', 'items', 'accounts'));
+        $sales_taxes = SalesTaxes::all();
+        $lokasi_inventory = LocationInventory::all();
+        return view('sales_order.create', compact('customer', 'jenis_pembayaran', 'employee', 'items', 'accounts', 'sales_taxes', 'lokasi_inventory'));
+    }
+
+    private function generateKodeOrder($dateOrder)
+    {
+        // Formatkan tanggal order sesuai kebutuhan (misal YYYYMMDD)
+        $dateFormatted = \Carbon\Carbon::parse($dateOrder)->format('Ymd');
+
+        $prefix = 'SO-' . $dateFormatted . '-';
+
+        // Cari order terakhir berdasarkan tanggal order yg sama
+        $last = \App\SalesOrder::where('order_number', 'like', $prefix . '%')
+            ->orderBy('order_number', 'desc')
+            ->first();
+
+        if ($last && preg_match('/' . $prefix . '(\d+)/', $last->order_number, $matches)) {
+            $number = (int) $matches[1] + 1;
+        } else {
+            $number = 1;
+        }
+
+        return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
     public function store(Request $request)
     {
+
+        // Cek apakah checkbox auto_generate dicentang
+        if ($request->has('auto_generate')) {
+            $order_number = $this->generateKodeOrder($request->date_order);
+        } else {
+            // Validasi manual
+            $request->validate([
+                'order_number' => 'unique:purchase_orders,order_number',
+            ]);
+            $order_number = $request->order_number;
+        }
         // ✅ VALIDASI FORM INPUT
         $request->validate([
-            'order_number'         => 'required|unique:sales_orders,order_number',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
             'customer_id'          => 'required|exists:customers,id',
+            'location_id'          => 'required|exists:location_inventories,id',
             'sales_person_id'          => 'required|exists:employees,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
+            'payment_method_account_id'  => 'required|exists:payment_method_details,id',
             'shipping_address'     => 'required|string',
-            'freight'              => 'required|numeric|min:0',
+            'freight'              => 'nullable|numeric|min:0',
             'early_payment_terms'  => 'nullable|string',
             'messages'             => 'nullable|string',
 
@@ -63,6 +100,7 @@ class SalesOrderController extends Controller
             'items.*.amount'       => 'nullable|numeric|min:0',
             'items.*.tax_value'          => 'nullable|numeric|min:0',
             'items.*.account'      => 'required|exists:chart_of_accounts,id',
+            'items.*.tax_id'      => 'required|exists:sales_taxes,id',
         ]);
 
         DB::beginTransaction();
@@ -70,16 +108,19 @@ class SalesOrderController extends Controller
         try {
             // ✅ Simpan data utama ke tabel sales_orders
             $salesOrder = SalesOrder::create([
-                'order_number'         => $request->order_number,
+                'order_number'         => $order_number,
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
                 'customer_id'          => $request->customer_id,
+                'location_id' => $request->location_id,
                 'sales_person_id'          => $request->sales_person_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $this->normalizeNumber($request['freight']),
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
+                'payment_method_account_id' => $request->payment_method_account_id,
+                'status_sales' => 1
             ]);
 
             // ✅ Simpan setiap item ke tabel sales_order_details
@@ -98,6 +139,7 @@ class SalesOrderController extends Controller
                     'amount'           => $this->normalizeNumber($item['amount']),
                     'tax'              => $this->normalizeNumber($item['tax_value']),
                     'account_id'       => $item['account'],
+                    'tax_id'       => $item['tax_id'],
                 ]);
             }
 
@@ -124,6 +166,7 @@ class SalesOrderController extends Controller
         // Ambil sales order beserta relasi terkait
         $salesOrder = SalesOrder::with([
             'customer',
+            'locationInventory',
             'salesPerson',
             'jenisPembayaran',
             'details.item',
@@ -139,9 +182,11 @@ class SalesOrderController extends Controller
         $employees = Employee::all();
         $jenis_pembayaran = PaymentMethod::all();
         $items = Item::all(); // semua item yang bisa dipilih
+        $sales_taxes = SalesTaxes::all();
+        $location_inventory = LocationInventory::all();
 
 
-        return view('sales_order.edit', compact('salesOrder', 'customers', 'employees', 'jenis_pembayaran', 'items'));
+        return view('sales_order.edit', compact('salesOrder', 'customers', 'employees', 'jenis_pembayaran', 'items', 'sales_taxes', 'location_inventory'));
     }
 
     /**
@@ -155,10 +200,12 @@ class SalesOrderController extends Controller
             'shipping_date' => 'required|date',
             'customer_id' => 'required|exists:customers,id',
             'employee_id' => 'required|exists:employees,id',
+            'location_id' => 'required|exists:location_inventories,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
+            'payment_method_account_id' => 'required|exists:payment_method_details,id',
             'shipping_address' => 'required|string',
-            'freight' => 'required|numeric',
-            'early_payment_terms' => 'required|string',
+            'freight' => 'nullable|numeric',
+            'early_payment_terms' => 'nullable|string',
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:items,id',
             'items.*.quantity' => 'required|numeric|min:0',
@@ -172,6 +219,7 @@ class SalesOrderController extends Controller
             'items.*.amount' => 'required|numeric|min:0',
             'items.*.tax_value' => 'required|numeric|min:0',
             'items.*.account' => 'required|exists:chart_of_accounts,id',
+            'items.*.tax_id' => 'required|exists:sales_taxes,id',
         ]);
 
         DB::beginTransaction();
@@ -183,12 +231,15 @@ class SalesOrderController extends Controller
                 'date_order' => $request->date_order,
                 'shipping_date' => $request->shipping_date,
                 'customer_id' => $request->customer_id,
+                'location_id' => $request->location_id,
                 'employee_id' => $request->employee_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address' => $request->shipping_address,
                 'freight' => $request->freight,
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages' => $request->messages,
+                'payment_method_account_id' => $request->payment_method_account_id,
+                'status_sales' => 1,
             ]);
 
             // Hapus detail lama dan simpan ulang
@@ -209,6 +260,7 @@ class SalesOrderController extends Controller
                     'amount' => $item['amount'],
                     'tax' => $item['tax_value'],
                     'account_id' => $item['account'],
+                    'tax_id' => $item['tax_id'],
                 ]);
             }
 
@@ -226,5 +278,25 @@ class SalesOrderController extends Controller
 
         $pdf = Pdf::loadView('sales_order.pdf', compact('salesOrder'));
         return $pdf->download('SalesOrder-' . $salesOrder->order_number . '.pdf');
+    }
+    public function destroy($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $order = SalesOrder::with(['details', 'invoices'])->findOrFail($id);
+
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($order->invoices()->exists()) {
+                    throw new \Exception("SO ini sudah digunakan dalam Sales Invoice, tidak bisa dihapus.");
+                }
+
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $order->delete();
+            });
+
+            return redirect()->route('sales_order.index')->with('success', 'Sales Order berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('sales_order.index')->with('error', $e->getMessage());
+        }
     }
 }

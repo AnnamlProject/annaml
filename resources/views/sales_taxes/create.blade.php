@@ -20,51 +20,62 @@
                     </ul>
                 </div>
             @endif
+            <h3 class="font-bold text-lg mb-3">Sales-Taxes Create</h3>
 
 
-            <div class="mb-5">
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Tax</label>
-                <input type="text" id="name" name="name"
-                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value="{{ old('name', $sales_taxes->name) }}">
-            </div>
-            <div class="mb-5">
-                <label for="purchase_account_id" class="block text-sm font-medium text-gray-700 mb-1">Purchase
-                    Account</label>
-                <select name="purchase_account_id" id="purchase_account_id"
-                    class="account-select w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
-                    <option value="">-- Pilih Account --</option>
-                    @foreach ($account as $g)
-                        <option value="{{ $g->id }}"
-                            {{ isset($sales_taxes) && $sales_taxes->purchase_account_id == $g->id ? 'selected' : '' }}>
-                            {{ $g->kode_akun }} - {{ $g->nama_akun }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            <div class="grid grid-cols-4 gap-4 text-sm">
+                <div class="mb-5">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Tax</label>
+                    <input type="text" id="name" name="name"
+                        class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ old('name', $sales_taxes->name ?? '') }}">
+                </div>
+                <div class="mb-5">
+                    <label for="rate" class="block text-sm font-medium text-gray-700 mb-1">Dalam Persen(%)</label>
+                    <input type="text" id="rate" name="rate"
+                        class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Contoh : 10" value="{{ old('rate', $sales_taxes->rate ?? '') }}">
+                </div>
+                <div class="mb-5">
+                    <label for="purchase_account_id" class="block text-sm font-medium text-gray-700 mb-1">Purchase
+                        Account</label>
+                    <select name="purchase_account_id" id="purchase_account_id"
+                        class="account-select w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                        <option value="">-- Pilih Account --</option>
+                        @foreach ($account as $g)
+                            <option value="{{ $g->id }}"
+                                {{ isset($sales_taxes) && $sales_taxes->purchase_account_id == $g->id ? 'selected' : '' }}>
+                                {{ $g->kode_akun }} - {{ $g->nama_akun }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <div class="mb-5">
-                <label for="sales_account_id" class="block text-sm font-medium text-gray-700 mb-1">Sales Account</label>
-                <select name="sales_account_id" id="sales_account_id"
-                    class="account-select w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
-                    <option value="">-- Pilih Account --</option>
-                    @foreach ($account as $g)
-                        <option value="{{ $g->id }}"
-                            {{ isset($sales_taxes) && $sales_taxes->sales_account_id == $g->id ? 'selected' : '' }}>
-                            {{ $g->kode_akun }} - {{ $g->nama_akun }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                <div class="mb-5">
+                    <label for="sales_account_id" class="block text-sm font-medium text-gray-700 mb-1">Sales Account</label>
+                    <select name="sales_account_id" id="sales_account_id"
+                        class="account-select w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                        <option value="">-- Pilih Account --</option>
+                        @foreach ($account as $g)
+                            <option value="{{ $g->id }}"
+                                {{ isset($sales_taxes) && $sales_taxes->sales_account_id == $g->id ? 'selected' : '' }}>
+                                {{ $g->kode_akun }} - {{ $g->nama_akun }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
 
-            <div>
-                <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Active</label>
-                <select name="active" id="active"
-                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="1">Yes</option>
-                    <option value="0">No</option>
-                </select>
+
+
+                <div>
+                    <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Active</label>
+                    <select name="active" id="active"
+                        class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
             </div>
 
             {{-- Tombol --}}

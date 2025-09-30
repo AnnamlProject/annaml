@@ -14,6 +14,7 @@ class BuildOfBom extends Model
         'total_cost',
         'status',
         'notes',
+        'from_location_id'
     ];
 
     /**
@@ -22,6 +23,10 @@ class BuildOfBom extends Model
     public function item()
     {
         return $this->belongsTo(Item::class, 'item_id');
+    }
+    public function LocationInventory()
+    {
+        return $this->belongsTo(LocationInventory::class, 'from_location_id');
     }
 
     /**

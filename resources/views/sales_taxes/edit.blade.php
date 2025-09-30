@@ -30,6 +30,13 @@
             </div>
 
             <div class="mb-5">
+                <label for="rate" class="block text-sm font-medium text-gray-700 mb-1">Dalam Persen(%)</label>
+                <input type="text" id="rate" name="rate"
+                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Contoh : 10" value="{{ old('rate', $sales_taxes->rate ?? '') }}">
+            </div>
+
+            <div class="mb-5">
                 <label for="purchase_account_id" class="block text-sm font-medium text-gray-700 mb-1">Purchase
                     Account</label>
                 <select name="purchase_account_id" id="purchase_account_id"

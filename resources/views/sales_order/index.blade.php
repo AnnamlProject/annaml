@@ -39,6 +39,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Shipping Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Location Inventory</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Customer</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Payment Method</th>
@@ -46,8 +48,6 @@
                                 Shipping Address</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Sales Person</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Freight</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Early Payment Terms</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -63,13 +63,13 @@
                                 <td class="px-6 py-4">{{ $item->order_number }}</td>
                                 <td class="px-6 py-4">{{ $item->date_order }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_date }}</td>
+                                <td class="px-6 py-2">{{ $item->locationInventory->kode_lokasi ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->customer->nama_customers ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_address }}</td>
                                 <td class="px-6 py-4">{{ $item->salesPerson->nama_karyawan ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->freight }}</td>
-                                <td class="px-6 py-4">{{ $item->early_payment_terms }}</td>
-                                <td class="px-6 py-4">{{ $item->messages }}</td>
+                                <td class="px-6 py-4">{{ $item->early_payment_terms ?? 'Tidak Ada' }}</td>
+                                <td class="px-6 py-4">{{ $item->messages ?? 'Tidak Ada' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end space-x-3">
                                         @can('sales_orders.view')

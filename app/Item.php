@@ -50,4 +50,13 @@ class Item extends Model
     {
         return $this->hasMany(ItemTaxes::class);
     }
+    public function assemblies()
+    {
+        return $this->hasMany(ItemAssemblie::class, 'parent_item_id');
+    }
+
+    public function assemblyComponents()
+    {
+        return $this->hasMany(ItemAssemblieDetail::class, 'component_item_id');
+    }
 }

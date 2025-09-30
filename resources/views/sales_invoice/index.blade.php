@@ -45,8 +45,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Sales Person</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Freight</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Early Payment Terms</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Messages</th>
@@ -65,7 +63,6 @@
                                 <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_address }}</td>
                                 <td class="px-6 py-4">{{ $item->salesPerson->nama_karyawan ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $item->freight }}</td>
                                 <td class="px-6 py-4">{{ $item->early_payment_terms }}</td>
                                 <td class="px-6 py-4">{{ $item->messages }}</td>
                                 <td class="px-6 py-4 text-right">

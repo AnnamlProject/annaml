@@ -43,6 +43,9 @@
                                     Tax</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Dalam Persen(%)</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tax On Purchases</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -57,6 +60,7 @@
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-2 py-1 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->name }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->rate }}%</td>
                                     <td class="px-2 py-1 text-center">{{ $item->purchaseAccount->nama_akun }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->salesAccount->nama_akun ?? '-' }}</td>
 

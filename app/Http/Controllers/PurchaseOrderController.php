@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\chartOfAccount;
 use App\Customers;
 use App\Item;
+use App\LocationInventory;
 use App\PaymentMethod;
 use App\PurchaseOrder;
 use App\PurchaseOrderDetail;
+use App\SalesTaxes;
 use App\Vendors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +20,7 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor'])->paginate(10);
+        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor', 'locationInventory'])->paginate(10);
         return view('purchase_order.index', compact('data'));
     }
     public function create()
@@ -27,14 +29,18 @@ class PurchaseOrderController extends Controller
         $jenis_pembayaran = PaymentMethod::all();
         $items = Item::all(); // semua item yang bisa dipilih
         $accounts = chartOfAccount::all(); // akun-akun untuk entri jurnal
-        return view('purchase_order.create', compact('vendor', 'jenis_pembayaran',  'items', 'accounts'));
+        $sales_taxes = SalesTaxes::all();
+        $locationInventory = LocationInventory::all();
+        return view('purchase_order.create', compact('vendor', 'jenis_pembayaran',  'items', 'accounts', 'sales_taxes', 'locationInventory'));
     }
-    private function generateKodeOrder()
+    private function generateKodeOrder($dateOrder)
     {
-        $today = now()->format('Ymd'); // format tanggal: 20250917
-        $prefix = 'PO-' . $today . '-';
+        // Formatkan tanggal order sesuai kebutuhan (misal YYYYMMDD)
+        $dateFormatted = \Carbon\Carbon::parse($dateOrder)->format('Ymd');
 
-        // Cari order terakhir yang ada pada tanggal hari ini
+        $prefix = 'PO-' . $dateFormatted . '-';
+
+        // Cari order terakhir berdasarkan tanggal order yg sama
         $last = \App\PurchaseOrder::where('order_number', 'like', $prefix . '%')
             ->orderBy('order_number', 'desc')
             ->first();
@@ -47,26 +53,29 @@ class PurchaseOrderController extends Controller
 
         return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
+
     public function store(Request $request)
     {
         // Cek apakah checkbox auto_generate dicentang
         if ($request->has('auto_generate')) {
-            $order_number = $this->generateKodeOrder();
+            $order_number = $this->generateKodeOrder($request->date_order);
         } else {
-            // Validasi order_number manual
+            // Validasi manual
             $request->validate([
                 'order_number' => 'unique:purchase_orders,order_number',
             ]);
             $order_number = $request->order_number;
         }
+
         // ✅ VALIDASI FORM INPUT
         $request->validate([
             'order_number'         => 'required|unique:purchase_orders,order_number',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
             'vendor_id'          => 'required|exists:vendors,id',
-            'account_id' => 'requird|exists:payment_method_details,id',
+            'account_id' => 'required|exists:payment_method_details,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
+            'location_id'  => 'required|exists:location_inventories,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
             'early_payment_terms'  => 'nullable|string',
@@ -81,7 +90,7 @@ class PurchaseOrderController extends Controller
             'items.*.unit'         => 'required|string',
             'items.*.description'  => 'required|string',
             'items.*.price'   => 'nullable|numeric|min:0',
-            'items.*.tax'     => 'nullable|numeric|min:0',
+            'items.*.tax_id'      => 'nullable|exists:sales_taxes,id',
             'items.*.tax_amount'        => 'nullable|numeric|min:0',
             'items.*.amount'       => 'nullable|numeric|min:0',
             'items.*.account'      => 'required|exists:chart_of_accounts,id',
@@ -97,6 +106,7 @@ class PurchaseOrderController extends Controller
                 'shipping_date'        => $request->shipping_date,
                 'vendor_id'          => $request->vendor_id,
                 'account_id' => $request->account_id,
+                'location_id' => $request->location_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $request->freight,
@@ -120,7 +130,7 @@ class PurchaseOrderController extends Controller
                     'unit'               => $item['unit'],
                     'item_description'   => $item['description'],
                     'price'         => $price,
-                    'tax'           => $item['tax'],
+                    'tax_id'           => $item['tax_id'],
                     'tax_amount'              => $tax_amount,
                     'amount'             => $amount,
                     'account_id'         => $item['account'],
@@ -139,36 +149,52 @@ class PurchaseOrderController extends Controller
         // Ambil sales order beserta relasi terkait
         $purchaseOrder = PurchaseOrder::with([
             'vendor',
+            'locationInventory',
             'jenisPembayaran',
             'details.item',
-            'details.account'
+            'details.account',
+            'details.sales_taxes'
         ])->findOrFail($id);
 
         return view('purchase_order.show', compact('purchaseOrder'));
     }
     public function edit($id)
     {
-        $purchaseOrder = PurchaseOrder::with('details')->findOrFail($id);
+        $purchaseOrder = PurchaseOrder::with('details', 'details.sales_taxes')->findOrFail($id);
         $vendors = Vendors::all();
         $jenis_pembayaran = PaymentMethod::all();
-        $items = Item::all(); // semua item yang bisa dipilih
+        $items = Item::all();
+        $locationInventory = LocationInventory::all();
+        $account = ChartOfAccount::all();
+        $sales_taxes = SalesTaxes::all(); // ✅ ambil semua pajak
 
-
-        return view('purchase_order.edit', compact('purchaseOrder', 'vendors', 'jenis_pembayaran', 'items'));
+        return view('purchase_order.edit', compact(
+            'purchaseOrder',
+            'vendors',
+            'jenis_pembayaran',
+            'items',
+            'account',
+            'sales_taxes',
+            'locationInventory' // ✅ kirim ke view
+        ));
     }
+
     public function update(Request $request, $id)
     {
+
+        // dd($request->all());
         $request->validate([
             'order_number'         => 'required|string',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
             'vendor_id'          => 'required|exists:vendors,id',
+            'account_id' => 'required|exists:chart_of_accounts,id',
+            'location_id' => 'required|exists:location_inventories,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
             'early_payment_terms'  => 'nullable|string',
             'messages'             => 'nullable|string',
-            'early_payment_terms' => 'required|string',
             // edatil
             'items'                => 'required|array|min:1',
             'items.*.item_id'      => 'required|exists:items,id',
@@ -178,10 +204,10 @@ class PurchaseOrderController extends Controller
             'items.*.unit'         => 'required|string',
             'items.*.description'  => 'required|string',
             'items.*.price'   => 'nullable|numeric|min:0',
-            'items.*.tax'     => 'nullable|numeric|min:0',
+            'items.*.tax_id'     => 'nullable|exists:sales_taxes,id',
             'items.*.tax_amount'        => 'nullable|numeric|min:0',
             'items.*.amount'       => 'nullable|numeric|min:0',
-            'items.*.account'      => 'required|exists:chart_of_accounts,id',
+            'items.*.account_id'      => 'required|exists:chart_of_accounts,id',
         ]);
 
         DB::beginTransaction();
@@ -193,6 +219,8 @@ class PurchaseOrderController extends Controller
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
                 'vendor_id'          => $request->vendor_id,
+                'account_id' => $request->account_id,
+                'location_id' => $request->location_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
                 'freight'              => $request->freight,
@@ -213,10 +241,10 @@ class PurchaseOrderController extends Controller
                     'unit'               => $item['unit'],
                     'item_description'   => $item['description'],
                     'price'         => $item['price'],
-                    'tax'           => $item['tax'],
+                    'tax_id'           => $item['tax_id'],
                     'tax_amount'              => $item['tax_amount'],
                     'amount'             => $item['amount'],
-                    'account_id'         => $item['account'],
+                    'account_id'         => $item['account_id'],
                 ]);
             }
 
@@ -225,6 +253,26 @@ class PurchaseOrderController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Terjadi kesalahan saat update: ' . $e->getMessage())->withInput();
+        }
+    }
+    public function destroy($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $order = PurchaseOrder::with(['details', 'invoices'])->findOrFail($id);
+
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($order->invoices()->exists()) {
+                    throw new \Exception("PO ini sudah digunakan dalam Purchase Invoice, tidak bisa dihapus.");
+                }
+
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $order->delete();
+            });
+
+            return redirect()->route('purchase_order.index')->with('success', 'Purchase Order berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('purchase_order.index')->with('error', $e->getMessage());
         }
     }
 }

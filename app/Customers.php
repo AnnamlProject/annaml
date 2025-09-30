@@ -17,4 +17,12 @@ class Customers extends Model
         'limit_kredit',
         'payment_terms',
     ];
+    public function salesOrder()
+    {
+        return $this->hasMany(SalesOrder::class, 'customer_id');
+    }
+    public function salesInvoice()
+    {
+        return $this->hasMany(SalesInvoice::class, 'customers_id');
+    }
 }

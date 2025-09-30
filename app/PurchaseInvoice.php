@@ -17,20 +17,23 @@ class PurchaseInvoice extends Model
         'shipping_address',
         'freight',
         'early_payment_terms',
-        'messages'
+        'messages',
+        'vendor_id',
+        'account_id',
+        'location_id'
     ];
 
     public function jenisPembayaran()
     {
         return $this->belongsTo(PaymentMethod::class);
     }
-    public function customer()
+    public function vendor()
     {
-        return $this->belongsTo(Customers::class);
+        return $this->belongsTo(Vendors::class);
     }
     public function details()
     {
-        return $this->hasMany(PurchaseInvoiceDetail::class);
+        return $this->hasMany(PurchaseInvoiceDetail::class, 'purchase_invoice_id');
     }
     public function purchaseOrder()
     {
@@ -39,5 +42,9 @@ class PurchaseInvoice extends Model
     public function documents()
     {
         return $this->hasMany(PurchaseInvoiceDocument::class);
+    }
+    public function locationInventories()
+    {
+        return $this->belongsTo(LocationInventory::class, 'location_id');
     }
 }

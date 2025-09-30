@@ -27,6 +27,7 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => 'nullable|exists:chart_of_accounts,id',
             'sales_account_id'   => 'nullable|exists:chart_of_accounts,id',
             'active'             => 'nullable|boolean',
+            'rate' => 'required|numeric'
         ]);
 
         // === 2) Simpan ke database ===
@@ -35,6 +36,7 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => $validated['purchase_account_id'] ?? null,
             'sales_account_id'   => $validated['sales_account_id'] ?? null,
             'active' => (bool) $validated['active'],
+            'rate' => $validated['rate']
 
         ]);
 
@@ -62,6 +64,7 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => 'nullable|exists:chart_of_accounts,id',
             'sales_account_id'   => 'nullable|exists:chart_of_accounts,id',
             'active'             => 'required',
+            'rate' => 'required|numeric',
         ]);
 
         $salesTax = SalesTaxes::findOrFail($id);
@@ -71,6 +74,7 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => $validated['purchase_account_id'] ?? null,
             'sales_account_id'   => $validated['sales_account_id'] ?? null,
             'active' => (bool) $validated['active'],
+            'rate' => $validated['rate']
 
         ]);
 

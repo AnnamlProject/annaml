@@ -32,12 +32,26 @@
                         <!-- Customers -->
                         <div>
                             <label class="block font-medium mb-1">Customers</label>
-                            <select name="customer_id" class="w-full border rounded px-2 py-1 text-sm" required>
+                            <select name="customer_id" id="customer_id" class="w-full border rounded px-2 py-1 text-sm"
+                                required>
                                 <option value="">-- Customers --</option>
                                 @foreach ($customer as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('customer_id', $sales_order->customer_id ?? '') == $level->id ? 'selected' : '' }}>
                                         {{ $level->nama_customers }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-medium mb-1">Location Inventory</label>
+                            <select name="location_id" id="location_id" class="w-full border rounded px-2 py-1 text-sm"
+                                required>
+                                <option value="">-- Location --</option>
+                                @foreach ($lokasi_inventory as $level)
+                                    <option value="{{ $level->id }}"
+                                        {{ old('location_id', $sales_order->location_id ?? '') == $level->id ? 'selected' : '' }}>
+                                        {{ $level->kode_lokasi }}
                                     </option>
                                 @endforeach
                             </select>
@@ -64,7 +78,7 @@
                             <div id="pm-account-panel"
                                 class="{{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
                                 <label class="block font-medium mb-1">Account</label>
-                                <select id="pm-account-id" name="account_detail_coa_id"
+                                <select id="pm-account-id" name="payment_method_account_id"
                                     class="w-full border rounded px-2 py-1 text-sm">
                                     <option value="">-- Pilih Account --</option>
                                 </select>
@@ -75,7 +89,8 @@
                         <!-- Employee -->
                         <div>
                             <label class="block font-medium mb-1">Employee</label>
-                            <select name="sales_person_id" class="w-full border rounded px-2 py-1 text-sm" required>
+                            <select name="sales_person_id" id="employee_id" class="w-full border rounded px-2 py-1 text-sm"
+                                required>
                                 <option value="">-- Employee --</option>
                                 @foreach ($employee as $level)
                                     <option value="{{ $level->id }}"
@@ -109,7 +124,7 @@
                         <div>
                             <label class="block font-medium mb-1">Date Order</label>
                             <input type="date" name="date_order"
-                                value="{{ old('date_order', $sales_order->date_order ?? '') }}"
+                                value="{{ old('date_order', $sales_order->date_order ?? now()->toDateString()) }}"
                                 class="w-full border rounded px-2 py-1 text-sm" required>
                         </div>
 
@@ -117,7 +132,7 @@
                         <div>
                             <label class="block font-medium mb-1">Shipping Date</label>
                             <input type="date" name="shipping_date"
-                                value="{{ old('shipping_date', $sales_order->shipping_date ?? '') }}"
+                                value="{{ old('shipping_date', $sales_order->shipping_date ?? now()->toDateString()) }}"
                                 class="w-full border rounded px-2 py-1 text-sm" required>
                         </div>
 
@@ -231,6 +246,60 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            function initSelect2(selector, url, mapper, placeholder) {
+                $(selector).select2({
+                    placeholder: placeholder,
+                    ajax: {
+                        url: url,
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.map(mapper)
+                            };
+                        },
+                        cache: true
+                    },
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+
+            // ✅ Customers
+            initSelect2(
+                '#customer_id',
+                '{{ route('customers.search') }}',
+                function(customer) {
+                    return {
+                        id: customer.id,
+                        text: customer.nama_customers
+                    };
+                },
+                "-- Customers --"
+            );
+
+            // ✅ Employees
+            initSelect2(
+                '#employee_id',
+                '{{ route('employee.search') }}',
+                function(employee) {
+                    return {
+                        id: employee.id,
+                        text: employee.nama_karyawan
+                    };
+                },
+                "-- Employees --"
+            );
+        });
+    </script>
 
     <script>
         function toggleAutoGenerate() {
@@ -349,12 +418,15 @@
             <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
 
             <!-- Tax dropdown -->
-            <td class="border px-2 py-1">
-                <select name="items[${index}][tax_rate]" class="tax-${index} w-full border rounded">
-                    <option value="0">Tanpa Pajak</option>
-                    <option value="11">11%</option>
-                    <option value="12">12%</option>
-                </select>
+           <td class="border px-2 py-1">
+              <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
+                <option value="">-- Pilih Pajak --</option>
+                @foreach ($sales_taxes as $item)
+                    <option value="{{ $item->id }}" data-rate="{{ $item->rate }}">
+                        ({{ $item->rate }}%)
+                    </option>
+                @endforeach
+            </select>
             </td>
 
             <!-- Nilai pajak -->
@@ -386,45 +458,54 @@
                     delay: 250,
                     data: params => ({
                         q: params.term,
-                        context: 'sales'
+                        context: 'sales', // ✅ supaya akun ambil revenue
+                        location_id: $('#location_id').val() // ✅ ikutkan lokasi
                     }),
                     processResults: data => ({
                         results: data.map(item => ({
                             id: item.id,
                             text: `${item.item_number} - ${item.item_description}`,
-                            item_description: item.item_description,
+                            item_name: item.item_description,
                             unit: item.unit,
-                            base_price: item.base_price,
-                            tax_rate: item.tax_rate, // asumsikan 0/11/12 dari server
+                            purchase_price: item.purchase_price,
+                            tax_rate: item.tax_rate,
                             account_id: item.account_id,
                             account_name: item.account_name,
-                            stock_quantity: item.on_hand_qty
+                            stock_quantity: item.on_hand_qty,
 
+                            // Tambahan utk HPP
+                            type: item.type, // inventory / service
+                            unit_cost: item
+                                .unit_cost, // sudah dihitung di controller per lokasi
+                            cogs_account_name: item.cogs_account_name,
+                            asset_account_name: item.asset_account_name
                         }))
                     }),
                     cache: true
                 }
             }).on('select2:select', function(e) {
                 const data = e.params.data;
-                console.log("Data dari server:", data);
 
-                $(`.desc-${index}`).val(data.item_description);
+                // ✅ Update input field
+                $(`.desc-${index}`).val(data.item_name);
                 $(`.unit-${index}`).val(data.unit);
-                $(`.base-${index}`).val(formatNumber(data.base_price));
-
-                // Set dropdown pajak dengan value numerik (0/11/12)
-                const rate = (typeof data.tax_rate !== 'undefined' && data.tax_rate !== null) ?
-                    String(parseFloat(String(data.tax_rate).toString().replace('%', '')) || 0) :
-                    '0';
-                $(`.tax-${index}`).val(rate).trigger('change');
-
+                $(`.tax-${index}`).val(data.tax_rate);
                 $(`.account-name-${index}`).val(data.account_name);
                 $(`.account-id-${index}`).val(data.account_id);
-                $(`.qty-${index}`).val(data.stock_quantity);
+                $(`.qty-${index}`).val(formatNumber(data.stock_quantity));
 
+                // ✅ Update atribut data-* di <tr>
+                const tr = document.querySelector(`tr[data-index="${index}"]`);
+                tr.dataset.type = data.type || '';
+                tr.dataset.unitCost = data.unit_cost || 0;
+                tr.dataset.cogsAccountName = data.cogs_account_name || 'COGS';
+                tr.dataset.assetAccountName = data.asset_account_name || 'Inventory';
+
+                // Hitung ulang amount
                 calculateAmount(index);
             });
         }
+
 
         function attachEvents(index) {
             // Input numerik yang mempengaruhi amount
@@ -473,7 +554,7 @@
             $(`.amount-${index}`).val(formatNumber(amount));
 
             // Pajak dihitung dari amount (setelah diskon)
-            const taxRate = parseFloat($(`.tax-${index}`).val()) || 0; // 0 / 11 / 12
+            const taxRate = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0; // 0 / 11 / 12
             const taxValue = (amount * taxRate) / 100;
             const finalValue = amount + taxValue;
 

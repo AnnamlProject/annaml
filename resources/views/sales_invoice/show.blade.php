@@ -88,7 +88,7 @@
                                 <tbody>
                                     @foreach ($salesInvoice->details as $item)
                                         <tr>
-                                            <td class="border px-3 py-2">{{ $item->item->item_name ?? '-' }}</td>
+                                            <td class="border px-3 py-2">{{ $item->item->item_description ?? '-' }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->order_quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>

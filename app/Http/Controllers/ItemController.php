@@ -159,87 +159,223 @@ class ItemController extends Controller
     }
     public function search(Request $request)
     {
-        $context = $request->get('context', 'sales'); // default ke sales kalau tidak ada
+        $context    = $request->get('context', 'sales');
+        $locationId = $request->get('location_id');
 
-        $items = Item::with('quantities', 'units', 'accounts')
-            ->where('item_description', 'like', '%' . $request->q . '%')
-            ->orWhere('item_number', 'like', '%' . $request->q . '%')
+        $items = Item::with([
+            'units',
+            'accounts',
+            'taxes',
+            'quantities' => function ($q) use ($locationId) {
+                if ($locationId) {
+                    $q->where('location_id', $locationId);
+                }
+            }
+        ])
+            ->where(function ($q) use ($request) {
+                $q->where('item_description', 'like', '%' . $request->q . '%')
+                    ->orWhere('item_number', 'like', '%' . $request->q . '%');
+            })
+            ->when($locationId, function ($q) use ($locationId) {
+                $q->whereHas('quantities', fn($q2) => $q2->where('location_id', $locationId));
+            })
             ->get();
 
         return response()->json($items->map(function ($item) use ($context) {
-            // Tentukan account sesuai context
             switch ($context) {
                 case 'purchase':
                     $accountId   = $item->accounts->asset_account_id ?? $item->accounts->expense_account_id ?? null;
                     $accountName = optional($item->accounts->assetAccount)->nama_akun
                         ?? optional($item->accounts->expenseAccount)->nama_akun
                         ?? '-';
-
-                    $unit = $item->units->selling_unit ?? '-';
+                    $unit = $item->units->buying_unit ?? '-';
                     break;
 
                 case 'sales':
                     $accountId   = $item->accounts->revenue_account_id ?? null;
                     $accountName = optional($item->accounts->revenueAccount)->nama_akun ?? '-';
-                    $unit = $item->units->buying_unit ?? '-';
+                    $unit = $item->units->selling_unit ?? '-';
                     break;
 
                 default:
                     $accountId   = $item->accounts->cogs_account_id ?? null;
                     $accountName = optional($item->accounts->cogsAccount)->nama_akun ?? '-';
+                    $unit = $item->units->selling_unit ?? '-';
                     break;
             }
 
+            // hitung dari lokasi yg difilter
+            $onHandQty   = $item->quantities->sum('on_hand_qty');
+            $onHandValue = $item->quantities->sum('on_hand_value');
+            $unitCost    = $onHandQty > 0 ? $onHandValue / $onHandQty : 0;
+
             return [
-                'id'              => $item->id,
-                'item_number'     => $item->item_number,
-                'item_description' => $item->item_description,
-                'on_hand_qty'     => $item->quantities->sum('on_hand_qty'),
-                'unit'            => $unit,
-                'tax_rate'        => $item->tax_rate,
-                'account_id'      => $accountId,
-                'account_name'    => $accountName,
+                'id'                 => $item->id,
+                'item_number'        => $item->item_number,
+                'item_description'   => $item->item_description,
+                'on_hand_qty'        => $onHandQty,
+                'unit'               => $unit,
+                'tax_rate'           => $item->taxes->first()->rate ?? 0,
+                'account_id'         => $accountId,
+                'account_name'       => $accountName,
+                'type'               => $item->type,
+                'unit_cost'          => $unitCost,
+                'cogs_account_name'  => optional($item->accounts->cogsAccount)->nama_akun ?? 'COGS',
+                'asset_account_name' => optional($item->accounts->assetAccount)->nama_akun ?? 'Inventory',
             ];
         }));
     }
 
 
-    public function info($id)
+    public function info($id, Request $request)
     {
-        $item = Item::with(['quantities', 'units'])->findOrFail($id);
+        $locationId = $request->get('location_id');
+
+        $item = Item::with(['quantities' => function ($q) use ($locationId) {
+            if ($locationId) {
+                $q->where('location_id', $locationId);
+            }
+        }, 'units'])->findOrFail($id);
+
+        $quantity = $item->quantities->first();
+
+        $onHandQty   = $quantity->on_hand_qty ?? 0;
+        $onHandValue = $quantity->on_hand_value ?? 0;
+
+        // hitung unit cost
+        $unitCost = $onHandQty > 0 ? $onHandValue / $onHandQty : 0;
 
         return response()->json([
             'description'   => $item->item_description,
             'unit'          => optional($item->units)->unit_of_measure ?? '-',
-            'current_stock' => $item->quantities->sum('on_hand_qty'),
+            'current_stock' => $onHandQty,
+            'unit_cost'     => round($unitCost, 2),
         ]);
     }
-    public function bom($id)
-    {
-        $itemBuild = ItemBuild::with(['details.item.quantities'])->where('item_id', $id)->first();
 
-        if (!$itemBuild) {
-            return response()->json(['details' => []]);
+    public function byLocation($locationId)
+    {
+        $items = Item::whereHas('quantities', function ($q) use ($locationId) {
+            $q->where('location_id', $locationId);
+        })->get(['id', 'item_description']);
+
+        return response()->json($items);
+    }
+
+    public function getAccounts($id)
+    {
+        $itemAccount = \App\ItemAccount::with([
+            'assetAccount',
+            'revenueAccount',
+            'cogsAccount',
+            'varianceAccount',
+            'expenseAccount'
+        ])->where('item_id', $id)->first();
+
+        if (!$itemAccount) {
+            return response()->json([
+                'asset_account'    => null,
+                'revenue_account'  => null,
+                'cogs_account'     => null,
+                'variance_account' => null,
+                'expense_account'  => null,
+            ]);
         }
 
         return response()->json([
-            'build_quantity' => $itemBuild->build_quantity,
-            'additional_costs' => $itemBuild->additional_costs,
-            'details' => $itemBuild->details->map(function ($d) {
-                $unitCost  = optional($d->item->quantities->first())->on_hand_value ?? 0;
-                $amount    = $unitCost * $d->quantity;
-                $available = $d->item->quantities->sum('on_hand_qty'); // stok komponen
+            'asset_account' => $itemAccount->assetAccount ? [
+                'id'   => $itemAccount->assetAccount->id,
+                'kode' => $itemAccount->assetAccount->kode_akun,
+                'nama' => $itemAccount->assetAccount->nama_akun,
+            ] : null,
+            'revenue_account' => $itemAccount->revenueAccount ? [
+                'id'   => $itemAccount->revenueAccount->id,
+                'kode' => $itemAccount->revenueAccount->kode_akun,
+                'nama' => $itemAccount->revenueAccount->nama_akun,
+            ] : null,
+            'cogs_account' => $itemAccount->cogsAccount ? [
+                'id'   => $itemAccount->cogsAccount->id,
+                'kode' => $itemAccount->cogsAccount->kode_akun,
+                'nama' => $itemAccount->cogsAccount->nama_akun,
+            ] : null,
+            'variance_account' => $itemAccount->varianceAccount ? [
+                'id'   => $itemAccount->varianceAccount->id,
+                'kode' => $itemAccount->varianceAccount->kode_akun,
+                'nama' => $itemAccount->varianceAccount->nama_akun,
+            ] : null,
+            'expense_account' => $itemAccount->expenseAccount ? [
+                'id'   => $itemAccount->expenseAccount->id,
+                'kode' => $itemAccount->expenseAccount->kode_akun,
+                'nama' => $itemAccount->expenseAccount->nama_akun,
+            ] : null,
+        ]);
+    }
+    public function getBom(Request $request, $id)
+    {
+        $locationId = $request->get('location_id'); // ambil dari query string
 
-                return [
-                    'component_id' => $d->item_id,
-                    'description'  => $d->description ?? $d->item->item_description,
-                    'unit'         => $d->unit,
-                    'quantity'     => $d->quantity,
-                    'unit_cost'    => $unitCost,
-                    'amount'       => $amount,
-                    'available'    => $available,
-                ];
-            }),
+        $item = \App\Item::with([
+            'builds.details.item.accounts.assetAccount',
+            'builds.details.item.units',
+            'builds.details.item.quantities' => function ($q) use ($locationId) {
+                if ($locationId) {
+                    $q->where('location_id', $locationId);
+                }
+                $q->orderByDesc('id');
+            },
+        ])->findOrFail($id);
+
+        $build = $item->builds->first();
+        if (!$build) {
+            return response()->json([
+                'item_id' => $item->id,
+                'details' => [],
+            ]);
+        }
+
+        $details = $build->details->map(function ($d) use ($locationId) {
+            $component = $d->item;
+
+            $account = ($component && $component->accounts && $component->accounts->assetAccount)
+                ? [
+                    'id'   => $component->accounts->assetAccount->id,
+                    'kode' => $component->accounts->assetAccount->kode_akun,
+                    'nama' => $component->accounts->assetAccount->nama_akun,
+                ]
+                : null;
+
+            // filter quantities per lokasi
+            $quantities = $component->quantities;
+            if ($locationId) {
+                $quantities = $quantities->where('location_id', $locationId);
+            }
+
+            $layer = $quantities->first(); // karena sudah diurutkan desc
+
+            $unitCost = 0.0;
+            if ($layer) {
+                $totalValue = floatval($layer->on_hand_value ?? 0);
+                $totalQty   = floatval($layer->on_hand_qty ?? 0);
+                $unitCost   = $totalQty > 0 ? ($totalValue / $totalQty) : $totalValue;
+            }
+
+            $available = $quantities->sum('on_hand_qty') ?? 0;
+
+            return [
+                'component_id' => $component->id,
+                'description'  => $d->description ?? $component->item_description,
+                'unit'         => $d->unit ?? optional($component->units)->unit_of_measure ?? '-',
+                'quantity'     => $d->quantity,
+                'unit_cost'    => $unitCost,
+                'amount'       => $unitCost * $d->quantity,
+                'available'    => $available,
+                'account'      => $account,
+            ];
+        });
+
+        return response()->json([
+            'item_id' => $item->id,
+            'details' => $details,
         ]);
     }
 }

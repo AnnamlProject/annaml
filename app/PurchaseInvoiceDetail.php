@@ -16,7 +16,7 @@ class PurchaseInvoiceDetail extends Model
         'unit',
         'item_description',
         'price',
-        'tax',
+        'tax_id',
         'tax_amount',
         'amount',
         'account_id',
@@ -40,5 +40,9 @@ class PurchaseInvoiceDetail extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+    public function sales_taxes()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'tax_id');
     }
 }

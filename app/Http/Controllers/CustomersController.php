@@ -6,6 +6,7 @@ use App\Customers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CustomersController extends Controller
@@ -89,13 +90,35 @@ class CustomersController extends Controller
     }
     public function destroy($id): RedirectResponse
     {
-        //get post by ID
-        $customers = Customers::findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $customer = Customers::with(['salesOrder', 'salesInvoice'])->findOrFail($id);
 
-        //delete post
-        $customers->delete();
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($customer->salesInvoice()->exists()) {
+                    throw new \Exception("customer ini sudah digunakan dalam Sales Invoices tidak bisa dihapus.");
+                }
+                if ($customer->salesOrder()->exists()) {
+                    throw new \Exception("customer ini sudah digunakan dalam Sales Order tidak bisa dihapus.");
+                }
 
-        //redirect to index
-        return redirect()->route('customers.index')->with('success', 'Customers deleted successfully.');
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $customer->delete();
+            });
+
+            return redirect()->route('customers.index')->with('success', 'customer berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('customers.index')->with('error', $e->getMessage());
+        }
+    }
+    public function search(Request $request)
+    {
+        $term = $request->q;
+        $customer = Customers::where('nama_customers', 'like', "%$term%")
+            ->select('id', 'nama_customers')
+            ->limit(20)
+            ->get();
+
+        return response()->json($customer);
     }
 }

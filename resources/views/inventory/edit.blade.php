@@ -94,71 +94,44 @@
 
                 {{-- Quantities --}}
                 <div id="quantities" class="tab-content">
-                    <h3 class="font-semibold text-lg mb-2">Quantities</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block">Location</label>
-                            <select name="location_id" id="location_id"
-                                class="w-full border rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">-- Location --</option>
-                                @foreach ($lokasiInventory as $g)
-                                    <option value="{{ $g->id }}"
-                                        {{ (string) old('location_id', optional($quantity)->location_id) === (string) $g->id ? 'selected' : '' }}>
-                                        {{ $g->kode_lokasi }}
-                                    </option>
-                                @endforeach
-                            </select>
+                    <h3 class="font-semibold text-lg mb-2">Quantities per Location</h3>
+
+                    @foreach ($quantities as $q)
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border rounded p-4 mb-4">
+                            <div>
+                                <label class="block">Location</label>
+                                <select name="quantities[{{ $loop->index }}][location_id]"
+                                    class="w-full border rounded-lg px-4 py-2">
+                                    <option value="">-- Location --</option>
+                                    @foreach ($lokasiInventory as $g)
+                                        <option value="{{ $g->id }}"
+                                            {{ $q->location_id == $g->id ? 'selected' : '' }}>
+                                            {{ $g->kode_lokasi }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block">On Hand Quantity</label>
+                                <input type="number" name="quantities[{{ $loop->index }}][on_hand_qty]" readonly
+                                    value="{{ $q->on_hand_qty }}"
+                                    class="form-input w-full border rounded px-2 py-1 text-sm" />
+                            </div>
+
+                            <div>
+                                <label class="block">On Hand Value</label>
+                                <input type="text" readonly value="{{ number_format($q->on_hand_value, 2, '.', ',') }}"
+                                    class="form-input w-full border rounded px-2 py-1 text-sm" />
+
+                                <input type="hidden" name="quantities[{{ $loop->index }}][on_hand_value]"
+                                    value="{{ $q->on_hand_value }}">
+
+                            </div>
                         </div>
-                        <div>
-                            <label class="block">On Hand Quantity</label>
-                            <input type="number" name="on_hand_qty"
-                                value="{{ old('on_hand_qty', optional($quantity)->on_hand_qty) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">On Hand Value</label>
-                            <input type="number" step="0.01" name="on_hand_value"
-                                value="{{ old('on_hand_value', optional($quantity)->on_hand_value) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">Pending Orders Quantity</label>
-                            <input type="number" name="pending_orders_qty"
-                                value="{{ old('pending_orders_qty', optional($quantity)->pending_orders_qty) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">Pending Orders Value</label>
-                            <input type="number" step="0.01" name="pending_orders_value"
-                                value="{{ old('pending_orders_value', optional($quantity)->pending_orders_value) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">Purchase Order Quantity</label>
-                            <input type="number" name="purchase_order_qty"
-                                value="{{ old('purchase_order_qty', optional($quantity)->purchase_order_qty) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">Sales Order Quantity</label>
-                            <input type="number" name="sales_order_qty"
-                                value="{{ old('sales_order_qty', optional($quantity)->sales_order_qty) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">Minimum Level</label>
-                            <input type="number" name="reorder_minimum"
-                                value="{{ old('reorder_minimum', optional($quantity)->reorder_minimum) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                        <div>
-                            <label class="block">To Order</label>
-                            <input type="number" name="reorder_to_order"
-                                value="{{ old('reorder_to_order', optional($quantity)->reorder_to_order) }}"
-                                class="form-input w-full border rounded px-2 py-1 text-sm" />
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
+
 
                 {{-- Units (inventory) --}}
                 @php $u = $item->units; @endphp
@@ -325,7 +298,7 @@
 
                 {{-- Linked COA (inventory) --}}
                 @php $acc = $item->accounts; @endphp
-                <div id="linked" class="tab-content hidden">
+                <div id="linked" class="tab-content {{ $item->type === 'inventory' ? '' : 'hidden' }}">
                     <h3 class="font-semibold text-lg mb-2">Account Linkings</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -343,7 +316,8 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Revenue Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <select name="inventory_revenue_account_id"
+                                class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Akun Pendapatan --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}"
@@ -619,13 +593,13 @@
                         </button>
                     </div>
                 </div>
-
-                <div id="linkedService" class="tab-content hidden">
+                <div id="linkedService" class="tab-content {{ $item->type === 'service' ? '' : 'hidden' }}">
                     <h3 class="font-semibold text-lg mb-2">Account Linkings</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Revenue Account</label>
-                            <select name="revenue_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <select name="service_revenue_account_id"
+                                class="form-select w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Account --</option>
                                 @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                     <option value="{{ $account->id }}"

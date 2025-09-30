@@ -18,11 +18,11 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Payment Method</label>
-                            <select name="jenis_pembayaran_id" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select id="jenis_pembayaran_id" name="jenis_pembayaran_id" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
                                 <option value="">-- Pilih --</option>
                                 @foreach ($jenis_pembayaran as $jenis)
                                     <option value="{{ $jenis->id }}"
@@ -32,9 +32,30 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <div id="account-wrapper" class="hidden">
+                            <label class="font-medium text-gray-700 block mb-1">Account</label>
+                            <select id="account_id" name="payment_method_account_id"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                <option value="">-- Pilih Account --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="font-medium text-gray-700 block mb-1">Location Inventory</label>
+                            <select name="location_id" id="location_id" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                @foreach ($location_inventory as $loc)
+                                    <option value="{{ $loc->id }}"
+                                        {{ $salesOrder->location_id == $loc->id ? 'selected' : '' }}>
+                                        {{ $loc->kode_lokasi }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Customer</label>
-                            <select name="customer_id" required
+                            <select name="customer_id" id="customer_id" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @foreach ($customers as $cust)
                                     <option value="{{ $cust->id }}"
@@ -43,11 +64,6 @@
                                     </option>
                                 @endforeach
                             </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="font-medium text-gray-700 block mb-1">Shipping Address</label>
-                            <textarea name="shipping_address" rows="2"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ $salesOrder->shipping_address }}</textarea>
                         </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Order Number</label>
@@ -69,7 +85,7 @@
                         </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Sales Person</label>
-                            <select name="employee_id"
+                            <select name="employee_id" id="employee_id"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                                 @foreach ($employees as $emp)
@@ -79,6 +95,11 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="font-medium text-gray-700 block mb-1">Shipping Address</label>
+                            <textarea name="shipping_address" rows="2"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ $salesOrder->shipping_address }}</textarea>
                         </div>
                     </div>
 
@@ -182,7 +203,8 @@
                                                     class="w-full border rounded bg-gray-100 price-display-{{ $i }}"
                                                     value="{{ number_format($detail->price, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][price]"
-                                                    class="price-hidden-{{ $i }}" value="{{ $detail->price }}">
+                                                    class="price-hidden-{{ $i }}"
+                                                    value="{{ $detail->price }}">
                                             </td>
 
                                             <!-- Amount -->
@@ -197,15 +219,16 @@
 
                                             <!-- Tax -->
                                             <td>
-                                                <select class="w-full border rounded tax-{{ $i }}"
-                                                    name="items[{{ $i }}][tax]"
-                                                    onchange="calculateAmount({{ $i }});">
-                                                    <option value="0" {{ $detail->tax == 0 ? 'selected' : '' }}>Tidak
-                                                    </option>
-                                                    <option value="11" {{ $detail->tax == 11 ? 'selected' : '' }}>11%
-                                                    </option>
-                                                    <option value="12" {{ $detail->tax == 12 ? 'selected' : '' }}>12%
-                                                    </option>
+                                                <select name="items[{{ $i }}][tax_id]"
+                                                    class="w-full border rounded tax-{{ $i }}">
+                                                    <option value="">-- Pilih Pajak --</option>
+                                                    @foreach ($sales_taxes as $tax)
+                                                        <option value="{{ $tax->id }}"
+                                                            data-rate="{{ $tax->rate }}"
+                                                            {{ $detail->tax_id == $tax->id ? 'selected' : '' }}>
+                                                            ({{ $tax->rate }}%)
+                                                        </option>
+                                                    @endforeach
                                                 </select>
                                             </td>
 
@@ -245,20 +268,49 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Subtotal</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="subtotal"
+                                                class="w-full border rounded text-right bg-gray-100" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Total Pajak</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="total-tax"
+                                                class="w-full border rounded text-right bg-gray-100" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <!-- Freight row -->
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Freight</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" name="freight" id="freight"
+                                                class="w-full border rounded text-right"
+                                                value="{{ old('freight', $salesOrder->freight ?? '') }}">
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-right font-bold border px-2 py-1">Grand Total</td>
+                                        <td colspan="2" class="border px-2 py-1">
+                                            <input type="text" id="grand-total"
+                                                class="w-full border rounded text-right bg-gray-100 font-bold" readonly>
+                                        </td>
+                                        <td colspan="3" class="border px-2 py-1"></td>
+                                    </tr>
+                                </tfoot>
 
                             </table>
-
                         </div>
                     </div>
 
                     {{-- Info Tambahan --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                        <div>
-                            <label class="font-medium text-gray-700 block mb-1">Freight</label>
-                            <input type="text" name="freight"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value="{{ $salesOrder->freight }}">
-                        </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Early Payment Terms</label>
                             <input type="text" name="early_payment_terms"
@@ -287,7 +339,182 @@
             </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID').format(num);
+        }
+
+        function parseNumber(val) {
+            if (!val) return 0;
+            return parseFloat(val.toString().replace(/,/g, '')) || 0;
+        }
+
+        function calculateAmount(index) {
+            let qty = parseNumber(document.querySelector(`.qty-${index}`).value);
+            let order = parseNumber(document.querySelector(`.order-${index}`).value);
+            let backOrder = order - qty;
+            if (backOrder < 0) backOrder = 0;
+            document.querySelector(`.back-${index}`).value = backOrder;
+
+            let basePrice = parseNumber(document.querySelector(`.base-hidden-${index}`).value);
+            let discount = parseNumber(document.querySelector(`.disc-display-${index}`).value);
+
+            // update hidden discount
+            document.querySelector(`.disc-hidden-${index}`).value = discount;
+
+            let price = basePrice - discount;
+            document.querySelector(`.price-display-${index}`).value = formatNumber(price);
+            document.querySelector(`.price-hidden-${index}`).value = price;
+
+            let amount = qty * price;
+            document.querySelector(`.amount-display-${index}`).value = formatNumber(amount);
+            document.querySelector(`.amount-hidden-${index}`).value = amount;
+
+            // Pajak
+            let taxSelect = document.querySelector(`.tax-${index}`);
+            let rate = parseFloat(taxSelect.selectedOptions[0]?.dataset.rate || 0);
+            let taxValue = amount * (rate / 100);
+            document.querySelector(`.taxval-display-${index}`).value = formatNumber(taxValue);
+            document.querySelector(`.taxval-hidden-${index}`).value = taxValue;
+
+            // Final
+            let final = amount + taxValue;
+            document.querySelector(`.final-display-${index}`).value = formatNumber(final);
+            document.querySelector(`.final-hidden-${index}`).value = final;
+
+            // Update footer
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            let subtotal = 0,
+                totalTax = 0,
+                grandTotal = 0;
+
+            document.querySelectorAll('tbody tr.item-row').forEach(row => {
+                let index = row.dataset.index;
+                subtotal += parseNumber(document.querySelector(`.amount-hidden-${index}`).value);
+                totalTax += parseNumber(document.querySelector(`.taxval-hidden-${index}`).value);
+            });
+
+            grandTotal = subtotal + totalTax + parseNumber(document.getElementById('freight').value);
+
+            document.getElementById('subtotal').value = formatNumber(subtotal);
+            document.getElementById('total-tax').value = formatNumber(totalTax);
+            document.getElementById('grand-total').value = formatNumber(grandTotal);
+        }
+
+        // Pastikan setiap kali freight berubah -> update grand total
+        document.getElementById('freight').addEventListener('input', calculateTotals);
+
+        // Inisialisasi awal
+        document.addEventListener('DOMContentLoaded', calculateTotals);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            function initSelect2(selector, url, mapper, placeholder) {
+                $(selector).select2({
+                    placeholder: placeholder,
+                    ajax: {
+                        url: url,
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.map(mapper)
+                            };
+                        },
+                        cache: true
+                    },
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+
+            // ✅ Customers
+            initSelect2(
+                '#customer_id',
+                '{{ route('customers.search') }}',
+                function(customer) {
+                    return {
+                        id: customer.id,
+                        text: customer.nama_customers
+                    };
+                },
+                "-- Customers --"
+            );
+
+            // ✅ Employees
+            initSelect2(
+                '#employee_id',
+                '{{ route('employee.search') }}',
+                function(employee) {
+                    return {
+                        id: employee.id,
+                        text: employee.nama_karyawan
+                    };
+                },
+                "-- Employees --"
+            );
+        });
+    </script>
+    <script>
+        const $pmSelect = $('#jenis_pembayaran_id');
+        const $account = $('#account_id');
+        const $wrapper = $('#account-wrapper');
+
+        function clearAccounts() {
+            $account.empty().append('<option value="">-- Pilih Account --</option>');
+            $wrapper.addClass('hidden');
+        }
+
+        function loadAccounts(pmId) {
+            if (!pmId) {
+                clearAccounts();
+                return;
+            }
+
+            $.getJSON("{{ route('payment-methods.accounts', ['id' => 'PM_ID']) }}".replace('PM_ID', pmId))
+                .done(function(res) {
+                    clearAccounts();
+                    (res.accounts || []).forEach(function(a) {
+                        const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
+                        $account.append(`<option value="${a.account_id}">${text}</option>`);
+                    });
+
+                    // ✅ Preselect account lama
+                    const oldVal =
+                        "{{ old('payment_method_account_id', $salesOrder->payment_method_account_id ?? '') }}";
+                    if (oldVal) $account.val(oldVal);
+
+                    $wrapper.removeClass('hidden');
+                })
+                .fail(function() {
+                    clearAccounts();
+                    alert('Gagal memuat account untuk Payment Method ini.');
+                });
+        }
+
+        // Event change
+        $pmSelect.on('change', function() {
+            loadAccounts($(this).val());
+        });
+
+        // ✅ Auto load saat edit
+        if ($pmSelect.val()) {
+            loadAccounts($pmSelect.val());
+        }
+
         function formatNumber(num) {
             return Number(num).toLocaleString('en-US', {
                 minimumFractionDigits: 0,

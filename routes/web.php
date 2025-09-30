@@ -6,9 +6,11 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\BonusKaryawanController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\CoaSearchController;
+use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartemenAkunController;
 use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeOffDayController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\FiscalController;
@@ -41,6 +43,7 @@ use App\Http\Controllers\ShiftKaryawanWahanaController;
 use App\Http\Controllers\SlipGajiController;
 use App\Http\Controllers\TargetUnitController;
 use App\Http\Controllers\TargetWahanaController;
+use App\Http\Controllers\VendorsController;
 use App\Http\Controllers\WahanaController;
 use App\SalesInvoiceDocument;
 use Illuminate\Support\Facades\Auth;
@@ -205,6 +208,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('payment-methods.accounts');
 
 
+    Route::get('/customers/search', [CustomersController::class, 'search'])->name('customers.search');
     Route::resource('customers', 'CustomersController')->middleware('permission:customers.access');
     // export dan import customers
     Route::get('/export/customers', [ExportController::class, 'exportcustomers'])->name('export.customers');
@@ -252,7 +256,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('purchases_options', 'PurchasesOptionsController')->middleware('permission:option_purchase.access');
 
 
+    Route::get('/vendors/search', [VendorsController::class, 'search'])->name('vendors.search');
     Route::resource('vendors', 'VendorsController')->middleware('permission:vendor.access');
+
     // export dan import items
     Route::get('/export/vendors', [ExportController::class, 'exportVendors'])->name('export.vendors');
     Route::post('/import/vendors', [ImportController::class, 'ImportVendors'])->name('import.vendors');
@@ -295,9 +301,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('build_of_bom', 'BuildOfBomController')->middleware('permission:Build from Bom.access');
     Route::get('/items/{id}/info', [ItemController::class, 'info'])->name('items.info');
+    Route::get('/items/by-location/{location}', [ItemController::class, 'byLocation']);
     Route::get('/items/{id}/bom', [ItemController::class, 'bom'])->name('items.bom');
+    Route::get('/items/{id}/accounts', [App\Http\Controllers\ItemController::class, 'getAccounts']);
+    Route::get('/items/{id}/bom', [App\Http\Controllers\ItemController::class, 'getBom']);
+
+    Route::resource('item_assembly', 'ItemAssemblyController')->middleware('permission:Build from item assembly.access');
 
 
+    Route::resource('transfer_inventory', 'TransferInventoryController')->middleware('permission:Transfer inventory.access');
 
     // end inventory  menu
 
@@ -331,6 +343,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/export/TaxRates', [ExportController::class, 'exportTaxRates'])->name('export.TaxRates');
     Route::post('/import/TaxRates', [ImportController::class, 'importTaxRates'])->name('import.TaxRates');
     // employee
+
+    Route::get('/employee/search', [EmployeeController::class, 'search'])->name('employee.search');
+
     Route::resource('employee', 'EmployeeController')->middleware('permission:employee.access');
     Route::get('/export/Employee', [ExportController::class, 'exportEmployee'])->name('export.Employee');
     Route::post('/import/Employee', [ImportController::class, 'importEmployee'])->name('import.Employee');

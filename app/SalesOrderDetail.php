@@ -20,7 +20,8 @@ class SalesOrderDetail extends Model
         'amount',
         'tax',
         'account_id',
-        'order'
+        'order',
+        'tax_id'
     ];
     public function salesOrder()
     {
@@ -35,5 +36,9 @@ class SalesOrderDetail extends Model
     public function account()
     {
         return $this->belongsTo(chartOfAccount::class);
+    }
+    public function sales_taxes()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'tax_id');
     }
 }

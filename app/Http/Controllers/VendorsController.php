@@ -7,6 +7,7 @@ use App\Vendors;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VendorsController extends Controller
 {
@@ -84,13 +85,35 @@ class VendorsController extends Controller
     }
     public function destroy($id): RedirectResponse
     {
-        //get post by ID
-        $vendors = Vendors::findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $vendor = Vendors::with(['purchaseOrder', 'invoices'])->findOrFail($id);
 
-        //delete post
-        $vendors->delete();
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($vendor->invoices()->exists()) {
+                    throw new \Exception("Vendor ini sudah digunakan dalam Purchase Invoices tidak bisa dihapus.");
+                }
+                if ($vendor->purchaseOrder()->exists()) {
+                    throw new \Exception("Vendor ini sudah digunakan dalam Purchase Order tidak bisa dihapus.");
+                }
 
-        //redirect to index
-        return redirect()->route('vendors.index')->with('success', 'vendors deleted successfully.');
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $vendor->delete();
+            });
+
+            return redirect()->route('vendors.index')->with('success', 'Vendor berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('vendors.index')->with('error', $e->getMessage());
+        }
+    }
+    public function search(Request $request)
+    {
+        $term = $request->q;
+        $vendors = Vendors::where('nama_vendors', 'like', "%$term%")
+            ->select('id', 'nama_vendors')
+            ->limit(20)
+            ->get();
+
+        return response()->json($vendors);
     }
 }

@@ -19,6 +19,7 @@ class PurchaseOrder extends Model
         'freight',
         'early_payment_terms',
         'messages',
+        'location_id'
     ];
 
     public function jenisPembayaran()
@@ -33,6 +34,10 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(PurchaseOrderDocument::class);
     }
+    public function account()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_id'); // ✅ header account
+    }
     public function vendor()
     {
         return $this->belongsTo(Vendors::class);
@@ -40,5 +45,13 @@ class PurchaseOrder extends Model
     public function paymentMethodDetail()
     {
         return $this->belongsTo(PaymentMethodDetail::class);
+    }
+    public function invoices()
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+    public function locationInventory()
+    {
+        return $this->belongsTo(LocationInventory::class, 'location_id');
     }
 }

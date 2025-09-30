@@ -13,13 +13,16 @@ class HapusKolomAccountDanVendorDiSalesOrder extends Migration
      */
     public function up()
     {
-        //
         Schema::table('sales_orders', function (Blueprint $table) {
-            // Baru hapus kolomnya
-            $table->dropColumn('account_id');
-            $table->dropColumn('vendor_id');
+            if (Schema::hasColumn('sales_orders', 'account_id')) {
+                $table->dropColumn('account_id');
+            }
+            if (Schema::hasColumn('sales_orders', 'vendor_id')) {
+                $table->dropColumn('vendor_id');
+            }
         });
     }
+
 
     /**
      * Reverse the migrations.

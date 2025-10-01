@@ -624,50 +624,63 @@
 
 
                     {{-- budgeting dropdown --}}
-                    <div class="relative ml-1" x-data="{ open: false }">
-                        <button @click="open = !open" @keydown.escape="open = false"
-                            class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
-                            :class="{ 'text-blue-600 bg-blue-50': open }">
-                            Budgeting
-                            <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
-                                :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
+                    @can('budgeting.access')
+                        <div class="relative ml-1" x-data="{ open: false }">
+                            <button @click="open = !open" @keydown.escape="open = false"
+                                class="flex items-center px-2 py-2 text-gray-700 font-medium text-sm text-sm hover:text-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md"
+                                :class="{ 'text-blue-600 bg-blue-50': open }">
+                                Budgeting
+                                <svg class="w-4 h-4 ml-1 transform transition-transform duration-200"
+                                    :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-150"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
-                            class="absolute left-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                                class="absolute left-0 mt-2 w-64 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50">
+
+                                @can('create_budget.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                        Budget
+
+                                    </a>
+                                @endcan
 
 
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                Budget
+                                @can('budget_submission.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                        Submission
 
-                            </a>
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                Submission
+                                    </a>
+                                @endcan
+                                @can('budget_disbursement.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                        Disbursement
 
-                            </a>
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                Disbursement
+                                    </a>
+                                @endcan
+                                @can('budget_realization.access')
+                                    <a href="{{ route('intangible_asset.index') }}"
+                                        class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                        Realization
 
-                            </a>
-                            <a href="{{ route('intangible_asset.index') }}"
-                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                Realization
+                                    </a>
+                                @endcan
 
-                            </a>
+                            </div>
                         </div>
-                    </div>
+                    @endcan
+
 
                     {{-- payroll dropdown --}}
                     @can('payroll.access')
@@ -2001,7 +2014,7 @@
                             <div x-show="open" x-collapse class="pl-4 space-y-1">
 
                                 <!-- Company with Sub-submenu -->
-                                @can('setting_inventory.access')
+                                @can('budgeting.access')
                                     <div x-data="{ subOpen: false }">
                                         <button @click="subOpen = !subOpen"
                                             class="w-full flex justify-between items-center px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md">
@@ -2016,26 +2029,35 @@
 
                                         <!-- Level 2: Company Sub-submenu -->
                                         <div x-show="subOpen" x-collapse class="pl-4 space-y-1">
-                                            <a href="{{ route('intangible_asset.index') }}"
-                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
-                                                Budget
+                                            @can('create_budget.access')
+                                                <a href="{{ route('intangible_asset.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Create
+                                                    Budget
 
-                                            </a>
-                                            <a href="{{ route('intangible_asset.index') }}"
-                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                                Submission
+                                                </a>
+                                            @endcan
+                                            @can('budget_submission.access')
+                                                <a href="{{ route('intangible_asset.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                    Submission
 
-                                            </a>
-                                            <a href="{{ route('intangible_asset.index') }}"
-                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                                Disbursement
+                                                </a>
+                                            @endcan
+                                            @can('budget_disbursement.access')
+                                                <a href="{{ route('intangible_asset.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                    Disbursement
 
-                                            </a>
-                                            <a href="{{ route('intangible_asset.index') }}"
-                                                class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
-                                                Realization
+                                                </a>
+                                            @endcan
+                                            @can('budget_realization.access')
+                                                <a href="{{ route('intangible_asset.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Budget
+                                                    Realization
 
-                                            </a>
+                                                </a>
+                                            @endcan
+
                                         </div>
                                     </div>
                                 @endcan

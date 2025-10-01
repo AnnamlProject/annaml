@@ -140,9 +140,7 @@ class PermissionSeeder extends Seeder
 
             'bonus_karyawan.access',
 
-            'maintenance.access',
-            'start_new_year.access',
-            'log_activity.access',
+
 
 
         ];

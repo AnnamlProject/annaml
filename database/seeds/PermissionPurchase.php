@@ -46,6 +46,12 @@ class PermissionPurchase extends Seeder
             'payment_purchase.update',
             'payment_purchase.delete',
 
+            'payment_expense.access',
+            'payment_expense.create',
+            'payment_expense.view',
+            'payment_expense.update',
+            'payment_expense.delete',
+
             'vendor.access',
             'vendor.create',
             'vendor.view',

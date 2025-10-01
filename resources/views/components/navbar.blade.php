@@ -493,6 +493,13 @@
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payments
                                                 </a>
                                             @endcan
+
+                                            @can('payment_expense.access')
+                                                <a href="{{ route('payment_expense.index') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payment
+                                                    Expense
+                                                </a>
+                                            @endcan
                                         </div>
                                     </div>
                                 @endcan

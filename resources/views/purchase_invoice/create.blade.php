@@ -720,7 +720,7 @@
                     <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
                     <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
                 </tr>
-            `);
+             `);
                     });
                 }
 

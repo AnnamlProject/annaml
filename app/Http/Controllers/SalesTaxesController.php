@@ -27,6 +27,7 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => 'nullable|exists:chart_of_accounts,id',
             'sales_account_id'   => 'nullable|exists:chart_of_accounts,id',
             'active'             => 'nullable|boolean',
+            'type'                => 'required|in:input_tax,withholding_tax',
             'rate' => 'required|numeric'
         ]);
 
@@ -36,7 +37,8 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => $validated['purchase_account_id'] ?? null,
             'sales_account_id'   => $validated['sales_account_id'] ?? null,
             'active' => (bool) $validated['active'],
-            'rate' => $validated['rate']
+            'rate' => $validated['rate'],
+            'type'                => $validated['type'],
 
         ]);
 
@@ -51,7 +53,7 @@ class SalesTaxesController extends Controller
         $sales_taxes = SalesTaxes::findOrFail($id);
         $account = ChartOfAccount::all(); // untuk dropdown purchase/sales account
 
-        return view('sales_taxes.create', compact('sales_taxes', 'account'));
+        return view('sales_taxes.edit', compact('sales_taxes', 'account'));
     }
 
     /**
@@ -65,6 +67,8 @@ class SalesTaxesController extends Controller
             'sales_account_id'   => 'nullable|exists:chart_of_accounts,id',
             'active'             => 'required',
             'rate' => 'required|numeric',
+            'type'                => 'required|in:input_tax,withholding_tax',
+
         ]);
 
         $salesTax = SalesTaxes::findOrFail($id);
@@ -74,7 +78,8 @@ class SalesTaxesController extends Controller
             'purchase_account_id' => $validated['purchase_account_id'] ?? null,
             'sales_account_id'   => $validated['sales_account_id'] ?? null,
             'active' => (bool) $validated['active'],
-            'rate' => $validated['rate']
+            'rate' => $validated['rate'],
+            'type' => $validated['type']
 
         ]);
 

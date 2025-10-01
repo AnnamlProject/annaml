@@ -12,7 +12,8 @@ class SalesTaxes extends Model
         'purchase_account_id',
         'sales_account_id',
         'active',
-        'rate'
+        'rate',
+        'type'
     ];
 
     public function purchaseAccount()

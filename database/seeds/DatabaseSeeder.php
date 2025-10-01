@@ -30,7 +30,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PriceListInventorySeeder::class);
         $this->call(LocationInventorySeeder::class);
         $this->call(JamKerjaSeeder::class);
-        $this->call(AbsensiSeeder::class);
         $this->call(PermissionSeeder::class);
         $this->call(PermissionAsset::class);
         $this->call(PermisssionSetup::class);

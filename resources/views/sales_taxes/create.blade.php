@@ -65,8 +65,19 @@
                     </select>
                 </div>
 
-
-
+                <div class="mb-4">
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                        Jenis Pajak
+                    </label>
+                    <select name="type" id="type" class="w-full border rounded px-3 py-2">
+                        <option value="input_tax" {{ old('type') == 'input_tax' ? 'selected' : '' }}>
+                            Input Tax (Ditambahkan, contoh: PPN)
+                        </option>
+                        <option value="withholding_tax" {{ old('type') == 'withholding_tax' ? 'selected' : '' }}>
+                            Withholding Tax (Potongan, contoh: PPh)
+                        </option>
+                    </select>
+                </div>
 
                 <div>
                     <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Active</label>

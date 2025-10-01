@@ -290,7 +290,7 @@ Route::middleware(['auth'])->group(function () {
     // payment
     Route::resource('payment', 'PaymentController')->middleware('permission:payment_purchase.access');
 
-    Route::resource('payment_expense', 'paymentExpenseController')->middleware('permission:payment_expense.access');
+    Route::resource('payment_expense', 'PaymentExpenseController')->middleware('permission:payment_expense.access');
 
 
 

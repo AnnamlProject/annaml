@@ -241,7 +241,7 @@ class JournalEntryController extends Controller
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
                     'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak'],
+                    'pajak' => $item['pajak'] ?? 0,
                     'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
                     'kode_fiscal' => $item['kode_fiscal'] ?? null
                 ]);
@@ -419,7 +419,7 @@ class JournalEntryController extends Controller
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
                     'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak'],
+                    'pajak' => $item['pajak'] ?? 0,
                     'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
                     'kode_fiscal' => $item['kode_fiscal'] ?? null
                 ]);

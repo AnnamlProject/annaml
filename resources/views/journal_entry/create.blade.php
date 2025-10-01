@@ -141,6 +141,35 @@
             </div>
         </div>
     </div>
+    <style>
+        /* Style agar Select2 seragam dengan input Tailwind */
+        .select2-container .select2-selection--single {
+            height: 36px !important;
+            /* sama dengan input Tailwind h-9 */
+            padding: 4px 8px !important;
+            border: 1px solid #d1d5db !important;
+            /* border gray-300 */
+            border-radius: 0.375rem !important;
+            /* rounded-md */
+            display: flex;
+            align-items: center;
+            background-color: #fff !important;
+        }
+
+        .select2-container .select2-selection__rendered {
+            line-height: 1.25rem !important;
+            /* teks rata */
+            font-size: 0.875rem !important;
+            /* text-sm */
+            color: #374151 !important;
+            /* gray-700 */
+        }
+
+        .select2-container .select2-selection__arrow {
+            height: 100% !important;
+            top: 0 !important;
+        }
+    </style>
 
 @endsection
 
@@ -251,6 +280,7 @@
             function attachSelect2(index) {
                 $(`select[data-index="${index}"]`).select2({
                     placeholder: 'Cari Akun...',
+                    width: '100%', // wajib supaya select2 full width
                     ajax: {
                         url: '/search-account',
                         dataType: 'json',

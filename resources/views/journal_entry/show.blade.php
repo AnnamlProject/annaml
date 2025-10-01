@@ -32,7 +32,9 @@
                             <th class="border px-4 py-2 text-right">Debit</th>
                             <th class="border px-4 py-2 text-right">Kredit</th>
                             <th class="border px-4 py-2">Comment</th>
-                            <th class="border px-4 py-2">Specpose</th>
+                            @can('specpose.access')
+                                <th class="border px-4 py-2">Specpose</th>
+                            @endcan
                         </tr>
                     </thead>
                     @php
@@ -68,9 +70,11 @@
                                 <td class="border px-4 py-2">
                                     {{ $detail->comment ?? '-' }}
                                 </td>
-                                <td class="border px-4 py-2">
-                                    {{ $detail->project->nama_project ?? 'Tidak Ada' }}
-                                </td>
+                                @can('specpose.access')
+                                    <td class="border px-4 py-2">
+                                        {{ $detail->project->nama_project ?? 'Tidak Ada' }}
+                                    </td>
+                                @endcan
                             </tr>
                         @endforeach
                     </tbody>

@@ -49,9 +49,14 @@
                                     <th class="border px-4 py-3 text-center w-[10%]">Debits</th>
                                     <th class="border px-4 py-3 text-center w-[10%]">Credits</th>
                                     <th class="border px-4 py-3 text-center w-[20%]">Comment</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
-                                    <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
-                                    <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    @can('specpose.access')
+                                        <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
+                                    @endcan
+
+                                    @can('fical.acces')
+                                        <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
+                                        <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
+                                    @endcan
                                     <th class="border px-4 py-3 text-center w-[5%]">Aksi</th>
                                 </tr>
 
@@ -104,52 +109,57 @@
                                             <input type="text" name="items[{{ $i }}][comment]"
                                                 class="w-full border rounded px-2 py-1" value="{{ $detail->comment }}" />
                                         </td>
-                                        <td class="border px-2 py-1">
-                                            <select class="w-full border rounded"
-                                                name="items[{{ $i }}][project_id]">
-                                                <option value="">-- Pilih Specpose --</option>
-                                                @foreach ($projects as $prj)
-                                                    <option value="{{ $prj->id }}"
-                                                        {{ $detail->project_id == $prj->id ? 'selected' : '' }}>
-                                                        {{ $prj->nama_project }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
 
-                                        <td class="border px-2 py-1 text-center">
-                                            <input type="hidden" name="items[{{ $i }}][pajak]" value="0">
-                                            <input type="checkbox" name="items[{{ $i }}][pajak]" value="1"
-                                                class="pajak-checkbox"
-                                                {{ old("items.$i.pajak", $detail->pajak ?? 0) ? 'checked' : '' }}>
-                                        </td>
-                                        <td class="border px-2 py-1 penyesuaian-col text-center">
-                                            @if ($detail->penyesuaian_fiskal || $detail->kode_fiscal)
-                                                <div class="flex flex-col space-y-1">
-                                                    <select name="items[{{ $i }}][penyesuaian_fiskal]"
-                                                        class="w-full border rounded px-2 py-1">
-                                                        <option value="">-- Pilih --</option>
-                                                        <option value="non_tax"
-                                                            {{ $detail->penyesuaian_fiskal == 'non_tax' ? 'selected' : '' }}>
-                                                            Non Tax Object</option>
-                                                        <option value="pph_final"
-                                                            {{ $detail->penyesuaian_fiskal == 'pph_final' ? 'selected' : '' }}>
-                                                            PPH Final</option>
-                                                        <option value="koreksi_plus"
-                                                            {{ $detail->penyesuaian_fiskal == 'koreksi_plus' ? 'selected' : '' }}>
-                                                            Koreksi Positif</option>
-                                                        <option value="koreksi_minus"
-                                                            {{ $detail->penyesuaian_fiskal == 'koreksi_minus' ? 'selected' : '' }}>
-                                                            Koreksi Negatif</option>
-                                                    </select>
-                                                    <input type="text" name="items[{{ $i }}][kode_fiscal]"
-                                                        value="{{ $detail->kode_fiscal }}" placeholder="Kode Fiscal"
-                                                        class="w-full border rounded px-2 py-1" />
-                                                </div>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
+                                        @can('specpose.access')
+                                            <td class="border px-2 py-1">
+                                                <select class="w-full border rounded"
+                                                    name="items[{{ $i }}][project_id]">
+                                                    <option value="">-- Pilih Specpose --</option>
+                                                    @foreach ($projects as $prj)
+                                                        <option value="{{ $prj->id }}"
+                                                            {{ $detail->project_id == $prj->id ? 'selected' : '' }}>
+                                                            {{ $prj->nama_project }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                        @endcan
+
+                                        @can('fiscal.access')
+                                            <td class="border px-2 py-1 text-center">
+                                                <input type="hidden" name="items[{{ $i }}][pajak]" value="0">
+                                                <input type="checkbox" name="items[{{ $i }}][pajak]" value="1"
+                                                    class="pajak-checkbox"
+                                                    {{ old("items.$i.pajak", $detail->pajak ?? 0) ? 'checked' : '' }}>
+                                            </td>
+                                            <td class="border px-2 py-1 penyesuaian-col text-center">
+                                                @if ($detail->penyesuaian_fiskal || $detail->kode_fiscal)
+                                                    <div class="flex flex-col space-y-1">
+                                                        <select name="items[{{ $i }}][penyesuaian_fiskal]"
+                                                            class="w-full border rounded px-2 py-1">
+                                                            <option value="">-- Pilih --</option>
+                                                            <option value="non_tax"
+                                                                {{ $detail->penyesuaian_fiskal == 'non_tax' ? 'selected' : '' }}>
+                                                                Non Tax Object</option>
+                                                            <option value="pph_final"
+                                                                {{ $detail->penyesuaian_fiskal == 'pph_final' ? 'selected' : '' }}>
+                                                                PPH Final</option>
+                                                            <option value="koreksi_plus"
+                                                                {{ $detail->penyesuaian_fiskal == 'koreksi_plus' ? 'selected' : '' }}>
+                                                                Koreksi Positif</option>
+                                                            <option value="koreksi_minus"
+                                                                {{ $detail->penyesuaian_fiskal == 'koreksi_minus' ? 'selected' : '' }}>
+                                                                Koreksi Negatif</option>
+                                                        </select>
+                                                        <input type="text" name="items[{{ $i }}][kode_fiscal]"
+                                                            value="{{ $detail->kode_fiscal }}" placeholder="Kode Fiscal"
+                                                            class="w-full border rounded px-2 py-1" />
+                                                    </div>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        @endcan
 
                                         <td class="border px-2 py-1 text-center">
                                             <button type="button"
@@ -269,6 +279,7 @@
         function attachSelect2($select) {
             $select.select2({
                 placeholder: 'Cari Account...',
+                width: '100%',
                 ajax: {
                     url: '/search-account',
                     dataType: 'json',

@@ -78,14 +78,15 @@
 
     <!-- Login Container -->
     <!-- Card utama -->
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+    <div class="w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
 
         <!-- Kiri: Form Login -->
         <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
             <div class="text-center mb-6">
-                <div class="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center shadow-md mb-4">
-                    <img src="{{ asset('storage/' . \App\Setting::get('logo', 'default.png')) }}" alt="Logo"
-                        class="h-12 w-12">
+                <div
+                    class="mx-auto w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center shadow-md mb-4 overflow-hidden">
+                    <img src="{{ asset('image/logologinpage.jpg') }}" alt="Logo"
+                        class="h-full w-full object-cover rounded-full">
                 </div>
                 <h4 class="text-2xl font-bold text-gray-800">Welcome Back!</h4>
                 <p class="text-gray-500 text-sm">Please login to continue</p>
@@ -149,7 +150,7 @@
 
         <!-- Kanan: Gambar -->
         <div class="w-full md:w-1/2 relative hidden md:block">
-            <img src="{{ asset('image/page_login.jpg') }}" alt="Login Banner" class="w-full h-full object-cover">
+            <img src="{{ asset('image/page_login_ptcmb.jpg') }}" alt="Login Banner" class="w-full h-full object-cover">
             <div class="absolute inset-0"></div>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
             </div>

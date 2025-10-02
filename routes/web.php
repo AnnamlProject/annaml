@@ -293,6 +293,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('payment_expense', 'PaymentExpenseController')->middleware('permission:payment_expense.access');
 
 
+    Route::resource('prepayment', 'PrepaymentController')->middleware('permission:prepayment_purchase.access');
+
+
 
     // end purchases menu
 

@@ -30,19 +30,9 @@
 
 
         <!-- Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-sky-600/80"></div>
+        <div class=""></div>
 
         <!-- Partikel -->
-        <div class="absolute inset-0 pointer-events-none">
-            @for ($i = 0; $i < 30; $i++)
-                <span class="absolute w-1 h-1 bg-white rounded-full opacity-70 animate-twinkle"
-                    style="
-                    top: {{ rand(0, 100) }}%; 
-                    left: {{ rand(0, 100) }}%; 
-                    animation-delay: {{ rand(0, 5) }}s;
-                "></span>
-            @endfor
-        </div>
 
         <!-- Konten -->
         <div class="relative max-w-xl z-10">
@@ -54,91 +44,11 @@
                 {{ $greeting }}
             </h1>
 
-            <p class="text-sm md:text-sm mb-6 text-gray-200 drop-shadow-md animate-fadeIn delay-300">
+            <p class="text-sm md:text-sm mb-6 text-gray-700 drop-shadow-md animate-fadeIn delay-300">
                 <span class="px-2 py-1 rounded-lg backdrop-blur-sm">
                     {{ $tagline }}
                 </span>
             </p>
         </div>
     </div>
-
-    <style>
-        @keyframes fadeSlide {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes zoomBg {
-            from {
-                transform: scale(1);
-            }
-
-            to {
-                transform: scale(1.1);
-            }
-        }
-
-        @keyframes textReveal {
-            0% {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes twinkle {
-
-            0%,
-            100% {
-                opacity: 0.2;
-            }
-
-            50% {
-                opacity: 1;
-            }
-        }
-
-        @keyframes glowButton {
-
-            0%,
-            100% {
-                box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 20px rgba(99, 102, 241, 0.9);
-            }
-        }
-
-        .animate-fadeSlide {
-            animation: fadeSlide 1s ease forwards;
-        }
-
-        .animate-zoomBg {
-            animation: zoomBg 20s ease-in-out infinite alternate;
-        }
-
-        .animate-textReveal {
-            animation: textReveal 1s ease-out;
-        }
-
-        .animate-twinkle {
-            animation: twinkle 3s infinite ease-in-out;
-        }
-
-        .animate-glowButton {
-            animation: glowButton 2s infinite ease-in-out;
-        }
-    </style>
 @endsection

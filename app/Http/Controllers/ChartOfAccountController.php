@@ -30,7 +30,7 @@ class ChartOfAccountController extends Controller
         }
 
         // 📄 Pagination + tetap menyimpan parameter (search, filter_tipe) di URL
-        $chartOfAccounts = $query->orderBy('kode_akun')->paginate(20)->withQueryString();
+        $chartOfAccounts = $query->orderBy('kode_akun')->get();
 
         // 🔄 Ambil semua tipe akun unik untuk dropdown filter
         $tipeAkunOptions = ChartOfAccount::select('tipe_akun')->distinct()->pluck('tipe_akun');

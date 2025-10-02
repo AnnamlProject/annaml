@@ -150,7 +150,7 @@
         <!-- Kanan: Gambar -->
         <div class="w-full md:w-1/2 relative hidden md:block">
             <img src="{{ asset('image/page_login.jpg') }}" alt="Login Banner" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+            <div class="absolute inset-0"></div>
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
             </div>
         </div>

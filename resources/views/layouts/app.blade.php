@@ -6,7 +6,31 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" href="{{ asset('image/favicon/favicon.ico') }}">
+    @php
+        // Cache-busting: ambil timestamp file jika ada, fallback ke time()
+        function ver($path)
+        {
+            $fullPath = public_path($path);
+            return file_exists($fullPath) ? filemtime($fullPath) : time();
+        }
+    @endphp
+
+    <!-- Favicon ICO -->
+    <link rel="icon" type="image/x-icon"
+        href="{{ asset('image/favicon/favicon.ico') }}?v={{ ver('image/favicon/favicon.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon"
+        href="{{ asset('image/favicon/favicon.ico') }}?v={{ ver('image/favicon/favicon.ico') }}">
+
+    <!-- Favicon PNG -->
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ asset('image/favicon/favicon-32x32.png') }}?v={{ ver('image/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ asset('image/favicon/favicon-16x16.png') }}?v={{ ver('image/favicon/favicon-16x16.png') }}">
+
+    <!-- Optional: SVG modern browser -->
+    <link rel="icon" type="image/svg+xml"
+        href="{{ asset('image/favicon/favicon.svg') }}?v={{ ver('image/favicon/favicon.svg') }}">
+
 
     {{-- CSS --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">

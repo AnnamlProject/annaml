@@ -14,6 +14,17 @@
                 <form action="{{ route('linkedAccount.store') }}" method="POST">
                     @csrf
 
+                    @if ($errors->any())
+                        <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+
                     <input type="hidden" name="kode" value="RETAINED EARNINGS">
 
                     <div class="mb-4">

@@ -32,7 +32,7 @@ class linkedAccountController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode' => 'required|in:retained_earnings',
+            'kode' => 'required|in:RETAINED EARNINGS',
             'akun_id' => 'required|exists:chart_of_accounts,id',
         ]);
 

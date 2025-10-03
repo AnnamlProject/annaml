@@ -17,10 +17,10 @@
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- File Button -->
-                        <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
+                        {{-- <button onclick="document.getElementById('fileModal').classList.remove('hidden')"
                             class="inline-flex items-center px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
-                        </button>
+                        </button> --}}
                         @can('sales_taxes.create')
                             <a href="{{ route('sales_taxes.create') }}"
                                 class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
@@ -43,13 +43,22 @@
                                     Tax</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Dalam Persen(%)</th>
+                                    Tax Code</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rate(%)</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tax On Purchases</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Tax On Sales</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Kategori</th>
 
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Aksi</th>
@@ -60,9 +69,12 @@
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-2 py-1 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->name }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->tax_code }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->rate }}%</td>
                                     <td class="px-2 py-1 text-center">{{ $item->purchaseAccount->nama_akun }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->salesAccount->nama_akun ?? '-' }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->type ?? '-' }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $item->kategori ?? '-' }}</td>
 
                                     <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">

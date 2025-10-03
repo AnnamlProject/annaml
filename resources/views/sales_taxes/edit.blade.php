@@ -22,72 +22,95 @@
                 </div>
             @endif
 
-            <div class="mb-5">
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Tax</label>
-                <input type="text" id="name" name="name"
-                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value="{{ old('name', $sales_taxes->name) }}">
-            </div>
+            <div class="grid grid-cols-4 gap-4 text-sm">
 
-            <div class="mb-5">
-                <label for="rate" class="block text-sm font-medium text-gray-700 mb-1">Dalam Persen(%)</label>
-                <input type="text" id="rate" name="rate"
-                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Contoh : 10" value="{{ old('rate', $sales_taxes->rate ?? '') }}">
-            </div>
+                <div class="mb-5">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pajak</label>
+                    <input type="text" id="name" name="name"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ old('name', $sales_taxes->name) }}">
+                </div>
+                <div class="mb-5">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Tax Code</label>
+                    <input type="text" id="name" name="tax_code"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value="{{ old('tax_code', $sales_taxes->tax_code) }}">
+                </div>
 
-            <div class="mb-5">
-                <label for="purchase_account_id" class="block text-sm font-medium text-gray-700 mb-1">Purchase
-                    Account</label>
-                <select name="purchase_account_id" id="purchase_account_id"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Pilih Account --</option>
-                    @foreach ($account as $g)
-                        <option value="{{ $g->id }}"
-                            {{ isset($sales_taxes) && $sales_taxes->purchase_account_id == $g->id ? 'selected' : '' }}>
-                            {{ $g->kode_akun }}-{{ $g->nama_akun }}
+                <div class="mb-5">
+                    <label for="rate" class="block text-sm font-medium text-gray-700 mb-1">Rate(%)</label>
+                    <input type="text" id="rate" name="rate"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Contoh : 10" value="{{ old('rate', $sales_taxes->rate ?? '') }}">
+                </div>
+
+                <div class="mb-5">
+                    <label for="purchase_account_id" class="block text-sm font-medium text-gray-700 mb-1">Purchases
+                        Transaction</label>
+                    <select name="purchase_account_id" id="purchase_account_id"
+                        class="w-full account-select border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Pilih Account --</option>
+                        @foreach ($account as $g)
+                            <option value="{{ $g->id }}"
+                                {{ isset($sales_taxes) && $sales_taxes->purchase_account_id == $g->id ? 'selected' : '' }}>
+                                {{ $g->kode_akun }}-{{ $g->nama_akun }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-5">
+                    <label for="sales_account_id" class="block text-sm font-medium text-gray-700 mb-1">Sales
+                        Transaction</label>
+                    <select name="sales_account_id" id="sales_account_id"
+                        class="w-full account-select border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">-- Pilih Account --</option>
+                        @foreach ($account as $g)
+                            <option value="{{ $g->id }}"
+                                {{ isset($sales_taxes) && $sales_taxes->sales_account_id == $g->id ? 'selected' : '' }}>
+                                {{ $g->kode_akun }}-{{ $g->nama_akun }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                        Kriteria
+                    </label>
+                    <select name="type" id="type" class="w-full border rounded px-3 py-2">
+                        <option value="input_tax"
+                            {{ old('type', $sales_taxes->type ?? '') == 'input_tax' ? 'selected' : '' }}>
+                            Input Tax (Ditambahkan, contoh: PPN)
                         </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-5">
-                <label for="sales_account_id" class="block text-sm font-medium text-gray-700 mb-1">Sales Account</label>
-                <select name="sales_account_id" id="sales_account_id"
-                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">-- Pilih Account --</option>
-                    @foreach ($account as $g)
-                        <option value="{{ $g->id }}"
-                            {{ isset($sales_taxes) && $sales_taxes->sales_account_id == $g->id ? 'selected' : '' }}>
-                            {{ $g->kode_akun }}-{{ $g->nama_akun }}
+                        <option value="withholding_tax"
+                            {{ old('type', $sales_taxes->type ?? '') == 'withholding_tax' ? 'selected' : '' }}>
+                            Withholding Tax (Potongan, contoh: PPh)
                         </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
-                    Jenis Pajak
-                </label>
-                <select name="type" id="type" class="w-full border rounded px-3 py-2">
-                    <option value="input_tax" {{ old('type', $sales_taxes->type ?? '') == 'input_tax' ? 'selected' : '' }}>
-                        Input Tax (Ditambahkan, contoh: PPN)
-                    </option>
-                    <option value="withholding_tax"
-                        {{ old('type', $sales_taxes->type ?? '') == 'withholding_tax' ? 'selected' : '' }}>
-                        Withholding Tax (Potongan, contoh: PPh)
-                    </option>
-                </select>
+                    </select>
 
-            </div>
-            <div>
-                <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Active</label>
-                <select name="active" id="active"
-                    class="w-1/8 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="1" {{ old('active', $sales_taxes->active ?? 1) == 1 ? 'selected' : '' }}>Yes
-                    </option>
-                    <option value="0" {{ old('active', $sales_taxes->active ?? 1) == 0 ? 'selected' : '' }}>No
-                    </option>
-                </select>x
-
+                </div>
+                <div>
+                    <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="kategori" id="kategori"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Exclude" {{ old('kategori', $sales_taxes->kategori ?? 1) == 1 ? 'selected' : '' }}>
+                            Exclude
+                        </option>
+                        <option value="0" {{ old('kategori', $sales_taxes->kategori ?? 1) == 0 ? 'selected' : '' }}>
+                            Include
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label for="active" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="active" id="active"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="1" {{ old('active', $sales_taxes->active ?? 1) == 1 ? 'selected' : '' }}>Active
+                        </option>
+                        <option value="0" {{ old('active', $sales_taxes->active ?? 1) == 0 ? 'selected' : '' }}>
+                            Non-Active
+                        </option>
+                    </select>
+                </div>
             </div>
 
             {{-- Tombol --}}
@@ -104,6 +127,12 @@
         </form>
     </div>
 @endsection
+{{-- Select2 CSS --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+{{-- Select2 JS --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
         $('.account-select').select2({

@@ -50,7 +50,7 @@
                         <li><a href="#units" class="tab-link">Units</a></li>
                         <li><a href="#pricing" class="tab-link">Pricing</a></li>
                         <li><a href="#vendors" class="tab-link">Vendors</a></li>
-                        <li><a href="#linked" class="tab-link">Linked COA</a></li>
+                        <li><a href="#linked" class="tab-link">Linked Account</a></li>
                         <li><a href="#build" class="tab-link">Build</a></li>
                         {{-- <li><a href="#statistics" class="tab-link">Statistics</a></li> --}}
                         <li><a href="#taxes" class="tab-link">Taxes</a></li>
@@ -63,7 +63,7 @@
                         <li><a href="#unitsService" class="tab-link">Units</a></li>
                         <li><a href="#pricingService" class="tab-link">Pricing</a></li>
                         <li><a href="#vendorsService" class="tab-link">Vendors</a></li>
-                        <li><a href="#linkedService" class="tab-link">Linked COA</a></li>
+                        <li><a href="#linkedService" class="tab-link">Linked Account</a></li>
                         {{-- <li><a href="#statisticsService" class="tab-link">Statistics</a></li> --}}
                         <li><a href="#taxesService" class="tab-link">Taxes</a></li>
                         <li><a href="#descriptionService" class="tab-link">Description</a></li>
@@ -474,40 +474,37 @@
                 {{-- Tab Linked (Chart of Accounts) --}}
                 <div id="linkedService" class="tab-content hidden">
                     <h3 class="font-semibold text-lg mb-2">Account Linkings</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                        {{-- Revenue Account --}}
-                        <div>
-                            <label for="service_revenue_account_id"
-                                class="block text-sm font-medium text-gray-700">Revenue
-                                Account</label>
-                            <select name="service_revenue_account_id"
-                                class="form-select w-full border rounded px-2 py-1 text-sm">
-                                <option value="">-- Pilih Account --</option>
-                                @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
-                                    <option value="{{ $account->id }}">
-                                        {{ $account->kode_akun }} - {{ $account->nama_akun }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
 
 
+                    {{-- Revenue Account --}}
+                    <div>
+                        <label for="service_revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
+                        </label>
+                        <select name="service_revenue_account_id"
+                            class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
+                                <option value="{{ $account->id }}">
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        {{-- expense Account --}}
-                        <div>
-                            <label for="expense_account_id" class="block text-sm font-medium text-gray-700">Expense
-                                Account</label>
-                            <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
-                                <option value="">-- Pilih Account --</option>
-                                @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
-                                    <option value="{{ $account->id }}">
-                                        {{ $account->kode_akun }} - {{ $account->nama_akun }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
 
+
+                    {{-- expense Account --}}
+                    <div>
+                        <label for="expense_account_id" class="block text-sm font-medium text-gray-700">Expense
+                        </label>
+                        <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
+                                <option value="{{ $account->id }}">
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

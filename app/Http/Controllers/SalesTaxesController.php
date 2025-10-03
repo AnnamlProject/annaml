@@ -28,7 +28,9 @@ class SalesTaxesController extends Controller
             'sales_account_id'   => 'nullable|exists:chart_of_accounts,id',
             'active'             => 'nullable|boolean',
             'type'                => 'required|in:input_tax,withholding_tax',
-            'rate' => 'required|numeric'
+            'rate' => 'required|numeric',
+            'kategori' => 'required|in:Inlude,Exclude',
+            'tax_code' => 'required|string'
         ]);
 
         // === 2) Simpan ke database ===
@@ -39,6 +41,8 @@ class SalesTaxesController extends Controller
             'active' => (bool) $validated['active'],
             'rate' => $validated['rate'],
             'type'                => $validated['type'],
+            'kategori' => $validated['kategori'],
+            'tax_code' => $validated['tax_code']
 
         ]);
 
@@ -68,6 +72,8 @@ class SalesTaxesController extends Controller
             'active'             => 'required',
             'rate' => 'required|numeric',
             'type'                => 'required|in:input_tax,withholding_tax',
+            'kategori' => 'required|in:Inlude,Exclude',
+            'tax_code' => 'required|string'
 
         ]);
 
@@ -79,7 +85,9 @@ class SalesTaxesController extends Controller
             'sales_account_id'   => $validated['sales_account_id'] ?? null,
             'active' => (bool) $validated['active'],
             'rate' => $validated['rate'],
-            'type' => $validated['type']
+            'type' => $validated['type'],
+            'kategori' => $validated['kategori'],
+            'tax_code' => $validated['tax_code']
 
         ]);
 

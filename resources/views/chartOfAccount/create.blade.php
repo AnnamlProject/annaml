@@ -24,11 +24,11 @@
                     @endif
 
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kode Akun</label>
                             <input type="text" name="kode_akun" id="kode_akun"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('kode_akun') border-red-500 @enderror"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('kode_akun') border-red-500 @enderror"
                                 value="{{ old('kode_akun', $chartOfAccounts->kode_akun ?? '') }}" required>
                             <small id="info_digit" class="text-sm text-gray-500 mt-1 block"></small>
                             @error('kode_akun')
@@ -39,14 +39,14 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Akun</label>
                             <input type="text" name="nama_akun"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value="{{ old('nama_akun', $chartOfAccounts->nama_akun ?? '') }}" required>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Akun</label>
                             <select name="tipe_akun"
-                                class="w-1/6 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 id="tipe_akun" ...>
                                 @foreach ($tipe_akun as $tipe)
                                     @php
@@ -66,7 +66,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Level Akun</label>
                             <select name="level_akun"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                                 @foreach (['HEADER', 'GROUP ACCOUNT', 'ACCOUNT', 'SUB ACCOUNT', 'X'] as $level)
                                     <option value="{{ $level }}"
@@ -78,8 +78,8 @@
                         </div>
                         <div class="col-span-1 md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Klasifikasi Akun</label>
-                            <select name="klasifikasi_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select name="klasifikasi_id" id="klasifikasi_akun_id"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Klasifikasi --</option>
                                 @foreach ($parent_akun as $klasifikasi)
                                     <option value="{{ $klasifikasi->id }}"
@@ -124,7 +124,7 @@
                         <div class="mb-4">
                             <label for="is_income_tax" class="block text-gray-700 font-medium mb-1">Pajak</label>
                             <select name="is_income_tax" id="is_income_tax" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
                                 <option value="1"
                                     {{ old('is_income_tax', $data->is_income_tax ?? '') == '1' ? 'selected' : '' }}>
@@ -143,13 +143,13 @@
                         <div class="col-span-1 md:col-span-2 mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Catatan / Deskripsi</label>
                             <textarea name="catatan" rows="3"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan', $chartOfAccounts->catatan ?? '') }}</textarea>
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan', $chartOfAccounts->catatan ?? '') }}</textarea>
                         </div>
 
                         <div class="col-span-1 md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Khusus Pajak</label>
                             <textarea name="catatan_pajak" rows="2"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan_pajak', $chartOfAccounts->catatan_pajak ?? '') }}</textarea>
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan_pajak', $chartOfAccounts->catatan_pajak ?? '') }}</textarea>
                         </div>
                     </div>
 
@@ -168,6 +168,11 @@
             </div>
         </div>
     </div>
+
+    <!-- Optional: Select2 CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tipeSelect = document.getElementById('tipe_akun');
@@ -212,6 +217,17 @@
             tipeSelect.addEventListener('change', updateValidasi);
 
             updateValidasi(); // Inisialisasi saat pertama kali load halaman
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('#klasifikasi_akun_id').select2({
+                placeholder: "-- Pilih --",
+                allowClear: true,
+                width: '100%'
+            });
         });
     </script>
 

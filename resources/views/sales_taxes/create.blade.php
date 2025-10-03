@@ -20,7 +20,7 @@
                     </ul>
                 </div>
             @endif
-            <h3 class="font-bold text-lg mb-3">Sales-Taxes Create</h3>
+            <h3 class="font-bold text-lg mb-3">Taxes Create</h3>
 
 
             <div class="grid grid-cols-4 gap-4 text-sm">

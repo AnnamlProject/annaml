@@ -144,8 +144,8 @@
                                         @endcan
                                         @can('sales_taxes.access')
                                             <a href="{{ route('sales_taxes.index') }}" @click="open = false"
-                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
-                                                - Taxes
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                Taxes
                                             </a>
                                         @endcan
                                     </div>
@@ -1614,8 +1614,8 @@
                                         @endcan
                                         @can('sales_taxes.access')
                                             <a href="{{ route('sales_taxes.index') }}" @click="open = false"
-                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
-                                                - Taxes
+                                                class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
+                                                Taxes
                                             </a>
                                         @endcan
                                     </div>

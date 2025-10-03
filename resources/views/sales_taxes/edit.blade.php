@@ -3,7 +3,7 @@
 @section('content')
 
     <div class="max-w-full mx-auto bg-white shadow-md rounded-xl p-8 mt-6">
-        <h2 class="text-lg font-bold mb-4">Sales Taxes Edit</h2>
+        <h2 class="text-lg font-bold mb-4">Taxes Edit</h2>
 
         <form method="POST"
             action="{{ isset($sales_taxes) ? route('sales_taxes.update', $sales_taxes->id) : route('sales_taxes.store') }}">

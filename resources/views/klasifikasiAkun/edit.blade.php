@@ -9,7 +9,7 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label for="kode_klasifikasi" class="block text-sm font-medium text-gray-700">Kode
                                 Klasifikasi</label>

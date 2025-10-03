@@ -91,8 +91,9 @@
                             @forelse($klasifikasis as $akun)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-2 py-1 text-center text-gray-700">{{ $loop->iteration }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $akun->numberingAccount->nama_grup ?? '-' }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $akun->nama_klasifikasi }}</td>
+                                    <td class="px-2 py-1 text-center">
+                                        {{ strtoupper($akun->numberingAccount->nama_grup ?? '-') }}</td>
+                                    <td class="px-2 py-1 text-center">{{ strtoupper($akun->nama_klasifikasi) }}</td>
                                     {{-- <td class="px-3 py-1">{{ $akun->parent->nama_klasifikasi ?? '-' }}</td> --}}
                                     <td class="px-2 py-1 text-center">
                                         <span class="{{ $akun->aktif ? 'text-green-600' : 'text-red-600' }}">

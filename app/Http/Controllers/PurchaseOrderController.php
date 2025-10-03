@@ -84,7 +84,7 @@ class PurchaseOrderController extends Controller
             // Validasi detail item
             'items'                => 'required|array|min:1',
             'items.*.item_id'      => 'required|exists:items,id',
-            'items.*.quantity'     => 'required|numeric|min:0',
+            'items.*.quantity'     => 'nullable|numeric|min:0',
             'items.*.order'        => 'required|numeric|min:0',
             'items.*.back_order'   => 'nullable|numeric|min:0',
             'items.*.unit'         => 'required|string',
@@ -124,7 +124,7 @@ class PurchaseOrderController extends Controller
                 PurchaseOrderDetail::create([
                     'purchase_order_id'     => $purchaseOrder->id,
                     'item_id'            => $item['item_id'],
-                    'quantity'           => $item['quantity'],
+                    'quantity'           => $item['quantity'] ?? 0,
                     'order'              => $item['order'],
                     'back_order'         => $item['back_order'],
                     'unit'               => $item['unit'],

@@ -13,7 +13,7 @@
                     style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
-                        Sales Taxes
+                        Taxes
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- File Button -->
@@ -24,7 +24,7 @@
                         @can('sales_taxes.create')
                             <a href="{{ route('sales_taxes.create') }}"
                                 class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                                <i class="fas fa-plus mr-2"></i> Add Sales Taxes
+                                <i class="fas fa-plus mr-2"></i> Add Taxes
                             </a>
                         @endcan
                     </div>
@@ -95,7 +95,7 @@
                                     <td colspan="15" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center text-gray-400">
                                             <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
-                                            <p class="text-lg font-medium">Belum ada Sales Taxes</p>
+                                            <p class="text-lg font-medium">Belum ada Taxes</p>
                                             <a href="{{ route('sales_taxes.create') }}"
                                                 class="mt-4 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                                                 <i class="fas fa-plus mr-2"></i> Tambah

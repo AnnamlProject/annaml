@@ -141,7 +141,8 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->tipe_akun }}
+                                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                                        {{ strtoupper($chartOfAccount->tipe_akun) }}
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->level_akun }}
                                     </td>

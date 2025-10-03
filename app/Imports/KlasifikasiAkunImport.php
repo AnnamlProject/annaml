@@ -22,7 +22,6 @@ class KlasifikasiAkunImport implements ToModel, WithHeadingRow
         if (!$numbering) {
             throw new \Exception("❌ Numbering dengan nama grup '{$row['nama_grup']}' tidak ditemukan!");
         }
-
         return new KlasifikasiAkun([
             'kode_klasifikasi'      => $row['kode_klasifikasi'],
             'nama_klasifikasi'      => $row['nama_klasifikasi'],

@@ -43,7 +43,7 @@
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-2 py-1 text-center text-gray-700">{{ $loop->iteration }}</td>
                                     <td class="px-2 py-1 text-center font-semibold text-gray-900">
-                                        {{ $numberingAccounts->nama_grup }}
+                                        {{ strtoupper($numberingAccounts->nama_grup) }}
                                     </td>
                                     <td class="px-2 py-1 text-center text-gray-800">
                                         {{ $numberingAccounts->jumlah_digit }}

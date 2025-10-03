@@ -34,10 +34,16 @@ class ImportController extends Controller
             'file' => 'required|file|mimes:xlsx,csv,xls',
         ]);
 
-        Excel::import(new KlasifikasiAkunImport, $request->file('file'));
+        try {
+            Excel::import(new KlasifikasiAkunImport, $request->file('file'));
 
-        return back()->with('success', 'Data klasifikasi akun berhasil diimpor.');
+            return back()->with('success', 'Data klasifikasi akun berhasil diimpor.');
+        } catch (\Exception $e) {
+            // Tangkap error dari Import (misalnya numbering tidak ada)
+            return back()->with('error', $e->getMessage());
+        }
     }
+
     public function importchartOfAccount(Request $request)
     {
         $request->validate([

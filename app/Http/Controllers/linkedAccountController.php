@@ -43,4 +43,19 @@ class linkedAccountController extends Controller
 
         return redirect()->route('linkedAccount.index')->with('success', 'Linked account berhasil disimpan.');
     }
+    public function destroy($id)
+    {
+        $linkedAccount = linkedAccounts::findOrFail($id);
+
+        try {
+            $linkedAccount->delete();
+            return redirect()
+                ->route('linkedAccount.index')
+                ->with('success', 'Linked Account berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('linkedAccount.index')
+                ->with('error', 'Terjadi kesalahan saat menghapus: ' . $e->getMessage());
+        }
+    }
 }

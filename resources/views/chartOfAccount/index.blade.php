@@ -147,7 +147,7 @@
                                     <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->level_akun }}
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
-                                        {{ $chartOfAccount->klasifikasiAkun->nama_klasifikasi ?? '-' }}
+                                        {{ strtoupper($chartOfAccount->klasifikasiAkun->nama_klasifikasi ?? '-') }}
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap text-right">
                                         <div class="flex justify-end space-x-2">

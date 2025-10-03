@@ -37,7 +37,7 @@
                                 <label for="purchase_order_id" class="block text-gray-700 font-medium mb-1">Order
                                     Number</label>
                                 <select name="purchase_order_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih --</option>
                                     @foreach ($purchase_order as $data)
                                         <option value="{{ $data->id }}"
@@ -52,7 +52,7 @@
                                     Number</label>
                                 <input type="text" id="invoice_number" name="invoice_number"
                                     value="{{ old('invoice_number', $purchase_invoice->invoice_number ?? '') }}"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                                 <label class="inline-flex items-center mt-2">
                                     <input type="checkbox" id="auto_generate" name="auto_generate" value="1"
@@ -94,7 +94,7 @@
                                 <label for="location_id" class="block text-gray-700 font-medium mb-1">Location Inventory
                                 </label>
                                 <select name="location_id" id="location_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required>
                                     <option value="">-- Location Inventory--</option>
                                     @foreach ($lokasi_inventory as $level)
@@ -112,7 +112,7 @@
                                 <label for="Vendor" class="block text-gray-700 font-medium mb-1">Vendor
                                 </label>
                                 <select name="vendor_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required>
                                     <option value="">-- Vendor--</option>
                                     @foreach ($vendor as $level)
@@ -131,7 +131,7 @@
                                 </label>
                                 <input type="date" id="name" name="date_invoice" required
                                     value="{{ old('date_invoice', $purchase_invoice->date_invoice ?? now()->toDateString()) }}"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @error('date_invoice')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -141,7 +141,7 @@
                                 </label>
                                 <input type="date" id="name" name="shipping_date" required
                                     value="{{ old('shipping_date', $purchase_invoice->shipping_date ?? now()->toDateString()) }}"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @error('shipping_date')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -151,7 +151,7 @@
                                 <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
                                     Address</label>
                                 <textarea id="shipping_address" name="shipping_address" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_invoice->shipping_address ?? '') }}</textarea>
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_invoice->shipping_address ?? '') }}</textarea>
                                 @error('shipping_address')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -233,7 +233,7 @@
                                 </label>
                                 <input type="text" id="name" name="early_payment_terms"
                                     value="{{ old('early_payment_terms', $purchase_invoice->early_payment_terms ?? '') }}"
-                                    class="w-1/3 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="w-1/3 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @error('early_payment_terms')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -241,8 +241,8 @@
                             <div class="mb-4 md:col-span-2 ">
                                 <label for="messages" class="block text-gray-700 font-medium mb-1">Messages
                                 </label>
-                                <textarea id="messages" name="messages" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $purchase_invoice->messages ?? '') }}</textarea>
+                                <textarea id="messages" name="messages" rows="3" placeholder="Masukkan messages(opsional)"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('messages', $purchase_invoice->messages ?? '') }}</textarea>
                                 @error('messages')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -517,8 +517,8 @@
             <tr class="item-row" data-index="${index}">
                 <td><input type="hidden" name="items[${index}][item_id]" value="${item.id}">${item.item_number}</td>
                 <td><input type="number" name="items[${index}][quantity]" value="${item.quantity}" class="qty-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][order]" value="${item.order}" class="order-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border rounded" readonly /></td>
+                <td><input type="number" name="items[${index}][order]" value="${item.order}" class="order-${index} w-full border bg-gray-200 rounded" readonly/></td>
+                <td><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border bg-gray-200 rounded" readonly /></td>
                 <td><input type="text" name="items[${index}][unit]" value="${item.unit}" class="unit-${index} w-full border rounded" /></td>
                 <td><input type="text" name="items[${index}][item_description]" value="${item.description}" class="desc-${index} w-full border rounded" /></td>
                 <td><input type="number" step="0.01" name="items[${index}][price]" value="${item.price}" class="purchase-${index} w-full border rounded" /></td>

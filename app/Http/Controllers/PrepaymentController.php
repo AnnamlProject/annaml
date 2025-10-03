@@ -111,4 +111,116 @@ class PrepaymentController extends Controller
         $data = Prepayment::with(['vendor', 'account'])->findOrFail($id);
         return view('prepayment.show', compact('data'));
     }
+
+    public function edit($id)
+    {
+        $prepayment = Prepayment::with(['vendor', 'account'])->findOrFail($id);
+        $vendor = Vendors::all();
+        $account = chartOfAccount::all();
+        $paidAccount = \App\linkedAccounts::with('akun')
+            ->where('kode', 'Prepayments Prepaid Orders')
+            ->first();
+        return view('prepayment.edit', compact('prepayment', 'vendor', 'account', 'paidAccount'));
+    }
+
+    public function update(Request $request, $id)
+    {
+
+        // hilangkan titik ribuan sebelum validasi
+        $request->merge([
+            'amount' => str_replace('.', '', $request->amount),
+        ]);
+        $validated = $request->validate([
+            'tanggal_prepayment'              => 'required|date',
+            'vendor_id' => 'required|exists:vendors,id',
+            'account_header_id' => 'required|exists:chart_of_accounts,id',
+            'reference'            => 'required|string|max:255',
+            'amount' => 'required|numeric',
+            'comment'             => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $expense = Prepayment::findOrFail($id);
+            $expense->update([
+                'tanggal_prepayment'              => $validated['tanggal_prepayment'],
+                'vendor_id' => $validated['vendor_id'],
+                'account_id'            => $validated['account_header_id'],
+                'amount'             => $validated['amount'],
+                'reference' => $validated['reference'],
+                'comment'             => $validated['comment'] ?? null,
+            ]);
+
+            $journalSource = 'Prepayment#' . $expense->id;
+
+            // hapus jurnal lama
+            $oldJournal = JournalEntry::where('source', $journalSource)->first();
+            if ($oldJournal) {
+                $oldJournal->details()->delete();
+                $oldJournal->delete();
+            }
+
+            // buat jurnal baru
+            $journal = JournalEntry::create([
+                'source'   => $journalSource,
+                'tanggal'  => $validated['tanggal_prepayment'],
+                'comment'  => $validated['comment'] ?? null,
+            ]);
+
+            $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
+
+            if (!$coaCode) {
+                throw new \Exception("Linked account 'Prepayments Prepaid Orders' tidak ditemukan");
+            }
+
+
+            // Journal Debit Prepayment
+            $accountPrepayment = ChartOfAccount::find($validated['account_header_id']);
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $accountPrepayment->kode_akun,
+                'debits'    => $expense->amount,
+                'credits'   => 0,
+                'comment'   => "Prepayment {$expense->id}",
+            ]);
+
+            // Journal Credit Kas/Bank
+            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepayments Prepaid Orders')->first();
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'debits'    => 0,
+                'credits'   => $expense->amount,
+                'comment'   => "Pembayaran Prepayment {$expense->id}",
+            ]);
+
+            DB::commit();
+            return redirect()->route('prepayment.index')->with('success', 'Prepayment berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['msg' => 'Error: ' . $e->getMessage()]);
+        }
+    }
+    public function destroy($id)
+    {
+        DB::transaction(function () use ($id) {
+            $expense = Prepayment::findOrFail($id);
+
+            // Hapus jurnal otomatis ikut terhapus kalau pakai onDelete('cascade')
+            $journal = JournalEntry::where('source', 'Prepayment#' . $expense->id)->first();
+
+            if ($journal) {
+                $journal->details()->delete();
+                $journal->delete();
+            }
+
+            // Hapus detail + header
+            $expense->details()->delete();
+            $expense->delete();
+        });
+
+        return redirect()
+            ->route('prepayment.index')
+            ->with('success', 'Prepayment berhasil dihapus.');
+    }
 }

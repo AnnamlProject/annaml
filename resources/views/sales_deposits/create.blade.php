@@ -20,7 +20,7 @@
                         </div>
                     @endif
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         {{-- payment method --}}
                         <div class="mb-4">
                             <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
@@ -43,7 +43,7 @@
                         <div class="mb-4">
                             <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Deposit To
                             </label>
-                            <select name="account_id"
+                            <select name="account_id" id="account_header_id"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                                 <option value="">-- Pilih--</option>
@@ -63,7 +63,7 @@
                         <div class="mb-4">
                             <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
                             </label>
-                            <select name="customers_id"
+                            <select name="customers_id" id="customers_id"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                                 <option value="">-- Customers--</option>
@@ -231,6 +231,47 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+    <script>
+        $(document).ready(function() {
+            $('#account_header_id').select2({
+                placeholder: "-- Pilih --",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#customers_id').select2({
+                placeholder: "-- Customers --",
+                ajax: {
+                    url: '{{ route('customers.search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        }; // query keyword
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(customer) {
+                                return {
+                                    id: customer.id,
+                                    text: customer.nama_customers
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
     <script>
         function toggleAutoGenerate() {
             const checkbox = document.getElementById('auto_generate');

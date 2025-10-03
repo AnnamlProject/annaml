@@ -14,7 +14,7 @@
                 <form action="{{ route('linkedAccount.store') }}" method="POST">
                     @csrf
 
-                    <input type="hidden" name="kode" value="retained_earnings">
+                    <input type="hidden" name="kode" value="RETAINED EARNINGS">
 
                     <div class="mb-4">
                         <label for="akun_id" class="block text-sm font-medium text-gray-700 mb-1">

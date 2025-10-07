@@ -24,19 +24,19 @@
 
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Provinsi</th>
-                            <td class="py-2">{{ $taxpayers->provinsi->name }}</td>
+                            <td class="py-2">{{ $taxpayers->provinsi->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kota</th>
-                            <td class="py-2">{{ $taxpayers->kota->name }}</td>
+                            <td class="py-2">{{ $taxpayers->kota->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Kecamatan</th>
-                            <td class="py-2">{{ $taxpayers->kecamatan->name }}</td>
+                            <td class="py-2">{{ $taxpayers->kecamatan->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Kelurahan</th>
-                            <td class="py-2">{{ $taxpayers->kelurahan->name }}</td>
+                            <td class="py-2">{{ $taxpayers->kelurahan->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Kode Pos</th>

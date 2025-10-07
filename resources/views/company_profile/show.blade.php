@@ -28,19 +28,19 @@
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Provinsi</th>
-                            <td class="py-2">{{ $informasiPerusahaans->provinsi->name }}</td>
+                            <td class="py-2">{{ $informasiPerusahaans->provinsi->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kota</th>
-                            <td class="py-2">{{ $informasiPerusahaans->kota->name }}</td>
+                            <td class="py-2">{{ $informasiPerusahaans->kota->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kecamatan</th>
-                            <td class="py-2">{{ $informasiPerusahaans->kecamatan->name }}</td>
+                            <td class="py-2">{{ $informasiPerusahaans->kecamatan->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kelurahan</th>
-                            <td class="py-2">{{ $informasiPerusahaans->kelurahan->name }}</td>
+                            <td class="py-2">{{ $informasiPerusahaans->kelurahan->name ?? '' }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kode Pos</th>

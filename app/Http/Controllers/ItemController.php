@@ -177,9 +177,16 @@ class ItemController extends Controller
                     ->orWhere('item_number', 'like', '%' . $request->q . '%');
             })
             ->when($locationId, function ($q) use ($locationId) {
-                $q->whereHas('quantities', fn($q2) => $q2->where('location_id', $locationId));
+                $q->where(function ($sub) use ($locationId) {
+                    $sub->where('type', 'service') // ✅ service tidak ikut filter lokasi
+                        ->orWhere(function ($sub2) use ($locationId) {
+                            $sub2->where('type', 'inventory')
+                                ->whereHas('quantities', fn($q2) => $q2->where('location_id', $locationId));
+                        });
+                });
             })
             ->get();
+
 
         return response()->json($items->map(function ($item) use ($context) {
             switch ($context) {
@@ -225,8 +232,6 @@ class ItemController extends Controller
             ];
         }));
     }
-
-
     public function info($id, Request $request)
     {
         $locationId = $request->get('location_id');

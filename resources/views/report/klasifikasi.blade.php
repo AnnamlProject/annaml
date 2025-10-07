@@ -2,7 +2,7 @@
 
 @section('content')
     @if (session('success'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg flex items-start shadow-sm">
                 <i class="fas fa-check-circle text-green-500 mr-3 mt-0.5"></i>
                 <div>

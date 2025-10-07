@@ -4,12 +4,17 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <form action="{{ route('start_new_year.update', $data->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <h2 class="font-bold text-lg mb-4">Edit Year Book</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
                             <label for="tahun" class="block font-medium"> Tahun </label>
                             <input type="number" name="tahun" id="tahun" value="{{ old('tahun', $data->tahun) }}"
@@ -44,7 +49,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="status" class="block text-gray-700 font-medium mb-1">status</label>
+                            <label for="status" class="block text-gray-700 font-medium mb-1">Status</label>
                             <select name="status" id="status" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih --</option>
@@ -56,14 +61,14 @@
                         </div>
 
                     </div>
-                    <div class="mt-6 flex justify-between">
-                        <a href="{{ route('masa_manfaat.index') }}"
+                    <div class="mt-6 flex justify-end gap-4">
+                        <a href="{{ route('start_new_year.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
-                            <i class="fas fa-arrow-left mr-1"></i> Kembali
+                            Kembali
                         </a>
                         <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
-                            <i class="fas fa-save mr-1"></i> Update
+                            class="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-yellow-600">
+                            Simpan
                         </button>
                     </div>
                 </form>

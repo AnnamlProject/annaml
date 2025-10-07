@@ -96,9 +96,22 @@
     @include('components.navbar')
 
     {{-- Main Content --}}
-    <main class="m-0 p-0">
+    <main class="m-0 p-0 pb-16">
         @yield('content')
     </main>
+
+
+    @php
+        $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+        $textFooter = \App\Setting::get('text_footer', 'ANTS LITE+ ©2025_AN NAML CORP.');
+    @endphp
+    <footer class="bg-[{{ $themeColor }}] text-white text-xs fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between">
+            <span>{{ $textFooter }}</span>
+            <span></span>
+        </div>
+    </footer>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

@@ -14,36 +14,37 @@
                             <td class="py-2">{{ $taxpayers->nama_perusahaan }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 font-medium">Jalan</th>
-                            <td class="py-2">{{ $taxpayers->nama_jabatan }}</td>
+                            <th class="py-2 font-medium">No.Telepon</th>
+                            <td class="py-2">{{ $taxpayers->phone_number }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">Kelurahan</th>
-                            <td class="py-2">{{ $taxpayers->kelurahan }}</td>
+                            <th class="py-2 w-1/3 font-medium">Email</th>
+                            <td class="py-2">{{ $taxpayers->email }}</td>
                         </tr>
+
                         <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">Kecamatan</th>
-                            <td class="py-2">{{ $taxpayers->kecamatan }}</td>
+                            <th class="py-2 w-1/3 font-medium">Provinsi</th>
+                            <td class="py-2">{{ $taxpayers->provinsi->name }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 font-medium">Kota</th>
-                            <td class="py-2">{{ $taxpayers->kota }}</td>
+                            <td class="py-2">{{ $taxpayers->kota->name }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">Provinsi</th>
-                            <td class="py-2">{{ $taxpayers->provinsi }}</td>
+                            <th class="py-2 w-1/3 font-medium">Kecamatan</th>
+                            <td class="py-2">{{ $taxpayers->kecamatan->name }}</td>
+                        </tr>
+                        <tr class="border-t">
+                            <th class="py-2 w-1/3 font-medium">Kelurahan</th>
+                            <td class="py-2">{{ $taxpayers->kelurahan->name }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Kode Pos</th>
                             <td class="py-2">{{ $taxpayers->kode_pos }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 font-medium">phone_number</th>
-                            <td class="py-2">{{ $taxpayers->phone_number }}</td>
-                        </tr>
-                        <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">email</th>
-                            <td class="py-2">{{ $taxpayers->email }}</td>
+                            <th class="py-2 font-medium">Alamat</th>
+                            <td class="py-2">{{ $taxpayers->nama_jabatan }}</td>
                         </tr>
                         <tr class="border-t">
                             <th class="py-2 w-1/3 font-medium">Bentuk Badan Hukum</th>
@@ -54,15 +55,15 @@
                             <td class="py-2">{{ $taxpayers->npwp }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 font-medium">klu code</th>
+                            <th class="py-2 font-medium">KLU Code</th>
                             <td class="py-2">{{ $taxpayers->klu_code }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">klu deskripsi</th>
+                            <th class="py-2 w-1/3 font-medium">KLU deskripsi</th>
                             <td class="py-2">{{ $taxpayers->klu_description }}</td>
                         </tr>
                         <tr class="border-t">
-                            <th class="py-2 w-1/3 font-medium">tax office</th>
+                            <th class="py-2 w-1/3 font-medium">Tax Office</th>
                             <td class="py-2">{{ $taxpayers->tax_office }}</td>
                         </tr>
                         <tr class="border-t">

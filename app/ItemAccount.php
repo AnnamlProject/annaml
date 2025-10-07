@@ -14,6 +14,7 @@ class ItemAccount extends Model
         'cogs_account_id',
         'variance_account_id',
         'expense_account_id',
+        'account_receivable_id'
     ];
 
     public function item()
@@ -47,5 +48,9 @@ class ItemAccount extends Model
     public function varianceAccount()
     {
         return $this->belongsTo(ChartOfAccount::class, 'variance_account_id');
+    }
+    public function accountReceivable()
+    {
+        return $this->belongsTo(ChartOfAccount::class, 'account_receivable_id');
     }
 }

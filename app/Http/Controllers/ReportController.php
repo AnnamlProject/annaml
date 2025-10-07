@@ -6,6 +6,7 @@ use App\Absensi;
 use App\chartOfAccount;
 use App\Exports\TargetWahanaExport;
 use App\JenisHari;
+use App\SalesTaxes;
 use App\TargetWahana;
 use App\UnitKerja;
 use App\Wahana;
@@ -120,6 +121,11 @@ class ReportController extends Controller
     {
         $data = chartOfAccount::with('klasifikasiAkun')->orderBy('kode_akun');
         return view('report.klasifikasi', compact('data'));
+    }
+    public function salesTaxes()
+    {
+        $data = SalesTaxes::with('purchaseAccount', 'salesAccount')->orderBy('name')->get();
+        return view('report.sales_taxes', compact('data'));
     }
     public function reportDepartemenAkun()
     {

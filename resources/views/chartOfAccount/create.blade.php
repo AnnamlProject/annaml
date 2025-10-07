@@ -2,9 +2,13 @@
 
 
 @section('content')
-    <div class="py-10">
+    <div class="py-10 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <h2 class="mb-6 font-bold text-lg">Account Create</h2>
                 <form method="POST"
                     action="{{ isset($chartOfAccounts) ? route('chartOfAccount.update', $chartOfAccounts->id) : route('chartOfAccount.store') }}">
@@ -28,6 +32,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Kode Akun</label>
                             <input type="text" name="kode_akun" id="kode_akun"
+                                placeholder="Masukkan kode akun sesuai digit"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 @error('kode_akun') border-red-500 @enderror"
                                 value="{{ old('kode_akun', $chartOfAccounts->kode_akun ?? '') }}" required>
                             <small id="info_digit" class="text-sm text-gray-500 mt-1 block"></small>
@@ -38,7 +43,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Akun</label>
-                            <input type="text" name="nama_akun"
+                            <input type="text" name="nama_akun" placeholder="Masukkan nama akun"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value="{{ old('nama_akun', $chartOfAccounts->nama_akun ?? '') }}" required>
                         </div>
@@ -142,13 +147,13 @@
                         <!-- Catatan -->
                         <div class="col-span-1 md:col-span-2 mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Catatan / Deskripsi</label>
-                            <textarea name="catatan" rows="3"
+                            <textarea name="catatan" rows="3" placeholder="Masukkan catatan"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan', $chartOfAccounts->catatan ?? '') }}</textarea>
                         </div>
 
                         <div class="col-span-1 md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Catatan Khusus Pajak</label>
-                            <textarea name="catatan_pajak" rows="2"
+                            <textarea name="catatan_pajak" rows="2" placeholder="Masukkan catatan khusus pajak"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('catatan_pajak', $chartOfAccounts->catatan_pajak ?? '') }}</textarea>
                         </div>
                     </div>
@@ -160,8 +165,8 @@
                             Batal
                         </a>
                         <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md">
-                            {{ isset($chartOfAccounts) ? 'Update' : 'Create' }} Account
+                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md">
+                            {{ isset($chartOfAccounts) ? 'Update' : 'Simpan' }}
                         </button>
                     </div>
                 </form>

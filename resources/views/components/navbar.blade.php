@@ -1,4 +1,4 @@
-    <nav x-data="{ menuOpen: false }" x-cloak class="bg-white shadow-lg border-b border-gray-200">
+    <nav x-data="{ menuOpen: false }" x-cloak class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-full mx-auto px-3 sm:px-6 lg:px-8">
             <!-- Header: Logo + Toggle -->
             <div class="flex items-center justify-between h-16">
@@ -187,6 +187,9 @@
                                                 class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Department
                                                 Accounts List</a>
                                         @endcan
+                                        <a href="{{ route('report.sales_taxes') }}" @click="open = false"
+                                            class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Sales
+                                            Taxes List</a>
                                     </div>
                                 </div>
                             @endcan
@@ -434,11 +437,6 @@
                                             x-transition:leave-end="opacity-0 translate-x-1"
                                             class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                             @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                            @can('option_purchase.access')
-                                                <a href="{{ route('purchases_options.create') }}"
-                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
-                                                </a>
-                                            @endcan
 
                                             @can('linked_account_purchase.access')
                                                 <a href="{{ route('linkedAccountPurchases.index') }}"
@@ -446,6 +444,13 @@
                                                     Account
                                                 </a>
                                             @endcan
+                                            @can('option_purchase.access')
+                                                <a href="{{ route('purchases_options.create') }}"
+                                                    class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
+                                                </a>
+                                            @endcan
+
+
                                         </div>
                                     </div>
                                 @endcan

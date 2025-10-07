@@ -86,7 +86,8 @@ class InventoryController extends Controller
             'revenue_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
             'cogs_account_id'       => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
             'variance_account_id'   => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
-            'expense_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'], // untuk service
+            'expense_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'account_receivable_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
 
             // Build
             'build'                 => ['nullable', 'array'],
@@ -97,9 +98,9 @@ class InventoryController extends Controller
 
             // Taxes
             'taxes'                 => ['nullable', 'array'],
-            'taxes.*'               => ['integer', 'exists:taxes,id'],
+            'taxes.*'               => ['integer', 'exists:sales_taxes,id'],
             'tax_exempt'            => ['nullable', 'array'],
-            'tax_exempt.*'          => ['integer', 'exists:taxes,id'],
+            'tax_exempt.*'          => ['integer', 'exists:sales_taxes,id'],
 
             // Files
             'picture'               => ['nullable', 'file', 'image', 'max:2048'],
@@ -118,6 +119,7 @@ class InventoryController extends Controller
         } else { // service
             $rules['revenue_account_id'][]  = 'nullable';
             $rules['expense_account_id'][]  = 'nullable';
+            $rules['account_receivable_id'][]  = 'nullable';
         }
 
         // Wajib akun (kalau kamu mau enforce saat edit, bisa ganti nullable→required)
@@ -258,6 +260,7 @@ class InventoryController extends Controller
                 'cogs_account_id'    => $request->input('cogs_account_id'),
                 'variance_account_id' => $request->input('variance_account_id'),
                 'expense_account_id' => $request->input('expense_account_id'),
+                'account_receivable_id' => $request->input('account_receivable_id'),
             ];
 
             // Kosongkan yang tidak relevan tergantung type agar bersih
@@ -300,21 +303,38 @@ class InventoryController extends Controller
             }
 
             // ===== 2i) Taxes =====
-            $selectedTaxIds = collect($request->input('taxes', []))->filter();      // [id, id, ...]
-            $exemptTaxIds   = collect($request->input('tax_exempt', []))->filter(); // [id, id, ...]
+
+            // Inventory taxes
+            $selectedTaxIds = collect($request->input('taxes', []))->filter();
+            $exemptTaxIds   = collect($request->input('tax_exempt', []))->filter();
 
             if ($selectedTaxIds->isNotEmpty()) {
-                // Ambil nama pajak dari master taxes
-                $taxes = \App\SalesTaxes::whereIn('id', $selectedTaxIds)->get(['id', 'name']);
-
-                foreach ($taxes as $tax) {
-                    \App\ItemTaxes::create([
+                $taxes = SalesTaxes::whereIn('id', $selectedTaxIds)->get(['id', 'name']);
+                foreach ($taxes as $t) {
+                    ItemTaxes::create([
                         'item_id'   => $item->id,
-                        'tax_name'  => $tax->name,                     // skema kamu minta tax_name, bukan tax_id
-                        'is_exempt' => $exemptTaxIds->contains($tax->id),
+                        'tax_name'  => $t->name,
+                        'is_exempt' => $exemptTaxIds->contains($t->id),
                     ]);
                 }
             }
+
+            // Service taxes
+            $selectedServiceTaxIds = collect($request->input('taxes_service', []))->filter();
+            $exemptServiceTaxIds   = collect($request->input('tax_exempt_service', []))->filter();
+
+            if ($selectedServiceTaxIds->isNotEmpty()) {
+                $taxes = SalesTaxes::whereIn('id', $selectedServiceTaxIds)->get(['id', 'name']);
+                foreach ($taxes as $t) {
+                    ItemTaxes::create([
+                        'item_id'   => $item->id,
+                        'tax_name'  => $t->name,
+                        'is_exempt' => $exemptServiceTaxIds->contains($t->id),
+                    ]);
+                }
+            }
+
+
 
 
             DB::commit();
@@ -437,6 +457,7 @@ class InventoryController extends Controller
             'cogs_account_id'       => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
             'variance_account_id'   => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
             'expense_account_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
+            'account_receivable_id'    => ['nullable', 'integer', 'exists:chart_of_accounts,id'],
 
             // Build
             'build'                 => ['nullable', 'array'],
@@ -447,9 +468,9 @@ class InventoryController extends Controller
 
             // Taxes
             'taxes'                 => ['nullable', 'array'],
-            'taxes.*'               => ['integer', 'exists:taxes,id'],
+            'taxes.*'               => ['integer', 'exists:sales_taxes,id'],
             'tax_exempt'            => ['nullable', 'array'],
-            'tax_exempt.*'          => ['integer', 'exists:taxes,id'],
+            'tax_exempt.*'          => ['integer', 'exists:sales_taxes,id'],
 
             // Files
             'picture'   => ['nullable', 'file', 'image', 'max:2048'],
@@ -607,6 +628,7 @@ class InventoryController extends Controller
                 'cogs_account_id'    => $request->input('cogs_account_id'),
                 'variance_account_id' => $request->input('variance_account_id'),
                 'expense_account_id' => $request->input('expense_account_id'),
+                'account_receivable_id' => $request->input('account_receivable_id'),
             ];
 
             // Kosongkan field yang tidak relevan
@@ -653,9 +675,10 @@ class InventoryController extends Controller
                 }
             }
 
-            // 10) TAXES: sync
+            // Hapus dulu semua pajak lama untuk item ini
             ItemTaxes::where('item_id', $inventory->id)->delete();
 
+            // Inventory taxes
             $selectedTaxIds = collect($request->input('taxes', []))->filter();
             $exemptTaxIds   = collect($request->input('tax_exempt', []))->filter();
 
@@ -664,8 +687,23 @@ class InventoryController extends Controller
                 foreach ($taxes as $t) {
                     ItemTaxes::create([
                         'item_id'   => $inventory->id,
-                        'tax_name'  => $t->name,                       // sesuai skema kamu
+                        'tax_name'  => $t->name,
                         'is_exempt' => $exemptTaxIds->contains($t->id),
+                    ]);
+                }
+            }
+
+            // Service taxes
+            $selectedServiceTaxIds = collect($request->input('taxes_service', []))->filter();
+            $exemptServiceTaxIds   = collect($request->input('tax_exempt_service', []))->filter();
+
+            if ($selectedServiceTaxIds->isNotEmpty()) {
+                $taxes = SalesTaxes::whereIn('id', $selectedServiceTaxIds)->get(['id', 'name']);
+                foreach ($taxes as $t) {
+                    ItemTaxes::create([
+                        'item_id'   => $inventory->id,
+                        'tax_name'  => $t->name,
+                        'is_exempt' => $exemptServiceTaxIds->contains($t->id),
                     ]);
                 }
             }

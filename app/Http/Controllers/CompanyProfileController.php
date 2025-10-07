@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\CompanyProfile;
+use App\Kecamatan;
+use App\Kelurahan;
+use App\KotaIndonesia;
 use App\LegalDocumentCompanyProfile;
+use App\ProvinceIndonesia;
 use Illuminate\Contracts\View\View as ViewView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,94 +24,97 @@ class CompanyProfileController extends Controller
     }
     public function create(): View
     {
-        return view('company_profile.create');
+        $provinsi = ProvinceIndonesia::select('id', 'name')->get();
+        $kota = KotaIndonesia::select('id', 'name')->get();
+        $kecamatan = Kecamatan::select('id', 'name')->get();
+        $kelurahan = Kelurahan::select('id', 'name')->get();
+        return view('company_profile.create', compact('provinsi', 'kota', 'kecamatan', 'kelurahan'));
     }
     public function store(Request $request): RedirectResponse
     {
-        // validate form perusahaan
+        // ✅ Validasi input
         $this->validate($request, [
-            'nama_perusahaan'     => 'required|min:5',
-            'jalan'   => 'nullable|string',
-            'kelurahan' => 'nullable|string',
-            'kecamatan' => 'nullable|string',
-            'kota' => 'nullable|string',
-            'provinsi' => 'nullable|string',
-            'kode_pos' => 'nullable|string',
-            'phone_number' => 'nullable|string',
-            'email' => 'nullable|string',
-            'logo'     => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'nama_perusahaan' => 'required|min:5',
+            'jalan'           => 'nullable|string',
+            'id_provinsi'     => 'nullable|exists:indonesia_provinces,id',
+            'id_kota'         => 'nullable|exists:indonesia_cities,id',
+            'id_kecamatan'    => 'nullable|exists:indonesia_districts,id',
+            'id_kelurahan'    => 'nullable|exists:indonesia_villages,id',
+            'kode_pos'        => 'nullable|string',
+            'phone_number'    => 'nullable|string',
+            'email'           => 'nullable|string',
+            'logo'            => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
 
-            // validasi legal dokumen
+            // dokumen legal
             'nib'                     => 'nullable|mimes:pdf|max:2048',
             'akte_pendirian'          => 'nullable|mimes:pdf|max:2048',
             'akta_perubahan_terakhir' => 'nullable|mimes:pdf|max:2048',
-            'bnri'                     => 'nullable|mimes:pdf|max:2048',
-            'npwp_perusahaan'          => 'nullable|mimes:pdf|max:2048',
-            'sppl' => 'nullable|mimes:pdf|max:2048',
-            'sptataruang'                     => 'nullable|mimes:pdf|max:2048',
-            'ktp_pemegang_saham'          => 'nullable|mimes:pdf|max:2048',
-            'k3l' => 'nullable|mimes:pdf|max:2048',
-            'skkemenkumhan' => 'nullable|mimes:pdf|max:2048',
+            'bnri'                    => 'nullable|mimes:pdf|max:2048',
+            'npwp_perusahaan'         => 'nullable|mimes:pdf|max:2048',
+            'sppl'                    => 'nullable|mimes:pdf|max:2048',
+            'sptataruang'             => 'nullable|mimes:pdf|max:2048',
+            'ktp_pemegang_saham'      => 'nullable|mimes:pdf|max:2048',
+            'k3l'                     => 'nullable|mimes:pdf|max:2048',
+            'skkemenkumhan'           => 'nullable|mimes:pdf|max:2048',
         ]);
 
-        // upload logo jika ada
-        $image = $request->file('logo');
+        // ✅ Upload logo
         $imageName = null;
-
-        if ($image) {
-            $image->storeAs('public/informasi_perusahaan', $image->hashName());
-            $imageName = $image->hashName();
+        if ($request->hasFile('logo')) {
+            $imageName = $request->file('logo')->hashName();
+            $request->file('logo')->storeAs('public/informasi_perusahaan', $imageName);
         }
 
-        // simpan data perusahaan dan ambil ID-nya
+        // ✅ Simpan data perusahaan
         $perusahaan = CompanyProfile::create([
-            'logo'     => $imageName,
-            'nama_perusahaan'     => $request->nama_perusahaan,
-            'jalan'   => $request->jalan,
-            'kelurahan' => $request->kelurahan,
-            'kecamatan'     => $request->kecamatan,
-            'kota'   => $request->kota,
-            'provinsi' => $request->provinsi,
-            'kode_pos' => $request->kode_pos,
-            'phone_number'     => $request->phone_number,
-            'email'   => $request->email
+            'logo'           => $imageName,
+            'nama_perusahaan' => $request->nama_perusahaan,
+            'jalan'          => $request->jalan,
+            'id_kelurahan'   => $request->id_kelurahan,
+            'id_kecamatan'   => $request->id_kecamatan,
+            'id_kota'        => $request->id_kota,
+            'id_provinsi'    => $request->id_provinsi,
+            'kode_pos'       => $request->kode_pos,
+            'phone_number'   => $request->phone_number,
+            'email'          => $request->email
         ]);
 
-        // simpan dokumen legal jika ada
+        // ✅ Upload dokumen legal
         $dokumens = [
-            'akte_pendirian' => 'Akte Pendirian',
+            'akte_pendirian'          => 'Akte Pendirian',
             'akte_perubahan_terakhir' => 'Akte Perubahan Terakhir',
-            'nib' => 'NIB',
-            'skkemenkumhan' => 'SKKEMENKUMHAN',
-            'bnri' => 'BNRI',
-            'npwp_perusahaan' => 'NPWP Perusahaan',
-            'sppl' => 'SPPL',
-            'sptataruang' => 'SPTATARUANG',
-            'ktp_pemegang_saham' => 'KTP Pemegang Saham',
-            'k3l' => 'K3L'
+            'nib'                     => 'NIB',
+            'skkemenkumhan'           => 'SKKEMENKUMHAN',
+            'bnri'                    => 'BNRI',
+            'npwp_perusahaan'         => 'NPWP Perusahaan',
+            'sppl'                    => 'SPPL',
+            'sptataruang'             => 'SPTATARUANG',
+            'ktp_pemegang_saham'      => 'KTP Pemegang Saham',
+            'k3l'                     => 'K3L'
         ];
 
         foreach ($dokumens as $fieldName => $jenisDokumen) {
             if ($request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('public/legal_documents', $filename);
+                $file->storeAs('public/legal_documents', $filename);
 
-                // simpan ke tabel legal_documents
-                \App\LegalDocumentCompanyProfile::create([
+                LegalDocumentCompanyProfile::create([
                     'company_profile_id' => $perusahaan->id,
-                    'jenis_dokumen' => $jenisDokumen,
-                    'file_path' => 'legal_documents/' . $filename,
+                    'jenis_dokumen'      => $jenisDokumen,
+                    'file_path'          => 'legal_documents/' . $filename,
                 ]);
             }
         }
 
-        return redirect()->route('company_profile.show', $perusahaan->id)->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('company_profile.show', $perusahaan->id)
+            ->with(['success' => 'Data Berhasil Disimpan!']);
     }
+
     public function show(string $id): View
     {
         //get post by ID
-        $informasiPerusahaans = CompanyProfile::with('legalDocuments')->findOrFail($id);
+        $informasiPerusahaans = CompanyProfile::with('legalDocuments', 'provinsi', 'kota', 'kecamatan', 'kelurahan')->findOrFail($id);
 
         //render view with post
         return view('company_profile.show', compact('informasiPerusahaans'));
@@ -115,10 +122,14 @@ class CompanyProfileController extends Controller
     public function edit(string $id): View
     {
         //get post by ID
-        $informasiPerusahaan = CompanyProfile::with('legalDocuments')->findOrFail($id);
+        $informasiPerusahaan = CompanyProfile::with('legalDocuments', 'provinsi', 'kota', 'kecamatan', 'kelurahan')->findOrFail($id);
+        $provinsi = ProvinceIndonesia::select('id', 'name')->get();
+        $kota = KotaIndonesia::select('id', 'name')->get();
+        $kecamatan = Kecamatan::select('id', 'name')->get();
+        $kelurahan = Kelurahan::select('id', 'name')->get();
 
         //render view with post
-        return view('company_profile.edit', compact('informasiPerusahaan'));
+        return view('company_profile.edit', compact('informasiPerusahaan', 'provinsi', 'kota', 'kecamatan', 'kelurahan'));
     }
     public function update(Request $request, $id): RedirectResponse
     {
@@ -126,10 +137,10 @@ class CompanyProfileController extends Controller
         $this->validate($request, [
             'nama_perusahaan' => 'required|min:5',
             'jalan'           => 'nullable|string',
-            'kelurahan'       => 'nullable|string',
-            'kecamatan'       => 'nullable|string',
-            'kota'            => 'nullable|string',
-            'provinsi'        => 'nullable|string',
+            'id_provinsi'     => 'nullable|exists:indonesia_provinces,id',
+            'id_kota'         => 'nullable|exists:indonesia_cities,id',
+            'id_kecamatan'    => 'nullable|exists:indonesia_districts,id',
+            'id_kelurahan'    => 'nullable|exists:indonesia_villages,id',
             'kode_pos'        => 'nullable|string',
             'phone_number'    => 'nullable|string',
             'email'           => 'nullable|string',
@@ -166,10 +177,10 @@ class CompanyProfileController extends Controller
             'logo'          => $informasiPerusahaan->logo, // jika berubah
             'nama_perusahaan' => $request->nama_perusahaan,
             'jalan'         => $request->jalan,
-            'kelurahan'     => $request->kelurahan,
-            'kecamatan'     => $request->kecamatan,
-            'kota'          => $request->kota,
-            'provinsi'      => $request->provinsi,
+            'id_kelurahan'   => $request->id_kelurahan,
+            'id_kecamatan'   => $request->id_kecamatan,
+            'id_kota'        => $request->id_kota,
+            'id_provinsi'    => $request->id_provinsi,
             'kode_pos'      => $request->kode_pos,
             'phone_number'  => $request->phone_number,
             'email'         => $request->email,
@@ -219,7 +230,7 @@ class CompanyProfileController extends Controller
             }
         }
 
-        return redirect()->route('company_profile.index')->with(['success' => 'Data Berhasil Diubah!']);
+        return redirect()->route('company_profile.show', $informasiPerusahaan->id)->with(['success' => 'Data Berhasil Diubah!']);
     }
     public function destroy($id): RedirectResponse
     {

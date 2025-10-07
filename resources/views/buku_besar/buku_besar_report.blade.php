@@ -236,7 +236,8 @@
                                                 }
                                             @endphp
                                             <tr>
-                                                <td class="px-2 py-1 border">{{ optional($row->journalEntry)->tanggal }}
+                                                <td class="px-2 py-1 border">
+                                                    {{ optional($row->journalEntry)->tanggal }}
                                                 </td>
                                                 <td class="px-2 py-1 border">
                                                     @if ($showComment == 'transaction_comment')
@@ -246,16 +247,19 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-2 py-1 border">
-                                                    <a href="{{ route('journal_entry.show', $row->journalEntry->id) }}">
+                                                    <a href="{{ route('journal_entry.edit', $row->journalEntry->id) }}">
                                                         {{ optional($row->journalEntry)->source ?? '-' }}
                                                     </a>
-
                                                 </td>
                                                 <td class="px-2 py-1 border text-right">
-                                                    {{ number_format($debit, 2, ',', '.') }}
+                                                    <a href="{{ route('journal_entry.show', $row->journalEntry->id) }}">
+                                                        {{ number_format($debit, 2, ',', '.') }}
+                                                    </a>
                                                 </td>
                                                 <td class="px-2 py-1 border text-right">
-                                                    {{ number_format($kredit, 2, ',', '.') }}
+                                                    <a href="{{ route('journal_entry.show', $row->journalEntry->id) }}">
+                                                        {{ number_format($kredit, 2, ',', '.') }}
+                                                    </a>
                                                 </td>
                                                 <td class="px-2 py-1 border text-right">
                                                     {{ number_format($saldoBerjalan, 2, ',', '.') }}

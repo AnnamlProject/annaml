@@ -3,7 +3,10 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <!-- Informasi Departemen -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Departemen</h3>

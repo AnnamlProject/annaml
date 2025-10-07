@@ -56,26 +56,39 @@ class PurchaseOrderController extends Controller
 
     public function store(Request $request)
     {
-        // Cek apakah checkbox auto_generate dicentang
+        // 1️⃣ Generate kode order
         if ($request->has('auto_generate')) {
             $order_number = $this->generateKodeOrder($request->date_order);
         } else {
-            // Validasi manual
             $request->validate([
-                'order_number' => 'unique:purchase_orders,order_number',
+                'order_number' => 'required|unique:purchase_orders,order_number',
             ]);
             $order_number = $request->order_number;
         }
 
-        // ✅ VALIDASI FORM INPUT
-        $request->validate([
+        // 2️⃣ Bersihkan angka dari format ribuan sebelum validasi
+        if ($request->has('items')) {
+            $items = $request->items;
+            foreach ($items as $i => $item) {
+                foreach (['price', 'discount', 'tax_amount', 'amount', 'order', 'back_order', 'quantity'] as $key) {
+                    if (isset($item[$key])) {
+                        // Hapus semua karakter non-digit kecuali titik dan minus
+                        $items[$i][$key] = preg_replace('/[^0-9.\-]/', '', $item[$key]);
+                    }
+                }
+            }
+            $request->merge(['items' => $items]);
+        }
+
+        // 3️⃣ Validasi input utama
+        $validated = $request->validate([
             'order_number'         => 'required|unique:purchase_orders,order_number',
             'date_order'           => 'required|date',
             'shipping_date'        => 'required|date',
-            'vendor_id'          => 'required|exists:vendors,id',
-            'account_id' => 'required|exists:payment_method_details,id',
+            'vendor_id'            => 'required|exists:vendors,id',
+            'account_id'           => 'required|exists:payment_method_details,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
-            'location_id'  => 'required|exists:location_inventories,id',
+            'location_id'          => 'required|exists:location_inventories,id',
             'shipping_address'     => 'required|string',
             'freight'              => 'required|numeric|min:0',
             'early_payment_terms'  => 'nullable|string',
@@ -89,51 +102,52 @@ class PurchaseOrderController extends Controller
             'items.*.back_order'   => 'nullable|numeric|min:0',
             'items.*.unit'         => 'required|string',
             'items.*.description'  => 'required|string',
-            'items.*.price'   => 'nullable|numeric|min:0',
-            'items.*.tax_id'      => 'nullable|exists:sales_taxes,id',
-            'items.*.tax_amount'        => 'nullable|numeric|min:0',
+            'items.*.price'        => 'nullable|numeric|min:0',
+            'items.*.tax_id'       => 'nullable|exists:sales_taxes,id',
+            'items.*.tax_amount'   => 'nullable|numeric|min:0',
             'items.*.amount'       => 'nullable|numeric|min:0',
+            'items.*.discount'     => 'nullable|numeric|min:0',
             'items.*.account'      => 'required|exists:chart_of_accounts,id',
         ]);
 
         DB::beginTransaction();
-
         try {
-            // ✅ Simpan data utama ke tabel sales_orders
+            // 4️⃣ Simpan header ke purchase_orders
             $purchaseOrder = PurchaseOrder::create([
                 'order_number'         => $order_number,
                 'date_order'           => $request->date_order,
                 'shipping_date'        => $request->shipping_date,
-                'vendor_id'          => $request->vendor_id,
-                'account_id' => $request->account_id,
-                'location_id' => $request->location_id,
+                'vendor_id'            => $request->vendor_id,
+                'account_id'           => $request->account_id,
+                'location_id'          => $request->location_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
-                'freight'              => $request->freight,
+                'freight'              => preg_replace('/[^0-9.\-]/', '', $request->freight ?? 0),
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
             ]);
 
-            // ✅ Simpan setiap item ke tabel sales_order_details
+            // 5️⃣ Simpan detail ke purchase_order_details
             foreach ($request->items as $item) {
-                $price = isset($item['price']) ? (float) str_replace(',', '', $item['price']) : 0;
-                $amount     = isset($item['amount'])     ? (float) str_replace(',', '', $item['amount'])     : 0;
-                $tax_amount       = isset($item['tax_amount'])        ? (float) str_replace(',', '', $item['tax_amount'])        : 0;
-
+                $price      = (float) ($item['price'] ?? 0);
+                $discount   = (float) ($item['discount'] ?? 0);
+                $tax_amount = (float) ($item['tax_amount'] ?? 0);
+                $amount     = (float) ($item['amount'] ?? 0);
 
                 PurchaseOrderDetail::create([
-                    'purchase_order_id'     => $purchaseOrder->id,
-                    'item_id'            => $item['item_id'],
-                    'quantity'           => $item['quantity'] ?? 0,
-                    'order'              => $item['order'],
-                    'back_order'         => $item['back_order'],
-                    'unit'               => $item['unit'],
-                    'item_description'   => $item['description'],
-                    'price'         => $price,
-                    'tax_id'           => $item['tax_id'],
-                    'tax_amount'              => $tax_amount,
-                    'amount'             => $amount,
-                    'account_id'         => $item['account'],
+                    'purchase_order_id' => $purchaseOrder->id,
+                    'item_id'           => $item['item_id'],
+                    'quantity'          => $item['quantity'] ?? 0,
+                    'order'             => $item['order'],
+                    'back_order'        => $item['back_order'] ?? 0,
+                    'unit'              => $item['unit'],
+                    'item_description'  => $item['description'],
+                    'price'             => $price,
+                    'discount'          => $discount,
+                    'tax_id'            => $item['tax_id'] ?? null,
+                    'tax_amount'        => $tax_amount,
+                    'amount'            => $amount,
+                    'account_id'        => $item['account'],
                 ]);
             }
 
@@ -144,6 +158,7 @@ class PurchaseOrderController extends Controller
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menyimpan: ' . $e->getMessage()])->withInput();
         }
     }
+
     public function show($id)
     {
         // Ambil sales order beserta relasi terkait
@@ -182,6 +197,19 @@ class PurchaseOrderController extends Controller
     public function update(Request $request, $id)
     {
 
+        if ($request->has('items')) {
+            $items = $request->items;
+            foreach ($items as $i => $item) {
+                foreach (['price', 'discount', 'tax_amount', 'amount', 'order', 'back_order', 'quantity'] as $key) {
+                    if (isset($item[$key])) {
+                        // Hapus semua karakter non-digit kecuali titik dan minus
+                        $items[$i][$key] = preg_replace('/[^0-9.\-]/', '', $item[$key]);
+                    }
+                }
+            }
+            $request->merge(['items' => $items]);
+        }
+
         // dd($request->all());
         $request->validate([
             'order_number'         => 'required|string',
@@ -198,12 +226,13 @@ class PurchaseOrderController extends Controller
             // edatil
             'items'                => 'required|array|min:1',
             'items.*.item_id'      => 'required|exists:items,id',
-            'items.*.quantity'     => 'required|numeric|min:0',
+            'items.*.quantity'     => 'nullable|numeric|min:0',
             'items.*.order'        => 'required|numeric|min:0',
             'items.*.back_order'   => 'nullable|numeric|min:0',
             'items.*.unit'         => 'required|string',
             'items.*.description'  => 'required|string',
             'items.*.price'   => 'nullable|numeric|min:0',
+            'items.*.discount'   => 'nullable|numeric|min:0',
             'items.*.tax_id'     => 'nullable|exists:sales_taxes,id',
             'items.*.tax_amount'        => 'nullable|numeric|min:0',
             'items.*.amount'       => 'nullable|numeric|min:0',
@@ -232,16 +261,21 @@ class PurchaseOrderController extends Controller
             PurchaseOrderDetail::where('purchase_order_id', $purchaseOrder->id)->delete();
 
             foreach ($request->items as $item) {
+                $price      = (float) ($item['price'] ?? 0);
+                $discount   = (float) ($item['discount'] ?? 0);
+                $tax_amount = (float) ($item['tax_amount'] ?? 0);
+                $amount     = (float) ($item['amount'] ?? 0);
                 PurchaseOrderDetail::create([
                     'purchase_order_id'     => $purchaseOrder->id,
                     'item_id'            => $item['item_id'],
-                    'quantity'           => $item['quantity'],
+                    'quantity'           => $item['quantity'] ?? 0,
                     'order'              => $item['order'],
-                    'back_order'         => $item['back_order'],
+                    'back_order'         => $item['back_order'] ?? 0,
                     'unit'               => $item['unit'],
                     'item_description'   => $item['description'],
-                    'price'         => $item['price'],
-                    'tax_id'           => $item['tax_id'],
+                    'price'         => $price,
+                    'discount'         => $discount,
+                    'tax_id'           => $item['tax_id'] ?? null,
                     'tax_amount'              => $item['tax_amount'],
                     'amount'             => $item['amount'],
                     'account_id'         => $item['account_id'],

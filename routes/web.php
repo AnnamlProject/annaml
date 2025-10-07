@@ -3,6 +3,7 @@
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\BonusKaryawanController;
 use App\Http\Controllers\BukuBesarController;
 use App\Http\Controllers\CoaSearchController;
@@ -92,6 +93,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/taxpayers_company', 'TaxpayersCompanyController')->middleware('permission:taxpayers_company.access');
 
     Route::resource('/company_profile', 'CompanyProfileController')->middleware('permission:company_profile.access');
+    Route::get('/company/searchProvinsi', [AlamatController::class, 'searchProvinsi'])->name('company.searchProvinsi');
+    Route::get('/company/searchKota', [AlamatController::class, 'searchKota'])->name('company.searchKota');
+    Route::get('/company/searchKecamatan', [AlamatController::class, 'searchKecamatan'])->name('company.searchKecamatan');
+    Route::get('/company/searchKelurahan', [AlamatController::class, 'searchKelurahan'])->name('company.searchKelurahan');
+
 
     // general menu
     Route::resource('/numbering_account', 'NumberingAccountController')->middleware('permission:numbering.access');
@@ -121,6 +127,8 @@ Route::middleware(['auth'])->group(function () {
 
     // sales taxes
     Route::resource('/sales_taxes', 'SalesTaxesController')->middleware('permission:sales_taxes.access');
+    Route::get('/report-sales-taxes', [ReportController::class, 'salesTaxes'])->name('report.sales_taxes');
+
 
     // export dan import Departemen
     Route::get('/export/Departemen', [ExportController::class, 'exportDepartemen'])->name('export.Departemen');

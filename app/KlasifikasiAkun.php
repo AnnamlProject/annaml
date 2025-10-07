@@ -33,4 +33,8 @@ class KlasifikasiAkun extends Model
     {
         return $this->hasMany(KlasifikasiAkun::class, 'parent_id');
     }
+    public function account()
+    {
+        return $this->hasMany(chartOfAccount::class, 'klasifikasi_id');
+    }
 }

@@ -1,8 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @php
+            $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+        @endphp
+        <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
             <div class="px-6 py-4 border-b">
                 <h2 class="text-2xl font-semibold text-gray-800">Informasi Account</h2>
             </div>

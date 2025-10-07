@@ -18,10 +18,17 @@
                         Numbering Account List
                     </h3>
                     @can('numbering.create')
-                        <a href="{{ route('numbering_account.create') }}"
-                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
-                            <i class="fas fa-plus mr-2"></i> Add Numbering Account
-                        </a>
+                        @if ($numberingAccount->count() == 0)
+                            <a href="{{ route('numbering_account.create') }}"
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                                <i class="fas fa-plus mr-2"></i> Add Numbering Account
+                            </a>
+                        @else
+                            <span
+                                class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">Numbering
+                                account sudah ditetapkan, tidak bisa tambah
+                                baru.</span>
+                        @endif
                     @endcan
                 </div>
 

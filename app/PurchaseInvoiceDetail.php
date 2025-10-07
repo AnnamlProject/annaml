@@ -20,7 +20,8 @@ class PurchaseInvoiceDetail extends Model
         'tax_amount',
         'amount',
         'account_id',
-        'project_id'
+        'project_id',
+        'discount'
     ];
 
     public function PurchaseInvoice()

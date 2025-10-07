@@ -2,7 +2,10 @@
 
 @section('content')
     <div class="py-10 px-4 sm:px-6 lg:px-8 max-w-full mx-auto">
-        <div class="bg-white shadow-lg rounded-2xl p-8">
+        @php
+            $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+        @endphp
+        <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">Create Account Classification</h2>
             <form action="{{ route('klasifikasiAkun.store') }}" method="POST" class="space-y-6">
                 @csrf
@@ -52,9 +55,15 @@
                         </select>
                     </div>
                 </div>
-                <div class="flex justify-end gap-3">
-                    <a href="{{ route('klasifikasiAkun.index') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
+                <div class="mt-6 flex justify-end gap-4">
+                    <a href="{{ route('klasifikasiAkun.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
+                        Batal
+                    </a>
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md">
+                        Simpan
+                    </button>
                 </div>
             </form>
         </div>

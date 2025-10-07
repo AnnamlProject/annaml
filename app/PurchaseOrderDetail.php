@@ -22,6 +22,7 @@ class PurchaseOrderDetail extends Model
         'tax_amount',
         'amount',
         'account_id',
+        'discount'
     ];
 
     public function purchaseOrder()

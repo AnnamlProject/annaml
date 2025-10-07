@@ -27,7 +27,7 @@
                     <label for="" class="font-semibold text-gray-700 block mb-2">Item</label>
                     <label for="item_number" class="mr-4">Number</label>
                     <input type="text" name="item_number" class="form-input w-1/8 border rounded px-2 py-1 text-sm">
-                    <label for="item_description" class="mr-4">Description</label>
+                    <label for="item_description" class="mr-4">Item Name</label>
                     <input type="text" name="item_description" class="form-input w-1/3 border rounded px-2 py-1 text-sm">
                 </div>
                 <div class="mb-4">
@@ -90,13 +90,14 @@
                             <div>
                                 <label class="block">On Hand Quantity</label>
                                 <input type="number" name="quantities[0][on_hand_qty]" value="0" readonly
-                                    class="form-input w-full border rounded px-2 py-1 text-sm" />
+                                    class="form-input w-full border rounded px-2 py-1 text-sm bg-gray-200" />
                             </div>
 
                             <div>
                                 <label class="block">On Hand Value</label>
                                 <input type="text" id="on_hand_display"
-                                    class="form-input w-full border rounded px-2 py-1 text-sm" value="0.00" readonly />
+                                    class="form-input w-full border rounded px-2 py-1 text-sm bg-gray-200" value="0.00"
+                                    readonly />
                                 <input type="hidden" id="on_hand_value" name="quantities[0][on_hand_value]" />
                             </div>
                         </div>
@@ -132,7 +133,7 @@
                         <div>
                             <label class="block">Selling Unit (if different)</label>
                             <input type="text" id="selling_unit" name="selling_unit"
-                                class="form-input w-full bor    der rounded px-2 py-1 text-sm" readonly />
+                                class="form-input w-full border rounded px-2 py-1 text-sm" readonly />
                         </div>
                         <div>
                             <label class="block">Selling Relationship</label>
@@ -204,7 +205,7 @@
                 <div id="vendors" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        <select name="vendor_id_inventory" id="vendor_id"
+                        <select name="vendor_id_inventory" id="vendor_inventory_id"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -218,7 +219,7 @@
                 <div id="vendorsService" class="tab-content hidden">
                     <div>
                         <label class="block">Vendor</label>
-                        <select name="vendor_id_service" id="vendor_id"
+                        <select name="vendor_id_service" id="vendor_service_id"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">-- Vendor --</option>
                             @foreach ($vendors as $g)
@@ -421,8 +422,6 @@
                     </table>
                 </div>
 
-
-
                 {{-- service area --}}
 
                 {{-- Units Tab --}}
@@ -481,7 +480,7 @@
                         <label for="service_revenue_account_id" class="block text-sm font-medium text-gray-700">Revenue
                         </label>
                         <select name="service_revenue_account_id"
-                            class="form-select w-full border rounded px-2 py-1 text-sm">
+                            class="form-select w-1/2 border rounded px-2 py-1 text-sm">
                             <option value="">-- Pilih Account --</option>
                             @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
                                 <option value="{{ $account->id }}">
@@ -490,14 +489,25 @@
                             @endforeach
                         </select>
                     </div>
-
-
-
+                    {{-- Account Receivable Account --}}
+                    <div>
+                        <label for="account_receivable_id" class="block text-sm font-medium text-gray-700">Account
+                            Receivable
+                        </label>
+                        <select name="account_receivable_id" class="form-select w-1/2 border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}">
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     {{-- expense Account --}}
                     <div>
                         <label for="expense_account_id" class="block text-sm font-medium text-gray-700">Expense
                         </label>
-                        <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                        <select name="expense_account_id" class="form-select w-1/2 border rounded px-2 py-1 text-sm">
                             <option value="">-- Pilih Account --</option>
                             @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
                                 <option value="{{ $account->id }}">
@@ -523,15 +533,15 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
-                                            <input type="checkbox" name="taxes[]" value="{{ $tax->id }}"
+                                            <input type="checkbox" name="taxes_service[]" value="{{ $tax->id }}"
                                                 class="form-checkbox">
                                             <span>{{ $tax->name }} ({{ $tax->rate }}%)</span>
                                         </label>
                                     </td>
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
-                                            <input type="checkbox" name="tax_exempt[]" value="{{ $tax->id }}"
-                                                class="form-checkbox">
+                                            <input type="checkbox" name="tax_exempt_service[]"
+                                                value="{{ $tax->id }}" class="form-checkbox">
                                             <span>Exempt {{ $tax->name }}</span>
                                         </label>
                                     </td>
@@ -566,20 +576,67 @@
 
 
                 {{-- Tombol Submit --}}
-                <div class="mt-6 flex space-x-4">
-                    <button type="submit"
-                        class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                        Simpan
-                    </button>
+                <div class="mt-6 justify-end flex space-x-4">
+
                     <a href="{{ route('inventory.index') }}"
                         class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                         Cancel
                     </a>
+                    <button type="submit"
+                        class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+                        Process
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 
+
+    <!-- JQUERY DULU -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('.form-select').select2({
+                placeholder: "Cari account...",
+                allowClear: true,
+                width: '100%',
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('#vendor_inventory_id,#vendor_service_id').select2({
+                placeholder: "-- Vendor --",
+                ajax: {
+                    url: '{{ route('vendors.search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        }; // query keyword
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(vendor) {
+                                return {
+                                    id: vendor.id,
+                                    text: vendor.nama_vendors
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
     <script>
         document.getElementById('on_hand_display').addEventListener('input', function(e) {
             let raw = e.target.value.replace(/,/g, '');

@@ -74,9 +74,7 @@
                                 <thead class="bg-gray-100 text-gray-700">
                                     <tr>
                                         <th class="border px-3 py-2">Item</th>
-                                        <th class="border px-3 py-2">Qty</th>
                                         <th class="border px-3 py-2">Order</th>
-                                        <th class="border px-3 py-2">Back Order</th>
                                         <th class="border px-3 py-2">Unit</th>
                                         <th class="border px-3 py-2">Description</th>
                                         <th class="border px-3 py-2">Base Price</th>
@@ -91,9 +89,7 @@
                                     @foreach ($salesOrder->details as $item)
                                         <tr>
                                             <td class="border px-3 py-2">{{ $item->item->item_description ?? '-' }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->order }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
                                             <td class="border px-3 py-2">{{ $item->item_description }}</td>
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->base_price) }}
@@ -109,31 +105,84 @@
                                 </tbody>
                                 <tfoot>
                                     @php
-                                        $subtotal = $salesOrder->details->sum('amount');
-                                        $totalTax = $salesOrder->details->sum('tax');
-                                        $freight = $salesOrder->freight ?? 0; // kalau ada kolom freight di salesOrder
-                                        $grandTotal = $subtotal + $totalTax + $freight;
+                                        // Inisialisasi
+                                        $subtotal = 0;
+                                        $totalInputTax = 0; // PPN (+)
+                                        $totalWithholding = 0; // PPh (+ di sini, tapi akan dikurangkan saat net)
                                     @endphp
+
+                                    @foreach ($salesOrder->details as $item)
+                                        @php
+                                            // Jumlahkan subtotal (sebelum pajak)
+                                            $subtotal += (float) ($item->amount ?? 0);
+
+                                            // Ambil tipe pajak dari relasi yang BENAR (ganti 'sales_taxes' sesuai nama relasi di model)
+                                            $taxType = optional($item->sales_taxes)->type; // 'input_tax' | 'withholding_tax' | null
+                                            $taxAmt = (float) ($item->tax ?? 0); // pastikan selalu disimpan positif di DB
+
+                                            if ($taxType === 'input_tax') {
+                                                $totalInputTax += $taxAmt; // PPN ditambah
+                                            } elseif ($taxType === 'withholding_tax') {
+                                                $totalWithholding += $taxAmt; // PPh diakumulasi terpisah (positif di sini)
+                                            }
+                                        @endphp
+                                    @endforeach
+
+                                    @php
+                                        $freight = (float) ($salesOrder->freight ?? 0);
+                                        $totalTaxNet = $totalInputTax - $totalWithholding; // PPN (+) dikurangi PPh (–)
+                                        $grandTotal = $subtotal + $totalTaxNet + $freight;
+                                    @endphp@php
+                                        // Inisialisasi
+                                        $subtotal = 0;
+                                        $totalInputTax = 0; // PPN (+)
+                                        $totalWithholding = 0; // PPh (+ di sini, tapi akan dikurangkan saat net)
+                                    @endphp
+
+                                    @foreach ($salesOrder->details as $item)
+                                        @php
+                                            // Jumlahkan subtotal (sebelum pajak)
+                                            $subtotal += (float) ($item->amount ?? 0);
+
+                                            // Ambil tipe pajak dari relasi yang BENAR (ganti 'sales_taxes' sesuai nama relasi di model)
+                                            $taxType = optional($item->sales_taxes)->type; // 'input_tax' | 'withholding_tax' | null
+                                            $taxAmt = (float) ($item->tax ?? 0); // pastikan selalu disimpan positif di DB
+
+                                            if ($taxType === 'input_tax') {
+                                                $totalInputTax += $taxAmt; // PPN ditambah
+                                            } elseif ($taxType === 'withholding_tax') {
+                                                $totalWithholding += $taxAmt; // PPh diakumulasi terpisah (positif di sini)
+                                            }
+                                        @endphp
+                                    @endforeach
+
+                                    @php
+                                        $freight = (float) ($salesOrder->freight ?? 0);
+                                        $totalTaxNet = $totalInputTax - $totalWithholding; // PPN (+) dikurangi PPh (–)
+                                        $grandTotal = $subtotal + $totalTaxNet + $freight;
+                                    @endphp
+
                                     <tr>
-                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Subtotal</td>
+                                        <td colspan="7" class="border px-3 py-2 text-right font-bold">Subtotal</td>
                                         <td class="border px-3 py-2 text-right font-bold">{{ number_format($subtotal) }}
                                         </td>
                                         <td colspan="2"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Total Pajak</td>
-                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($totalTax) }}
+                                        <td colspan="7" class="border px-3 py-2 text-right font-bold">Total Pajak</td>
+                                        <td class="border px-3 py-2 text-right font-bold">
+                                            {{ number_format($totalTaxNet) }}
                                         </td>
                                         <td colspan="2"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Freight</td>
+                                        <td colspan="7" class="border px-3 py-2 text-right font-bold">Freight</td>
                                         <td class="border px-3 py-2 text-right font-bold">{{ number_format($freight) }}
                                         </td>
                                         <td colspan="2"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Grand Total</td>
+                                        <td colspan="7" class="border px-3 py-2 text-right font-bold">Grand Total</td>
                                         <td class="border px-3 py-2 text-right font-bold">{{ number_format($grandTotal) }}
                                         </td>
                                         <td colspan="2"></td>

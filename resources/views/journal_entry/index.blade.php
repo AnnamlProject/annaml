@@ -12,7 +12,7 @@
                     style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
-                        Journal Entry
+                        General Journal
                     </h3>
                     <div class="flex flex-wrap gap-2">
                         <!-- Filter Button -->

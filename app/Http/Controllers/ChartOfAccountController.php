@@ -103,6 +103,8 @@ class ChartOfAccountController extends Controller
     }
     public function update(Request $request, ChartOfAccount $chartOfAccount)
     {
+
+        // dd($request->all());
         $request->validate([
             'kode_akun' => 'required|unique:chart_of_accounts,kode_akun,' . $chartOfAccount->id,
             'nama_akun' => 'required|string',
@@ -140,6 +142,7 @@ class ChartOfAccountController extends Controller
             'nama_akun' => $request->nama_akun,
             'tipe_akun' => $request->tipe_akun,
             'level_akun' => $request->level_akun,
+            'klasifikasi_id' => $request->klasifikasi_id,
             'aktif' => $request->has('aktif'),
             'omit_zero_balance' => $request->has('omit_zero_balance'),
             'allow_project_allocation' => $request->has('allow_project_allocation'),
@@ -156,10 +159,11 @@ class ChartOfAccountController extends Controller
         $chartOfAccounts = chartOfAccount::findOrFail($id);
         $tipe_akun = ['Aset', 'Kewajiban', 'Ekuitas', 'Pendapatan', 'Beban'];
         $parent_akun = ChartOfAccount::whereIn('level_akun', ['header', 'subheader'])->get();
+        $klasifikasi = KlasifikasiAkun::all();
 
 
         //render view with post
-        return view('chartOfAccount.edit', compact('chartOfAccounts', 'tipe_akun', 'parent_akun'));
+        return view('chartOfAccount.edit', compact('chartOfAccounts', 'tipe_akun', 'parent_akun', 'klasifikasi'));
     }
     public function show(string $id): View
     {

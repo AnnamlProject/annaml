@@ -17,4 +17,8 @@ class NumberingAccount extends Model
     {
         return $this->hasMany(KlasifikasiAkun::class, 'numbering_account_id');
     }
+    public function account()
+    {
+        return $this->belongsTo(chartOfAccount::class);
+    }
 }

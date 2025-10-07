@@ -62,6 +62,7 @@ class PurchaseInvoiceController extends Controller
                     'back_order'   => $detail->back_order ?? 0,
                     'unit'         => $detail->unit ?? '',
                     'price'        => $detail->price ?? 0,
+                    'discount'        => $detail->discount ?? 0,
                     'tax_id'       => $detail->tax_id ?? null, // ambil ID pajak
                     'tax_rate'     => optional($detail->sales_taxes)->rate ?? 0, // ambil rate pajak
                     'tax_purchase_account_id'   => optional($detail->sales_taxes)->purchase_account_id ?? null,
@@ -96,7 +97,7 @@ class PurchaseInvoiceController extends Controller
     }
     public function store(Request $request)
     {
-        // 0) Nomor invoice (auto/manual)
+        // 0️⃣ Generate nomor invoice
         if ($request->has('auto_generate')) {
             $invoice_number = $this->generateKodeInvoice($request->date_invoice);
         } else {
@@ -104,7 +105,7 @@ class PurchaseInvoiceController extends Controller
             $invoice_number = $request->invoice_number;
         }
 
-        // 1) Normalisasi payload
+        // 1️⃣ Normalisasi payload
         $payload = $request->all();
 
         $payload['freight'] = isset($payload['freight'])
@@ -132,14 +133,14 @@ class PurchaseInvoiceController extends Controller
 
         $request->replace($payload);
 
-        // 2) Validasi
+        // 2️⃣ Validasi
         $request->validate([
             'date_invoice'        => 'required|date',
             'shipping_date'       => 'required|date',
             'vendor_id'           => 'required|exists:vendors,id',
             'header_account_id'   => 'required|exists:payment_method_details,id',
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
-            'location_id'   => 'nullable|exists:location_inventories,id',
+            'location_id'         => 'nullable|exists:location_inventories,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'shipping_address'    => 'required|string',
             'freight'             => 'required|numeric|min:0',
@@ -151,7 +152,9 @@ class PurchaseInvoiceController extends Controller
 
         DB::beginTransaction();
         try {
-            // 3) Simpan header
+            // ==============================================================
+            // 3️⃣ Simpan Header Purchase Invoice
+            // ==============================================================
             $purchaseInvoice = \App\PurchaseInvoice::create([
                 'invoice_number'      => $invoice_number,
                 'date_invoice'        => $request->date_invoice,
@@ -159,134 +162,181 @@ class PurchaseInvoiceController extends Controller
                 'vendor_id'           => $request->vendor_id,
                 'account_id'          => $request->header_account_id,
                 'purchase_order_id'   => $request->purchase_order_id,
-                'location_id' => $request->location_id,
+                'location_id'         => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address'    => $request->shipping_address,
                 'freight'             => $request->freight,
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages'            => $request->messages,
             ]);
-            // dump('Purchase Invoice tersimpan:', $purchaseInvoice->toArray());
+            dump('📘 Purchase Invoice tersimpan:', $purchaseInvoice->toArray());
 
-            // 3b) Update status PO
+            // 3b️⃣ Update status PO
             if ($request->purchase_order_id) {
                 \App\PurchaseOrder::whereKey($request->purchase_order_id)
                     ->update(['status_purchase' => 1]);
-                // dump('Purchase Order update status_purchase=1:', $request->purchase_order_id);
+                dump('📦 Purchase Order diupdate:', $request->purchase_order_id);
             }
 
-            // 4) Simpan detail
+            // ==============================================================
+            // 4️⃣ Simpan Detail Item & Update Inventory
+            // ==============================================================
             foreach ($request->items ?? [] as $row) {
                 $detail = \App\PurchaseInvoiceDetail::create([
                     'purchase_invoice_id' => $purchaseInvoice->id,
-                    'item_id'           => $row['item_id'],
-                    'quantity'          => $row['quantity'],
-                    'order'             => $row['order'],
-                    'back_order'        => $row['back_order'] ?? 0,
-                    'unit'              => $row['unit'],
-                    'item_description'  => $row['item_description'],
-                    'price'             => $row['price'] ?? 0,
-                    'tax_id'            => $row['tax_id'],
-                    'tax_amount'        => $row['tax_amount'] ?? 0,
-                    'amount'            => $row['amount'] ?? 0,
-                    'account_id'        => $row['account_id'],
-                    'project_id'        => $row['project_id'] ?? null,
+                    'item_id'             => $row['item_id'],
+                    'quantity'            => $row['quantity'],
+                    'order'               => $row['order'],
+                    'back_order'          => $row['back_order'] ?? 0,
+                    'unit'                => $row['unit'],
+                    'item_description'    => $row['item_description'],
+                    'price'               => $row['price'] ?? 0,
+                    'discount'            => $row['discount'] ?? 0,
+                    'tax_id'              => $row['tax_id'],
+                    'tax_amount'          => $row['tax_amount'] ?? 0,
+                    'amount'              => $row['amount'] ?? 0,
+                    'account_id'          => $row['account_id'],
+                    'project_id'          => $row['project_id'] ?? null,
                 ]);
-                // dump('Detail tersimpan:', $detail->toArray());
+                dump('🧾 Detail tersimpan:', $detail->toArray());
 
-                // ✅ Update stok di lokasi invoice
+                // Update stok
                 $qtyChange   = $row['quantity'] ?? 0;
                 $valueChange = ($row['quantity'] ?? 0) * ($row['price'] ?? 0);
-
-                $this->adjustItemQuantity($row['item_id'], $request->location_id, $qtyChange, $valueChange);
+                $inventory = $this->adjustItemQuantity($row['item_id'], $request->location_id, $qtyChange, $valueChange);
+                dump('📦 Update stok:', [
+                    'item_id' => $row['item_id'],
+                    'qtyChange' => $qtyChange,
+                    'valueChange' => $valueChange,
+                    'after' => $inventory->toArray()
+                ]);
             }
 
-            // 5) Jurnal header
+            // ==============================================================
+            // 5️⃣ Buat Journal Entry Header
+            // ==============================================================
             $journal = \App\JournalEntry::create([
-                'source' => 'purchase_invoice',
+                'source'  => 'purchase_invoice',
                 'tanggal' => $request->date_invoice,
                 'comment' => "Purchase Invoice #{$purchaseInvoice->invoice_number}",
             ]);
-            // dump('Journal Entry tersimpan:', $journal->toArray());
+            dump('🪵 Journal Entry header dibuat:', $journal->toArray());
 
             $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
+            $totalDebit = 0;
+            $totalCredit = 0;
 
-            // 6) Jurnal debit items & PPN
+            // ==============================================================
+            // 6️⃣ Journal Detail (Items + Pajak)
+            // ==============================================================
             foreach ($request->items ?? [] as $row) {
+                // --- Barang / Beban (Debit)
                 if (!empty($row['amount']) && $row['amount'] > 0 && !empty($row['account_id'])) {
                     $kodeAkun = $coaCode($row['account_id']);
                     $jd = \App\JournalEntryDetail::create([
                         'journal_entry_id' => $journal->id,
-                        'kode_akun' => $kodeAkun,
-                        'debits' => $row['amount'],
-                        'credits' => 0,
-                        'comment' => $row['item_description'] ?? null,
+                        'kode_akun'        => $kodeAkun,
+                        'debits'           => $row['amount'],
+                        'credits'          => 0,
+                        'comment'          => $row['item_description'] ?? null,
                     ]);
-                    // dump('Journal Debit Item:', $jd->toArray());
+                    dump('💰 Journal Debit Item:', $jd->toArray());
+                    $totalDebit += $row['amount'];
                 }
 
-                if (!empty($row['tax_amount']) && $row['tax_amount'] > 0 && !empty($row['tax_id'])) {
-                    $taxAccountId = \App\SalesTaxes::whereKey($row['tax_id'])->value('purchase_account_id');
-                    $kodeAkunPpn  = $coaCode($taxAccountId);
+                // --- Pajak
+                if (!empty($row['tax_amount']) && !empty($row['tax_id'])) {
+                    $tax = \App\SalesTaxes::find($row['tax_id']);
+                    if ($tax) {
+                        $taxAccountId = $tax->purchase_account_id;
+                        $taxType = $tax->type;
+                        $kodeAkunTax = $coaCode($taxAccountId);
+                        $nilaiTax = abs($row['tax_amount']); // pakai nilai absolut
 
-                    if (!$kodeAkunPpn) {
-                        throw new \Exception("SalesTax ID {$row['tax_id']} tidak punya purchase_account_id valid");
+                        dump("📑 Pajak Ditemukan:", [
+                            'tax_id' => $row['tax_id'],
+                            'type' => $taxType,
+                            'rate' => $tax->rate,
+                            'amount_raw' => $row['tax_amount'],
+                            'amount_final' => $nilaiTax,
+                            'kode_akun' => $kodeAkunTax,
+                        ]);
+
+                        if ($taxType === 'input_tax') {
+                            $jp = \App\JournalEntryDetail::create([
+                                'journal_entry_id' => $journal->id,
+                                'kode_akun'        => $kodeAkunTax,
+                                'debits'           => $nilaiTax,
+                                'credits'          => 0,
+                                'comment'          => "PPN ({$tax->rate}%)",
+                            ]);
+                            dump('🧾 Journal Debit Pajak Masukan (PPN):', $jp->toArray());
+                            $totalDebit += $nilaiTax;
+                        } elseif ($taxType === 'withholding_tax') {
+                            $jp = \App\JournalEntryDetail::create([
+                                'journal_entry_id' => $journal->id,
+                                'kode_akun'        => $kodeAkunTax,
+                                'debits'           => 0,
+                                'credits'          => $nilaiTax,
+                                'comment'          => "PPh Potongan ({$tax->rate}%)",
+                            ]);
+                            dump('💸 Journal Credit Pajak Potongan (PPh):', $jp->toArray());
+                            $totalCredit += $nilaiTax;
+                        }
                     }
-
-                    $jp = \App\JournalEntryDetail::create([
-                        'journal_entry_id' => $journal->id,
-                        'kode_akun' => $kodeAkunPpn,
-                        'debits' => $row['tax_amount'],
-                        'credits' => 0,
-                        'comment' => 'PPN ' . ($row['tax'] ?? '') . '%',
-                    ]);
-                    // dump('Journal Debit PPN:', $jp->toArray());
                 }
             }
 
-            // 7) Freight (debit)
+            // ==============================================================
+            // 7️⃣ Freight Expense
+            // ==============================================================
             if ($request->freight > 0) {
                 $freightLinked = \App\linkedAccounts::where('kode', 'Freight Expense')->first();
                 $freightKode   = $coaCode(optional($freightLinked)->akun_id);
 
                 $jf = \App\JournalEntryDetail::create([
                     'journal_entry_id' => $journal->id,
-                    'kode_akun' => $freightKode,
-                    'debits' => $request->freight,
-                    'credits' => 0,
-                    'comment' => 'Freight Expense',
+                    'kode_akun'        => $freightKode,
+                    'debits'           => $request->freight,
+                    'credits'          => 0,
+                    'comment'          => 'Freight Expense',
                 ]);
-                // dump('Journal Debit Freight:', $jf->toArray());
+                dump('🚚 Journal Debit Freight Expense:', $jf->toArray());
+                $totalDebit += $request->freight;
             }
 
-            // 8) Kredit (kas/bank/hutang)
-            $grandTotal = collect($request->items)->sum('amount')
-                + collect($request->items)->sum('tax_amount')
-                + ($request->freight ?? 0);
+            // ==============================================================
+            // 8️⃣ Kredit (Kas / Hutang)
+            // ==============================================================
+            $netPayable = $totalDebit - $totalCredit;
 
-            if ($grandTotal > 0) {
+            if ($netPayable > 0) {
                 $pmDetail = \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)
                     ->where('is_default', 1)->first()
                     ?? \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)->first();
 
                 $pmKode = $coaCode(optional($pmDetail)->account_id);
-                if (!$pmKode) {
-                    throw new \Exception("Payment Method ID {$request->jenis_pembayaran_id} tidak punya akun default");
-                }
 
                 $jc = \App\JournalEntryDetail::create([
                     'journal_entry_id' => $journal->id,
-                    'kode_akun' => $pmKode,
-                    'debits' => 0,
-                    'credits' => $grandTotal,
-                    'comment' => 'Payment / Credit',
+                    'kode_akun'        => $pmKode,
+                    'debits'           => 0,
+                    'credits'          => $netPayable,
+                    'comment'          => 'Payment / Credit',
                 ]);
-                // dump('Journal Credit Payment:', $jc->toArray());
+                dump('🏦 Journal Credit Payment:', $jc->toArray());
+                $totalCredit += $netPayable;
             }
 
+            dump('📊 Total Journal:', [
+                'total_debit' => $totalDebit,
+                'total_credit' => $totalCredit
+            ]);
+
             DB::commit();
-            // dd('✅ Semua proses selesai tanpa error.');
-            return redirect()->route('purchase_invoice.index')->with('success', 'Purchase invoice berhasil disimpan.');
+            dump('✅ Semua proses berhasil disimpan.');
+            // return redirect()->route('purchase_invoice.index')
+            // ->with('success', 'Purchase invoice berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
             dd('❌ Error:', $e->getMessage(), $e->getTraceAsString(), [
@@ -294,6 +344,8 @@ class PurchaseInvoiceController extends Controller
             ]);
         }
     }
+
+
     protected function adjustItemQuantity($itemId, $locationId, $qtyChange, $valueChange)
     {
         $itemQty = \App\ItemQuantities::firstOrCreate(
@@ -301,9 +353,20 @@ class PurchaseInvoiceController extends Controller
             ['on_hand_qty' => 0, 'on_hand_value' => 0]
         );
 
+        $before = $itemQty->replicate()->toArray();
+
         $itemQty->on_hand_qty   += $qtyChange;
         $itemQty->on_hand_value += $valueChange;
         $itemQty->save();
+
+        dump("🔄 Update Inventory Item #$itemId", [
+            'before' => $before,
+            'change' => [
+                'qty' => $qtyChange,
+                'value' => $valueChange,
+            ],
+            'after' => $itemQty->toArray()
+        ]);
 
         return $itemQty;
     }

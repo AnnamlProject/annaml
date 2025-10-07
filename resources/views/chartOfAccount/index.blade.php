@@ -84,17 +84,17 @@
                     <table class="min-w-full divide-y">
                         <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
-                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Kode Akun
+                                <th class="px-2 py-1 text-center font-medium text-gray-600 uppercase">Kode Akun
                                 </th>
-                                <th class="px-4 py-2 text-left font-medium text-gray-600 uppercase">Nama Akun
+                                <th class="px-2 py-1 text-left font-medium text-gray-600 uppercase">Nama Akun
                                 </th>
-                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Tipe Akun
+                                <th class="px-2 py-1 text-center font-medium text-gray-600 uppercase">Tipe Akun
                                 </th>
-                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Level Akun
+                                <th class="px-2 py-1 text-center font-medium text-gray-600 uppercase">Level Akun
                                 </th>
-                                <th class="px-4 py-2 text-center font-medium text-gray-600 uppercase">Klasifikasi
+                                <th class="px-2 py-1 text-center font-medium text-gray-600 uppercase">Klasifikasi
                                     Akun</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -124,9 +124,9 @@
                                     $icon = $iconMap[$lowerLevel] ?? '📄';
                                 @endphp
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->kode_akun }}
+                                    <td class="text-center whitespace-nowrap">{{ $chartOfAccount->kode_akun }}
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                                    <td class="text-center whitespace-nowrap">
                                         <div class="flex items-center" style="margin-left: {{ $margin }}px">
                                             {!! $icon !!}
                                             &nbsp;
@@ -141,15 +141,15 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                                    <td class="text-center whitespace-nowrap">
                                         {{ strtoupper($chartOfAccount->tipe_akun) }}
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">{{ $chartOfAccount->level_akun }}
+                                    <td class="text-center whitespace-nowrap">{{ $chartOfAccount->level_akun }}
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap">
+                                    <td class="text-center whitespace-nowrap">
                                         {{ strtoupper($chartOfAccount->klasifikasiAkun->nama_klasifikasi ?? '-') }}
                                     </td>
-                                    <td class="px-2 py-1 text-center whitespace-nowrap text-right">
+                                    <td class="text-center whitespace-nowrap text-right">
                                         <div class="flex justify-end space-x-2">
                                             @can('chart_of_account.view')
                                                 <a href="{{ route('chartOfAccount.show', $chartOfAccount->id) }}"
@@ -221,9 +221,11 @@
                     class="space-y-2">
                     @csrf
                     <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
-                    <input type="file" name="file" class="block w-full text-sm border rounded px-2 py-1" required>
-                    <button type="submit" class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
-                        <i class="fas fa-file-upload mr-1"></i> Import
+                    <input type="file" name="file"
+                        class="block w-full text-sm border rounded  required>
+                    <button type="submit"
+                        class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
+                    <i class="fas fa-file-upload mr-1"></i> Import
                     </button>
                 </form>
             </div>

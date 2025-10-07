@@ -4,7 +4,7 @@
     <div class="py-8">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-md p-6">
-                <h2 class="font-bold text-lg mb-2">Journal Entry Create</h2>
+                <h2 class="font-bold text-lg mb-2">General Journal Create</h2>
                 <form id="journal-entry-form" action="{{ route('journal_entry.store') }}" method="POST">
                     @csrf
 
@@ -46,7 +46,7 @@
                         <!-- Source -->
                         <div>
                             <label for="source" class="block text-sm font-semibold text-gray-700 mb-1">Source</label>
-                            <input type="text" name="source" id="source"
+                            <input type="text" name="source" id="source" placeholder="Masukkan Source"
                                 class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('source') }}"
                                 required>
                         </div>
@@ -62,7 +62,7 @@
                         <!-- Comment -->
                         <div>
                             <label for="comment" class="block text-sm font-semibold text-gray-700 mb-1">Comment</label>
-                            <input type="text" name="comment" id="comment"
+                            <input type="text" name="comment" id="comment" placeholder="Masukkan Comment(opsional)"
                                 class="w-full rounded-md border border-gray-300 px-3 py-2" value="{{ old('comment') }}">
                         </div>
                     </div>

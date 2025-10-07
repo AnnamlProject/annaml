@@ -40,7 +40,7 @@
                         <div class="text-red-500 text-xs">{{ $message }}</div>
                     @enderror
 
-                    <label for="item_description" class="ml-4 mr-4">Description</label>
+                    <label for="item_description" class="ml-4 mr-4">Item Name</label>
                     <input type="text" name="item_description"
                         value="{{ old('item_description', $item->item_description) }}"
                         class="form-input w-1/3 border rounded px-2 py-1 text-sm">
@@ -73,7 +73,7 @@
                         <li><a href="#units" class="tab-link">Units</a></li>
                         <li><a href="#pricing" class="tab-link">Pricing</a></li>
                         <li><a href="#vendors" class="tab-link">Vendors</a></li>
-                        <li><a href="#linked" class="tab-link">Linked COA</a></li>
+                        <li><a href="#linked" class="tab-link">Linked Account</a></li>
                         <li><a href="#build" class="tab-link">Build</a></li>
                         <li><a href="#taxes" class="tab-link">Taxes</a></li>
                         <li><a href="#description" class="tab-link">Description</a></li>
@@ -85,7 +85,7 @@
                         <li><a href="#unitsService" class="tab-link">Units</a></li>
                         <li><a href="#pricingService" class="tab-link">Pricing</a></li>
                         <li><a href="#vendorsService" class="tab-link">Vendors</a></li>
-                        <li><a href="#linkedService" class="tab-link">Linked COA</a></li>
+                        <li><a href="#linkedService" class="tab-link">Linked Account</a></li>
                         <li><a href="#taxesService" class="tab-link">Taxes</a></li>
                         <li><a href="#descriptionService" class="tab-link">Description</a></li>
                         <li><a href="#pictureService" class="tab-link">Picture</a></li>
@@ -595,32 +595,42 @@
                 </div>
                 <div id="linkedService" class="tab-content {{ $item->type === 'service' ? '' : 'hidden' }}">
                     <h3 class="font-semibold text-lg mb-2">Account Linkings</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Revenue Account</label>
-                            <select name="service_revenue_account_id"
-                                class="form-select w-full border rounded px-2 py-1 text-sm">
-                                <option value="">-- Pilih Account --</option>
-                                @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
-                                    <option value="{{ $account->id }}"
-                                        {{ (string) old('revenue_account_id', optional($acc)->revenue_account_id) === (string) $account->id ? 'selected' : '' }}>
-                                        {{ $account->kode_akun }} - {{ $account->nama_akun }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Expense Account</label>
-                            <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
-                                <option value="">-- Pilih Account --</option>
-                                @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
-                                    <option value="{{ $account->id }}"
-                                        {{ (string) old('expense_account_id', optional($acc)->expense_account_id) === (string) $account->id ? 'selected' : '' }}>
-                                        {{ $account->kode_akun }} - {{ $account->nama_akun }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Revenue Account</label>
+                        <select name="service_revenue_account_id"
+                            class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts->where('tipe_akun', 'Pendapatan') as $account)
+                                <option value="{{ $account->id }}"
+                                    {{ (string) old('revenue_account_id', optional($acc)->revenue_account_id) === (string) $account->id ? 'selected' : '' }}>
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Account Receivable</label>
+                        <select name="account_receivable_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts as $account)
+                                <option value="{{ $account->id }}"
+                                    {{ (string) old('account_receivable_id', optional($acc)->account_receivable_id) === (string) $account->id ? 'selected' : '' }}>
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Expense Account</label>
+                        <select name="expense_account_id" class="form-select w-full border rounded px-2 py-1 text-sm">
+                            <option value="">-- Pilih Account --</option>
+                            @foreach ($accounts->where('tipe_akun', 'Beban') as $account)
+                                <option value="{{ $account->id }}"
+                                    {{ (string) old('expense_account_id', optional($acc)->expense_account_id) === (string) $account->id ? 'selected' : '' }}>
+                                    {{ $account->kode_akun }} - {{ $account->nama_akun }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
@@ -638,7 +648,7 @@
                                 <tr class="border-b">
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
-                                            <input type="checkbox" name="taxes[]" value="{{ $t->id }}"
+                                            <input type="checkbox" name="taxes_service[]" value="{{ $t->id }}"
                                                 class="form-checkbox"
                                                 {{ in_array($t->id, old('taxes', $selectedTaxIds ?? [])) ? 'checked' : '' }}>
                                             <span>{{ $t->name }} ({{ $t->rate }}%)</span>
@@ -646,8 +656,8 @@
                                     </td>
                                     <td class="px-4 py-2">
                                         <label class="flex items-center space-x-2">
-                                            <input type="checkbox" name="tax_exempt[]" value="{{ $t->id }}"
-                                                class="form-checkbox"
+                                            <input type="checkbox" name="tax_exempt_service[]"
+                                                value="{{ $t->id }}" class="form-checkbox"
                                                 {{ in_array($t->id, old('tax_exempt', $exemptTaxIds ?? [])) ? 'checked' : '' }}>
                                             <span>Exempt {{ $t->name }}</span>
                                         </label>
@@ -693,20 +703,36 @@
                 </div>
 
                 {{-- Submit --}}
-                <div class="mt-6 flex space-x-4">
-                    <button type="submit"
-                        class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                        Update
-                    </button>
+                <div class="mt-6 justify-end flex space-x-4">
                     <a href="{{ route('inventory.index') }}"
                         class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                         Cancel
                     </a>
+                    <button type="submit"
+                        class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
+                        Process
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 
+
+    <!-- JQUERY DULU -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('.form-select').select2({
+                placeholder: "Cari account...",
+                allowClear: true,
+                width: '100%',
+            });
+        });
+    </script>
     {{-- Build JS --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {

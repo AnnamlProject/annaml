@@ -3,15 +3,14 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <!-- Informasi Klasifikasi Akun -->
                 <div class="mb-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Klasifikasi</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                        <div>
-                            <span class="font-medium">Kode Klasifikasi:</span>
-                            <span class="ml-2">{{ $klasifikasi->kode_klasifikasi }}</span>
-                        </div>
                         <div>
                             <span class="font-medium">Nama Klasifikasi:</span>
                             <span class="ml-2">{{ $klasifikasi->nama_klasifikasi }}</span>

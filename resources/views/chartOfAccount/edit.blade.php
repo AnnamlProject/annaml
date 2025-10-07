@@ -3,7 +3,10 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <h2 class="mb-6 font-bold text-lg">Account Edit</h2>
 
                 <form method="POST" action="{{ route('chartOfAccount.update', $chartOfAccounts->id) }}">
@@ -58,6 +61,20 @@
                                     <option value="{{ $level }}"
                                         {{ old('level_akun', $chartOfAccounts->level_akun) == $level ? 'selected' : '' }}>
                                         {{ ucfirst($level) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Klasifikasi Akun</label>
+                            <select name="klasifikasi_id"
+                                class="w-full select-klasifikasi border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                                @foreach ($klasifikasi as $g)
+                                    <option value="{{ $g->id }}"
+                                        {{ isset($chartOfAccounts) && $chartOfAccounts->klasifikasi_id == $g->id ? 'selected' : '' }}>
+                                        {{ $g->nama_klasifikasi }}
                                     </option>
                                 @endforeach
                             </select>
@@ -132,8 +149,8 @@
                             Batal
                         </a>
                         <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md">
-                            Update Account
+                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md">
+                            Simpan
                         </button>
                     </div>
                 </form>
@@ -141,3 +158,19 @@
         </div>
     </div>
 @endsection
+
+{{-- Select2 CSS --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+{{-- Select2 JS --}}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.select-klasifikasi').select2({
+            placeholder: "Cari klasifikasi...",
+            allowClear: true
+        });
+    });
+</script>

@@ -6,10 +6,12 @@
             <!-- Main Card -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <!-- Sticky Card Header -->
-                <div
-                    class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 
-                bg-gradient-to-r from-indigo-500 to-blue-600 
-                flex justify-between items-center">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+
+                <div class="sticky top-0 z-20 px-6 py-5 border-b border-gray-100 flex justify-between items-center"
+                    style="background: {{ $themeColor }};">
                     <h3 class="text-xl font-bold text-white flex items-center">
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Taxes List

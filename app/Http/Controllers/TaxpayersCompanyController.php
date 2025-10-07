@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Kecamatan;
+use App\Kelurahan;
+use App\KotaIndonesia;
+use App\ProvinceIndonesia;
 use App\TaxpayersProfile;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +23,11 @@ class TaxpayersCompanyController extends Controller
     }
     public function create(): View
     {
-        return view('taxpayers_company.create');
+        $provinsi = ProvinceIndonesia::select('id', 'name')->get();
+        $kota = KotaIndonesia::select('id', 'name')->get();
+        $kecamatan = Kecamatan::select('id', 'name')->get();
+        $kelurahan = Kelurahan::select('id', 'name')->get();
+        return view('taxpayers_company.create', compact('provinsi', 'kota', 'kecamatan', 'kelurahan'));
     }
     public function store(Request $request): RedirectResponse
     {
@@ -27,10 +35,10 @@ class TaxpayersCompanyController extends Controller
         $this->validate($request, [
             'nama_perusahaan'     => 'required|min:5',
             'jalan'   => 'nullable|string',
-            'kelurahan' => 'nullable|string',
-            'kecamatan' => 'nullable|string',
-            'kota' => 'nullable|string',
-            'provinsi' => 'nullable|string',
+            'id_provinsi'     => 'nullable|exists:indonesia_provinces,id',
+            'id_kota'         => 'nullable|exists:indonesia_cities,id',
+            'id_kecamatan'    => 'nullable|exists:indonesia_districts,id',
+            'id_kelurahan'    => 'nullable|exists:indonesia_villages,id',
             'kode_pos' => 'nullable|string',
             'phone_number' => 'nullable|string',
             'email' => 'nullable|string',
@@ -58,10 +66,10 @@ class TaxpayersCompanyController extends Controller
             'logo'     => $imageName,
             'nama_perusahaan'     => $request->nama_perusahaan,
             'jalan'   => $request->jalan,
-            'kelurahan' => $request->kelurahan,
-            'kecamatan'     => $request->kecamatan,
-            'kota'   => $request->kota,
-            'provinsi' => $request->provinsi,
+            'id_kelurahan'   => $request->id_kelurahan,
+            'id_kecamatan'   => $request->id_kecamatan,
+            'id_kota'        => $request->id_kota,
+            'id_provinsi'    => $request->id_provinsi,
             'kode_pos' => $request->kode_pos,
             'phone_number'     => $request->phone_number,
             'email'   => $request->email,
@@ -78,7 +86,7 @@ class TaxpayersCompanyController extends Controller
     public function show(string $id): View
     {
         //get post by ID
-        $taxpayers = TaxpayersProfile::findOrFail($id);
+        $taxpayers = TaxpayersProfile::with(['provinsi', 'kota', 'kelurahan', 'kecamatan'])->findOrFail($id);
 
         //render view with post
         return view('taxpayers_company.show', compact('taxpayers'));
@@ -87,9 +95,13 @@ class TaxpayersCompanyController extends Controller
     {
         //get post by ID
         $taxpayers = TaxpayersProfile::findOrFail($id);
+        $provinsi = ProvinceIndonesia::select('id', 'name')->get();
+        $kota = KotaIndonesia::select('id', 'name')->get();
+        $kecamatan = Kecamatan::select('id', 'name')->get();
+        $kelurahan = Kelurahan::select('id', 'name')->get();
 
         //render view with post
-        return view('taxpayers_company.edit', compact('taxpayers'));
+        return view('taxpayers_company.edit', compact('taxpayers', 'provinsi', 'kota', 'kecamatan', 'kelurahan'));
     }
     public function update(Request $request, $id): RedirectResponse
     {
@@ -97,10 +109,10 @@ class TaxpayersCompanyController extends Controller
         $this->validate($request, [
             'nama_perusahaan'     => 'required|min:5',
             'jalan'   => 'nullable|string',
-            'kelurahan' => 'nullable|string',
-            'kecamatan' => 'nullable|string',
-            'kota' => 'nullable|string',
-            'provinsi' => 'nullable|string',
+            'id_provinsi'     => 'nullable|exists:indonesia_provinces,id',
+            'id_kota'         => 'nullable|exists:indonesia_cities,id',
+            'id_kecamatan'    => 'nullable|exists:indonesia_districts,id',
+            'id_kelurahan'    => 'nullable|exists:indonesia_villages,id',
             'kode_pos' => 'nullable|string',
             'phone_number' => 'nullable|string',
             'email' => 'nullable|string',
@@ -125,10 +137,10 @@ class TaxpayersCompanyController extends Controller
                 'image'     => $image->hashName(),
                 'nama_perusahaan'     => $request->nama_perusahaan,
                 'jalan'   => $request->jalan,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan'     => $request->kecamatan,
-                'kota'   => $request->kota,
-                'provinsi' => $request->provinsi,
+                'id_kelurahan' => $request->id_kelurahan,
+                'id_kecamatan'     => $request->id_kecamatan,
+                'id_kota'   => $request->id_kota,
+                'id_provinsi' => $request->id_provinsi,
                 'kode_pos' => $request->kode_pos,
                 'phone_number'     => $request->phone_number,
                 'email'   => $request->email,
@@ -144,10 +156,10 @@ class TaxpayersCompanyController extends Controller
             $taxpayers->update([
                 'nama_perusahaan'     => $request->nama_perusahaan,
                 'jalan'   => $request->jalan,
-                'kelurahan' => $request->kelurahan,
-                'kecamatan'     => $request->kecamatan,
-                'kota'   => $request->kota,
-                'provinsi' => $request->provinsi,
+                'id_kelurahan' => $request->id_kelurahan,
+                'id_kecamatan'     => $request->id_kecamatan,
+                'id_kota'   => $request->id_kota,
+                'id_provinsi' => $request->id_provinsi,
                 'kode_pos' => $request->kode_pos,
                 'phone_number'     => $request->phone_number,
                 'email'   => $request->email,

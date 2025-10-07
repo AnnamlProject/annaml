@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\KlasifikasiAkun;
 use App\NumberingAccount;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KlasifikasiAkunController extends Controller
 {
@@ -76,11 +78,23 @@ class KlasifikasiAkunController extends Controller
 
         return redirect()->route('klasifikasiAkun.index')->with('success', 'Klasifikasi Akun berhasil diperbarui.');
     }
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
-        $klasifikasi = KlasifikasiAkun::findOrFail($id);
-        $klasifikasi->delete();
+        try {
+            DB::transaction(function () use ($id) {
+                $klasifikasi = KlasifikasiAkun::with(['account'])->findOrFail($id);
 
-        return redirect()->route('klasifikasiAkun.index')->with('success', 'Klasifikasi berhasil dihapus.');
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($klasifikasi->account()->exists()) {
+                    throw new \Exception("Klasifikasi ini sudah digunakan dalam Account tidak bisa dihapus.");
+                }
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $klasifikasi->delete();
+            });
+
+            return redirect()->route('klasifikasiAkun.index')->with('success', 'Klasifikasi Akun berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('klasifikasiAkun.index')->with('error', $e->getMessage());
+        }
     }
 }

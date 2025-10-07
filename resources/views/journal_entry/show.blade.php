@@ -4,7 +4,7 @@
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Detail Journal Entry</h2>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-2">Detail General Journal</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
                 <div>
                     <strong>Source:</strong>

@@ -28,34 +28,34 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="px-6 py-3 text-center text-sm font-medium">Item Number</th>
-                                <th class="px-6 py-3 text-center text-sm font-medium"> Item Description</th>
-                                <th class="px-6 py-3 text-center text-sm font-medium">Type</th>
-                                <th class="px-6 py-3 text-center text-sm font-medium">Description</th>
-                                <th class="px-6 py-3 text-center text-sm font-medium">Picture Path</th>
-                                <th class="px-6 py-3 text-center text-sm font-medium">Thumbnail Path</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium">Item Number</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium"> Item Description</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium">Type</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium">Description</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium">Picture Path</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium">Thumbnail Path</th>
                                 <th class="px-6 py-3 text-right text-sm font-medium">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($items as $item)
                                 <tr>
-                                    <td class="px-4 py-2 text-center">{{ $item->item_number }}</td>
-                                    <td class="px-4 py-2 text-center">{{ $item->item_description ?? '-' }}</td>
-                                    <td class="px-4 py-2 text-center">{{ $item->type }}</td>
-                                    <td class="px-4 py-2 text-center">{{ $item->description }}</td>
-                                    <td class="px-4 py-2 text-center">{{ $item->picture_path }}</td>
-                                    <td class="px-4 py-2 text-center">{{ $item->thumbnail_path }}</td>
+                                    <td class="px-4 py-2 text-left">{{ $item->item_number }}</td>
+                                    <td class="px-4 py-2 text-left">{{ $item->item_description ?? '-' }}</td>
+                                    <td class="px-4 py-2 text-left">{{ strtoupper($item->type) }}</td>
+                                    <td class="px-4 py-2 text-left">{{ $item->description }}</td>
+                                    <td class="px-4 py-2 text-left">{{ $item->picture_path }}</td>
+                                    <td class="px-4 py-2 text-left">{{ $item->thumbnail_path }}</td>
 
                                     <td class="px-4 py-2 text-right">
                                         <div class="flex justify-end space-x-3">
-                                            @can('inventory.view')
+                                            {{-- @can('inventory.view')
                                                 <a href="{{ route('inventory.show', $item->id) }}"
                                                     class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
                                                     title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                            @endcan
+                                            @endcan --}}
                                             @can('inventory.update')
                                                 <a href="{{ route('inventory.edit', $item->id) }}"
                                                     class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"

@@ -148,58 +148,70 @@
                     }
 
                     let tableHTML = `
-                        <table class="min-w-full table-auto border border-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100 text-left">
-                                    <th class="px-4 py-2 border">Nama Komponen</th>
-                                    <th class="px-4 py-2 border">Tipe</th>
-                                    <th class="px-4 py-2 border">Periode</th>
-                                    <th class="px-4 py-2 border text-right">Nilai</th>
-                                    <th class="px-4 py-2 border text-center">Jumlah</th>
-                                    <th class="px-4 py-2 border text-right">Potongan</th>
-                                    <th class="px-4 py-2 border text-right">Total Nilai</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
+                    <table class="min-w-full table-auto border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="px-4 py-2 border">Nama Komponen</th>
+                                <th class="px-4 py-2 border">Tipe</th>
+                                <th class="px-4 py-2 border">Periode</th>
+                                <th class="px-4 py-2 border text-right">Nilai</th>
+                                <th class="px-4 py-2 border text-center">Jumlah</th>
+                                <th class="px-4 py-2 border text-right">Potongan</th>
+                                <th class="px-4 py-2 border">Catatan</th>
+                                <th class="px-4 py-2 border text-right">Total Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
 
                     data.forEach((item, index) => {
-                        // label Jumlah → bisa "Hari" atau "Jam"
-                        const jumlahLabel = (item.nama_komponen.toLowerCase() === 'lembur') ?
-                            'Jam' : 'Hari';
+                        // Tentukan label Jumlah
+                        let jumlahLabel = 'Hari';
+                        if (item.nama_komponen.toLowerCase() === 'lembur') jumlahLabel = 'Jam';
+                        if (item.nama_komponen.toLowerCase() === 'transportasi') jumlahLabel =
+                            'Unit';
+
+                        // Lock nilai transportasi jika target tidak tercapai
+                        const isTransportasiLocked = (item.nama_komponen.toLowerCase() ===
+                            'transportasi' && item.nilai == 0);
 
                         tableHTML += `
-                            <tr>
-                                <td class="px-4 py-2 border">
-                                    ${item.nama_komponen}
-                                    <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
-                                </td>
-                                <td class="px-4 py-2 border">${item.tipe || '-'}</td>
-                                <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
-                                <td class="px-4 py-2 border">
-                                    <input type="number" step="any" name="komponen[${index}][nilai]" 
-                                           class="nilai border rounded w-full p-1 text-right" 
-                                           data-index="${index}" value="${item.nilai || 0}">
-                                </td>
-                                <td class="px-4 py-2 border">
-                                    <input type="number" step="any" name="komponen[${index}][jumlah_hari]" 
-                                           class="jumlah-hari border rounded w-full p-1 text-center" 
-                                           data-index="${index}" value="${item.jumlah_hari || 0}">
-                                    <span class="text-xs text-gray-500">${jumlahLabel}</span>
-                                </td>
-                                <td class="px-4 py-2 border">
-                                    <input type="number" step="any" name="komponen[${index}][potongan]" 
-                                           class="potongan border rounded w-full p-1 text-right" 
-                                           data-index="${index}" value="${item.potongan || 0}">
-                                </td>
-                                <td class="px-4 py-2 border">
-                                    <input type="text" class="total-display border rounded w-full p-1 bg-gray-100 text-right" 
-                                           data-index="${index}" value="0" readonly>
-                                    <input type="hidden" name="komponen[${index}][total]" 
-                                           class="total-hidden" data-index="${index}" value="0">
-                                </td>
-                            </tr>
-                        `;
+                        <tr>
+                            <td class="px-4 py-2 border">
+                                ${item.nama_komponen}
+                                <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
+                            </td>
+                            <td class="px-4 py-2 border">${item.tipe || '-'}</td>
+                            <td class="px-4 py-2 border">${item.periode_perhitungan || '-'}</td>
+                            <td class="px-4 py-2 border">
+                                <input type="number" step="any" name="komponen[${index}][nilai]" 
+                                       class="nilai border rounded w-full p-1 text-right" 
+                                       data-index="${index}" value="${item.nilai || 0}"
+                                       ${isTransportasiLocked ? 'readonly style="background:#f3f4f6; color:#999;"' : ''}>
+                            </td>
+                            <td class="px-4 py-2 border">
+                                <input type="number" step="any" name="komponen[${index}][jumlah_hari]" 
+                                       class="jumlah-hari border rounded w-full p-1 text-center" 
+                                       data-index="${index}" value="${item.jumlah_hari || 0}">
+                                <span class="text-xs text-gray-500">${jumlahLabel}</span>
+                            </td>
+                            <td class="px-4 py-2 border">
+                                <input type="number" step="any" name="komponen[${index}][potongan]" 
+                                       class="potongan border rounded w-full p-1 text-right" 
+                                       data-index="${index}" value="${item.potongan || 0}">
+                            </td>
+                            <td class="px-4 py-2 border">
+                                ${item.catatan || '-'}
+                                <input type="hidden" name="komponen[${index}][catatan]" value="${item.catatan || ''}">
+                            </td>
+                            <td class="px-4 py-2 border">
+                                <input type="text" class="total-display border rounded w-full p-1 bg-gray-100 text-right" 
+                                       data-index="${index}" value="0" readonly>
+                                <input type="hidden" name="komponen[${index}][total]" 
+                                       class="total-hidden" data-index="${index}" value="0">
+                            </td>
+                        </tr>
+                    `;
                     });
 
                     tableHTML += '</tbody></table>';

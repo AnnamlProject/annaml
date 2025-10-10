@@ -132,7 +132,7 @@ class TargetUnitController extends Controller
 
         $target_unit->update($request->all());
 
-        return redirect()->route('target_unit.index')->with('success', 'Data Target Wahana berhasil diperbarui');
+        return redirect()->route('target_unit.index')->with('success', 'Data Target Unit berhasil diperbarui');
     }
 
 

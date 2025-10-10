@@ -2,9 +2,14 @@
 
 @section('content')
 
+    @php
+        $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+    @endphp
     <div class="max-w-full mx-auto bg-white shadow-md rounded-xl p-8 mt-6">
         <form method="POST"
-            action="{{ isset($target_unit) ? route('target_unit.update', $target_unit->id) : route('target_unit.store') }}">
+            action="{{ isset($target_unit) ? route('target_unit.update', $target_unit->id) : route('target_unit.store') }}"
+            class="bg-white shadow-lg
+            rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
             @csrf
             @if (isset($target_unit))
                 @method('PUT')
@@ -19,10 +24,11 @@
                     </ul>
                 </div>
             @endif
-            <div class="grid grid-cols-3 gap-4 text-sm">
-
-
-                <div class="mb-5">
+            <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                Target Unit Edit
+            </h4>
+            <div class="grid grid-cols-4 gap-4 text-sm">
+                <div>
                     <label for="unit_kerja_id" class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
                     <select name="unit_kerja_id" id="unit_kerja_id"
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -35,7 +41,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="mb-5">
+                <div>
                     <label for="level_karyawan_id" class="block text-sm font-medium text-gray-700 mb-1">
                         Level Karyawan
                     </label>
@@ -51,7 +57,7 @@
                     </select>
                 </div>
 
-                <div class="mb-5">
+                <div>
                     <label for="komponen_penghasilan_id" class="block text-sm font-medium text-gray-700 mb-1">
                         Komponen Penghasilan
                     </label>
@@ -62,7 +68,7 @@
                 </div>
 
 
-                <div class="mb-5">
+                <div>
                     <label for="target_bulanan" class="block text-sm font-medium text-gray-700 mb-1">Target Bulanan
                         (Rp)</label>
                     <input type="text" id="target_bulanan" name="target_bulanan"
@@ -70,21 +76,21 @@
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Contoh: 4.500.000">
                 </div>
-                <div class="mb-5">
+                <div>
                     <label for="bulan" class="block text-sm font-medium text-gray-700 mb-1">Bulan
                     </label>
                     <input type="text" name="bulan" value="{{ $target_unit->bulan }}"
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required>
                 </div>
-                <div class="mb-5">
+                <div>
                     <label for="tahun" class="block text-sm font-medium text-gray-700 mb-1">Tahun
                     </label>
                     <input type="text" name="tahun" value="{{ $target_unit->tahun }}"
                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required>
                 </div>
-                <div class="mb-5">
+                <div>
                     <label for="besaran_nominal" class="block text-sm font-medium text-gray-700 mb-1">Besaran Nominal
                         (Rp)</label>
                     <input type="text" id="besaran_nominal" name="besaran_nominal"
@@ -99,11 +105,11 @@
             <div class="flex justify-end">
                 <a href="{{ route('target_unit.index') }}"
                     class="mr-3 inline-block px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">
-                    Batal
+                    Cancel
                 </a>
                 <button type="submit"
                     class="inline-block px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
-                    {{ isset($target_unit) ? '💾 Update' : '✅ Simpan' }}
+                    {{ isset($target_unit) ? ' Process' : ' Process' }}
                 </button>
             </div>
         </form>

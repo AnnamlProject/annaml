@@ -3,8 +3,13 @@
 @section('content')
 
     <div class="max-w-full mx-auto bg-white shadow-md rounded-xl p-8 mt-6">
+        @php
+            $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+        @endphp
         <form method="POST"
-            action="{{ isset($target_unit) ? route('target_unit.update', $target_unit->id) : route('target_unit.store') }}">
+            action="{{ isset($target_unit) ? route('target_unit.update', $target_unit->id) : route('target_unit.store') }}"
+            class="bg-white shadow-lg
+            rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
             @csrf
             @if (isset($target_unit))
                 @method('PUT')
@@ -19,7 +24,11 @@
                     </ul>
                 </div>
             @endif
-            <div class="grid grid-cols-3 gap-4 text-sm">
+
+            <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                Target Unit Create
+            </h4>
+            <div class="grid grid-cols-4 gap-4 text-sm">
 
 
                 <div class="mb-5">
@@ -94,11 +103,11 @@
             <div class="flex justify-end">
                 <a href="{{ route('target_unit.index') }}"
                     class="mr-3 inline-block px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400">
-                    Batal
+                    Cancel
                 </a>
                 <button type="submit"
                     class="inline-block px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
-                    {{ isset($target_unit) ? '💾 Update' : '✅ Simpan' }}
+                    {{ isset($target_unit) ? '💾 Update' : ' Process' }}
                 </button>
             </div>
         </form>

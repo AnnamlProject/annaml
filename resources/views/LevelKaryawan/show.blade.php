@@ -3,10 +3,16 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
+
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Employee Level Detail
+                </h4>
                 <!-- Informasi Klasifikasi Akun -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Informasi Level Karyawan</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
 
                         <div>

@@ -17,7 +17,9 @@ class TargetWahanaController extends Controller
     public function index()
     {
         $query = TargetWahana::with(['wahana', 'jenis_hari', 'unit'])
-            ->orderBy('wahana_id');
+            ->orderBy('wahana_id', 'asc')
+            ->orderBy('bulan', 'asc')
+            ->orderBy('tahun', 'asc');
 
         // Filter Unit (dropdown berisi nama_unit)
         if ($unit = request('filter_tipe')) {

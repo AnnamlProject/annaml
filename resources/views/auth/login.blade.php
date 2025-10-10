@@ -83,12 +83,10 @@
         <!-- Kiri: Form Login -->
         <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
             <div class="text-center mb-6">
-                <div
-                    class="mx-auto w-20 h-20 rounded-full flex items-center justify-center shadow-md mb-4 overflow-hidden">
-                    <img src="{{ asset('image/logologinpage.jpg') }}"
-                        class="h-full w-full object-contain scale-85 rounded-full">
+                <div class="mx-auto w-56 h-26  flex items-center justify-center">
+                    <img src="{{ asset('image/logologinpage.jpg') }}" class="h-full w-full object-contain">
                 </div>
-                <h4 class="text-2xl font-bold text-gray-800">Welcome Back!</h4>
+                <h4 class="text-lg font-bold text-gray-800 mt-3">Welcome Back!</h4>
                 <p class="text-gray-500 text-sm">Please login to continue</p>
             </div>
             {{-- pesan status/error --}}

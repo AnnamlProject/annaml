@@ -3,9 +3,14 @@
 
 @section('content')
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        @php
+            $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+        @endphp
+        <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
             <div class="px-6 py-4 border-b">
-                <h2 class="text-2xl font-semibold text-gray-800">Informasi Scheduling Karyawan</h2>
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Scheduling Personnel Detail
+                </h4>
             </div>
             <div class="px-6 py-4">
                 <table class="w-full text-sm text-left text-gray-700">

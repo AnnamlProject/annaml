@@ -131,7 +131,7 @@
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
-                                            {{ $item->transaksiWahana->wahana->nama_wahana }}
+                                            {{ $item->transaksiWahana->wahana->nama_wahana ?? '-' }}
                                         </div>
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">

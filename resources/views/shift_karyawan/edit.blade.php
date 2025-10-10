@@ -28,7 +28,7 @@
                     @endif
 
                     <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
-                        Scheduling Personnel Create
+                        Scheduling Personnel Edit
                     </h4>
                     {{-- PTKP --}}
                     <div class="grid grid-cols-3 gap-4 text-sm">

@@ -1,15 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="py-10">
+    <div class="py-10 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <form method="POST"
                     action="{{ isset($wahana) ? route('wahana.update', $wahana->id) : route('wahana.store') }}">
                     @csrf
                     @if (isset($wahana))
                         @method('PUT')
                     @endif
+
+                    <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                        Wahana Create
+                    </h4>
 
                     <div style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         <table style="width: 100%; border-collapse: collapse;" id="tabel-wahana">
@@ -36,7 +45,7 @@
                                     <td style="padding: 12px; border: 1px solid #ddd;">
                                         <select name="unit_kerja_id[]" id="unit_kerja_id"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="">-- Pilih Golongan --</option>
+                                            <option value="">-- Pilih --</option>
                                             @foreach ($unit_kerja as $g)
                                                 <option value="{{ $g->id }}"
                                                     {{ isset($wahana) && $wahana->unit_kerja_id == $g->id ? 'selected' : '' }}>
@@ -83,15 +92,15 @@
                     </div>
 
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($wahana) ? 'Update' : 'Create' }} wahana
-                        </button>
+                    <div class="mt-6 justify-end flex space-x-4">
                         <a href="{{ route('wahana.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($wahana) ? 'Update' : 'Process' }}
+                        </button>
                     </div>
                 </form>
             </div>

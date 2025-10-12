@@ -33,7 +33,9 @@ class Employee extends Model
         'sertifikat',
         'photo',
         'foto_ktp',
-        'rfid_code'
+        'rfid_code',
+        'supervisor_id',
+        'user_id'
     ];
 
     public function jabatan()
@@ -54,5 +56,13 @@ class Employee extends Model
     public function unitKerja()
     {
         return $this->belongsTo(UnitKerja::class, 'unit_kerja_id');
+    }
+    public function supervisor()
+    {
+        return $this->belongsTo(Employee::class, 'supervisor_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

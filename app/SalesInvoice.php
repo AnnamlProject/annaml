@@ -16,9 +16,11 @@ class SalesInvoice extends Model
         'shipping_address',
         'shipping_date',
         'sales_person_id',
+        'location_id',
         'freight',
         'early_payment_terms',
-        'messages'
+        'messages',
+        'payment_method_account_id'
     ];
     public function jenisPembayaran()
     {

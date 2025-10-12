@@ -12,7 +12,9 @@
                     </ul>
                 </div>
 
-                <h2 class="text-lg font-bold mb-4">Sales Invoice</h2>
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Create Sales Invoice
+                </h4>
 
                 <form method="POST"
                     action="{{ isset($sales_invoice) ? route('sales_invoice.update', $sales_invoice->id) : route('sales_invoice.store') }}"
@@ -186,25 +188,35 @@
 
                             <!-- Scrollable Table -->
                             <div>
-                                <div class="overflow-x-auto border rounded">
-                                    <table class="w-full border-collapse border">
-                                        <thead>
+                                <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
+                                    <table class="min-w-max border-collapse border text-sm whitespace-nowrap">
+
+                                        @php
+                                            $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                            $textFooter = \App\Setting::get(
+                                                'text_footer',
+                                                'ANTS LITE+ ©2025_AN NAML CORP.',
+                                            );
+                                        @endphp
+                                        <thead
+                                            class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                             <tr>
-                                                <th class="px-2 py-1">Item Number</th>
-                                                <th class="px-2 py-1">Description</th>
-                                                <th class="px-2 py-1">Qty</th>
-                                                <th class="px-2 py-1">Order</th>
-                                                <th class="px-2 py-1">Back Order</th>
-                                                <th class="px-2 py-1">Unit</th>
-                                                <th class="px-2 py-1">Base Price</th>
-                                                <th class="px-2 py-1">Discount</th>
-                                                <th class="px-2 py-1">Price</th>
-                                                <th class="px-2 py-1">Amount</th>
-                                                <th class="px-2 py-1">Tax</th>
-                                                <th class="px-2 py-1">Tax Value</th>
-                                                <th class="px-2 py-1">Final</th>
-                                                <th class="px-2 py-1">Account</th>
-                                                <th class="px-2 py-1">Project</th>
+                                                <th class="px-2 py-1 border w-40">Item Number</th>
+                                                <th class="px-2 py-1 border">Description</th>
+                                                <th class="px-2 py-1 border">Qty</th>
+                                                <th class="px-2 py-1 border">Order</th>
+                                                <th class="px-2 py-1 border">Back Order</th>
+                                                <th class="px-2 py-1 border">Unit</th>
+                                                <th class="px-2 py-1 border">Base Price</th>
+                                                <th class="px-2 py-1 border">Discount</th>
+                                                <th class="px-2 py-1 border">Price</th>
+                                                <th class="px-2 py-1 border">Amount</th>
+                                                <th class="px-2 py-1 border">Tax</th>
+                                                <th class="px-2 py-1 border">Tax Value</th>
+                                                <th class="px-2 py-1 border">Final</th>
+                                                <th class="px-2 py-1 border">Account</th>
+                                                <th class="px-2 py-1 border">Project</th>
+                                                <th class="px-2 py-1 border">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="items-body">
@@ -253,6 +265,13 @@
                                             </tr>
                                         </tfoot>
                                     </table>
+                                </div>
+
+                                <div class="mt-2">
+                                    <button type="button" id="add-row"
+                                        class="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700">
+                                        + Tambah Baris
+                                    </button>
                                 </div>
 
                                 <div class="grid grid-cols-3 gap-4 text-sm mt-4">
@@ -310,15 +329,15 @@
                     </div>
 
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($sales_invoice) ? 'Update' : 'Create' }}
-                        </button>
+                    <div class="mt-6 flex justify-end space-x-4">
                         <a href="{{ route('sales_invoice.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($sales_invoice) ? 'Update' : 'Process' }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -476,12 +495,13 @@
 
                         (res.accounts || []).forEach(function(a) {
                             const text = `${a.kode_akun} - ${a.nama_akun}`;
-                            $pmAccount.append(`<option value="${a.account_id}">${text}</option>`);
+                            // ⬇️ gunakan detail_id untuk kompatibel dgn validasi exists:payment_method_details,id
+                            $pmAccount.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
-                        const def = res.accounts.find(x => x.is_default) || res.accounts[0];
+                        const def = (res.accounts || []).find(x => x.is_default) || (res.accounts || [])[0];
                         if (def) {
-                            $pmAccount.val(def.account_id);
+                            $pmAccount.val(def.detail_id);
                             console.log('✅ Auto pilih account:', def);
                         }
 
@@ -504,33 +524,54 @@
             function calculateBackOrder(index) {
                 const qty = parseNumber(document.querySelector(`.qty-${index}`).value);
                 const order = parseNumber(document.querySelector(`.order-${index}`).value);
-                const back = qty - order;
+                // ⬇️ back order = order - qty (minimal 0)
+                const back = Math.max(order - qty, 0);
                 document.querySelector(`.back-${index}`).value = formatNumber(back);
             }
 
             function calculateAmount(index) {
+                const qty = parseNumber(document.querySelector(`.qty-${index}`).value);
                 const order = parseNumber(document.querySelector(`.order-${index}`).value);
                 const basePrice = parseNumber(document.querySelector(`.purchase-${index}`).value);
                 const discount = parseNumber(document.querySelector(`.disc-${index}`).value);
 
                 const taxSelect = document.querySelector(`.tax-${index}`);
                 const taxPercent = parseNumber(taxSelect?.selectedOptions[0]?.dataset.rate);
+                // ⬇️ baca tipe pajak
+                const taxType = (taxSelect?.selectedOptions[0]?.dataset.type) || 'input_tax';
+
+                // ✅ batasi qty tidak boleh melebihi order saat mode PO
+                if (useOrderCheckbox.checked && qty > order) {
+                    alert('Qty tidak boleh melebihi Order.');
+                    document.querySelector(`.qty-${index}`).value = formatNumber(order);
+                    calculateBackOrder(index);
+                    // continue with corrected qty
+                }
 
                 // price after discount
-                const price = order * basePrice - discount;
+                const price = Math.max(basePrice - discount, 0);
                 document.querySelector(`.price-${index}`).value = formatNumber(price);
 
-                // amount
-                const amount = price;
+                // amount = qty * price
+                const qtyNow = parseNumber(document.querySelector(`.qty-${index}`).value); // ambil setelah clamp
+                const amount = qtyNow * price;
                 document.querySelector(`.amount-${index}`).value = formatNumber(amount);
 
                 // tax value
                 const taxValue = amount * (taxPercent / 100);
                 document.querySelector(`.taxval-${index}`).value = formatNumber(taxValue);
 
-                // final
-                const final = amount + taxValue;
+                // final berdasarkan type
+                let final = amount;
+                if (taxType === 'input_tax') {
+                    final = amount + taxValue; // PPN tambah
+                } else if (taxType === 'withholding_tax') {
+                    final = Math.max(amount - taxValue, 0); // PPh kurang
+                }
                 document.querySelector(`.final-${index}`).value = formatNumber(final);
+
+                // back order realtime
+                calculateBackOrder(index);
 
                 calculateTotals();
             }
@@ -541,8 +582,14 @@
 
                 document.querySelectorAll('#items-body .item-row').forEach(row => {
                     const idx = row.dataset.index;
-                    subtotal += parseNumber(document.querySelector(`.amount-${idx}`).value);
-                    totalTax += parseNumber(document.querySelector(`.taxval-${idx}`).value);
+                    const amount = parseNumber(document.querySelector(`.amount-${idx}`).value);
+                    const taxVal = parseNumber(document.querySelector(`.taxval-${idx}`).value);
+                    const taxType = document.querySelector(`.tax-${idx}`)?.selectedOptions[0]?.dataset
+                        .type || 'input_tax';
+
+                    subtotal += amount;
+                    if (taxType === 'input_tax') totalTax += taxVal;
+                    else if (taxType === 'withholding_tax') totalTax -= taxVal;
                 });
 
                 subtotalInput.value = formatNumber(subtotal);
@@ -577,21 +624,34 @@
                         totalCredit += amount;
                     }
 
-                    // Pajak → Credit
+                    // Pajak → tergantung type
                     if (taxAmount > 0) {
                         const taxSelect = document.querySelector(`.tax-${idx}`);
                         const taxAccountName = taxSelect?.selectedOptions[0]?.dataset.accountName || 'Tax';
-                        journalRows.push({
-                            account: taxAccountName,
-                            debit: 0,
-                            credit: taxAmount
-                        });
-                        totalCredit += taxAmount;
+                        const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+
+                        if (taxType === 'withholding_tax') {
+                            // PPh ditahan pelanggan → Debit akun PPh Dipotong (aset/contra AR)
+                            journalRows.push({
+                                account: taxAccountName,
+                                debit: taxAmount,
+                                credit: 0
+                            });
+                            totalDebit += taxAmount;
+                        } else {
+                            // PPN Keluaran → Credit kewajiban
+                            journalRows.push({
+                                account: taxAccountName,
+                                debit: 0,
+                                credit: taxAmount
+                            });
+                            totalCredit += taxAmount;
+                        }
                     }
 
-                    // HPP untuk Inventory
+                    // HPP untuk Inventory (kalau memang kamu butuh; dibiarkan sesuai script awal)
                     const type = row.dataset.type;
-                    const qty = parseNumber(document.querySelector(`.order-${idx}`)?.value);
+                    const qty = parseNumber(document.querySelector(`.qty-${idx}`)?.value);
                     const unitCost = parseNumber(row.dataset.unitCost);
                     const cogsAccount = row.dataset.cogsAccountName || 'COGS';
                     const assetAccount = row.dataset.assetAccountName || 'Inventory';
@@ -626,7 +686,7 @@
                     totalCredit += freight;
                 }
 
-                // Payment → Debit
+                // Payment → Debit (ambil teks dari option)
                 const paymentAccountName = document.querySelector('#pm-account-id option:checked')?.text || '';
                 const grandTotal = parseNumber(grandTotalInput.value);
                 if (grandTotal > 0 && paymentAccountName) {
@@ -645,12 +705,12 @@
                 } else {
                     journalRows.forEach(row => {
                         journalBody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td class="border px-2 py-1">${row.account}</td>
-                    <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
-                    <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
-                </tr>
-                `);
+                        <tr>
+                            <td class="border px-2 py-1">${row.account}</td>
+                            <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
+                            <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
+                        </tr>
+                    `);
                     });
                 }
 
@@ -713,47 +773,49 @@
                     data-cogs-account-name="" 
                     data-asset-account-name="">
                     
-                    <td><select name="items[${index}][item_id]" data-index="${index}" class="w-full border px-2 py-1"></select></td>
-                    <td><input type="text" name="items[${index}][description]" class="w-full border px-2 py-1 desc-${index}" readonly></td>
-                    <td><input type="text" name="items[${index}][quantity]" class="w-full border px-2 py-1 qty-${index}"></td>
-                    <td><input type="text" name="items[${index}][order_quantity]" class="w-full border px-2 py-1 order-${index}"></td>
-                    <td><input type="text" name="items[${index}][back_order]" class="w-full border px-2 py-1 back-${index}" readonly></td>
-                    <td><input type="text" name="items[${index}][unit]" class="w-full border px-2 py-1 unit-${index}" readonly></td>
-                    <td><input type="text" name="items[${index}][base_price]" class="w-full border px-2 py-1 purchase-${index}"></td>
-                    <td><input type="text" name="items[${index}][discount]" class="w-full border px-2 py-1 disc-${index}"></td>
-                    <td><input type="text" name="items[${index}][price]" class="w-full border px-2 py-1 price-${index}" readonly></td>
-                    <td><input type="text" name="items[${index}][amount]" class="w-full border px-2 py-1 amount-${index}" readonly></td>
+                    <td><select name="items[${index}][item_id]" data-index="${index}" class="w-full border rounded"></select></td>
+                    <td><input type="text" name="items[${index}][description]" class="w-full border rounded  desc-${index}" readonly></td>
+                    <td><input type="text" name="items[${index}][quantity]" class="w-full border rounded  qty-${index}"></td>
+                    <td><input type="text" name="items[${index}][order_quantity]" class="w-full border bg-gray-100 rounded  order-${index}" readonly></td>
+                    <td><input type="text" name="items[${index}][back_order]" class="w-full border bg-gray-100 rounded  back-${index}" readonly></td>
+                    <td><input type="text" name="items[${index}][unit]" class="w-full border rounded  unit-${index}" readonly></td>
+                    <td><input type="text" name="items[${index}][base_price]" class="w-full border rounded  purchase-${index}"></td>
+                    <td><input type="text" name="items[${index}][discount]" class="w-full border rounded  disc-${index}"></td>
+                    <td><input type="text" name="items[${index}][price]" class="w-full border rounded bg-gray-100  price-${index}" readonly></td>
+                    <td><input type="text" name="items[${index}][amount]" class="w-full border bg-gray-100 rounded  amount-${index}" readonly></td>
                     <td>
-                        <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
+                        <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded ">
                             <option value="">-- Pilih Pajak --</option>
                             @foreach ($sales_taxes as $item)
                                 <option value="{{ $item->id }}" 
                                         data-rate="{{ $item->rate }}" 
+                                        data-type="{{ $item->type }}" 
                                         data-account="{{ $item->sales_account_id }}"  
                                         data-account-name="{{ $item->salesAccount->nama_akun ?? '' }}">
-                                ({{ $item->rate }}%)
+                                    ({{ $item->rate }}%)
                                 </option>
                             @endforeach
                         </select>
                     </td>
-                    <td><input type="text" name="items[${index}][tax_value]" class="taxval-${index} w-full border rounded text-right" readonly></td>
-                    <td><input type="text" name="items[${index}][final]" class="final-${index} w-full border rounded text-right" readonly></td>
-                    <td><input type="text" class="w-full border px-2 py-1 account-name-${index}" readonly><input type="hidden" name="items[${index}][account_id]" class="account-id-${index}"></td>
+                    <td><input type="text" name="items[${index}][tax_value]" class="taxval-${index} w-full border rounded bg-gray-100 text-right" readonly></td>
+                    <td><input type="text" name="items[${index}][final]" class="final-${index} w-full border rounded text-right bg-gray-100" readonly></td>
+                    <td><input type="text" class="w-full border bg-gray-100  account-name-${index}" readonly><input type="hidden" name="items[${index}][account_id]" class="account-id-${index}"></td>
                     <td>
-                        <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
+                        <select name="items[${index}][project_id]" class="w-full border rounded ">
                             <option value="">-- Pilih Project --</option>
                             @foreach ($project as $prj)
                                 <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                             @endforeach
                         </select>
                     </td>
-                    <td class="text-center"><button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button></td>
+                    <td class="text-center">
+                    <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button>
+                </td>
                 </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
                 attachSelect2(index);
                 attachInputListeners(index);
             }
-
 
             function addRowFromPO(item) {
                 const index = rowIndex++;
@@ -797,11 +859,11 @@
                 </td>
                 <td class="border px-2 py-1">
                     <input type="text" name="items[${index}][price]" value="${formatNumber(item.price ?? 0)}" 
-                        class="w-full border rounded price-${index}" readonly>
+                        class="w-full bg-gray-100 border rounded price-${index}" readonly>
                 </td>
                 <td class="border px-2 py-1">
                     <input type="text" name="items[${index}][amount]" value="${formatNumber(item.amount ?? 0)}" 
-                        class="w-full border rounded amount-${index}" readonly>
+                        class="w-full bg-gray-100 border rounded amount-${index}" readonly>
                 </td>
 
                 <!-- Pajak -->
@@ -810,7 +872,8 @@
                         <option value="">-- Pilih Pajak --</option>
                         @foreach ($sales_taxes as $tax)
                             <option value="{{ $tax->id }}" 
-                                    data-rate="{{ $tax->rate }}" 
+                                    data-rate="{{ $tax->rate }}"
+                                    data-type="{{ $tax->type }}"
                                     data-account="{{ $tax->sales_account_id }}"  
                                     data-account-name="{{ $tax->salesAccount->nama_akun ?? '' }}">
                                 {{ $tax->name }} ({{ $tax->rate }}%)
@@ -822,12 +885,12 @@
                 <td>
                     <input type="text" name="items[${index}][tax_value]" 
                         value="${formatNumber(item.tax ?? 0)}" 
-                        class="taxval-${index} w-full border rounded text-right" readonly>
+                        class="taxval-${index} w-full bg-gray-100 border rounded text-right" readonly>
                 </td>
                 <td>
                     <input type="text" name="items[${index}][final]" 
                         value="${formatNumber(item.final ?? 0)}" 
-                        class="final-${index} w-full border rounded text-right" readonly>
+                        class="final-${index} w-full bg-gray-100 border rounded text-right" readonly>
                 </td>
 
                 <td class="border px-2 py-1">
@@ -859,8 +922,10 @@
                 }
 
                 attachInputListeners(index);
+                // hitung awal utk baris ini
+                calculateBackOrder(index);
+                calculateAmount(index);
             }
-
 
             function attachSelect2(index) {
                 $(`select[data-index="${index}"]`).select2({
@@ -901,7 +966,7 @@
                     // ✅ Update input field
                     $(`.desc-${index}`).val(data.item_name);
                     $(`.unit-${index}`).val(data.unit);
-                    $(`.tax-${index}`).val(data.tax_rate);
+                    // ($`.tax-${index}`).val(data.tax_rate); // biarkan user pilih pajak dari dropdown (id), jangan paksa rate
                     $(`.account-name-${index}`).val(data.account_name);
                     $(`.account-id-${index}`).val(data.account_id);
                     $(`.qty-${index}`).val(formatNumber(data.stock_quantity));
@@ -918,6 +983,17 @@
                 });
             }
 
+            // function addRow() {
+            //     const newRow = generateRow(rowIndex);
+            //     $('#item-table-body').append(newRow);
+            //     attachSelect2(rowIndex);
+            //     attachEvents(rowIndex);
+            //     rowIndex++;
+            // }
+
+            $('#add-row').on('click', function() {
+                addEmptyRow();
+            });
 
             // hapus row
             $(document).on('click', '.remove-row', function() {
@@ -930,7 +1006,5 @@
             }
         });
     </script>
-
-
 
 @endsection

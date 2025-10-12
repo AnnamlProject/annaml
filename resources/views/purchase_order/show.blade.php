@@ -2,9 +2,12 @@
 
 @section('content')
     <div class="py-10">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="container mx-auto py-6" x-data="{ tab: 'details' }">
-                <div class="bg-white p-6 rounded shadow">
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="mx-auto py-6" x-data="{ tab: 'details' }">
+                <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                     <h2 class="text-2xl font-semibold mb-6">Purchase Order Details</h2>
                     <div class="border-b mb-4 flex space-x-4">
                         <button @click="tab = 'details'"
@@ -73,13 +76,12 @@
                                 <thead class="bg-gray-100 text-gray-700">
                                     <tr>
                                         <th class="border px-3 py-2">Item</th>
-                                        <th class="border px-3 py-2">Qty</th>
                                         <th class="border px-3 py-2">Order</th>
-                                        <th class="border px-3 py-2">Back Order</th>
                                         <th class="border px-3 py-2">Unit</th>
                                         <th class="border px-3 py-2">Description</th>
                                         {{-- <th class="border px-3 py-2">Discount</th> --}}
                                         <th class="border px-3 py-2">Price</th>
+                                        <th class="border px-3 py-2">Discount</th>
                                         <th class="border px-3 py-2">Amount</th>
                                         <th class="border px-3 py-2">Tax</th>
                                         <th class="border px-3 py-2">Total Tax</th>
@@ -89,72 +91,87 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        $total_tax = 0;
-                                        $amount = 0;
                                         $subtotal = 0;
-                                    $total = 0; @endphp
+                                        $totalInputTax = 0; // PPN (+)
+                                        $totalWithholding = 0; // PPh (-)
+                                    @endphp
+
                                     @foreach ($purchaseOrder->details as $item)
                                         @php
-                                            $amount = $item->order * $item->price;
-                                            $total_tax += $item->tax_amount;
+                                            // Ambil tipe pajak dari relasi
+                                            $taxType = optional($item->sales_taxes)->type;
+                                            $taxAmt = (float) ($item->tax_amount ?? 0);
+
+                                            // Hitung subtotal per item
+                                            $amount = ($item->price - $item->discount) * $item->order;
                                             $subtotal += $amount;
-                                            $total = $subtotal + $total_tax + $purchaseOrder->freight;
+
+                                            // Klasifikasikan pajak
+                                            if ($taxType === 'input_tax') {
+                                                $totalInputTax += $taxAmt; // PPN → tambah
+                                            } elseif ($taxType === 'withholding_tax') {
+                                                $totalWithholding += $taxAmt; // PPh → simpan untuk dikurangkan nanti
+                                            }
                                         @endphp
                                         <tr>
                                             <td class="border px-3 py-2">{{ $item->item_description ?? '-' }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->order }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>
                                             <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
-                                            <td class="border px-3 py-2">{{ $item->item_description }}</td>
-                                            {{-- <td class="border px-3 py-2 text-right">{{ number_format($item->discount, 2) }}
-                                            </td> --}}
+                                            <td class="border px-3 py-2 text-center">{{ $item->item_description }}</td>
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->price, 2) }}
                                             </td>
-                                            <td class="border px-3 py-2 text-right">{{ number_format($amount, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->discount, 2) }}
                                             </td>
+                                            <td class="border px-3 py-2 text-right">{{ number_format($amount, 2) }}</td>
                                             <td class="border px-3 py-2 text-right">
                                                 {{ optional($item->sales_taxes)->rate ? $item->sales_taxes->rate . '%' : '-' }}
                                             </td>
-
                                             <td class="border px-3 py-2 text-right">
                                                 {{ number_format($item->tax_amount, 2) }}</td>
-                                            <td class="border px-3 py-2 text-right">
-                                                {{ number_format($item->amount, 2) }}
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->amount, 2) }}
                                             </td>
                                             <td class="border px-3 py-2">{{ $item->account->nama_akun ?? '-' }}</td>
                                         </tr>
                                     @endforeach
+
+                                    @php
+                                        // 🚀 Setelah looping baru total akhir dihitung
+                                        $totalTaxNet = $totalInputTax - $totalWithholding; // PPN (+), PPh (–)
+                                        $grandTotal = $subtotal + $totalTaxNet + ($purchaseOrder->freight ?? 0);
+                                    @endphp
                                 </tbody>
+
                                 <tfoot>
                                     <tr>
-                                        <td colspan="9"></td>
+                                        <td colspan="8"></td>
                                         <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
                                             {{ number_format($subtotal, 2) }}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9"></td>
+                                        <td colspan="8"></td>
                                         <td class="pr-3 text-right font-semibold">Total Tax :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1">
-                                            {{ number_format($total_tax, 2) }}
+                                            {{ number_format($totalTaxNet, 2) }}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9"></td>
+                                        <td colspan="8"></td>
                                         <td class="pr-3 text-right font-semibold">Freight :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
-                                            {{ number_format($purchaseOrder->freight, 2) }}</td>
+                                            {{ number_format($purchaseOrder->freight, 2) }}
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9"></td>
-                                        <td class="pr-3 text-right font-semibold">Total :</td>
+                                        <td colspan="8"></td>
+                                        <td class="pr-3 text-right font-semibold">Grand Total :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
-                                            {{ number_format($total, 2) }}</td>
-
+                                            {{ number_format($grandTotal, 2) }}
+                                        </td>
                                     </tr>
                                 </tfoot>
+
                             </table>
                         </div>
                     </div>

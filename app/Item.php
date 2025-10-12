@@ -59,4 +59,12 @@ class Item extends Model
     {
         return $this->hasMany(ItemAssemblieDetail::class, 'component_item_id');
     }
+    public function transferInventory()
+    {
+        return $this->hasMany(TransferInventoryDetail::class, 'component_item_id');
+    }
+    public function buildofbomComponents()
+    {
+        return $this->hasMany(BuildOfBomDetail::class, 'component_item_id');
+    }
 }

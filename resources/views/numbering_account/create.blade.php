@@ -3,7 +3,10 @@
 @section('content')
     <div class="py-10 bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 shadow-sm hover:shadow-md rounded-2xl p-8 space-y-6 transition">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <h2 class="text-2xl font-semibold text-gray-800 dark:text-white">Pengaturan Numbering Account</h2>
 
                 <form method="POST"
@@ -74,15 +77,15 @@
                     </div>
 
                     <!-- Tombol Aksi -->
-                    <div class="mt-8 flex flex-wrap gap-4">
-                        <button type="submit"
-                            class="inline-flex items-center px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
-                            {{ isset($numberingAccount) ? 'Update' : 'Create' }} Numbering Account
-                        </button>
+                    <div class="mt-8 justify-end flex flex-wrap gap-4">
                         <a href="{{ route('numbering_account.index') }}"
                             class="inline-flex items-center px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg transition">
-                            Cancel
+                            Batal
                         </a>
+                        <button type="submit"
+                            class="inline-flex items-center px-6 py-2 bg-green-600 text-white font-semibold rounded-lg transition">
+                            {{ isset($numberingAccount) ? 'Update' : 'Create' }} Numbering Account
+                        </button>
                     </div>
                 </form>
             </div>

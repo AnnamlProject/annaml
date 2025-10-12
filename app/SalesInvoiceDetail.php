@@ -23,7 +23,8 @@ class SalesInvoiceDetail extends Model
         'tax',
         'status',
         'account_id',
-        'project_id'
+        'project_id',
+        'tax_id'
     ];
 
     public function invoice()
@@ -43,5 +44,9 @@ class SalesInvoiceDetail extends Model
     public function project()
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+    public function sales_taxes()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'tax_id');
     }
 }

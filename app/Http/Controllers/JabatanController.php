@@ -6,14 +6,26 @@ use App\Jabatan;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JabatanController extends Controller
 {
     //
     public function index(): View
     {
-        $jabatans = Jabatan::latest()->paginate(10);
+        $jabatans = Jabatan::orderBy('kd_jabatan', 'asc')->paginate(10);
         return view('jabatan.index', compact('jabatans'));
+    }
+
+    public function search(Request $request)
+    {
+        $term = $request->q;
+        $jabatan = Jabatan::where('nama_jabatan', 'like', "%$term%")
+            ->select('id', 'nama_jabatan')
+            ->limit(20)
+            ->get();
+
+        return response()->json($jabatan);
     }
 
     public function create(): View
@@ -73,15 +85,24 @@ class JabatanController extends Controller
 
         return redirect()->route('jabatan.index')->with('success', 'Jabatan updated successfully.');
     }
-    public function destroy($kd_jabatan): RedirectResponse
+    public function destroy($id): RedirectResponse
     {
-        //get post by ID
-        $jabatan = Jabatan::where('kd_jabatan', $kd_jabatan)->firstOrFail();
+        try {
+            DB::transaction(function () use ($id) {
+                $jabatan = Jabatan::with(['employee'])->findOrFail($id);
 
-        //delete post
-        $jabatan->delete();
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($jabatan->employee()->exists()) {
+                    throw new \Exception("Jabatan ini sudah digunakan dalam Employee tidak bisa dihapus.");
+                }
 
-        //redirect to index
-        return redirect()->route('jabatan.index')->with('success', 'Jabatan deleted successfully.');
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $jabatan->delete();
+            });
+
+            return redirect()->route('jabatan.index')->with('success', 'Jabatan berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('jabatan.index')->with('error', $e->getMessage());
+        }
     }
 }

@@ -106,14 +106,18 @@
                     {{-- TABEL ITEM --}}
                     <div class="mt-8">
                         <h3 class="font-semibold text-lg mb-2">🛒 Order Items</h3>
-                        <div class="overflow-auto">
-                            <table class="w-full border text-sm text-left shadow-md">
-                                <thead class="bg-blue-100 text-gray-700">
+                        <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
+                            <table class="min-w-max border-collapse border text-sm whitespace-nowrap">
+
+                                @php
+                                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                    $textFooter = \App\Setting::get('text_footer', 'ANTS LITE+ ©2025_AN NAML CORP.');
+                                @endphp
+                                <thead
+                                    class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                     <tr>
                                         <th class="p-2">Item</th>
-                                        <th>Qty</th>
                                         <th>Order</th>
-                                        <th>Back Order</th>
                                         <th>Unit</th>
                                         <th>Description</th>
                                         <th>Base Price</th>
@@ -140,12 +144,12 @@
                                             </td>
 
                                             <!-- Quantity -->
-                                            <td>
+                                            {{-- <td>
                                                 <input type="number" name="items[{{ $i }}][quantity]"
                                                     class="w-full border rounded qty-{{ $i }}"
                                                     value="{{ $detail->quantity }}"
                                                     oninput="calculateBackOrder({{ $i }}); calculateAmount({{ $i }});">
-                                            </td>
+                                            </td> --}}
 
                                             <!-- Order -->
                                             <td>
@@ -156,12 +160,12 @@
                                             </td>
 
                                             <!-- Back Order -->
-                                            <td>
+                                            {{-- <td>
                                                 <input type="number" readonly
                                                     class="w-full border rounded bg-gray-100 back-{{ $i }}"
                                                     name="items[{{ $i }}][back_order]"
                                                     value="{{ $detail->back_order }}">
-                                            </td>
+                                            </td> --}}
 
                                             <!-- Unit -->
                                             <td>
@@ -178,8 +182,8 @@
 
                                             <!-- Base Price -->
                                             <td>
-                                                <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 base-display-{{ $i }}"
+                                                <input type="text"
+                                                    class="w-full border rounded text-right  base-display-{{ $i }}"
                                                     value="{{ number_format($detail->base_price, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][base_price]"
                                                     class="base-hidden-{{ $i }}"
@@ -189,7 +193,7 @@
                                             <!-- Discount -->
                                             <td>
                                                 <input type="text"
-                                                    class="w-full border rounded disc-display-{{ $i }}"
+                                                    class="w-full border rounded text-right disc-display-{{ $i }}"
                                                     value="{{ number_format($detail->discount, 0, '.', ',') }}"
                                                     oninput="calculateAmount({{ $i }}); this.value = this.value.replace(/[^0-9,]/g,'');">
                                                 <input type="hidden" name="items[{{ $i }}][discount]"
@@ -200,7 +204,7 @@
                                             <!-- Price -->
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 price-display-{{ $i }}"
+                                                    class="w-full border rounded text-right bg-gray-100 price-display-{{ $i }}"
                                                     value="{{ number_format($detail->price, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][price]"
                                                     class="price-hidden-{{ $i }}"
@@ -210,7 +214,7 @@
                                             <!-- Amount -->
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 amount-display-{{ $i }}"
+                                                    class="w-full border rounded text-right bg-gray-100 amount-display-{{ $i }}"
                                                     value="{{ number_format($detail->amount, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][amount]"
                                                     class="amount-hidden-{{ $i }}"
@@ -225,6 +229,7 @@
                                                     @foreach ($sales_taxes as $tax)
                                                         <option value="{{ $tax->id }}"
                                                             data-rate="{{ $tax->rate }}"
+                                                            data-type="{{ $tax->type }}"
                                                             {{ $detail->tax_id == $tax->id ? 'selected' : '' }}>
                                                             ({{ $tax->rate }}%)
                                                         </option>
@@ -235,7 +240,7 @@
                                             <!-- Tax Value -->
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 taxval-display-{{ $i }}"
+                                                    class="w-full border rounded text-right bg-gray-100 taxval-display-{{ $i }}"
                                                     value="{{ number_format($detail->tax ?? 0, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][tax_value]"
                                                     class="taxval-hidden-{{ $i }}"
@@ -245,7 +250,7 @@
                                             <!-- Final -->
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 final-display-{{ $i }}"
+                                                    class="w-full border text-right rounded bg-gray-100 final-display-{{ $i }}"
                                                     value="{{ number_format($detail->final ?? 0, 0, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][final]"
                                                     class="final-hidden-{{ $i }}"
@@ -304,7 +309,6 @@
                                         <td colspan="3" class="border px-2 py-1"></td>
                                     </tr>
                                 </tfoot>
-
                             </table>
                         </div>
                     </div>
@@ -325,15 +329,16 @@
                     </div>
 
                     {{-- Tombol --}}
-                    <div class="mt-8 flex justify-start space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                            💾 Update
-                        </button>
+                    <div class="mt-8 flex justify-end space-x-4">
                         <a href="{{ route('sales_order.index') }}"
                             class="px-6 py-2 bg-gray-300 rounded-lg shadow hover:bg-gray-400 transition">
-                            ❌ Cancel
+                            Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                            Process
+                        </button>
+
                     </div>
                 </form>
             </div>
@@ -344,76 +349,149 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        function formatNumber(num) {
-            return new Intl.NumberFormat('id-ID').format(num);
-        }
+        document.addEventListener('DOMContentLoaded', function() {
 
-        function parseNumber(val) {
-            if (!val) return 0;
-            return parseFloat(val.toString().replace(/,/g, '')) || 0;
-        }
+            const $pmSelect = $('#jenis_pembayaran_id');
+            const $account = $('#account_id');
+            const $wrapper = $('#account-wrapper');
 
-        function calculateAmount(index) {
-            let qty = parseNumber(document.querySelector(`.qty-${index}`).value);
-            let order = parseNumber(document.querySelector(`.order-${index}`).value);
-            let backOrder = order - qty;
-            if (backOrder < 0) backOrder = 0;
-            document.querySelector(`.back-${index}`).value = backOrder;
+            function clearAccounts() {
+                $account.empty().append('<option value="">-- Pilih Account --</option>');
+                $wrapper.addClass('hidden');
+            }
 
-            let basePrice = parseNumber(document.querySelector(`.base-hidden-${index}`).value);
-            let discount = parseNumber(document.querySelector(`.disc-display-${index}`).value);
+            function loadAccounts(pmId) {
+                if (!pmId) {
+                    clearAccounts();
+                    return;
+                }
 
-            // update hidden discount
-            document.querySelector(`.disc-hidden-${index}`).value = discount;
+                $.getJSON("{{ route('payment-methods.accounts', ['id' => 'PM_ID']) }}".replace('PM_ID', pmId))
+                    .done(function(res) {
+                        clearAccounts();
+                        (res.accounts || []).forEach(function(a) {
+                            const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
+                            $account.append(`<option value="${a.detail_id}">${text}</option>`);
+                        });
 
-            let price = basePrice - discount;
-            document.querySelector(`.price-display-${index}`).value = formatNumber(price);
-            document.querySelector(`.price-hidden-${index}`).value = price;
+                        // ✅ Preselect account lama
+                        const oldVal =
+                            "{{ old('payment_method_account_id', $salesOrder->payment_method_account_id ?? '') }}";
+                        if (oldVal) $account.val(oldVal);
 
-            let amount = qty * price;
-            document.querySelector(`.amount-display-${index}`).value = formatNumber(amount);
-            document.querySelector(`.amount-hidden-${index}`).value = amount;
+                        $wrapper.removeClass('hidden');
+                    })
+                    .fail(function() {
+                        clearAccounts();
+                        alert('Gagal memuat account untuk Payment Method ini.');
+                    });
+            }
 
-            // Pajak
-            let taxSelect = document.querySelector(`.tax-${index}`);
-            let rate = parseFloat(taxSelect.selectedOptions[0]?.dataset.rate || 0);
-            let taxValue = amount * (rate / 100);
-            document.querySelector(`.taxval-display-${index}`).value = formatNumber(taxValue);
-            document.querySelector(`.taxval-hidden-${index}`).value = taxValue;
-
-            // Final
-            let final = amount + taxValue;
-            document.querySelector(`.final-display-${index}`).value = formatNumber(final);
-            document.querySelector(`.final-hidden-${index}`).value = final;
-
-            // Update footer
-            calculateTotals();
-        }
-
-        function calculateTotals() {
-            let subtotal = 0,
-                totalTax = 0,
-                grandTotal = 0;
-
-            document.querySelectorAll('tbody tr.item-row').forEach(row => {
-                let index = row.dataset.index;
-                subtotal += parseNumber(document.querySelector(`.amount-hidden-${index}`).value);
-                totalTax += parseNumber(document.querySelector(`.taxval-hidden-${index}`).value);
+            // Event change
+            $pmSelect.on('change', function() {
+                loadAccounts($(this).val());
             });
 
-            grandTotal = subtotal + totalTax + parseNumber(document.getElementById('freight').value);
+            // ✅ Auto load saat edit
+            if ($pmSelect.val()) {
+                loadAccounts($pmSelect.val());
+            }
+            // Helper functions
+            const formatNumber = num => new Intl.NumberFormat('id-ID').format(num);
+            const parseNumber = val => parseFloat((val || '0').toString().replace(/,/g, '')) || 0;
 
-            document.getElementById('subtotal').value = formatNumber(subtotal);
-            document.getElementById('total-tax').value = formatNumber(totalTax);
-            document.getElementById('grand-total').value = formatNumber(grandTotal);
-        }
+            function calculateAmount(index) {
+                const order = parseNumber(document.querySelector(`.order-${index}`)?.value);
+                const basePrice = parseNumber(document.querySelector(`.base-display-${index}`)?.value);
+                const discount = parseNumber(document.querySelector(`.disc-display-${index}`)?.value);
 
-        // Pastikan setiap kali freight berubah -> update grand total
-        document.getElementById('freight').addEventListener('input', calculateTotals);
+                // Update hidden value
+                document.querySelector(`.base-hidden-${index}`).value = basePrice;
+                document.querySelector(`.disc-hidden-${index}`).value = discount;
 
-        // Inisialisasi awal
-        document.addEventListener('DOMContentLoaded', calculateTotals);
+                const price = Math.max(basePrice - discount, 0);
+                const amount = price * order;
+
+                // Pajak
+                const taxSelect = document.querySelector(`.tax-${index}`);
+                const taxRate = parseFloat(taxSelect?.selectedOptions[0]?.dataset.rate || 0);
+                const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+
+                let taxValue = (amount * taxRate) / 100;
+                let finalValue = amount;
+
+                if (taxType === 'input_tax') {
+                    finalValue += taxValue; // PPN → tambah
+                } else if (taxType === 'withholding_tax') {
+                    finalValue -= taxValue; // PPh → kurang
+                    if (finalValue < 0) finalValue = 0;
+                }
+
+                // Update tampilan
+                document.querySelector(`.price-display-${index}`).value = formatNumber(price);
+                document.querySelector(`.price-hidden-${index}`).value = price;
+
+                document.querySelector(`.amount-display-${index}`).value = formatNumber(amount);
+                document.querySelector(`.amount-hidden-${index}`).value = amount;
+
+                document.querySelector(`.taxval-display-${index}`).value = formatNumber(taxValue);
+                document.querySelector(`.taxval-hidden-${index}`).value = taxValue;
+
+                document.querySelector(`.final-display-${index}`).value = formatNumber(finalValue);
+                document.querySelector(`.final-hidden-${index}`).value = finalValue;
+
+                calculateTotals();
+            }
+
+            function calculateTotals() {
+                let subtotal = 0,
+                    totalTax = 0,
+                    grandTotal = 0;
+
+                document.querySelectorAll('tr.item-row').forEach(row => {
+                    const index = row.dataset.index;
+                    const amount = parseNumber(document.querySelector(`.amount-hidden-${index}`)?.value);
+                    const taxVal = parseNumber(document.querySelector(`.taxval-hidden-${index}`)?.value);
+                    const taxType = document.querySelector(`.tax-${index}`)?.selectedOptions[0]?.dataset
+                        .type || 'input_tax';
+
+                    subtotal += amount;
+
+                    if (taxType === 'input_tax') totalTax += taxVal;
+                    else if (taxType === 'withholding_tax') totalTax -= taxVal;
+                });
+
+                const freight = parseNumber(document.getElementById('freight')?.value);
+                grandTotal = subtotal + totalTax + freight;
+
+                document.getElementById('subtotal').value = formatNumber(subtotal);
+                document.getElementById('total-tax').value = formatNumber(totalTax);
+                document.getElementById('grand-total').value = formatNumber(grandTotal);
+            }
+
+            // Event binding untuk semua input yang relevan
+            document.querySelectorAll('tr.item-row').forEach(row => {
+                const index = row.dataset.index;
+
+                // Base Price, Discount, Order, Tax select
+                ['.base-display-', '.disc-display-', '.order-'].forEach(prefix => {
+                    const el = row.querySelector(prefix + index);
+                    if (el) el.addEventListener('input', () => calculateAmount(index));
+                });
+
+                const taxSelect = row.querySelector('.tax-' + index);
+                if (taxSelect) taxSelect.addEventListener('change', () => calculateAmount(index));
+
+                // Jalankan perhitungan awal untuk baris ini
+                calculateAmount(index);
+            });
+
+            // Update total kalau Freight berubah
+            document.getElementById('freight')?.addEventListener('input', calculateTotals);
+        });
     </script>
+
+
 
     <script>
         $(document).ready(function() {
@@ -468,106 +546,6 @@
             );
         });
     </script>
-    <script>
-        const $pmSelect = $('#jenis_pembayaran_id');
-        const $account = $('#account_id');
-        const $wrapper = $('#account-wrapper');
 
-        function clearAccounts() {
-            $account.empty().append('<option value="">-- Pilih Account --</option>');
-            $wrapper.addClass('hidden');
-        }
-
-        function loadAccounts(pmId) {
-            if (!pmId) {
-                clearAccounts();
-                return;
-            }
-
-            $.getJSON("{{ route('payment-methods.accounts', ['id' => 'PM_ID']) }}".replace('PM_ID', pmId))
-                .done(function(res) {
-                    clearAccounts();
-                    (res.accounts || []).forEach(function(a) {
-                        const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                        $account.append(`<option value="${a.account_id}">${text}</option>`);
-                    });
-
-                    // ✅ Preselect account lama
-                    const oldVal =
-                        "{{ old('payment_method_account_id', $salesOrder->payment_method_account_id ?? '') }}";
-                    if (oldVal) $account.val(oldVal);
-
-                    $wrapper.removeClass('hidden');
-                })
-                .fail(function() {
-                    clearAccounts();
-                    alert('Gagal memuat account untuk Payment Method ini.');
-                });
-        }
-
-        // Event change
-        $pmSelect.on('change', function() {
-            loadAccounts($(this).val());
-        });
-
-        // ✅ Auto load saat edit
-        if ($pmSelect.val()) {
-            loadAccounts($pmSelect.val());
-        }
-
-        function formatNumber(num) {
-            return Number(num).toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            });
-        }
-
-        function calculateBackOrder(index) {
-            const qty = parseFloat(document.querySelector(`.qty-${index}`).value) || 0;
-            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
-            const back = qty - order;
-            document.querySelector(`.back-${index}`).value = back;
-        }
-
-        function calculateAmount(index) {
-            const order = parseFloat(document.querySelector(`.order-${index}`).value) || 0;
-            const basePrice = parseFloat(document.querySelector(`.base-display-${index}`).value.replace(/,/g, '')) || 0;
-            const discount = parseFloat(document.querySelector(`.disc-display-${index}`).value.replace(/,/g, '')) || 0;
-            const taxPercent = parseFloat(document.querySelector(`.tax-${index}`).value) || 0;
-
-            // price per item (after discount)
-            const price = order * basePrice - discount;
-            const amount = price;
-            const taxValue = amount * (taxPercent / 100);
-            const final = amount + taxValue;
-
-            // Update input tampilan (format ribuan)
-            document.querySelector(`.price-display-${index}`).value = formatNumber(price);
-            document.querySelector(`.amount-display-${index}`).value = formatNumber(amount);
-            document.querySelector(`.taxval-display-${index}`).value = formatNumber(taxValue);
-            document.querySelector(`.final-display-${index}`).value = formatNumber(final);
-
-            // Update hidden input untuk backend (angka murni)
-            document.querySelector(`.price-hidden-${index}`).value = price;
-            document.querySelector(`.amount-hidden-${index}`).value = amount;
-            document.querySelector(`.taxval-hidden-${index}`).value = taxValue;
-            document.querySelector(`.final-hidden-${index}`).value = final;
-            document.querySelector(`.base-hidden-${index}`).value = basePrice;
-            document.querySelector(`.disc-hidden-${index}`).value = discount;
-        }
-
-        // Tambahkan listener untuk setiap baris
-        document.querySelectorAll('.item-row').forEach(row => {
-            const index = row.dataset.index;
-            row.querySelectorAll('.qty-' + index + ', .order-' + index + ', .disc-display-' + index + ', .tax-' +
-                    index)
-                .forEach(input => {
-                    input.addEventListener('input', function() {
-                        calculateBackOrder(index);
-                        calculateAmount(index);
-                    });
-                });
-        });
-    </script>
 
 @endsection

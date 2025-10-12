@@ -7,6 +7,7 @@ use App\Jabatan;
 use App\LevelKaryawan;
 use App\Ptkp;
 use App\UnitKerja;
+use App\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,7 +72,9 @@ class EmployeeController extends Controller
         $ptkps = Ptkp::all();
         $jabatans = Jabatan::all();
         $units = UnitKerja::all();
-        return view('employee.create', compact('levels', 'ptkps', 'jabatans', 'units'));
+        $employee = Employee::all();
+        $user = User::all();
+        return view('employee.create', compact('levels', 'ptkps', 'jabatans', 'units', 'employee', 'user'));
     }
     public function store(Request $request)
     {
@@ -91,6 +94,8 @@ class EmployeeController extends Controller
             'kewarganegaraan' => 'nullable|string',
             'status_pernikahan' => 'nullable|string',
             'ptkp_id' => 'required|exists:ptkps,id',
+            'supervisor_id' => 'required|exists:employees,id',
+            'user_id' => 'nullable|exists:users,id',
             'jabatan_id' => 'required|exists:jabatans,id',
             'level_kepegawaian_id' => 'required|exists:level_karyawans,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
@@ -100,7 +105,7 @@ class EmployeeController extends Controller
             'sertifikat' => 'nullable|string',
             'photo' => 'nullable|mimes:jpg,jpeg,png,pdf',
             'foto_ktp' => 'nullable|mimes:jpg,jpeg,png,pdf',
-            'rfid_code' => 'required|string|unique:employees,rfid_code',
+            'rfid_code' => 'nullable|string|unique:employees,rfid_code',
 
 
         ]);
@@ -120,7 +125,7 @@ class EmployeeController extends Controller
     }
     public function show($id)
     {
-        $employee = Employee::with(['jabatan', 'ptkp', 'levelKaryawan', 'unitKerja'])->findOrFail($id);
+        $employee = Employee::with(['jabatan', 'ptkp', 'levelKaryawan', 'unitKerja', 'supervisor'])->findOrFail($id);
 
         return view('employee.show', compact('employee'));
     }
@@ -131,8 +136,9 @@ class EmployeeController extends Controller
         $ptkps = Ptkp::all();
         $jabatans = Jabatan::all();
         $units = UnitKerja::all();
-
-        return view('employee.edit', compact('employee', 'ptkps', 'levels', 'jabatans', 'units'));
+        $atasan = Employee::all();
+        $user = User::all();
+        return view('employee.edit', compact('employee', 'ptkps', 'levels', 'jabatans', 'units', 'atasan', 'user'));
     }
     public function update(Request $request, $id): RedirectResponse
     {
@@ -155,6 +161,8 @@ class EmployeeController extends Controller
             'ptkp_id' => 'required|exists:ptkps,id',
             'jabatan_id' => 'required|exists:jabatans,id',
             'level_kepegawaian_id' => 'required|exists:level_karyawans,id',
+            'supervisor_id' => 'required|exists:employees,id',
+            'user_id' => 'nullable|exists:users,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'tanggal_masuk' => 'nullable|date',
             'tanggal_keluar' => 'nullable|date',

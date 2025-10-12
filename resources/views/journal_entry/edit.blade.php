@@ -53,7 +53,7 @@
                                         <th class="border px-4 py-3 text-center w-[15%]">Specpose</th>
                                     @endcan
 
-                                    @can('fical.acces')
+                                    @can('fiscal.access')
                                         <th class="border px-4 py-3 text-center w-[7%]">Fiscorr</th>
                                         <th class="border px-4 py-3 text-center w-[15%]">Penyesuaian Fiskal</th>
                                     @endcan

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Employee;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -28,22 +29,39 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role_id'  => 'nullable|exists:roles,id',
+            'employee_id' => [
+                'nullable',
+                'exists:employees,id',
+                function ($attribute, $value, $fail) {
+                    if (Employee::where('id', $value)->whereNotNull('user_id')->exists()) {
+                        $fail('Karyawan ini sudah memiliki akun user.');
+                    }
+                },
+            ],
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role_id'  => $request->role_id,
-            'password' => Hash::make($request->password),
-        ]);
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'role_id'  => $request->role_id,
+                'password' => Hash::make($request->password),
+            ]);
 
-        // Assign role ke user jika role_id dikirim
-        if ($request->filled('role_id')) {
-            $role = Role::findById($request->role_id);
-            $user->assignRole($role);
-        }
+            if ($request->filled('employee_id')) {
+                Employee::where('id', $request->employee_id)
+                    ->update(['user_id' => $user->id]);
+            }
 
-        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'User berhasil ditambahkan.');
+            if ($request->filled('role_id')) {
+                $role = Role::findById($request->role_id);
+                $user->assignRole($role);
+            }
+        });
+
+        return redirect()
+            ->route('users.index', ['tab' => 'users'])
+            ->with('success', 'User berhasil ditambahkan.');
     }
 
     public function update(Request $request, User $user)
@@ -77,7 +95,18 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $user->delete();
-        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'User berhasil dihapus.');
+        DB::transaction(function () use ($user) {
+            // Jika user punya relasi employee, set user_id = null
+            if ($user->employee) {
+                $user->employee->update(['user_id' => null]);
+            }
+
+            // Hapus user-nya
+            $user->delete();
+        });
+
+        return redirect()
+            ->route('users.index', ['tab' => 'users'])
+            ->with('success', 'User berhasil dihapus.');
     }
 }

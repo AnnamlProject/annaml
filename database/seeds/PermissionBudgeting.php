@@ -20,6 +20,16 @@ class PermissionBudgeting extends Seeder
             'create_budget.update',
             'create_budget.delete',
 
+            'approval_step.access',
+            'approval_step.create',
+            'approval_step.update',
+            'approval_step.delete',
+
+            'rekening.access',
+            'rekening.create',
+            'rekening.update',
+            'rekening.delete',
+
             'budget_submission.access',
             'budget_submission.create',
             'budget_submission.update',

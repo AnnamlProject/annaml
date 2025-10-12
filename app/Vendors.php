@@ -30,4 +30,8 @@ class Vendors extends Model
     {
         return $this->hasMany(PurchaseInvoice::class, 'vendor_id');
     }
+    public function prepayments()
+    {
+        return $this->hasMany(Prepayment::class, 'vendor_id');
+    }
 }

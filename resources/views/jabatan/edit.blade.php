@@ -4,12 +4,17 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <form action="{{ route('jabatan.update', $jabatan->kd_jabatan) }}" method="POST"
                     enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-
+                    <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                        Edit Jabatan
+                    </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label for="kd_jabatan" class="block font-medium">Kode vendors</label>

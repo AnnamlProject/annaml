@@ -1,8 +1,11 @@
 @extends('layouts.app')
 @section('content')
-    <div class="py-2">
+    <div class="py-10">
         <div class="w-full px-1">
-            <div class="bg-white shadow rounded p-2">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
 
                 <!-- Judul Menu -->
                 <h2 class="text-base font-bold mb-2">Purchase Order</h2>
@@ -134,15 +137,18 @@
                         <h3 class="text-base font-semibold mb-2">Order Items</h3>
                         <div class="overflow-x-auto border rounded shadow-sm">
                             <table class="min-w-full table-auto border-collapse text-xs text-left">
-                                <thead class="bg-gray-100 text-gray-700 font-semibold">
+                                @php
+                                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                @endphp
+                                <thead
+                                    class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                     <tr>
                                         <th class="border px-2 py-1 w-40">Item</th>
-                                        <th class="border px-2 py-1 w-16 text-center">Qty</th>
                                         <th class="border px-2 py-1 w-16 text-center">Order</th>
-                                        <th class="border px-2 py-1 w-20 text-center">Back Order</th>
                                         <th class="border px-2 py-1 w-20">Unit</th>
                                         <th class="border px-2 py-1 w-40">Description</th>
                                         <th class="border px-2 py-1 w-24 text-right">Price</th>
+                                        <th class="border px-2 py-1 w-24 text-right">Discount</th>
                                         <th class="border px-2 py-1 w-20 text-right">Tax</th>
                                         <th class="border px-2 py-1 w-24 text-right">Tax Amt</th>
                                         <th class="border px-2 py-1 w-28 text-right">Amount</th>
@@ -219,21 +225,22 @@
                         </div>
                     </div>
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-3 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($purchase_orders) ? 'Update' : 'Create' }} Purchase Orders
-                        </button>
+                    <div class="mt-6 flex justify-end space-x-4">
+
                         <a href="{{ route('purchase_order.index') }}"
                             class="px-3 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-3 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($purchase_orders) ? 'Update' : 'Process' }}
+                        </button>
+
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
 
     <!-- JQUERY DULU -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -248,6 +255,7 @@
             });
         });
     </script> --}}
+
 
     <script>
         $(document).ready(function() {
@@ -348,7 +356,7 @@
                         (res.accounts || []).forEach(function(a) {
                             const text =
                                 `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                            $select.append(`<option value="${a.account_id}">${text}</option>`);
+                            $select.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
                         // kalau form edit, bisa auto-select berdasarkan value lama
@@ -385,24 +393,23 @@
             <td class="border px-2 py-1">
                 <select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select>
             </td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded bg-gray-200" readonly/></td>
             <td class="border px-2 py-1"><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded bg-gray-200" readonly/></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded"  /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded"  /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly  /></td>
             <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded text-right"  /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][discount]" class="disc-${index} w-full border rounded text-right"  /></td>
             <td class="border px-2 py-1">
               <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                 <option value="">-- Pilih Pajak --</option>
                 @foreach ($sales_taxes as $item)
-                    <option value="{{ $item->id }}" data-rate="{{ $item->rate }}">
+                    <option value="{{ $item->id }}" data-rate="{{ $item->rate }}" data-type="{{ $item->type }}">
                        ({{ $item->rate }}%)
                     </option>
                 @endforeach
             </select>
             </td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border rounded text-right" readonly /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][tax_amount]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly /></td>
+            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded bg-gray-100 text-right" readonly /></td>
             <td class="border px-2 py-1">
                 <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
                 <input type="hidden" name="items[${index}][account]" class="account-id-${index}" />
@@ -416,6 +423,7 @@
         function attachSelect2(index) {
             $(`select[data-index="${index}"]`).select2({
                 placeholder: 'Cari item...',
+                width: '100%',
                 ajax: {
                     url: '/search-item',
                     dataType: 'json',
@@ -471,33 +479,59 @@
         function calculateAmount(index) {
             const order = parseFloat($(`.order-${index}`).val()) || 0;
             const price = parseFloat(cleanNumber($(`.price-${index}`).val())) || 0;
-            const taxRate = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0;
+            const discount = parseFloat(cleanNumber($(`.disc-${index}`).val())) || 0;
+            const $selectedTax = $(`.tax-${index} option:selected`);
+            const taxRate = parseFloat($selectedTax.data('rate')) || 0;
+            const taxType = $selectedTax.data('type') || 'input_tax';
 
-            const baseAmount = order * price;
-            const taxAmount = baseAmount * (taxRate / 100);
-            const totalAmount = baseAmount + taxAmount;
+            const baseAmount = (price - discount) * order;
 
-            $(`.tax_amount-${index}`).val(formatNumber(taxAmount));
-            $(`.amount-${index}`).val(formatNumber(totalAmount));
+            let taxValue = (baseAmount * taxRate) / 100;
+            let finalValue = baseAmount;
+
+            if (taxType === 'input_tax') {
+                // contoh: PPN → tambah
+                finalValue = baseAmount + taxValue;
+            } else if (taxType === 'withholding_tax') {
+                // contoh: PPh → kurang
+                finalValue = baseAmount - taxValue;
+                // jangan sampai negatif
+                if (finalValue < 0) finalValue = 0;
+            }
+            $(`.tax_amount-${index}`).val(formatNumber(taxValue));
+            $(`.amount-${index}`).val(formatNumber(finalValue));
 
             updateTotal();
         }
 
         function updateTotal() {
             let subtotal = 0;
-            let totalTax = 0;
+            let totalInputTax = 0; // PPN (tambah)
+            let totalWithholdingTax = 0; // PPh (kurang)
 
             $('.item-row').each(function() {
                 const index = $(this).data('index');
-                const baseAmount = (parseFloat($(`.order-${index}`).val()) || 0) *
-                    (parseFloat(cleanNumber($(`.price-${index}`).val())) || 0);
-                const taxAmount = parseFloat(cleanNumber($(`.tax_amount-${index}`).val())) || 0;
-                subtotal += baseAmount;
-                totalTax += taxAmount;
+                const order = parseFloat($(`.order-${index}`).val()) || 0;
+                const price = cleanNumber($(`.price-${index}`).val());
+                const discount = cleanNumber($(`.disc-${index}`).val());
+                const $selectedTax = $(`.tax-${index} option:selected`);
+                const taxType = $selectedTax.data('type') || 'input_tax';
+                const taxAmount = cleanNumber($(`.tax_amount-${index}`).val());
+
+                subtotal += (price - discount) * order;
+
+                // Bedakan tipe pajak
+                if (taxType === 'input_tax') {
+                    totalInputTax += taxAmount; // PPN -> menambah total
+                } else if (taxType === 'withholding_tax') {
+                    totalWithholdingTax += taxAmount; // PPh -> mengurangi total
+                }
             });
 
-            const freight = parseFloat($('#freight').val()) || 0;
-            const grandTotal = subtotal + totalTax + freight;
+            const freight = cleanNumber($('#freight').val());
+
+            const grandTotal = subtotal + totalInputTax - totalWithholdingTax + freight;
+            const totalTax = totalInputTax - totalWithholdingTax; // tampilkan neto di field tax
 
             $('#subtotal').val(formatNumber(subtotal));
             $('#grand-tax').val(formatNumber(totalTax));
@@ -512,6 +546,12 @@
             $(this).val(formatNumber(value)); // tampilkan sudah diformat
             updateTotal();
         });
+
+        $(document).on('blur', 'input[class*="price-"], input[class*="disc-"]', function() {
+            const val = cleanNumber($(this).val());
+            $(this).val(formatNumber(val));
+        });
+
 
         function addRow() {
             const newRow = generateRow(rowIndex);

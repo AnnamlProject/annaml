@@ -89,14 +89,14 @@
                                         @endcan
 
                                         @can('jabatan.delete')
-                                            <form id="delete-form-{{ $jabatan->kd_jabatan }}"
-                                                action="{{ route('jabatan.destroy', $jabatan->kd_jabatan) }}" method="POST"
+                                            <form id="delete-form-{{ $jabatan->id }}"
+                                                action="{{ route('jabatan.destroy', $jabatan->id) }}" method="POST"
                                                 style="display: none;">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
 
-                                            <button type="button" onclick="confirmDelete({{ $jabatan->kd_jabatan }})"
+                                            <button type="button" onclick="confirmDelete({{ $jabatan->id }})"
                                                 class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
                                                 title="Delete">
                                                 <i class="fas fa-trash"></i>

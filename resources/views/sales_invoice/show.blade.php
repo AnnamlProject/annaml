@@ -4,8 +4,11 @@
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 
-            <div class="container mx-auto py-6" x-data="{ tab: 'details' }">
-                <div class="bg-white p-6 rounded shadow">
+            <div class="mx-auto py-6" x-data="{ tab: 'details' }">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+                <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                     <h2 class="text-2xl font-semibold mb-6">Sales Invoice Details</h2>
 
                     <!-- Tabs -->
@@ -54,6 +57,10 @@
                                 <strong>Shipping Address:</strong>
                                 <p>{{ $salesInvoice->shipping_address }}</p>
                             </div>
+                            <div class="md:col-span-2">
+                                <strong>Location Inventory:</strong>
+                                <p>{{ $salesInvoice->lokasi_inventory->kode_lokasi ?? '-' }}</p>
+                            </div>
                             <div>
                                 <strong>Early Payment Terms:</strong>
                                 <p>{{ $salesInvoice->early_payment_terms }}</p>
@@ -76,23 +83,45 @@
                                         <th class="border px-3 py-2">Back Order</th>
                                         <th class="border px-3 py-2">Unit</th>
                                         <th class="border px-3 py-2">Description</th>
-                                        <th class="border px-3 py-2">Base Price</th>
-                                        <th class="border px-3 py-2">Discount</th>
-                                        <th class="border px-3 py-2">Price</th>
-                                        <th class="border px-3 py-2">Amount</th>
-                                        <th class="border px-3 py-2">Tax</th>
+                                        <th class="border px-3 py-2 text-right">Base Price</th>
+                                        <th class="border px-3 py-2 text-right">Discount</th>
+                                        <th class="border px-3 py-2 text-right">Price</th>
+                                        <th class="border px-3 py-2 text-right">Amount</th>
+                                        <th class="border px-3 py-2 text-right">Rate</th>
+                                        <th class="border px-3 py-2 text-right">Tax</th>
                                         <th class="border px-3 py-2">Account</th>
                                         <th class="border px-3 py-2">Project</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $subtotal = 0;
+                                        $totalInputTax = 0; // PPN (+)
+                                        $totalWithholding = 0; // PPh (-)
+                                    @endphp
                                     @foreach ($salesInvoice->details as $item)
+                                        @php
+                                            // Ambil tipe pajak dari relasi
+                                            $taxType = optional($item->sales_taxes)->type;
+                                            $taxAmt = (float) ($item->tax_amount ?? 0);
+
+                                            // Hitung subtotal per item
+                                            $amount = ($item->price - $item->discount) * $item->order;
+                                            $subtotal += $amount;
+
+                                            // Klasifikasikan pajak
+                                            if ($taxType === 'input_tax') {
+                                                $totalInputTax += $taxAmt; // PPN → tambah
+                                            } elseif ($taxType === 'withholding_tax') {
+                                                $totalWithholding += $taxAmt; // PPh → simpan untuk dikurangkan nanti
+                                            }
+                                        @endphp
                                         <tr>
                                             <td class="border px-3 py-2">{{ $item->item->item_description ?? '-' }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->quantity }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->order_quantity }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->back_order }}</td>
-                                            <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
+                                            <td class="border px-3 py-2 text-left">{{ $item->quantity }}</td>
+                                            <td class="border px-3 py-2 text-left">{{ $item->order_quantity }}</td>
+                                            <td class="border px-3 py-2 text-left">{{ $item->back_order }}</td>
+                                            <td class="border px-3 py-2 text-left">{{ $item->unit }}</td>
                                             <td class="border px-3 py-2">{{ $item->description }}</td>
                                             <td class="border px-3 py-2 text-right">
                                                 {{ number_format($item->base_price) }}
@@ -102,6 +131,8 @@
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->price) }}
                                             </td>
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->amount) }}
+                                            </td>
+                                            <td class="border px-3 py-2 text-right">{{ $item->sales_taxes->rate ?? '-' }} %
                                             </td>
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->tax) }}
                                             </td>

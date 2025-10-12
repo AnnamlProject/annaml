@@ -8,7 +8,10 @@
                     <li><a href="#journal_report" class="tab-link">Journal report</a></li>
                 </ul>
             </div>
-            <div class="bg-white shadow-md rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <form method="POST"
                     action="{{ isset($purchase_invoice) ? route('purchase_invoice.update', $purchase_invoice->id) : route('purchase_invoice.store') }}">
                     @csrf
@@ -25,6 +28,8 @@
                             </ul>
                         </div>
                     @endif
+
+                    <h2 class="font-bold text-lg">Purchase Invoice Create</h2>
                     <div id="select_item" class="tab-content">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
@@ -111,7 +116,7 @@
                             <div>
                                 <label for="Vendor" class="block text-gray-700 font-medium mb-1">Vendor
                                 </label>
-                                <select name="vendor_id"
+                                <select name="vendor_id" id="vendor_id"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required>
                                     <option value="">-- Vendor--</option>
@@ -161,9 +166,14 @@
                             <h3 class="text-lg font-semibold mb-4">Order Items</h3>
 
                             <!-- Scrollable Table -->
-                            <div class="overflow-x-auto border rounded-lg shadow-sm">
-                                <table class="w-full mt-6 text-sm border" id="item-table">
-                                    <thead class="bg-gray-100 text-left">
+                            <div class="overflow-x-auto border rounded shadow-sm">
+
+                                <table class="min-w-full table-auto border-collapse text-xs text-left" id="item-table">
+                                    @php
+                                        $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                    @endphp
+                                    <thead
+                                        class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                         <tr>
                                             <th class="px-4 py-2">Item Number</th>
                                             <th class="px-2 py-1">Qty</th>
@@ -172,11 +182,13 @@
                                             <th class="px-2 py-1">Unit</th>
                                             <th class="px-2 py-1">Description</th>
                                             <th class="px-2 py-1">Price</th>
+                                            <th class="px-2 py-1">Discount</th>
                                             <th class="px-2 py-1">Tax</th>
                                             <th class="px-2 py-1">Tax Amount</th>
                                             <th class="px-2 py-1">Amount</th>
                                             <th class="px-2 py-1">Account</th>
                                             <th class="px-2 py-1">Project</th>
+                                            <th class="px-2 py-1">#</th>
                                         </tr>
                                     </thead>
                                     <tbody id="items-body">
@@ -184,20 +196,20 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="8"></td>
+                                            <td colspan="9"></td>
                                             <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                             <td><input type="text" id="subtotal" readonly
                                                     class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="8"></td>
+                                            <td colspan="9"></td>
 
                                             <td class="pr-3 text-right font-semibold">Total Tax :</td>
                                             <td><input type="text" id="grand-tax" readonly
                                                     class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="8"></td>
+                                            <td colspan="9"></td>
                                             <td class="pr-3 text-right font-semibold">Freight :</td>
                                             <td>
                                                 <!-- input asli (hidden) -->
@@ -210,7 +222,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td colspan="8"></td>
+                                            <td colspan="9"></td>
                                             <td class="pr-3 text-right font-semibold">Total :</td>
                                             <td><input type="text" id="grand-total" readonly
                                                     class="w-32 border rounded text-right px-2 py-1 bg-gray-100 font-bold">
@@ -279,15 +291,16 @@
                     <!-- Order Items Table -->
 
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($purchase_invoice) ? 'Update' : 'Create' }}
-                        </button>
+                    <div class="mt-6 justify-end flex space-x-4">
                         <a href="{{ route('purchase_invoice.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($purchase_invoice) ? 'Update' : 'Process' }}
+                        </button>
+
                     </div>
                 </form>
             </div>
@@ -299,6 +312,37 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+
+    <script>
+        $(document).ready(function() {
+            $('#vendor_id').select2({
+                placeholder: "-- Vendor --",
+                ajax: {
+                    url: '{{ route('vendors.search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        }; // query keyword
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(vendor) {
+                                return {
+                                    id: vendor.id,
+                                    text: vendor.nama_vendors
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
     <script>
         // Tab switching
         document.querySelectorAll('.tab-link').forEach(link => {
@@ -467,27 +511,30 @@
                 <td><select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select></td>
                 <td><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
                 <td><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded" readonly /></td>
-                <td><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded" /></td>
-                <td><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border rounded" /></td>
+                <td><input type="number" name="items[${index}][back_order]" class="back-${index} w-full bg-gray-100 border rounded" readonly /></td>
+                <td><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
+                <td><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly /></td>
                 <td><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
+                <td><input type="number" step="0.01" name="items[${index}][discount]" class="disc-${index} w-full border rounded" /></td>
                 <td>
                     <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                         <option value="">-- Pilih Pajak --</option>
                         @foreach ($sales_taxes as $item)
                             <option value="{{ $item->id }}" 
                                     data-rate="{{ $item->rate }}" 
+                                    data-type="{{ $item->type }}"
                                     data-account="{{ $item->purchase_account_id }}"  
+                                    data-account-code="{{ $item->purchaseAccount->kode_akun ?? '' }}"
                                     data-account-name="{{ $item->purchaseAccount->nama_akun ?? '' }}">
                                  ({{ $item->rate }}%)
                             </option>
                         @endforeach
                     </select>
                 </td>
-                <td><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border rounded text-right" readonly />
+                <td><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][tax_amount]" class="tax_amount_raw-${index}" />
                 </td>
-                <td><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border rounded text-right" readonly />
+                <td><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][amount]" class="amount_raw-${index}" />
                 </td>
                 <td>
@@ -518,27 +565,30 @@
                 <td><input type="hidden" name="items[${index}][item_id]" value="${item.id}">${item.item_number}</td>
                 <td><input type="number" name="items[${index}][quantity]" value="${item.quantity}" class="qty-${index} w-full border rounded" /></td>
                 <td><input type="number" name="items[${index}][order]" value="${item.order}" class="order-${index} w-full border bg-gray-200 rounded" readonly/></td>
-                <td><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border bg-gray-200 rounded" readonly /></td>
-                <td><input type="text" name="items[${index}][unit]" value="${item.unit}" class="unit-${index} w-full border rounded" /></td>
-                <td><input type="text" name="items[${index}][item_description]" value="${item.description}" class="desc-${index} w-full border rounded" /></td>
+                <td><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border bg-gray-100 bg-gray-200 rounded" readonly /></td>
+                <td><input type="text" name="items[${index}][unit]" value="${item.unit}" class="unit-${index} w-full bg-gray-100 border rounded" readonly/></td>
+                <td><input type="text" name="items[${index}][item_description]" value="${item.description}" class="desc-${index} w-full bg-gray-100 border rounded" readonly /></td>
                 <td><input type="number" step="0.01" name="items[${index}][price]" value="${item.price}" class="purchase-${index} w-full border rounded" /></td>
+                <td><input type="number" step="0.01" name="items[${index}][discount]" value="${item.discount}" class="disc-${index} w-full border rounded" /></td>
                 <td>
                     <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                         <option value="">-- Pilih Pajak --</option>
                         @foreach ($sales_taxes as $tax)
                             <option value="{{ $tax->id }}" ${item.tax_id == {{ $tax->id }} ? 'selected' : ''} 
                                     data-rate="{{ $tax->rate }}" 
+                                    data-type="{{ $tax->type }}"
                                     data-account="{{ $tax->purchase_account_id }}"  
+                                    data-account-code="{{ $tax->purchaseAccount->kode_akun ?? '' }}"
                                     data-account-name="{{ $tax->purchaseAccount->nama_akun ?? '' }}">
                                  ({{ $tax->rate }}%)
                             </option>
                         @endforeach
                     </select>
                 </td>
-                <td><input type="text" name="items[${index}][tax_amount_display]" value="${formatNumber(item.tax_amount)}" class="tax_amount-${index} w-full border rounded text-right" readonly />
+                <td><input type="text" name="items[${index}][tax_amount_display]" value="${formatNumber(item.tax_amount)}" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][tax_amount]" value="${item.tax_amount}" class="tax_amount_raw-${index}" />
                 </td>
-                <td><input type="text" name="items[${index}][amount_display]" value="${formatNumber(item.amount)}" class="amount-${index} w-full border rounded text-right" readonly />
+                <td><input type="text" name="items[${index}][amount_display]" value="${formatNumber(item.amount)}" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][amount]" value="${item.amount}" class="amount_raw-${index}" />
                 </td>
                 <td><input type="text" value="${item.account_name}" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
@@ -579,6 +629,7 @@
                                 unit: item.unit,
                                 purchase_price: item.purchase_price ?? 0,
                                 tax_rate: item.tax_rate,
+                                discount: item.discount,
                                 account_id: item.account_id,
                                 account_name: item.account_name,
                             }))
@@ -612,34 +663,46 @@
             }
 
             function calculateAmount(index) {
-                const order = parseFloat($(`.order-${index}`).val()) || 0;
+                const qty = parseFloat($(`.qty-${index}`).val()) || 0;
                 const price = parseFloat($(`.purchase-${index}`).val()) || 0;
+                const discount = parseFloat($(`.disc-${index}`).val()) || 0;
                 const taxRate = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0;
+                const taxType = $(`.tax-${index} option:selected`).data('type') || 'input_tax';
 
-                const amount = order * price;
-                const taxAmount = amount * (taxRate / 100);
+                // 💰 Nilai dasar (sebelum pajak)
+                const baseAmount = (price - discount) * qty;
 
-                // simpan raw ke hidden
-                $(`.amount_raw-${index}`).val(amount.toFixed(2));
+                // 💸 Pajak
+                let taxAmount = baseAmount * (taxRate / 100);
+                if (taxType === 'withholding_tax') {
+                    taxAmount = -Math.abs(taxAmount); // potongan
+                }
+
+                // Simpan raw (tanpa efek pajak)
+                $(`.amount_raw-${index}`).val(baseAmount.toFixed(2));
                 $(`.tax_amount_raw-${index}`).val(taxAmount.toFixed(2));
 
-                // tampilkan formatted
-                $(`.amount-${index}`).val(formatNumber(amount));
-                $(`.tax_amount-${index}`).val(formatNumber(taxAmount));
+                // Untuk tampilan di tabel
+                $(`.amount-${index}`).val(formatNumber(baseAmount));
+                $(`.tax_amount-${index}`).val(formatNumber(Math.abs(taxAmount)));
 
                 calculateTotals();
                 generateJournalPreview();
             }
 
             function calculateTotals() {
-                let subtotal = 0,
-                    totalTax = 0;
-                $('input[name$="[amount]"]').each(function() {
-                    subtotal += parseFloat($(this).val()) || 0;
+                let subtotal = 0;
+                let totalTax = 0;
+
+                $('tr.item-row').each(function() {
+                    const index = $(this).data('index');
+                    const base = parseFloat($(`.amount_raw-${index}`).val()) || 0;
+                    const tax = parseFloat($(`.tax_amount_raw-${index}`).val()) || 0;
+
+                    subtotal += base;
+                    totalTax += tax; // withholding sudah negatif
                 });
-                $('input[name$="[tax_amount]"]').each(function() {
-                    totalTax += parseFloat($(this).val()) || 0;
-                });
+
                 const freight = parseFloat($('#freight').val()) || 0;
                 const grandTotal = subtotal + totalTax + freight;
 
@@ -648,81 +711,96 @@
                 $('#grand-total').val(formatNumber(grandTotal));
             }
 
-            // --- Journal Preview ---
+
             function generateJournalPreview() {
                 const journalBody = document.querySelector('.journal-body');
                 journalBody.innerHTML = '';
 
                 let journalRows = [];
-                let totalDebit = 0,
-                    totalCredit = 0;
+                let totalDebit = 0;
+                let totalCredit = 0;
 
-                // Item rows
                 $('tr.item-row').each(function() {
                     const index = $(this).data('index');
                     const accountName = $(`.account-name-${index}`).val();
-                    const amount = parseFloat($(`.amount_raw-${index}`).val()) || 0;
+                    const accountCode = $(`.account-name-${index}`).data('kode') || '';
+                    const baseAmount = parseFloat($(`.amount_raw-${index}`).val()) || 0;
                     const taxAmount = parseFloat($(`.tax_amount_raw-${index}`).val()) || 0;
+                    const taxType = $(`.tax-${index} option:selected`).data('type') || null;
+                    const taxAccountName = $(`.tax-${index} option:selected`).data('account-name') || 'Tax';
+                    const taxAccountCode = $(`.tax-${index} option:selected`).data('account-code') || '';
 
-                    if (amount > 0) {
+                    // --- Barang / Asset (Debit) ---
+                    if (baseAmount > 0) {
                         journalRows.push({
+                            accountCode: accountCode,
                             account: accountName,
-                            debit: 0,
-                            credit: amount
+                            debit: baseAmount,
+                            credit: 0
                         });
-                        totalCredit += amount;
+                        totalDebit += baseAmount;
                     }
 
-                    if (taxAmount > 0) {
-                        const taxAccountName = $(`.tax-${index} option:selected`).data('account-name') ||
-                            'Tax';
-                        journalRows.push({
-                            account: taxAccountName,
-                            debit: 0,
-                            credit: taxAmount
-                        });
-                        totalCredit += taxAmount;
+                    // --- Pajak ---
+                    if (taxAmount !== 0 && taxType) {
+                        if (taxType === 'input_tax') {
+                            journalRows.push({
+                                accountCode: taxAccountCode,
+                                account: taxAccountName,
+                                debit: Math.abs(taxAmount),
+                                credit: 0
+                            });
+                            totalDebit += Math.abs(taxAmount);
+                        } else if (taxType === 'withholding_tax') {
+                            journalRows.push({
+                                accountCode: taxAccountCode,
+                                account: taxAccountName,
+                                debit: 0,
+                                credit: Math.abs(taxAmount)
+                            });
+                            totalCredit += Math.abs(taxAmount);
+                        }
                     }
                 });
 
-                // Freight (anggap pendapatan tambahan → credit)
+                // --- Freight ---
                 const freight = parseFloat($('#freight').val()) || 0;
                 if (freight > 0) {
                     journalRows.push({
+                        accountCode: '',
                         account: freightAccount.name,
-                        debit: 0,
-                        credit: freight
-                    });
-                    totalCredit += freight;
-                }
-
-                // Payment / Kas / Piutang
-                const paymentAccountName = $('#pm-account-id option:selected').text();
-                const grandTotal = parseFloat($('#grand-total').val().replace(/,/g, '')) || 0;
-                if (grandTotal > 0 && paymentAccountName) {
-                    journalRows.push({
-                        account: paymentAccountName,
-                        debit: grandTotal,
+                        debit: freight,
                         credit: 0
                     });
-                    totalDebit += grandTotal;
+                    totalDebit += freight;
                 }
 
-                // Render
-                if (journalRows.length === 0) {
-                    journalBody.innerHTML =
-                        `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal</td></tr>`;
-                } else {
-                    journalRows.forEach(row => {
-                        journalBody.insertAdjacentHTML('beforeend', `
+                // --- Payment / Kas ---
+                const paymentAccountName = $('#pm-account-id option:selected').text();
+                const paymentAccountCode = $('#pm-account-id option:selected').data('kode') || '';
+                if (paymentAccountName) {
+                    const payableAmount = totalDebit - totalCredit;
+                    journalRows.push({
+                        accountCode: paymentAccountCode,
+                        account: paymentAccountName,
+                        debit: 0,
+                        credit: payableAmount
+                    });
+                    totalCredit += payableAmount;
+                }
+
+                // --- Render ---
+                journalRows.forEach(row => {
+                    const displayAccount = row.accountCode ?
+                        `${row.accountCode} - ${row.account}` : row.account;
+                    journalBody.insertAdjacentHTML('beforeend', `
                 <tr>
-                    <td class="border px-2 py-1">${row.account}</td>
+                    <td class="border px-2 py-1">${displayAccount}</td>
                     <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
                     <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
                 </tr>
-             `);
-                    });
-                }
+            `);
+                });
 
                 document.querySelector('.total-debit').textContent = formatNumber(totalDebit);
                 document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
@@ -738,10 +816,13 @@
                     calculateAmount(index);
                 });
 
-            $(document).on('input', 'input[name^="items"][name$="[price]"]', function() {
-                const index = $(this).closest('tr').data('index');
-                calculateAmount(index);
-            });
+            $(document).on('input',
+                'input[name^="items"][name$="[discount]"], input[name^="items"][name$="[quantity]"]',
+                function() {
+                    const index = $(this).closest('tr').data('index');
+                    calculateAmount(index);
+                });
+
 
             $(document).on('change', 'select[name^="items"][name$="[tax_id]"]', function() {
                 const index = $(this).closest('tr').data('index');

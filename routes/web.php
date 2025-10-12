@@ -18,6 +18,7 @@ use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IncomeStatementController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\KomposisiGajiController;
 use App\Http\Controllers\NeracaController;
@@ -27,18 +28,22 @@ use App\Http\Controllers\SettingDepartementController;
 use App\Http\Controllers\TrialBalanceController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PembayaranGajiController;
+use App\Http\Controllers\PengajuanApprovalController;
 use App\Http\Controllers\PerhitunganPajakPenghasilan;
 use App\Http\Controllers\PerhitunganPajakPenghasilanController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Controllers\PurchaseInvoiceDocumentController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseOrderDocumentController;
 use App\Http\Controllers\ReceiptsController;
+use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SalesInvoiceController;
 use App\Http\Controllers\SalesInvoiceDocumentController;
+use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SalesOrderDocumentController;
 use App\Http\Controllers\ShiftKaryawanWahanaController;
 use App\Http\Controllers\SlipGajiController;
@@ -172,8 +177,14 @@ Route::middleware(['auth'])->group(function () {
 
     // neraca
     Route::get('filter_neraca', [NeracaController::class, 'neracaFilter'])->name('neraca.filter_neraca')->middleware('permission:neraca.access');
-    Route::get('neraca_report', [NeracaController::class, 'neracaReport'])->name('neraca.neraca_report');
+    Route::get('arus_kas_report', [NeracaController::class, 'neracaReport'])->name('neraca.neraca_report');
     Route::get('/neraca/export', [NeracaController::class, 'export'])->name('neraca.export');
+
+
+    // arus kas 
+    Route::get('filter_arus_kas', [ReportController::class, 'aruskasFilter'])->name('arus_kas.filter_arus_kas')->middleware('permission:arus_kas.access');
+    Route::get('arus_kas_report', [ReportController::class, 'reportArusKas'])->name('arus_kas.arus_kas_report');
+
 
 
     // buku besar
@@ -203,6 +214,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('sales_option', 'salesOptionsController')->middleware('permission:option_sales.access');
     Route::resource('sales_discount', 'SalesDiscountController')->middleware('permission:sales_discount.access');
 
+    Route::resource('sales_person', 'SalesPersonController')->middleware('permission:sales_person.access');
+
+
     Route::resource('item_category', 'ItemCategoryController');
 
     Route::resource('items', 'ItemController');
@@ -223,6 +237,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/customers', [ImportController::class, 'importcustomers'])->name('import.customers');
 
     Route::resource('sales_order', 'SalesOrderController')->middleware('permission:sales_orders.access');
+    Route::get('/sales_order/{id}/print', [SalesOrderController::class, 'print'])->name('sales_order.print');
+    Route::get('/sales_order/{id}/pdf', [SalesOrderController::class, 'downloadPdf'])->name('sales_order.pdf');
     Route::get('sales-orders/documents', [SalesOrderDocumentController::class, 'index'])
         ->name('sales_orders.documents.index');
 
@@ -237,6 +253,8 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::resource('sales_invoice', 'SalesInvoiceController')->middleware('permission:sales_invoice.access');
+    Route::get('/sales_invoice/{id}/print', [SalesInvoiceController::class, 'print'])->name('sales_invoice.print');
+    Route::get('/sales_invoice/{id}/pdf', [SalesInvoiceController::class, 'downloadPdf'])->name('sales_invoice.pdf');
     Route::get('sales-invoice/documents', [SalesInvoiceDocumentController::class, 'index'])
         ->name('sales_invoice.documents.index');
 
@@ -266,6 +284,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/vendors/search', [VendorsController::class, 'search'])->name('vendors.search');
     Route::resource('vendors', 'VendorsController')->middleware('permission:vendor.access');
+    Route::get('/vendor/{vendor}/invoices-prepayments', [VendorsController::class, 'getInvoicesAndPrepayments']);
+
 
     // export dan import items
     Route::get('/export/vendors', [ExportController::class, 'exportVendors'])->name('export.vendors');
@@ -273,6 +293,9 @@ Route::middleware(['auth'])->group(function () {
 
     // purchase order
     Route::resource('purchase_order', 'PurchaseOrderController')->middleware('permission:purchase_order.access');
+    Route::get('/purchase_order/{id}/print', [PurchaseOrderController::class, 'print'])->name('purchase_order.print');
+    Route::get('/purchase_order/{id}/pdf', [PurchaseOrderController::class, 'downloadPdf'])->name('purchase_order.pdf');
+
     Route::get('purchase-order/documents', [PurchaseOrderDocumentController::class, 'index'])
         ->name('purchase_order.documents.index');
     Route::prefix('purchase-order/{purchasOrder}')->group(function () {
@@ -285,6 +308,8 @@ Route::middleware(['auth'])->group(function () {
 
     // purchase invoice
     Route::resource('purchase_invoice', 'PurchaseInvoiceController')->middleware('permission:purchase_invoice.access');
+    Route::get('/purchase_invoice/{id}/print', [PurchaseInvoiceController::class, 'print'])->name('purchase_invoice.print');
+    Route::get('/purchase_invoice/{id}/pdf', [PurchaseInvoiceController::class, 'downloadPdf'])->name('purchase_invoice.pdf');
     Route::get('purchase-invoice/documents', [PurchaseInvoiceDocumentController::class, 'index'])
         ->name('purchase_invoice.documents.index');
     Route::prefix('purchase-invoice/{purchaseInvoice}')->group(function () {
@@ -299,8 +324,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('payment', 'PaymentController')->middleware('permission:payment_purchase.access');
 
     Route::resource('payment_expense', 'PaymentExpenseController')->middleware('permission:payment_expense.access');
-
-
     Route::resource('prepayment', 'PrepaymentController')->middleware('permission:prepayment_purchase.access');
 
 
@@ -327,14 +350,23 @@ Route::middleware(['auth'])->group(function () {
 
     // end inventory  menu
 
+    // budgeting menu 
+    Route::resource('approval_step', 'ApprovalStepController')->middleware('permission:approval_step.access');
+    Route::get('/rekening/search', [RekeningController::class, 'search'])->name('rekening.search');
 
+    Route::resource('rekening', 'RekeningController')->middleware('permission:rekening.access');
+
+    Route::resource('pengajuan', 'PengajuanController')->middleware('permission:create_budget.access');
+    Route::get('approval', [PengajuanApprovalController::class, 'index'])->name('pengajuan.approval.index');
     // payroll menu
 
     // level karyawan
     Route::resource('LevelKaryawan', 'LevelKaryawanController')->middleware('permission:level_karyawan.access');
     // unit kerja
     Route::resource('unit_kerja', 'UnitKerjaController')->middleware('permission:unit.access');
+
     // jabatan
+    Route::get('/jabatan/search', [JabatanController::class, 'search'])->name('jabatan.search');
     Route::resource('jabatan', 'JabatanController')->middleware('permission:jabatan.access');
     // ptkp
     Route::resource('ptkp', 'PtkpController')->middleware('permission:ptkp.access');
@@ -359,8 +391,8 @@ Route::middleware(['auth'])->group(function () {
     // employee
 
     Route::get('/employee/search', [EmployeeController::class, 'search'])->name('employee.search');
-
     Route::resource('employee', 'EmployeeController')->middleware('permission:employee.access');
+
     Route::get('/export/Employee', [ExportController::class, 'exportEmployee'])->name('export.Employee');
     Route::post('/import/Employee', [ImportController::class, 'importEmployee'])->name('import.Employee');
     // wahana

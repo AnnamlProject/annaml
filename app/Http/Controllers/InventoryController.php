@@ -742,43 +742,52 @@ class InventoryController extends Controller
 
     public function destroy($id)
     {
-        DB::beginTransaction();
-
         try {
-            $item = Item::findOrFail($id);
+            DB::transaction(function () use ($id) {
+                $item = Item::with(['assemblyComponents', 'transferInventory', 'buildofbomComponents'])->findOrFail($id);
 
-            // Hapus file gambar (kalau ada)
-            if ($item->picture_path) {
-                Storage::disk('public')->delete($item->picture_path);
-            }
-            if ($item->thubmnail_path) {
-                Storage::disk('public')->delete($item->thubmnail_path);
-            }
+                // Validasi relasi
+                if ($item->assemblyComponents()->exists()) {
+                    throw new \Exception("Item ini sudah digunakan dalam Assembly Component, tidak bisa dihapus.");
+                }
+                if ($item->transferInventory()->exists()) {
+                    throw new \Exception("Item ini sudah digunakan dalam Transfer Inventory Order, tidak bisa dihapus.");
+                }
+                if ($item->buildofbomComponents()->exists()) {
+                    throw new \Exception("Item ini sudah digunakan dalam Build Of Bom, tidak bisa dihapus.");
+                }
 
-            // Hapus relasi satu per satu (atau definisikan cascade di DB)
-            ItemQuantities::where('item_id', $item->id)->delete();
-            ItemUnit::where('item_id', $item->id)->delete();
-            ItemPrice::where('item_id', $item->id)->delete();
-            ItemVendor::where('item_id', $item->id)->delete();
-            ItemAccount::where('item_id', $item->id)->delete();
-            ItemTaxes::where('item_id', $item->id)->delete();
+                // Hapus file gambar (kalau ada)
+                if ($item->picture_path) {
+                    Storage::disk('public')->delete($item->picture_path);
+                }
+                if ($item->thumbnail_path) {
+                    Storage::disk('public')->delete($item->thumbnail_path);
+                }
 
-            // Hapus build + details
-            $builds = ItemBuild::where('item_id', $item->id)->get();
-            foreach ($builds as $build) {
-                ItemBuildDetail::where('item_build_id', $build->id)->delete();
-                $build->delete();
-            }
+                // Hapus relasi satu per satu
+                ItemQuantities::where('item_id', $item->id)->delete();
+                ItemUnit::where('item_id', $item->id)->delete();
+                ItemPrice::where('item_id', $item->id)->delete();
+                ItemVendor::where('item_id', $item->id)->delete();
+                ItemAccount::where('item_id', $item->id)->delete();
+                ItemTaxes::where('item_id', $item->id)->delete();
 
-            // Terakhir, hapus item
-            $item->delete();
+                // Hapus build dan detailnya
+                $builds = ItemBuild::where('item_id', $item->id)->get();
+                foreach ($builds as $build) {
+                    ItemBuildDetail::where('item_build_id', $build->id)->delete();
+                    $build->delete();
+                }
 
-            DB::commit();
+                // Terakhir, hapus item
+                $item->delete();
+            });
+
             return redirect()
                 ->route('inventory.index')
                 ->with('success', 'Item berhasil dihapus beserta seluruh relasinya.');
         } catch (\Throwable $e) {
-            DB::rollBack();
             report($e);
             return back()->with('error', 'Gagal menghapus item: ' . $e->getMessage());
         }

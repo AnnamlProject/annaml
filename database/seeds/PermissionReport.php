@@ -21,6 +21,8 @@ class PermissionReport extends Seeder
             'income_statement_departement.access',
             'neraca.access',
 
+            'arus_kas.access',
+
 
             'documents.access',
             'sales_document.access',

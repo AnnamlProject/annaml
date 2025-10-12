@@ -12,7 +12,6 @@ class PurchaseInvoice extends Model
         'date_invoice',
         'purchase_order_id',
         'jenis_pembayaran_id',
-        'customer_id',
         'shipping_date',
         'shipping_address',
         'freight',
@@ -20,7 +19,9 @@ class PurchaseInvoice extends Model
         'messages',
         'vendor_id',
         'account_id',
-        'location_id'
+        'location_id',
+        'status_purchase',
+
     ];
 
     public function jenisPembayaran()
@@ -46,5 +47,9 @@ class PurchaseInvoice extends Model
     public function locationInventories()
     {
         return $this->belongsTo(LocationInventory::class, 'location_id');
+    }
+    public function prepaymentAllocations()
+    {
+        return $this->hasMany(PrepaymentAllocation::class);
     }
 }

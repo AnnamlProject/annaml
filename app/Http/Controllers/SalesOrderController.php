@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ChartOfAccount;
+use App\CompanyProfile;
 use App\Customers;
 use App\Employee;
 use App\Item;
@@ -72,6 +73,12 @@ class SalesOrderController extends Controller
             ]);
             $order_number = $request->order_number;
         }
+
+        $request->merge([
+            'freight' => $this->normalizeNumber($request->freight ?? 0),
+        ]);
+
+
         // ✅ VALIDASI FORM INPUT
         $request->validate([
             'date_order'           => 'required|date',
@@ -89,7 +96,7 @@ class SalesOrderController extends Controller
             // Validasi detail item
             'items'                => 'required|array|min:1',
             'items.*.item_id'      => 'required|exists:items,id',
-            'items.*.quantity'     => 'required|numeric|min:0',
+            'items.*.quantity'     => 'nullable|numeric|min:0',
             'items.*.order'        => 'required|numeric|min:0',
             'items.*.back_order'   => 'nullable|numeric|min:0',
             'items.*.unit'         => 'required|string',
@@ -100,7 +107,7 @@ class SalesOrderController extends Controller
             'items.*.amount'       => 'nullable|numeric|min:0',
             'items.*.tax_value'          => 'nullable|numeric|min:0',
             'items.*.account'      => 'required|exists:chart_of_accounts,id',
-            'items.*.tax_id'      => 'required|exists:sales_taxes,id',
+            'items.*.tax_id'      => 'nullable|exists:sales_taxes,id',
         ]);
 
         DB::beginTransaction();
@@ -116,7 +123,7 @@ class SalesOrderController extends Controller
                 'sales_person_id'          => $request->sales_person_id,
                 'jenis_pembayaran_id'  => $request->jenis_pembayaran_id,
                 'shipping_address'     => $request->shipping_address,
-                'freight'              => $this->normalizeNumber($request['freight']),
+                'freight'              => $request->freight,
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
                 'payment_method_account_id' => $request->payment_method_account_id,
@@ -128,9 +135,9 @@ class SalesOrderController extends Controller
                 SalesOrderDetail::create([
                     'sales_order_id'   => $salesOrder->id,
                     'item_id'          => $item['item_id'],
-                    'quantity'         => $this->normalizeNumber($item['quantity']),
+                    'quantity'         => $this->normalizeNumber($item['quantity'] ?? 0),
                     'order'            => $this->normalizeNumber($item['order']),
-                    'back_order'       => $this->normalizeNumber($item['back_order']),
+                    'back_order'       => $this->normalizeNumber($item['back_order'] ?? 0),
                     'unit'             => $item['unit'],
                     'item_description' => $item['description'],
                     'base_price'       => $this->normalizeNumber($item['base_price']),
@@ -139,7 +146,7 @@ class SalesOrderController extends Controller
                     'amount'           => $this->normalizeNumber($item['amount']),
                     'tax'              => $this->normalizeNumber($item['tax_value']),
                     'account_id'       => $item['account'],
-                    'tax_id'       => $item['tax_id'],
+                    'tax_id'       => $item['tax_id'] ?? null,
                 ]);
             }
 
@@ -170,7 +177,8 @@ class SalesOrderController extends Controller
             'salesPerson',
             'jenisPembayaran',
             'details.item',
-            'details.account'
+            'details.account',
+            'details.sales_taxes'
         ])->findOrFail($id);
 
         return view('sales_order.show', compact('salesOrder'));
@@ -194,6 +202,8 @@ class SalesOrderController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        // dd($request->all());
         $request->validate([
             'order_number' => 'required|string',
             'date_order' => 'required|date',
@@ -208,7 +218,7 @@ class SalesOrderController extends Controller
             'early_payment_terms' => 'nullable|string',
             'items' => 'required|array',
             'items.*.item_id' => 'required|exists:items,id',
-            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.quantity' => 'nullable|numeric|min:0',
             'items.*.order' => 'required|numeric|min:0',
             'items.*.back_order' => 'nullable|numeric',
             'items.*.unit' => 'required|string',
@@ -219,7 +229,7 @@ class SalesOrderController extends Controller
             'items.*.amount' => 'required|numeric|min:0',
             'items.*.tax_value' => 'required|numeric|min:0',
             'items.*.account' => 'required|exists:chart_of_accounts,id',
-            'items.*.tax_id' => 'required|exists:sales_taxes,id',
+            'items.*.tax_id' => 'nullable|exists:sales_taxes,id',
         ]);
 
         DB::beginTransaction();
@@ -249,7 +259,7 @@ class SalesOrderController extends Controller
                 SalesOrderDetail::create([
                     'sales_order_id' => $salesOrder->id,
                     'item_id' => $item['item_id'],
-                    'quantity' => $item['quantity'],
+                    'quantity' => $item['quantity'] ?? 0,
                     'order' => $item['order'],
                     'back_order' => $item['back_order'] ?? 0,
                     'unit' => $item['unit'],
@@ -260,7 +270,7 @@ class SalesOrderController extends Controller
                     'amount' => $item['amount'],
                     'tax' => $item['tax_value'],
                     'account_id' => $item['account'],
-                    'tax_id' => $item['tax_id'],
+                    'tax_id' => $item['tax_id'] ?? null,
                 ]);
             }
 
@@ -298,5 +308,44 @@ class SalesOrderController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('sales_order.index')->with('error', $e->getMessage());
         }
+    }
+    public function print($id)
+    {
+        // Ambil sales order beserta relasi terkait
+        $salesOrder = SalesOrder::with([
+            'customer',
+            'locationInventory',
+            'salesPerson',
+            'jenisPembayaran',
+            'details.item',
+            'details.account',
+            'details.sales_taxes'
+        ])->findOrFail($id);
+
+        $companyProfile = CompanyProfile::first();
+
+        return view('sales_order.print', compact('salesOrder', 'companyProfile'));
+    }
+    public function downloadPdf($id)
+    {
+        $salesOrder = SalesOrder::with([
+            'customer',
+            'locationInventory',
+            'salesPerson',
+            'jenisPembayaran',
+            'details.item',
+            'details.account',
+            'details.sales_taxes'
+        ])->findOrFail($id);
+
+        $companyProfile = CompanyProfile::first();
+        $isPdf = true;
+        $pdf = Pdf::loadView('sales_order.print', compact(
+            'salesOrder',
+            'companyProfile',
+            'isPdf'
+        ))->setPaper('A4', 'portrait');
+
+        return $pdf->download("PO_{$salesOrder->order_number}.pdf");
     }
 }

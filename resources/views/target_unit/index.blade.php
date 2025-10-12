@@ -92,6 +92,10 @@
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">#
                             </th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Bulan</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tahun</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama Unit</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama Komponen</th>
@@ -101,10 +105,7 @@
                                 Level Karyawan</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Besaran Nominal</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Tahun</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Bulan</th>
+
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
                         </tr>
@@ -113,14 +114,15 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-center text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                <td class="px-4 py-2 text-center">{{ $item->bulan ?? '-' }}</td>
+                                <td class="px-4 py-2 text-center">{{ $item->tahun ?? '-' }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->unit->nama_unit }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->komponen->nama_komponen }}</td>
                                 <td class="px-4 py-2 text-center">{{ number_format($item->target_bulanan) }}</td>
                                 <td class="px-4 py-2 text-center">{{ $item->levelKaryawan->nama_level ?? 'Tidak Ada' }}
                                 </td>
                                 <td class="px-4 py-2 text-center">{{ number_format($item->besaran_nominal) }}</td>
-                                <td class="px-4 py-2 text-center">{{ $item->tahun ?? '-' }}</td>
-                                <td class="px-4 py-2 text-center">{{ $item->bulan ?? '-' }}</td>
+
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
                                         @can('target_unit.view')

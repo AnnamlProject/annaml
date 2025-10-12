@@ -47,6 +47,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Early Payment Terms</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Messages</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
@@ -64,9 +66,24 @@
                                 <td class="px-6 py-4">{{ $item->shipping_address }}</td>
                                 <td class="px-6 py-4">{{ $item->salesPerson->nama_karyawan ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->early_payment_terms }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($item->status == 1)
+                                        <span
+                                            class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
+                                    @elseif ($item->status == 2)
+                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">Sudah
+                                            Pembayaran</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">{{ $item->messages }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end space-x-3">
+                                        <button onclick="openFilePrint({{ $item->id }})"
+                                            class="text-green-500 hover:text-green-700 p-2 rounded-full hover:bg-green-50 transition-colors"
+                                            title="Print">
+                                            <i class="fas fa-print text-green-500 mr-2"></i>
+                                        </button>
+
                                         @can('sales_invoice.view')
                                             <a href="{{ route('sales_invoice.show', $item->id) }}"
                                                 class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
@@ -74,29 +91,40 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endcan
+                                        @if ($item->status == 1)
+                                            {{-- tombol edit dan hapus aktif --}}
+                                            @can('sales_invoice.update')
+                                                <a href="{{ route('sales_invoice.edit', $item->id) }}"
+                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endcan
 
-                                        @can('sales_invoice.update')
-                                            <a href="{{ route('sales_invoice.edit', $item->id) }}"
-                                                class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                title="Edit">
+                                            @can('sales_invoice.delete')
+                                                <form id="delete-form-{{ $item->id }}"
+                                                    action="{{ route('sales_invoice.destroy', $item->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                                <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                                                    title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            @endcan
+                                        @elseif ($item->status == 2)
+                                            {{-- tombol edit dan hapus dinonaktifkan --}}
+                                            <button class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"
+                                                title="Edit Disabled" disabled>
                                                 <i class="fas fa-edit"></i>
-                                            </a>
-                                        @endcan
-
-                                        @can('sales_invoice.delete')
-                                            <form id="delete-form-{{ $item->id }}"
-                                                action="{{ route('sales_invoice.destroy', $item->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-
-                                            <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                                class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                title="Delete">
+                                            </button>
+                                            <button class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"
+                                                title="Delete Disabled" disabled>
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -116,9 +144,27 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
+    <div id="filePrint"
+        class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
+            </h3>
+            <div class="space-y-3 text-sm text-gray-700">
+                <a id="printLink" href="#" target="_blank" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-green-500"></i> Print
+                </a>
+                <a id="pdfLink" href="#" target="_blank" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-red-500"></i> Download PDF
+                </a>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="document.getElementById('filePrint').classList.add('hidden')"
+                    class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -158,4 +204,14 @@
             transition: background-color 0.2s ease;
         }
     </style>
+    <script>
+        function openFilePrint(id) {
+            // Tampilkan modal
+            document.getElementById('filePrint').classList.remove('hidden');
+
+            // Ubah link dinamis berdasarkan ID yang diklik
+            document.getElementById('printLink').href = `/sales_invoice/${id}/print`;
+            document.getElementById('pdfLink').href = `/sales_invoice/${id}/pdf`;
+        }
+    </script>
 @endsection

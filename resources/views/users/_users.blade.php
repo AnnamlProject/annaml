@@ -25,7 +25,8 @@
               <div>
                   <div>
                       <label>Employee</label>
-                      <select id="employeeSelect" class="select-employee w-full border rounded px-3 py-2">
+                      <select id="employeeSelect" name="employee_id"
+                          class="select-employee w-full border rounded px-3 py-2">
                           <option value="">- Pilih Employee -</option>
                           @foreach ($employee as $emp)
                               <option value="{{ $emp->id }}" data-nama="{{ $emp->nama_karyawan }}"

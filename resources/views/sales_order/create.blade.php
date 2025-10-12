@@ -146,14 +146,20 @@
                     <!-- Order Items Table -->
                     <div class="mt-4">
                         <h3 class="font-semibold text-sm mb-2">Order Items</h3>
-                        <div class="overflow-x-auto border rounded">
-                            <table class="w-full border-collapse border">
-                                <thead>
+                        <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
+                            <table class="min-w-max border-collapse border text-sm whitespace-nowrap">
+
+                                @php
+                                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                    $textFooter = \App\Setting::get('text_footer', 'ANTS LITE+ ©2025_AN NAML CORP.');
+                                @endphp
+                                <thead
+                                    class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                     <tr>
                                         <th class="border px-2 py-1 w-80">Item</th>
-                                        <th class="border px-2 py-1">Qty</th>
+                                        {{-- <th class="border px-2 py-1">Qty</th> --}}
                                         <th class="border px-2 py-1">Order</th>
-                                        <th class="border px-2 py-1">BackOrder</th>
+                                        {{-- <th class="border px-2 py-1">BackOrder</th> --}}
                                         <th class="border px-2 py-1">Unit</th>
                                         <th class="border px-2 py-1">Desc</th>
                                         <th class="border px-2 py-1">Base Price</th>
@@ -167,7 +173,7 @@
                                         <th class="border px-2 py-1">#</th>
                                     </tr>
                                 </thead>
-                                <tbody id="item-table-body"></tbody>
+                                <tbody id="item-table-body" class="divide-y divide-gray-200"></tbody>
                                 <tfoot>
                                     <tr>
                                         <td colspan="9" class="text-right font-bold border px-2 py-1">Subtotal</td>
@@ -206,7 +212,6 @@
                                 </tfoot>
 
                             </table>
-
                         </div>
                         <button type="button" id="add-row"
                             class="mt-2 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">+ Add
@@ -227,13 +232,14 @@
                     </div>
 
                     <!-- Buttons -->
-                    <div class="mt-4 flex space-x-2">
-                        <button type="submit"
-                            class="px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700">
-                            {{ isset($sales_order) ? 'Update' : 'Create' }}
-                        </button>
+                    <div class="mt-4 flex justify-end gap-2 space-x-2">
+
                         <a href="{{ route('sales_order.index') }}"
                             class="px-4 py-1 bg-gray-300 text-sm text-gray-700 rounded hover:bg-gray-400">Cancel</a>
+                        <button type="submit"
+                            class="px-4 py-1 bg-green-600 text-white text-sm font-semibold rounded hover:bg-blue-700">
+                            {{ isset($sales_order) ? 'Update' : 'Process' }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -369,7 +375,7 @@
                         (res.accounts || []).forEach(function(a) {
                             const text =
                                 `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                            $select.append(`<option value="${a.account_id}">${text}</option>`);
+                            $select.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
                         // kalau form edit, bisa auto-select berdasarkan value lama
@@ -402,27 +408,25 @@
         function generateRow(index) {
             return `
         <tr class="item-row" data-index="${index}">
-            <td class="border px-2 py-1">
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
                 <select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select>
             </td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="number" name="items[${index}][back_order]" class="back-${index} w-full border rounded" readonly /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded" /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border rounded" /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][description]" class="desc-${index} w-full border rounded" /></td>
 
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][base_price]" class="base-${index} w-full border rounded text-right" /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][discount]" class="disc-${index} w-full border rounded text-right" value="0" /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][base_price]" class="base-${index} w-full border rounded text-right" /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][discount]" class="disc-${index} w-full border rounded text-right" value="0" /></td>
 
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded text-right" readonly /></td>
-            <td class="border px-2 py-1"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][price]" class="price-${index} w-full border rounded text-right" readonly /></td>
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition"><input type="text" name="items[${index}][amount]" class="amount-${index} w-full border rounded text-right" readonly /></td>
 
             <!-- Tax dropdown -->
-           <td class="border px-2 py-1">
+           <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
               <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                 <option value="">-- Pilih Pajak --</option>
                 @foreach ($sales_taxes as $item)
-                    <option value="{{ $item->id }}" data-rate="{{ $item->rate }}">
+                    <option value="{{ $item->id }}" data-rate="{{ $item->rate }}" data-type="{{ $item->type }}">
                         ({{ $item->rate }}%)
                     </option>
                 @endforeach
@@ -430,20 +434,20 @@
             </td>
 
             <!-- Nilai pajak -->
-            <td class="border px-2 py-1">
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
                 <input type="text" name="items[${index}][tax_value]" class="taxval-${index} w-full border rounded text-right" readonly />
             </td>
 
             <!-- Final (amount + tax) -->
-            <td class="border px-2 py-1">
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
                 <input type="text" name="items[${index}][final]" class="final-${index} w-full border rounded text-right" readonly />
             </td>
 
-            <td class="border px-2 py-1">
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
                 <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" />
                 <input type="hidden" name="items[${index}][account]" class="account-id-${index}" />
             </td>
-            <td class="border px-2 py-1 text-center">
+            <td class="border px-2 py-1 odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition text-center">
                 <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" data-index="${index}">X</button>
             </td>
         </tr>`;
@@ -542,21 +546,35 @@
             const disc = parseNumber($(`.disc-${index}`).val());
 
             // Subtotal kotor
-            const subtotal = order * base_price;
+            const price = base_price - disc;
+            const subtotal = order * price;
 
-            // Total setelah diskon (clamp minimal 0)
-            const amount = Math.max(subtotal - disc, 0);
+            // Total setelah diskon
+            const amount = Math.max(subtotal, 0);
 
-            // Harga akhir per unit (sesuai definisi "Price")
+            // Harga akhir per unit
             const pricePerUnit = order > 0 ? amount / order : 0;
 
             $(`.price-${index}`).val(formatNumber(pricePerUnit));
             $(`.amount-${index}`).val(formatNumber(amount));
 
-            // Pajak dihitung dari amount (setelah diskon)
-            const taxRate = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0; // 0 / 11 / 12
-            const taxValue = (amount * taxRate) / 100;
-            const finalValue = amount + taxValue;
+            // Pajak dihitung dari amount
+            const $selectedTax = $(`.tax-${index} option:selected`);
+            const taxRate = parseFloat($selectedTax.data('rate')) || 0;
+            const taxType = $selectedTax.data('type') || 'input_tax';
+
+            let taxValue = (amount * taxRate) / 100;
+            let finalValue = amount;
+
+            if (taxType === 'input_tax') {
+                // contoh: PPN → tambah
+                finalValue = amount + taxValue;
+            } else if (taxType === 'withholding_tax') {
+                // contoh: PPh → kurang
+                finalValue = amount - taxValue;
+                // jangan sampai negatif
+                if (finalValue < 0) finalValue = 0;
+            }
 
             $(`.taxval-${index}`).val(formatNumber(taxValue));
             $(`.final-${index}`).val(formatNumber(finalValue));
@@ -569,19 +587,33 @@
             let totalTax = 0;
             let grandTotal = 0;
 
+
             $('.item-row').each(function() {
                 const index = $(this).data('index');
                 const amount = parseNumber($(`.amount-${index}`).val());
+
+                const $selectedTax = $(`.tax-${index} option:selected`);
                 const taxVal = parseNumber($(`.taxval-${index}`).val());
-                const finalVal = parseNumber($(`.final-${index}`).val());
+                const taxType = $selectedTax.data('type') || 'input_tax';
 
                 total += amount;
-                totalTax += taxVal;
-                grandTotal += finalVal;
+
+                if (taxType === 'input_tax') {
+                    // contoh PPN → ditambahkan
+                    totalTax += taxVal;
+                    grandTotal += (amount + taxVal);
+                } else if (taxType === 'withholding_tax') {
+                    // contoh PPh → dikurangkan
+                    totalTax -= taxVal;
+                    grandTotal += (amount - taxVal);
+                } else {
+                    // fallback
+                    grandTotal += amount;
+                }
             });
 
             // Freight
-            const freight = parseNumber($('#freight').val());
+            const freight = parseNumber(document.getElementById('freight')?.value);
 
             // Update fields
             $('#subtotal').val(formatNumber(total));

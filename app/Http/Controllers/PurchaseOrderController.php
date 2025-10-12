@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\chartOfAccount;
+use App\CompanyProfile;
 use App\Customers;
 use App\Item;
 use App\LocationInventory;
@@ -10,7 +11,9 @@ use App\PaymentMethod;
 use App\PurchaseOrder;
 use App\PurchaseOrderDetail;
 use App\SalesTaxes;
+use App\Setting;
 use App\Vendors;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +23,7 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor', 'locationInventory'])->paginate(10);
+        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor', 'locationInventory'])->orderBy('order_number', 'asc')->paginate(10);
         return view('purchase_order.index', compact('data'));
     }
     public function create()
@@ -308,5 +311,38 @@ class PurchaseOrderController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('purchase_order.index')->with('error', $e->getMessage());
         }
+    }
+    public function print($id)
+    {
+        $purchaseOrder = PurchaseOrder::with(['vendor', 'locationInventory', 'jenisPembayaran', 'details.item'])->findOrFail($id);
+
+        // bisa buat perhitungan subtotal, tax, grand total
+        $subtotal = $purchaseOrder->details->sum('amount');
+        $taxTotal = $purchaseOrder->details->sum('tax_amount');
+        $grandTotal = $subtotal + $taxTotal + $purchaseOrder->freight;
+        $companyProfile = CompanyProfile::first();
+        $setting = Setting::first();
+
+        return view('purchase_order.print', compact('purchaseOrder', 'subtotal', 'taxTotal', 'grandTotal', 'companyProfile', 'setting'));
+    }
+
+    public function downloadPdf($id)
+    {
+        $purchaseOrder = PurchaseOrder::with(['vendor', 'details.item'])->findOrFail($id);
+        $subtotal = $purchaseOrder->details->sum('amount');
+        $taxTotal = $purchaseOrder->details->sum('tax_amount');
+        $grandTotal = $subtotal + $taxTotal + $purchaseOrder->freight;
+        $companyProfile = CompanyProfile::first();
+        $isPdf = true;
+        $pdf = Pdf::loadView('purchase_order.print', compact(
+            'purchaseOrder',
+            'subtotal',
+            'taxTotal',
+            'grandTotal',
+            'companyProfile',
+            'isPdf'
+        ))->setPaper('A4', 'portrait');
+
+        return $pdf->download("PO_{$purchaseOrder->order_number}.pdf");
     }
 }

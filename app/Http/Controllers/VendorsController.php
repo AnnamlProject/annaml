@@ -116,4 +116,35 @@ class VendorsController extends Controller
 
         return response()->json($vendors);
     }
+    public function getInvoicesAndPrepayments($vendorId)
+    {
+        $vendor = Vendors::with([
+            'invoices.details', // include relasi detail invoice
+            'prepayments'
+        ])->findOrFail($vendorId);
+
+        // Hitung total untuk setiap invoice
+        $invoices = $vendor->invoices->map(function ($invoice) {
+            $subtotal = 0;
+            $total_tax = 0;
+
+            foreach ($invoice->details as $item) {
+                $amount = ($item->price - $item->discount) * $item->quantity;
+                $subtotal += $amount;
+                $total_tax += $item->tax_amount;
+            }
+
+            $invoice->original_amount = $subtotal + $total_tax + ($invoice->freight ?? 0);
+
+            // Kamu bisa tambahkan juga field amount_owing jika sudah ada payment sebelumnya
+            $invoice->amount_owing = $invoice->original_amount; // sementara sama dengan original amount
+
+            return $invoice;
+        });
+
+        return response()->json([
+            'invoices' => $invoices,
+            'prepayments' => $vendor->prepayments,
+        ]);
+    }
 }

@@ -43,6 +43,7 @@
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
                         <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                            max="{{ now()->endOfYear()->format('Y-m-d') }}"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
                             required>
                     </div>
@@ -88,6 +89,22 @@
 
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const endDateInput = document.getElementById('end_date');
+            const maxDate = new Date("{{ now()->endOfYear()->format('Y-m-d') }}");
+
+            endDateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+
+                if (selectedDate > maxDate) {
+                    alert('Tanggal tidak boleh melebihi akhir tahun berjalan!');
+                    this.value = maxDate.toISOString().split('T')[0]; // otomatis ubah ke batas maksimum
+                }
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

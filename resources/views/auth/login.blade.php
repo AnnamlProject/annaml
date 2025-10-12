@@ -74,86 +74,88 @@
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-white to-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="from-white h-screen overflow-hidden font-sans">
 
-    <!-- Login Container -->
+
     <!-- Card utama -->
-    <div class="w-full max-w-7xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-
+    <div class="flex h-screen">
         <!-- Kiri: Form Login -->
-        <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
-            <div class="text-center mb-6">
-                <div class="mx-auto w-56 h-26  flex items-center justify-center">
-                    <img src="{{ asset('image/logologinpage.jpg') }}" class="h-full w-full object-contain">
+        <div class="w-full md:w-1/2 flex flex-col justify-center items-center p-8 bg-white">
+            <div class="w-full max-w-sm">
+                <div class="text-center mb-8">
+                    <div class="mx-auto w-52 h-26 rounded-full overflow-hidden flex items-center justify-center mb-3">
+                        <img src="{{ asset('image/logologinpage.jpg') }}" class="h-full w-full object-contain"
+                            alt="Logo">
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800">Welcome Back!</h4>
+                    <p class="text-gray-500 text-sm">Please login to continue</p>
                 </div>
-                <h4 class="text-lg font-bold text-gray-800 mt-3">Welcome Back!</h4>
-                <p class="text-gray-500 text-sm">Please login to continue</p>
+
+                {{-- Flash messages --}}
+                @if (session('status'))
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded-lg">
+                        <i class="bi bi-check-circle-fill mr-2"></i> {{ session('status') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg">
+                        <i class="bi bi-exclamation-triangle-fill mr-2"></i> {{ session('error') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg">
+                        @foreach ($errors->all() as $error)
+                            <p><i class="bi bi-exclamation-circle-fill mr-2"></i> {{ $error }}</p>
+                        @endforeach
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                    @csrf
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
+                            placeholder="Email">
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                        <input type="password" id="password" name="password" required
+                            class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
+                            placeholder="Password">
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center text-sm text-gray-600">
+                            <input id="remember_me" name="remember" type="checkbox"
+                                class="h-4 w-4 text-secondary border-gray-300 rounded mr-2">
+                            Remember me
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-secondary text-white py-3 rounded-lg hover:bg-opacity-90 shadow-md flex items-center justify-center">
+                        <i class="bi bi-box-arrow-in-right mr-2"></i> Sign In
+                    </button>
+                </form>
             </div>
-            {{-- pesan status/error --}}
-            @if (session('status'))
-                <div id="statusMessage"
-                    class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded-lg opacity-0">
-                    <i class="bi bi-check-circle-fill mr-2"></i> {{ session('status') }}
-                </div>
-            @endif
-            @if (session('error'))
-                <div id="errorMessage"
-                    class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
-                    <i class="bi bi-exclamation-triangle-fill mr-2"></i> {{ session('error') }}
-                </div>
-            @endif
-            @if ($errors->any())
-                <div id="validationErrors"
-                    class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded-lg opacity-0">
-                    @foreach ($errors->all() as $error)
-                        <p><i class="bi bi-exclamation-circle-fill mr-2"></i> {{ $error }}</p>
-                    @endforeach
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}" class="space-y-4">
-                @csrf
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" required
-                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
-                        placeholder="Email">
-                </div>
-
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
-                        <i class="bi bi-lock-fill"></i>
-                    </div>
-                    <input type="password" id="password" name="password" required
-                        class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
-                        placeholder="Password">
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <label class="flex items-center text-sm text-gray-600">
-                        <input id="remember_me" name="remember" type="checkbox"
-                            class="h-4 w-4 text-secondary border-gray-300 rounded mr-2">
-                        Remember me
-                    </label>
-                </div>
-
-                <button type="submit"
-                    class="w-full bg-secondary text-white py-3 rounded-lg hover:bg-opacity-90 shadow-md flex items-center justify-center">
-                    <i class="bi bi-box-arrow-in-right mr-2"></i> Login
-                </button>
-            </form>
         </div>
 
         <!-- Kanan: Gambar -->
-        <div class="w-full md:w-1/2 relative hidden md:block">
-            <img src="{{ asset('image/page_login_ptcmb.jpg') }}" alt="Login Banner" class="w-full h-full object-cover">
-            <div class="absolute inset-0"></div>
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
-            </div>
+
+        <!-- Kanan: Gambar -->
+        <div class="hidden md:block md:w-1/2 flex items-center justify-center">
+            <img src="{{ asset('image/page_login_ptcmb.jpg') }}" alt="Login Banner"
+                class="w-full h-full object-contain">
         </div>
+
     </div>
+
 
     <script>
         // Smooth animations for error messages

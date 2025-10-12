@@ -3,9 +3,12 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-
-            <div class="container mx-auto py-6">
-                <div class="bg-white p-6 rounded shadow" x-data="{ tab: 'details' }">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="mx-auto py-6">
+                <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}"
+                    x-data="{ tab: 'details' }">
                     <h2 class="text-2xl font-semibold mb-6">Purchase Invoice Details</h2>
                     <div class="border-b mb-4 flex space-x-4">
                         <button @click="tab = 'details'"
@@ -75,6 +78,7 @@
                                         <th class="border px-3 py-2">Unit</th>
                                         <th class="border px-3 py-2">Description</th>
                                         <th class="border px-3 py-2">Price</th>
+                                        <th class="border px-3 py-2">Discount</th>
                                         <th class="border px-3 py-2">Tax</th>
                                         <th class="border px-3 py-2">Tax Amount</th>
                                         <th class="border px-3 py-2">Amount</th>
@@ -91,7 +95,7 @@
                                     $total = 0; @endphp
                                     @foreach ($purchaseInvoice->details as $item)
                                         @php
-                                            $amount = $item->order * $item->price;
+                                            $amount = ($item->price - $item->discount) * $item->quantity;
                                             $total_tax += $item->tax_amount;
                                             $subtotal += $amount;
                                             $total = $subtotal + $total_tax + $purchaseInvoice->freight;
@@ -104,6 +108,8 @@
                                             <td class="border px-3 py-2 text-center">{{ $item->unit }}</td>
                                             <td class="border px-3 py-2">{{ $item->item_description }}</td>
                                             <td class="border px-3 py-2 text-right">{{ number_format($item->price) }}</td>
+                                            <td class="border px-3 py-2 text-right">{{ number_format($item->discount) }}
+                                            </td>
                                             <td class="border px-3 py-2 text-right">
                                                 {{ optional($item->sales_taxes)->rate ? $item->sales_taxes->rate . '%' : '-' }}
                                             </td>
@@ -118,27 +124,27 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="9"></td>
                                         <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
                                             {{ number_format($subtotal, 2) }}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="9"></td>
                                         <td class="pr-3 text-right font-semibold">Total Tax :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1">
                                             {{ number_format($total_tax, 2) }}
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="9"></td>
                                         <td class="pr-3 text-right font-semibold">Freight :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
                                             {{ number_format($purchaseInvoice->freight, 2) }}</td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="9"></td>
                                         <td class="pr-3 text-right font-semibold">Total :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
                                             {{ number_format($total, 2) }}</td>

@@ -3,7 +3,10 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white p-8 shadow-xl rounded-xl">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <div id="tabs" class="type-section">
                     <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
                         <li><a href="#select_item" class="tab-link active">Proces purchase invoice</a></li>
@@ -26,6 +29,9 @@
 
                     <div id="select_item" class="tab-content">
 
+                        <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                            Purchase Invoice Edit
+                        </h4>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Invoice Number</label>
@@ -68,7 +74,7 @@
                             </div>
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Vendor</label>
-                                <select name="vendor_id" required
+                                <select name="vendor_id" id="vendor_id" required
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">
                                     @foreach ($vendor as $ven)
                                         <option value="{{ $ven->id }}"
@@ -118,10 +124,11 @@
                                             <th class="p-2">Item</th>
                                             <th>Qty</th>
                                             <th>Order</th>
-                                            <th>Back Order</th>
+                                            {{-- <th>Back Order</th> --}}
                                             <th>Unit</th>
                                             <th>Description</th>
                                             <th>Price</th>
+                                            <th>Discount</th>
                                             <th>Tax</th>
                                             <th>Tax Amount</th>
                                             <th>Amount</th>
@@ -157,12 +164,12 @@
                                                 </td>
 
                                                 <!-- Back Order -->
-                                                <td>
+                                                {{-- <td>
                                                     <input type="number" readonly
                                                         class="back-{{ $i }} w-full border px-2 py-1 bg-gray-50"
                                                         name="items[{{ $i }}][back_order]"
                                                         value="{{ $detail->back_order }}">
-                                                </td>
+                                                </td> --}}
 
                                                 <!-- Unit -->
                                                 <td>
@@ -187,6 +194,13 @@
                                                         name="items[{{ $i }}][price]"
                                                         value="{{ $detail->price }}">
                                                 </td>
+                                                {{-- discount --}}
+                                                <td>
+                                                    <input type="text"
+                                                        class="discount-{{ $i }} w-full border px-2 py-1 text-right"
+                                                        name="items[{{ $i }}][discount]"
+                                                        value="{{ $detail->discount }}">
+                                                </td>
 
                                                 <!-- Tax -->
                                                 <td>
@@ -196,7 +210,9 @@
                                                         @foreach ($sales_taxes as $tax)
                                                             <option value="{{ $tax->id }}"
                                                                 data-rate="{{ $tax->rate }}"
+                                                                data-type="{{ $tax->type }}"
                                                                 data-account="{{ $tax->purchase_account_id }}"
+                                                                data-account-code="{{ $tax->purchaseAccount->kode_akun ?? '' }}"
                                                                 data-account-name="{{ $tax->purchaseAccount->nama_akun ?? '' }}"
                                                                 {{ $detail->tax_id == $tax->id ? 'selected' : '' }}>
                                                                 {{ $tax->name }} ({{ $tax->rate }}%)
@@ -340,21 +356,57 @@
                     </div>
 
                     {{-- Tombol --}}
-                    <div class="mt-8 flex justify-start space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                            💾 Update
-                        </button>
+                    <div class="mt-8 flex justify-end space-x-4">
                         <a href="{{ route('purchase_invoice.index') }}"
                             class="px-6 py-2 bg-gray-300 rounded-lg shadow hover:bg-gray-400 transition">
-                            ❌ Cancel
+                            Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                            Process
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('#vendor_id').select2({
+                placeholder: "-- Vendor --",
+                ajax: {
+                    url: '{{ route('vendors.search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            q: params.term
+                        }; // query keyword
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(vendor) {
+                                return {
+                                    id: vendor.id,
+                                    text: vendor.nama_vendors
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
     <script>
         // Tab switching
         document.querySelectorAll('.tab-link').forEach(link => {
@@ -438,16 +490,27 @@
             function calculateBackOrder(index) {
                 const qty = parseFloat($(`.qty-${index}`).val()) || 0;
                 const order = parseFloat($(`.order-${index}`).val()) || 0;
-                $(`.back-${index}`).val(qty - order);
+                // $(`.back-${index}`).val(qty - order);
             }
 
             function calculateAmount(index) {
+                const qty = parseFloat($(`.qty-${index}`).val()) || 0;
                 const order = parseFloat($(`.order-${index}`).val()) || 0;
                 const price = parseFloat($(`.price-${index}`).val()) || 0;
+                const discount = parseFloat($(`.discount-${index}`).val()) || 0;
+                const taxSelect = document.querySelector(`.tax-${index}`);
                 const taxPercent = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0;
+                const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+                const baseAmount = (price - discount) * qty;
+                let taxAmount = (baseAmount * taxPercent) / 100;
+                let finalValue = baseAmount;
 
-                const baseAmount = order * price;
-                const taxAmount = baseAmount * (taxPercent / 100);
+                if (taxType === 'input_tax') {
+                    finalValue += taxAmount; // PPN → tambah
+                } else if (taxType === 'withholding_tax') {
+                    finalValue -= taxAmount; // PPh → kurang
+                    if (finalValue < 0) finalValue = 0;
+                }
 
                 $(`.amount-display-${index}`).val(formatNumber(baseAmount));
                 $(`.tax_amount-display-${index}`).val(formatNumber(taxAmount));
@@ -467,8 +530,17 @@
                     subtotal += parseFloat($(this).val()) || 0;
                 });
 
-                $('.tax_amount-hidden').each(function() {
-                    totalTax += parseFloat($(this).val()) || 0;
+                // Baca ulang setiap pajak dengan tipe-nya
+                $('.tax_amount-hidden').each(function(index) {
+                    const taxAmount = parseFloat($(this).val()) || 0;
+                    const taxSelect = document.querySelector(`.tax-${index}`);
+                    const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+
+                    if (taxType === 'input_tax') {
+                        totalTax += taxAmount;
+                    } else if (taxType === 'withholding_tax') {
+                        totalTax -= taxAmount;
+                    }
                 });
 
                 const freight = parseFloat($('#freight').val()) || 0;
@@ -480,6 +552,7 @@
                 $('#freight-display').val(formatNumber(freight));
             }
 
+
             function generateJournalPreview() {
                 const $journalBody = $('.journal-body');
                 $journalBody.empty();
@@ -489,29 +562,48 @@
                     rows = [];
 
                 // Item rows
-                $('tbody#item-table-body tr').each(function() {
+                $('tbody#item-table-body tr').each(function(index) {
                     const amount = parseFloat($(this).find('.amount-hidden').val()) || 0;
                     const taxAmount = parseFloat($(this).find('.tax_amount-hidden').val()) || 0;
                     const accountName = $(this).find('input[name$="[account_id]"]').siblings(
                         'input[type=text]').val();
-                    const $taxOption = $(this).find('select[name$="[tax_id]"] option:selected');
-                    const taxAccountName = $taxOption.data('account-name') || $taxOption.text();
 
+                    const $taxSelect = $(this).find('select[name$="[tax_id]"]');
+                    const $taxOption = $taxSelect.find('option:selected');
+                    const taxAccountName = $taxOption.data('account-name') || $taxOption.text();
+                    const taxAccountCode = $taxOption.data('account-code') || '';
+                    const taxType = $taxOption.data('type') || 'input_tax';
+
+                    // Item utama
                     if (amount > 0) {
                         rows.push({
+                            accountCode: taxAccountCode,
                             account: accountName,
                             debit: amount,
                             credit: 0
                         });
                         totalDebit += amount;
                     }
+
+                    // Pajak: sesuaikan arah jurnal
                     if (taxAmount > 0) {
-                        rows.push({
-                            account: taxAccountName,
-                            debit: taxAmount,
-                            credit: 0
-                        });
-                        totalDebit += taxAmount;
+                        if (taxType === 'input_tax') {
+                            rows.push({
+                                accountCode: taxAccountCode,
+                                account: taxAccountName,
+                                debit: taxAmount,
+                                credit: 0
+                            });
+                            totalDebit += taxAmount;
+                        } else if (taxType === 'withholding_tax') {
+                            rows.push({
+                                accountCode: taxAccountCode,
+                                account: taxAccountName,
+                                debit: 0,
+                                credit: taxAmount
+                            });
+                            totalCredit += taxAmount;
+                        }
                     }
                 });
 
@@ -547,18 +639,19 @@
                 } else {
                     rows.forEach(r => {
                         $journalBody.append(`
-                    <tr>
-                        <td class="border px-2 py-1">${r.account}</td>
-                        <td class="border px-2 py-1 text-right">${r.debit.toLocaleString()}</td>
-                        <td class="border px-2 py-1 text-right">${r.credit.toLocaleString()}</td>
-                    </tr>
-                `);
+                <tr>
+                    <td class="border px-2 py-1">${r.account}</td>
+                    <td class="border px-2 py-1 text-right">${r.debit.toLocaleString()}</td>
+                    <td class="border px-2 py-1 text-right">${r.credit.toLocaleString()}</td>
+                </tr>
+            `);
                     });
                 }
 
                 $('.total-debit').text(totalDebit.toLocaleString());
                 $('.total-credit').text(totalCredit.toLocaleString());
             }
+
 
             // Delegation
             $(document).on('input',

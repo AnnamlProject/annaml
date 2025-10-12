@@ -25,4 +25,8 @@ class Prepayment extends Model
     {
         return $this->belongsTo(chartOfAccount::class, 'account_id');
     }
+    public function allocations()
+    {
+        return $this->hasMany(PrepaymentAllocation::class);
+    }
 }

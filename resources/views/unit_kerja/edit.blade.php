@@ -8,10 +8,7 @@
                 <form action="{{ route('unit_kerja.update', $unit_kerja->id) }}" method="POST">
                     @csrf
                     @method('PUT')
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-
                         <div>
                             <label for="nama_unit" class="block text-sm font-medium text-gray-700">Nama</label>
                             <input type="text" name="nama_unit" id="nama_unit"

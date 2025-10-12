@@ -15,7 +15,9 @@ class TargetUnitController extends Controller
     {
         $query = TargetUnit::with(['unit', 'komponen', 'levelKaryawan'])
             ->join('unit_kerjas', 'targetunits.unit_kerja_id', '=', 'unit_kerjas.id')
-            ->orderBy('unit_kerjas.nama_unit')
+            ->orderBy('unit_kerjas.nama_unit', 'asc')
+            ->orderBy('targetunits.bulan', 'asc')
+            ->orderBy('targetunits.tahun', 'asc')
             ->select('targetunits.*');
 
         if ($unit = request('filter_tipe')) {

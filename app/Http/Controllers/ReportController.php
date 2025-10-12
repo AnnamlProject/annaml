@@ -7,6 +7,7 @@ use App\chartOfAccount;
 use App\Exports\TargetWahanaExport;
 use App\JenisHari;
 use App\SalesTaxes;
+use App\StartNewYear;
 use App\TargetWahana;
 use App\UnitKerja;
 use App\Wahana;
@@ -380,5 +381,67 @@ class ReportController extends Controller
     public function exportExcelWahana(Request $request)
     {
         return Excel::download(new TargetWahanaExport($request), 'report_target_wahana.xlsx');
+    }
+    public function aruskasFilter()
+    {
+        $account = \App\ChartOfAccount::whereHas('klasifikasiAkun', function ($query) {
+            $query->whereIn('nama_klasifikasi', ['Cash', 'Bank']);
+        })->get();
+        $tahun_buku = StartNewYear::all();
+
+        return view('arus_kas.filter_arus_kas', compact('account', 'tahun_buku'));
+    }
+    public function reportArusKas(Request $request)
+    {
+        $tanggalAwal = $request->start_date;
+        $tanggalAkhir = $request->end_date;
+
+        // 1️⃣ Ambil akun kas/bank (bisa dari filter user atau default)
+        $selectedAccountsRaw = explode(',', $request->selected_accounts ?? '');
+        $selectedAccountCodes = [];
+        foreach ($selectedAccountsRaw as $item) {
+            $parts = explode(' - ', $item);
+            if (count($parts) > 0) {
+                $selectedAccountCodes[] = trim($parts[0]);
+            }
+        }
+
+        if (empty($selectedAccountCodes)) {
+            // Jika user belum pilih, ambil semua akun dengan klasifikasi Cash/Bank
+            $selectedAccountCodes = \App\ChartOfAccount::whereHas('klasifikasiAkun', function ($q) {
+                $q->whereIn('nama_klasifikasi', ['Cash', 'Bank']);
+            })->pluck('kode_akun')->toArray();
+        }
+
+        // 2️⃣ Ambil jurnal detail yang melibatkan akun kas/bank
+        $cashDetails = \App\JournalEntryDetail::with(['journalEntry', 'akun'])
+            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+            ->whereIn('kode_akun', $selectedAccountCodes)
+            ->get();
+
+        $rows = [];
+
+        // 3️⃣ Bangun struktur laporan
+        foreach ($cashDetails as $detail) {
+            $entry = $detail->journalEntry;
+
+            // Ambil semua lawan akun dalam jurnal ini, kecuali akun kas/bank
+            $lawanAkun = \App\JournalEntryDetail::where('journal_entry_id', $detail->journal_entry_id)
+                ->whereNotIn('kode_akun', $selectedAccountCodes)
+                ->pluck('kode_akun')
+                ->implode(', ');
+
+            $rows[] = [
+                'tanggal'    => $entry->tanggal,
+                'source'     => $entry->source,
+                'akun_kas'   => $detail->kode_akun,
+                'lawan_akun' => $lawanAkun,
+                'keterangan' => $entry->comment ?? $detail->comment,
+                'cash_in'    => $detail->debits > 0 ? $detail->debits : 0,
+                'cash_out'   => $detail->credits > 0 ? $detail->credits : 0,
+            ];
+        }
+
+        return view('arus_kas.report_arus_kas', compact('rows', 'tanggalAwal', 'tanggalAkhir'));
     }
 }

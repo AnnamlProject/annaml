@@ -3,7 +3,10 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white p-8 shadow-xl rounded-xl">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <form method="POST" action="{{ route('purchase_order.update', $purchaseOrder->id) }}">
                     @csrf
                     @method('PUT')
@@ -18,6 +21,8 @@
                         </div>
                     @endif
 
+
+                    <h2 class="font-bold text-lg">Edit Purchase Order</h2>
                     <!-- FORM HEADER -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
@@ -98,17 +103,22 @@
                     <!-- TABEL ITEM -->
                     <div class="mt-8">
                         <h3 class="font-semibold text-lg mb-2">🛒 Order Items</h3>
-                        <div class="overflow-auto">
-                            <table class="w-full border text-sm text-left shadow-md">
-                                <thead class="bg-blue-100 text-gray-700">
+                        <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
+                            <table class="w-full border-collapse border text-sm whitespace-nowrap">
+
+                                @php
+                                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                    $textFooter = \App\Setting::get('text_footer', 'ANTS LITE+ ©2025_AN NAML CORP.');
+                                @endphp
+                                <thead
+                                    class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                     <tr>
                                         <th class="p-2">Item</th>
-                                        <th>Qty</th>
                                         <th>Order</th>
-                                        <th>Back Order</th>
                                         <th>Unit</th>
                                         <th>Description</th>
                                         <th>Price</th>
+                                        <th>Discount</th>
                                         <th>Tax</th>
                                         <th>Tax Amount</th>
                                         <th>Amount</th>
@@ -118,44 +128,44 @@
                                 </thead>
                                 <tbody id="item-table-body">
                                     @foreach ($purchaseOrder->details as $i => $detail)
-                                        <tr class="bg-white even:bg-gray-50 border-b">
+                                        <tr class="item-row bg-white even:bg-gray-50 border-b"
+                                            data-index="{{ $i }}">
                                             <td>
                                                 <input type="hidden" name="items[{{ $i }}][item_id]"
                                                     value="{{ $detail->item_id }}">
                                                 <input type="text" class="w-full border rounded bg-gray-100"
                                                     value="{{ $detail->item_description }}" readonly>
                                             </td>
-                                            <td>
-                                                <input type="number" name="items[{{ $i }}][quantity]"
-                                                    class="w-full border rounded qty-{{ $i }}"
-                                                    value="{{ $detail->quantity }}">
-                                            </td>
+
                                             <td>
                                                 <input type="number" name="items[{{ $i }}][order]"
                                                     class="w-full border rounded order-{{ $i }}"
                                                     value="{{ $detail->order }}">
                                             </td>
-                                            <td>
-                                                <input type="number" readonly
-                                                    class="w-full border rounded bg-gray-100 back-{{ $i }}"
-                                                    name="items[{{ $i }}][back_order]"
-                                                    value="{{ $detail->back_order }}">
-                                            </td>
+
                                             <td>
                                                 <input type="text" name="items[{{ $i }}][unit]"
-                                                    class="w-full border rounded" value="{{ $detail->unit }}">
+                                                    class="w-full border rounded" value="{{ $detail->unit }}" readonly>
                                             </td>
+
                                             <td>
                                                 <input type="text" name="items[{{ $i }}][description]"
                                                     class="w-full border rounded bg-gray-100" readonly
                                                     value="{{ $detail->item_description }}">
                                             </td>
+
                                             <td>
-                                                <input type="number" step="0.01"
-                                                    name="items[{{ $i }}][price]"
-                                                    class="w-full border rounded price-hidden-{{ $i }}"
-                                                    value="{{ $detail->price }}">
+                                                <input type="text" name="items[{{ $i }}][price]"
+                                                    class="w-full border text-right rounded price-hidden-{{ $i }}"
+                                                    value="{{ number_format($detail->price ?? 0, 2, '.', ',') }}">
                                             </td>
+
+                                            <td>
+                                                <input type="text" name="items[{{ $i }}][discount]"
+                                                    class="w-full border rounded text-right discount-hidden-{{ $i }}"
+                                                    value="{{ number_format($detail->discount ?? 0, 2, '.', ',') }}">
+                                            </td>
+
                                             <td>
                                                 <select name="items[{{ $i }}][tax_id]"
                                                     class="w-full border rounded tax-{{ $i }}">
@@ -163,34 +173,39 @@
                                                     @foreach ($sales_taxes as $tax)
                                                         <option value="{{ $tax->id }}"
                                                             data-rate="{{ $tax->rate }}"
+                                                            data-type="{{ $tax->type }}"
                                                             {{ $detail->tax_id == $tax->id ? 'selected' : '' }}>
-                                                            ({{ $tax->rate }}%)
+                                                            {{ $tax->name }} ({{ $tax->rate }}%)
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </td>
+
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 tax_amount-display-{{ $i }}"
-                                                    value="{{ number_format($detail->tax_amount ?? 0, 0, '.', ',') }}">
+                                                    class="w-full border text-right rounded bg-gray-100 tax_amount-display-{{ $i }}"
+                                                    value="{{ number_format($detail->tax_amount ?? 0, 2, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][tax_amount]"
-                                                    class="tax_amount-hidden tax_amount-hidden-{{ $i }}"
+                                                    class="tax_amount-hidden  tax_amount-hidden-{{ $i }}"
                                                     value="{{ $detail->tax_amount }}">
                                             </td>
+
                                             <td>
                                                 <input type="text" readonly
-                                                    class="w-full border rounded bg-gray-100 amount-display-{{ $i }}"
-                                                    value="{{ number_format($detail->amount ?? 0, 0, '.', ',') }}">
+                                                    class="w-full border text-right rounded bg-gray-100 amount-display-{{ $i }}"
+                                                    value="{{ number_format($detail->amount ?? 0, 2, '.', ',') }}">
                                                 <input type="hidden" name="items[{{ $i }}][amount]"
                                                     class="amount-hidden amount-hidden-{{ $i }}"
                                                     value="{{ $detail->amount }}">
                                             </td>
+
                                             <td>
                                                 <input type="text" readonly class="w-full border rounded bg-gray-100"
                                                     value="{{ optional($detail->account)->nama_akun }}">
                                                 <input type="hidden" name="items[{{ $i }}][account_id]"
                                                     value="{{ $detail->account_id }}">
                                             </td>
+
                                             <td class="text-center">
                                                 <button type="button" class="remove-row text-red-500 font-bold"
                                                     data-index="{{ $i }}">×</button>
@@ -198,32 +213,33 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+
                                 <tfoot>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="7"></td>
                                         <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                         <td><input type="text" id="subtotal" readonly
                                                 class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="7"></td>
                                         <td class="pr-3 text-right font-semibold">Total Tax :</td>
                                         <td><input type="text" id="grand-tax" readonly
                                                 class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="7"></td>
                                         <td class="pr-3 text-right font-semibold">Freight :</td>
                                         <td>
                                             <input type="hidden" id="freight" name="freight"
                                                 value="{{ $purchaseOrder->freight ?? 0 }}">
                                             <input type="text" id="freight-display"
                                                 class="w-32 border rounded text-right px-2 py-1 bg-gray-100"
-                                                value="{{ number_format($purchaseOrder->freight ?? 0, 0, '.', ',') }}">
+                                                value="{{ number_format($purchaseOrder->freight ?? 0, 2, '.', ',') }}">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="8"></td>
+                                        <td colspan="7"></td>
                                         <td class="pr-3 text-right font-semibold">Grand Total :</td>
                                         <td><input type="text" id="grand-total" readonly
                                                 class="w-32 border rounded text-right px-2 py-1 bg-gray-100 font-bold">
@@ -249,15 +265,16 @@
                     </div>
 
                     <!-- Tombol -->
-                    <div class="mt-8 flex justify-start space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition">
-                            💾 Update
-                        </button>
+                    <div class="mt-8 flex justify-end space-x-4">
                         <a href="{{ route('purchase_order.index') }}"
                             class="px-6 py-2 bg-gray-300 rounded-lg shadow hover:bg-gray-400 transition">
-                            ❌ Cancel
+                            Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+                            Process
+                        </button>
+
                     </div>
                 </form>
             </div>
@@ -319,7 +336,7 @@
                         clearAccounts();
                         (res.accounts || []).forEach(function(a) {
                             const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                            $account.append(`<option value="${a.account_id}">${text}</option>`);
+                            $account.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
                         // ✅ Preselect account lama
@@ -345,30 +362,40 @@
             }
 
 
+            function cleanNumber(value) {
+                return parseFloat((value || '0').toString().replace(/[^0-9.\-]/g, '')) || 0;
+            }
+
             function formatNumber(num) {
                 return Number(num).toLocaleString('en-US', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 });
             }
 
-            window.calculateBackOrder = function(index) {
-                const qty = parseFloat($(`.qty-${index}`).val()) || 0;
-                const order = parseFloat($(`.order-${index}`).val()) || 0;
-                $(`.back-${index}`).val(qty - order);
-            }
-
+            // ======== CORE CALCULATIONS ==========
             window.calculateAmount = function(index) {
                 const order = parseFloat($(`.order-${index}`).val()) || 0;
-                const price = parseFloat($(`.price-hidden-${index}`).val()) || 0;
+                const price = cleanNumber($(`.price-hidden-${index}`).val());
+                const discount = cleanNumber($(`.discount-hidden-${index}`).val());
+                const taxSelect = document.querySelector(`.tax-${index}`);
                 const taxPercent = parseFloat($(`.tax-${index} option:selected`).data('rate')) || 0;
+                const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
 
-                const baseAmount = order * price;
-                const taxAmount = baseAmount * (taxPercent / 100);
+                const baseAmount = (price - discount) * order;
+                let taxAmount = (baseAmount * taxPercent) / 100;
+                let finalValue = baseAmount;
 
+                if (taxType === 'input_tax') {
+                    finalValue += taxAmount; // PPN → tambah
+                } else if (taxType === 'withholding_tax') {
+                    finalValue -= taxAmount; // PPh → kurang
+                    if (finalValue < 0) finalValue = 0;
+                }
+
+                // Display values
                 $(`.amount-display-${index}`).val(formatNumber(baseAmount));
                 $(`.tax_amount-display-${index}`).val(formatNumber(taxAmount));
-
                 $(`.amount-hidden-${index}`).val(baseAmount);
                 $(`.tax_amount-hidden-${index}`).val(taxAmount);
 
@@ -379,15 +406,18 @@
                 let subtotal = 0,
                     totalTax = 0;
 
-                $('.amount-hidden').each(function() {
-                    subtotal += parseFloat($(this).val()) || 0;
+                $('.item-row').each(function() {
+                    const index = $(this).data('index');
+                    const amount = cleanNumber($(`.amount-hidden-${index}`).val());
+                    const taxAmount = cleanNumber($(`.tax_amount-hidden-${index}`).val());
+                    const taxType = $(`.tax-${index} option:selected`).data('type') || 'input_tax';
+
+                    subtotal += amount;
+                    if (taxType === 'input_tax') totalTax += taxAmount;
+                    else if (taxType === 'withholding_tax') totalTax -= taxAmount;
                 });
 
-                $('.tax_amount-hidden').each(function() {
-                    totalTax += parseFloat($(this).val()) || 0;
-                });
-
-                const freight = parseFloat($('#freight').val()) || 0;
+                const freight = cleanNumber($('#freight').val());
                 const grandTotal = subtotal + totalTax + freight;
 
                 $('#subtotal').val(formatNumber(subtotal));
@@ -396,22 +426,16 @@
                 $('#freight-display').val(formatNumber(freight));
             }
 
-            // Delegation: realtime update
+            // ======== EVENT HANDLERS ==========
             $(document).on('input',
-                'input[name^="items"][name$="[quantity]"], input[name^="items"][name$="[order]"]',
+                'input[name^="items"][name$="[order]"], input[name^="items"][name$="[price]"], input[name^="items"][name$="[discount]"]',
                 function() {
-                    const index = $(this).closest('tr').index();
-                    calculateBackOrder(index);
+                    const index = $(this).closest('tr').data('index');
                     calculateAmount(index);
                 });
 
-            $(document).on('input', 'input[name^="items"][name$="[price]"]', function() {
-                const index = $(this).closest('tr').index();
-                calculateAmount(index);
-            });
-
             $(document).on('change', 'select[name^="items"][name$="[tax_id]"]', function() {
-                const index = $(this).closest('tr').index();
+                const index = $(this).closest('tr').data('index');
                 calculateAmount(index);
             });
 
@@ -422,7 +446,7 @@
                 calculateTotals();
             });
 
-            // Initial load
+            // ======== INITIAL LOAD ==========
             @foreach ($purchaseOrder->details as $i => $detail)
                 calculateAmount({{ $i }});
             @endforeach

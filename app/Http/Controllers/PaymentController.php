@@ -6,6 +6,8 @@ use App\ChartOfAccount;
 use App\PaymentMethod;
 use App\Payment;
 use App\PaymentDetail;
+use App\Prepayment;
+use App\PrepaymentAllocation;
 use App\Vendors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,64 +29,53 @@ class PaymentController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
-            'jenis_pembayaran_id' => 'required',
-            'from_account' => 'required|string',
-            'source' => 'required|string',
-            'vendor_id' => 'required',
-            'payment_date' => 'required|date',
-            'type' => 'required|in:Invoice,Other',
-            'comment' => 'nullable|string',
+        $vendorId = $request->vendor_id;
+        $tanggal_payment = $request->payment_date;
+        $source = $request->source;
+        $jenis_pembayaran = $request->jenis_pembayaran_id;
+        $account_payment = $request->payment_method_account_id;
+        $comment = $request->comment;
+
+
+        $payment = Payment::create([
+            'vendor_id' => $vendorId,
+            'jenis_pembayaran_id' => $jenis_pembayaran,
+            'payment_method_account_id' => $account_payment,
+            'payment_date' => $tanggal_payment,
+            'type' => 'vendor_payment',
+            'source' => $source,
+            'comment' => $comment,
         ]);
 
-        DB::beginTransaction();
-
-        try {
-            $payment = Payment::create([
-                'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
-                'from_account' => $request->from_account,
-                'source' => $request->source,
-                'vendor_id' => $request->vendor_id,
-                'payment_date' => $request->payment_date,
-                'type' => $request->type,
-                'comment' => $request->comment,
-            ]);
-
-            if ($request->type === 'Invoice') {
-                foreach ($request->invoice_details as $detail) {
-                    if (!empty($detail['invoice_number'])) {
-                        PaymentDetail::create([
-                            'payment_id' => $payment->id,
-                            'due_date' => $detail['due_date'] ?? null,
-                            'invoice_number' => $detail['invoice_number'],
-                            'original_amount' => $detail['original_amount'] ?? 0,
-                            'amount_owing' => $detail['amount_owing'] ?? 0,
-                            'discount_available' => $detail['discount_available'] ?? 0,
-                            'discount_taken' => $detail['discount_taken'] ?? 0,
-                            'payment_amount' => $detail['payment_amount'] ?? 0,
-                        ]);
-                    }
-                }
-            } elseif ($request->type === 'Other') {
-                foreach ($request->other_details as $detail) {
-                    if (!empty($detail['account'])) {
-                        PaymentDetail::create([
-                            'payment_id' => $payment->id,
-                            'account_id' => $detail['account'],
-                            'description' => $detail['description'] ?? null,
-                            'amount' => $detail['amount'] ?? 0,
-                            'tax' => $detail['tax'] ?? 0,
-                            'allocation' => $detail['allocation'] ?? null,
-                        ]);
-                    }
+        if ($request->payment_amount) {
+            foreach ($request->payment_amount as $invoiceId => $amount) {
+                if ($amount > 0) {
+                    PaymentDetail::create([
+                        'payment_id' => $payment->id,
+                        'payment_amount' => $request->payment_amount,
+                        'invoice_number_id' => $request->invoice_number_id,
+                        'account_id' => $request->account_id ?? null
+                    ]);
                 }
             }
+        }
 
-            DB::commit();
-            return redirect()->route('payment.index')->with('success', 'Payment saved successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withErrors(['error' => 'Failed to save payment: ' . $e->getMessage()]);
+        // 2️⃣ Simpan alokasi prepayment
+        if ($request->prepayment_allocations) {
+            foreach ($request->prepayment_allocations as $prepaymentId => $amount) {
+                if ($amount > 0) {
+                    PrepaymentAllocation::create([
+                        'prepayment_id' => $prepaymentId,
+                        'purchase_invoice_id' => null, // nanti bisa dikaitkan
+                        'allocated_amount' => $amount,
+                    ]);
+
+                    // kurangi saldo prepayment
+                    $prepayment = Prepayment::find($prepaymentId);
+                    $prepayment->amount -= $amount;
+                    $prepayment->save();
+                }
+            }
         }
     }
 }

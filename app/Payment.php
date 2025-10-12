@@ -9,7 +9,7 @@ class Payment extends Model
     //
     protected $fillable = [
         'jenis_pembayaran_id',
-        'from_account',
+        'payment_method_account_id',
         'source',
         'vendor_id',
         'payment_date',
@@ -27,5 +27,9 @@ class Payment extends Model
     public function details()
     {
         return $this->hasMany(PaymentDetail::class);
+    }
+    public function PaymentMethodAccount()
+    {
+        return $this->belongsTo(PaymentMethodDetail::class);
     }
 }

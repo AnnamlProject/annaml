@@ -3,7 +3,10 @@
     <div class="py-10">
         <div class="py-8">
             <div class="w-full px-4 sm:px-6 lg:px-8">
-                <div class="bg-white rounded-xl shadow-md p-6">
+                @php
+                    $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                @endphp
+                <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                     <div id="tabs" class="type-section">
                         <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
                             <li><a href="#select_item" class="tab-link active">Proces Prepayment</a></li>
@@ -118,11 +121,11 @@
                         <div class="mt-6 flex justify-end gap-4">
                             <a href="{{ route('prepayment.index') }}"
                                 class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
-                                <i class="fas fa-arrow-left mr-2"></i> Batal
+                                Cancel
                             </a>
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-semibold text-sm rounded-md hover:bg-indigo-700">
-                                <i class="fas fa-save mr-2"></i> Simpan
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-semibold text-sm rounded-md hover:bg-green-700">
+                                Process
                             </button>
                         </div>
                     </form>

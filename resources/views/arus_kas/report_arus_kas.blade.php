@@ -146,31 +146,86 @@
                         {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
                     </p>
                 </div>
+                @php
+                    $grouped = collect($rows)->groupBy('source');
+                    $grandCashIn = 0;
+                    $grandCashOut = 0;
+                @endphp
+
                 <table class="min-w-full border-collapse border border-gray-300 text-sm">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="border p-2">Tanggal</th>
-                            <th class="border p-2">Source</th>
+                            <th class="border p-2 w-24">Tanggal</th>
+                            <th class="border p-2 w-40">Source</th>
                             <th class="border p-2">Akun Kas/Bank</th>
                             <th class="border p-2">Lawan Akun</th>
                             <th class="border p-2">Keterangan</th>
-                            <th class="border p-2 text-right">Cash In</th>
-                            <th class="border p-2 text-right">Cash Out</th>
+                            <th class="border p-2 text-right w-28">Cash In</th>
+                            <th class="border p-2 text-right w-28">Cash Out</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($rows as $r)
-                            <tr>
-                                <td class="border p-2">{{ \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y') }}</td>
-                                <td class="border p-2">{{ $r['source'] }}</td>
-                                <td class="border p-2">{{ $r['akun_kas'] }}</td>
-                                <td class="border p-2">{{ $r['lawan_akun'] }}</td>
-                                <td class="border p-2">{{ $r['keterangan'] }}</td>
-                                <td class="border p-2 text-right">{{ number_format($r['cash_in'], 2) }}</td>
-                                <td class="border p-2 text-right">{{ number_format($r['cash_out'], 2) }}</td>
+                        @foreach ($grouped as $source => $items)
+                            {{-- Header Source --}}
+                            <tr class="bg-gray-200 font-semibold">
+                                <td colspan="7" class="p-2 text-left">
+                                    Source: {{ $source }}
+                                </td>
                             </tr>
+
+                            @php
+                                $subtotalIn = 0;
+                                $subtotalOut = 0;
+                            @endphp
+
+                            {{-- Baris Detail --}}
+                            @foreach ($items as $r)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="border p-2">{{ \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y') }}</td>
+                                    <td class="border p-2">{{ $r['source'] }}</td>
+                                    <td class="border p-2">{{ $r['akun_kas'] }}</td>
+                                    <td class="border p-2">{{ $r['lawan_akun'] }}</td>
+                                    <td class="border p-2">{{ $r['keterangan'] }}</td>
+                                    <td class="border p-2 text-right">{{ number_format($r['cash_in'], 2) }}</td>
+                                    <td class="border p-2 text-right">{{ number_format($r['cash_out'], 2) }}</td>
+                                </tr>
+
+                                @php
+                                    $subtotalIn += $r['cash_in'];
+                                    $subtotalOut += $r['cash_out'];
+                                @endphp
+                            @endforeach
+
+                            {{-- Subtotal per Source --}}
+                            <tr class="font-semibold bg-gray-100">
+                                <td colspan="5" class="p-2 text-right">Subtotal ({{ $source }})</td>
+                                <td class="border p-2 text-right">{{ number_format($subtotalIn, 2) }}</td>
+                                <td class="border p-2 text-right">{{ number_format($subtotalOut, 2) }}</td>
+                            </tr>
+
+                            @php
+                                $grandCashIn += $subtotalIn;
+                                $grandCashOut += $subtotalOut;
+                            @endphp
                         @endforeach
                     </tbody>
+
+                    {{-- Total Keseluruhan --}}
+                    <tfoot>
+                        <tr class="bg-gray-300 font-bold">
+                            <td colspan="5" class="p-2 text-right">TOTAL KESELURUHAN</td>
+                            <td class="border p-2 text-right">{{ number_format($grandCashIn, 2) }}</td>
+                            <td class="border p-2 text-right">{{ number_format($grandCashOut, 2) }}</td>
+                        </tr>
+
+                        {{-- Tambahkan baris saldo akhir kas --}}
+                        {{-- <tr class="bg-gray-200 font-semibold">
+                            <td colspan="5" class="p-2 text-right">SALDO AKHIR KAS</td>
+                            <td colspan="2" class="border p-2 text-right">
+                                {{ number_format($grandCashIn - $grandCashOut, 2) }}
+                            </td>
+                        </tr> --}}
+                    </tfoot>
                 </table>
             </div>
         </div>

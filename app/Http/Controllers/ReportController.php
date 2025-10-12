@@ -396,7 +396,7 @@ class ReportController extends Controller
         $tanggalAwal = $request->start_date;
         $tanggalAkhir = $request->end_date;
 
-        // 1️⃣ Ambil akun kas/bank (bisa dari filter user atau default)
+        // 1️⃣ Ambil akun kas/bank
         $selectedAccountsRaw = explode(',', $request->selected_accounts ?? '');
         $selectedAccountCodes = [];
         foreach ($selectedAccountsRaw as $item) {
@@ -407,39 +407,56 @@ class ReportController extends Controller
         }
 
         if (empty($selectedAccountCodes)) {
-            // Jika user belum pilih, ambil semua akun dengan klasifikasi Cash/Bank
             $selectedAccountCodes = \App\ChartOfAccount::whereHas('klasifikasiAkun', function ($q) {
                 $q->whereIn('nama_klasifikasi', ['Cash', 'Bank']);
             })->pluck('kode_akun')->toArray();
         }
 
-        // 2️⃣ Ambil jurnal detail yang melibatkan akun kas/bank
-        $cashDetails = \App\JournalEntryDetail::with(['journalEntry', 'akun'])
-            ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
-            ->whereIn('kode_akun', $selectedAccountCodes)
+        // 2️⃣ Ambil semua jurnal di rentang tanggal
+        $journalEntries = \App\JournalEntry::with(['details.chartOfAccount'])
+            ->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir])
             ->get();
 
         $rows = [];
 
-        // 3️⃣ Bangun struktur laporan
-        foreach ($cashDetails as $detail) {
-            $entry = $detail->journalEntry;
+        // 3️⃣ Loop tiap jurnal (group per source)
+        foreach ($journalEntries as $entry) {
+            $details = $entry->details;
 
-            // Ambil semua lawan akun dalam jurnal ini, kecuali akun kas/bank
-            $lawanAkun = \App\JournalEntryDetail::where('journal_entry_id', $detail->journal_entry_id)
-                ->whereNotIn('kode_akun', $selectedAccountCodes)
-                ->pluck('kode_akun')
-                ->implode(', ');
+            // pisahkan kas vs lawan
+            $kasDetails = $details->whereIn('kode_akun', $selectedAccountCodes);
+            $lawanDetails = $details->whereNotIn('kode_akun', $selectedAccountCodes);
 
-            $rows[] = [
-                'tanggal'    => $entry->tanggal,
-                'source'     => $entry->source,
-                'akun_kas'   => $detail->kode_akun,
-                'lawan_akun' => $lawanAkun,
-                'keterangan' => $entry->comment ?? $detail->comment,
-                'cash_in'    => $detail->debits > 0 ? $detail->debits : 0,
-                'cash_out'   => $detail->credits > 0 ? $detail->credits : 0,
-            ];
+            if ($kasDetails->isEmpty() || $lawanDetails->isEmpty()) continue;
+
+            // total lawan untuk proporsi
+            $totalDebetLawan = $lawanDetails->sum('debits');
+            $totalKreditLawan = $lawanDetails->sum('credits');
+
+            foreach ($kasDetails as $kas) {
+                $isCashIn = $kas->debits > 0;
+                $totalKas = $isCashIn ? $kas->debits : $kas->credits;
+
+                foreach ($lawanDetails as $lawan) {
+                    // ambil nilai proporsi berdasarkan sisi lawan
+                    $nilaiLawan = $isCashIn ? $lawan->credits : $lawan->debits;
+                    $totalLawan = $isCashIn ? $totalKreditLawan : $totalDebetLawan;
+
+                    if ($totalLawan == 0) $totalLawan = 1; // hindari div/0
+                    $proporsi = $nilaiLawan / $totalLawan;
+                    $nilaiKasProporsional = $totalKas * $proporsi;
+
+                    $rows[] = [
+                        'tanggal'    => $entry->tanggal,
+                        'source'     => $entry->source,
+                        'akun_kas'   => $kas->kode_akun . ' - ' . ($kas->chartOfAccount->nama_akun ?? ''),
+                        'lawan_akun' => $lawan->kode_akun . ' - ' . ($lawan->chartOfAccount->nama_akun ?? ''),
+                        'keterangan' => $entry->comment ?? $kas->comment,
+                        'cash_in'    => $isCashIn ? $nilaiKasProporsional : 0,
+                        'cash_out'   => !$isCashIn ? $nilaiKasProporsional : 0,
+                    ];
+                }
+            }
         }
 
         return view('arus_kas.report_arus_kas', compact('rows', 'tanggalAwal', 'tanggalAkhir'));

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\JenisHari;
+use App\UnitKerja;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JenisHariController extends Controller
 {
@@ -15,24 +17,56 @@ class JenisHariController extends Controller
     }
     public function create()
     {
-        return view('jenis_hari.create');
+        $unitKerja = UnitKerja::all();
+        $jenis_hari = null;
+        return view('jenis_hari.create', compact('unitKerja', 'jenis_hari'));
     }
     public function store(Request $request)
     {
+        // 1️⃣ Validasi array
         $validated = $request->validate([
-            // Hapus 'required' karena bisa auto-generate
-
-            'nama' => 'string|max:255',
-            'deskripsi' => 'nullable|string',
-            'jam_mulai'     => 'required|date_format:H:i',
-            'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
+            'unit_kerja_id.*' => 'required|exists:unit_kerjas,id',
+            'nama.*'          => 'required|string|max:255',
+            'deskripsi.*'     => 'nullable|string',
+            'jam_mulai.*'     => 'required|date_format:H:i',
+            'jam_selesai.*'   => 'required|date_format:H:i',
         ]);
 
+        // 2️⃣ Validasi jam_selesai setelah jam_mulai per baris
+        foreach ($request->jam_mulai as $index => $mulai) {
+            $selesai = $request->jam_selesai[$index] ?? null;
+            if ($mulai && $selesai && $selesai <= $mulai) {
+                return back()
+                    ->withErrors(["jam_selesai.$index" => "Jam selesai harus lebih besar dari jam mulai pada baris " . ($index + 1)])
+                    ->withInput();
+            }
+        }
 
-        JenisHari::create($validated);
+        // 3️⃣ Siapkan data untuk insert batch
+        $data = [];
+        for ($i = 0; $i < count($request->unit_kerja_id); $i++) {
+            if (empty($request->unit_kerja_id[$i])) continue;
 
-        return redirect()->route('jenis_hari.index')->with('success', 'Jenis Hari created successfully.');
+            $data[] = [
+                'unit_kerja_id' => $request->unit_kerja_id[$i],
+                'nama'          => $request->nama[$i],
+                'jam_mulai'     => $request->jam_mulai[$i],
+                'jam_selesai'   => $request->jam_selesai[$i],
+                'deskripsi'     => $request->deskripsi[$i] ?? null,
+                'created_at'    => now(),
+                'updated_at'    => now()
+            ];
+        }
+
+        // 4️⃣ Simpan data
+        if (count($data)) {
+            \App\JenisHari::insert($data);
+            return redirect()->route('jenis_hari.index')->with('success', 'Data berhasil ditambahkan.');
+        } else {
+            return back()->with('error', 'Tidak ada data yang dimasukkan.');
+        }
     }
+
     public function show($id)
     {
         $data = JenisHari::findOrFail($id);
@@ -40,12 +74,14 @@ class JenisHariController extends Controller
     }
     public function edit($id)
     {
-        $data = JenisHari::findOrFail($id);
-        return view('jenis_hari.edit', compact('data'));
+        $data = JenisHari::with(['unitKerja'])->findOrFail($id);
+        $unitKerja = UnitKerja::all();
+        return view('jenis_hari.edit', compact('data', 'unitKerja'));
     }
     public function update(Request $request, $id)
     {
         $request->validate([
+            'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'nama' => 'string|max:255',
             'deskripsi' => 'nullable|string',
             'jam_mulai'     => 'required|date_format:H:i',
@@ -61,10 +97,25 @@ class JenisHariController extends Controller
     }
     public function destroy($id)
     {
-        $jenis_hari = JenisHari::findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $jenis_hari = JenisHari::with(['BonusKaryawan', 'scheduling'])->findOrFail($id);
 
-        $jenis_hari->delete();
+                // 🚫 Cek apakah sudah dipakai di Invoice
+                if ($jenis_hari->BonusKaryawan()->exists()) {
+                    throw new \Exception("Jenis hari ini sudah digunakan dalam bonus karyawan tidak bisa dihapus.");
+                }
+                if ($jenis_hari->scheduling()->exists()) {
+                    throw new \Exception("Jenis hari ini sudah digunakan dalam scheduling tidak bisa dihapus.");
+                }
 
-        return redirect()->route('jenis_hari.index')->with('success', ' Data berhasil dihapus.');
+                // ✅ Kalau aman, hapus (details ikut terhapus otomatis via cascade)
+                $jenis_hari->delete();
+            });
+
+            return redirect()->route('jenis_hari.index')->with('success', 'Jenis hari berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('jenis_hari.index')->with('error', $e->getMessage());
+        }
     }
 }

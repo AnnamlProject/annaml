@@ -10,7 +10,20 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="nama" class="block font-medium">Nama Lokasi</label>
+                            <label for="unit_kerja_id" class="block font-medium">Unit Kerja</label>
+                            <select name="unit_kerja_id" id="unit_kerja_id"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($unitKerja as $g)
+                                    <option value="{{ $g->id }}"
+                                        {{ isset($jenis_hari) && $jenis_hari->unit_kerja_id == $g->id ? 'selected' : '' }}>
+                                        {{ $g->nama_unit }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="nama" class="block font-medium">Nama</label>
                             <input type="text" name="nama" id="nama" value="{{ old('nama', $data->nama) }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none
                                 focus:ring-2 focus:ring-blue-500 @error('nama') border-red-500 @enderror"

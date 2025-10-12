@@ -38,7 +38,7 @@
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </td>
                                     <td style="padding: 12px; border: 1px solid #ddd;">
-                                        <input type="number" name="deskripsi[]"
+                                        <input type="text" name="deskripsi[]"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Masukkan deskripsi(Opsional)">
                                     </td>

@@ -15,7 +15,7 @@ class AddInvoiceNumberIdDiPaymentDetail extends Migration
     {
         //
         Schema::table('payment_details', function (Blueprint $table) {
-            $table->foreignId('invoice_number_id')->nullable()->constrained('payment_invoices');
+            $table->foreignId('invoice_number_id')->nullable()->constrained('purchase_invoices');
             $table->dropColumn('invoice_number');
         });
     }

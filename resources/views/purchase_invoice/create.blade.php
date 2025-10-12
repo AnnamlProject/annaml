@@ -807,14 +807,15 @@
             }
 
 
-            // Delegation realtime
-            $(document).on('input',
-                'input[name^="items"][name$="[quantity]"], input[name^="items"][name$="[order]"]',
-                function() {
-                    const index = $(this).closest('tr').data('index');
+            // fallback universal untuk perubahan apa pun di table body
+            $(document).on('input change', '#items-body input, #items-body select', function() {
+                const index = $(this).closest('tr').data('index');
+                if (index !== undefined) {
                     calculateBackOrder(index);
                     calculateAmount(index);
-                });
+                }
+            });
+
 
             $(document).on('input',
                 'input[name^="items"][name$="[discount]"], input[name^="items"][name$="[quantity]"]',
@@ -841,7 +842,7 @@
             });
 
             function addRow() {
-                const newRow = addemEmptyRow(rowIndex);
+                const newRow = addEmptyRow(rowIndex);
                 $('#item-table-body').append(newRow);
                 attachSelect2(rowIndex);
                 rowIndex++;

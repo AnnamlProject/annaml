@@ -34,7 +34,7 @@ class PurchaseInvoiceController extends Controller
         $jenis_pembayaran = PaymentMethod::all();
         $items = Item::all();
         $accounts = chartOfAccount::all();
-        $purchase_order = PurchaseOrder::all();
+        $purchase_order = PurchaseOrder::where('status_purchase', 0)->get();
         $project = Project::all();
         $vendor = Vendors::all();
         $sales_taxes = SalesTaxes::all();

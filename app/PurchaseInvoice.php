@@ -28,6 +28,10 @@ class PurchaseInvoice extends Model
     {
         return $this->belongsTo(PaymentMethod::class);
     }
+    public function paymentmethodDetail()
+    {
+        return $this->belongsTo(PaymentMethodDetail::class, 'account_id');
+    }
     public function vendor()
     {
         return $this->belongsTo(Vendors::class);

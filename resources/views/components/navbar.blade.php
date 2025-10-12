@@ -907,6 +907,13 @@
                                             @endcan
 
 
+                                            @can('crew_shift_karyawan.access')
+                                                <a href="{{ route('crew_shift_karyawan.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Crew
+                                                    Scheduling
+
+                                                </a>
+                                            @endcan
                                             @can('shift_karyawan.access')
                                                 <a href="{{ route('shift_karyawan.index') }}"
                                                     class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Personnel

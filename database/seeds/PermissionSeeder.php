@@ -40,6 +40,14 @@ class PermissionSeeder extends Seeder
             'target_wahana.update',
             'target_wahana.delete',
 
+
+            // crew shift karywan
+            'crew_shift_karyawan.access',
+            'crew_shift_karyawan.create',
+            'crew_shift_karyawan.view',
+            'crew_shift_karyawan.update',
+            'crew_shift_karyawan.delete',
+
             //target unit modul
             'target_unit.access',
             'target_unit.create',

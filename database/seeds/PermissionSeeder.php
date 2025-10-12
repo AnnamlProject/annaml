@@ -48,6 +48,13 @@ class PermissionSeeder extends Seeder
             'crew_shift_karyawan.update',
             'crew_shift_karyawan.delete',
 
+            // group unit
+            'group_unit.access',
+            'group_unit.create',
+            'group_unit.view',
+            'group_unit.update',
+            'group_unit.delete',
+
             //target unit modul
             'target_unit.access',
             'target_unit.create',

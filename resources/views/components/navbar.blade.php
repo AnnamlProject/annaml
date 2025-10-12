@@ -849,6 +849,12 @@
                                                     Components By Level
                                                 </a>
                                             @endcan
+                                            @can('group_unit.access')
+                                                <a href="{{ route('group_unit.index') }}"
+                                                    class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Group
+                                                    Unit
+                                                </a>
+                                            @endcan
                                             @can('unit.access')
                                                 <a href="{{ route('unit_kerja.index') }}"
                                                     class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Units/Departemens

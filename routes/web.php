@@ -449,6 +449,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/slip-gaji/{id}', [SlipGajiController::class, 'show'])->name('slip.show')->middleware('permission:slip_gaji_nonstaff.access');
     Route::get('/slip-gaji/{id}/download', [SlipGajiController::class, 'download'])->name('slip.download');
 
+    // crew shift karyawan
+    Route::resource('crew_shift_karyawan', 'CrewShiftKaryawanControlller');
+
+    // group unit
+    Route::resource('group_unit', 'GroupUnitController');
+
     // rekap absensi
     Route::get('/rekap-absensi', [ReportController::class, 'filter'])->name('report.absensi.filter')->middleware('permission:rekap_absensi.access');
     Route::get('/rekap-absensi/hasil', [ReportController::class, 'hasil'])->name('report.absensi.hasil');

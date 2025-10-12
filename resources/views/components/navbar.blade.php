@@ -290,9 +290,9 @@
                                             {{-- <a href="{{ route('item_category.index') }}"
                                         class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Item
                                         Category</a>
-                                    <a href="{{ route('items.index') }}"
-                                        class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
-                                    </a> --}}
+                                        <a href="{{ route('items.index') }}"
+                                            class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Items
+                                        </a> --}}
                                             @can('payment_method.access')
                                                 <a href="{{ route('PaymentMethod.index') }}"
                                                     class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Payment
@@ -359,36 +359,27 @@
                                     </div>
                                 @endcan
 
-                                <!-- Reports Submenu -->
-                                {{-- <div class="relative" x-data="{ subOpen: false }">
-                                <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
-                                    class="w-full text-left px-4 py-3 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
-                                    <span class="text-gray-700 group-hover:text-blue-600">Reports</span>
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                                <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
-                                    x-transition:enter-start="opacity-0 translate-x-1"
-                                    x-transition:enter-end="opacity-100 translate-x-0"
-                                    x-transition:leave="transition ease-in duration-150"
-                                    x-transition:leave-start="opacity-100 translate-x-0"
-                                    x-transition:leave-end="opacity-0 translate-x-1"
-                                    class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
-                                    @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                                    <a href="{{ route('report.account') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Account
-                                        List</a>
-                                    <a href="{{ route('report.klasifikasi') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Account
-                                        Classification List</a>
-                                    <a href="{{ route('report.departemen-akun') }}"
-                                        class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Department
-                                        Accounts List</a>
+                                <div class="relative" x-data="{ subOpen: false }">
+                                    <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                        class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                        <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                        @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+
+                                    </div>
                                 </div>
-                            </div> --}}
                             </div>
                         </div>
                     @endcan
@@ -449,7 +440,6 @@
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Options
                                                 </a>
                                             @endcan
-
 
                                         </div>
                                     </div>
@@ -549,9 +539,26 @@
                                         </div>
                                     </div>
                                 @endcan
-
-
-
+                                <div class="relative" x-data="{ subOpen: false }">
+                                    <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                        class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                        <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                        @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endcan
@@ -658,10 +665,34 @@
                                         Inventory
                                     </a>
                                 @endcan
+                                <div class="relative" x-data="{ subOpen: false }">
+                                    <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                        class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                        <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                        @mouseenter="subOpen = true" @mouseleave="subOpen = false">
 
+
+                                    </div>
+                                </div>
                             </div>
+
+
                         </div>
                     @endcan
+
 
 
                     {{-- budgeting dropdown --}}
@@ -1051,6 +1082,33 @@
                                             x-transition:leave-end="opacity-0 translate-x-1"
                                             class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
                                             @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+                                            <a href="{{ route('linkedAccountAsset.index') }}"
+                                                class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Linked
+                                                Account
+                                                Asset
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endcan
+                                @can('setup_asset.access')
+                                    <div class="relative" x-data="{ subOpen: false }">
+                                        <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                            class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                            <span class="text-gray-700 group-hover:text-blue-600">Data</span>
+                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 translate-x-1"
+                                            x-transition:enter-end="opacity-100 translate-x-0"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 translate-x-0"
+                                            x-transition:leave-end="opacity-0 translate-x-1"
+                                            class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                            @mouseenter="subOpen = true" @mouseleave="subOpen = false">
                                             @can('kategori_asset.access')
                                                 <a href="{{ route('kategori_asset.index') }}"
                                                     class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Category
@@ -1103,6 +1161,28 @@
                                         Process
                                     </a>
                                 @endcan
+                                <div class="relative" x-data="{ subOpen: false }">
+                                    <button @mouseenter="subOpen = true" @mouseleave="subOpen = false"
+                                        class="w-full text-left px-2 py-1 hover:bg-blue-50 flex justify-between items-center group transition-colors duration-150">
+                                        <span class="text-gray-700 group-hover:text-blue-600">Report</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-600" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="subOpen" x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 translate-x-1"
+                                        x-transition:enter-end="opacity-100 translate-x-0"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 translate-x-0"
+                                        x-transition:leave-end="opacity-0 translate-x-1"
+                                        class="absolute left-full top-0 ml-1 w-56 bg-white shadow-xl rounded-lg border border-gray-200 py-2 z-50"
+                                        @mouseenter="subOpen = true" @mouseleave="subOpen = false">
+
+
+                                    </div>
+                                </div>
 
 
                                 {{-- <!-- Reports Submenu -->
@@ -1449,7 +1529,8 @@
                                             <a href="{{ route('purchase_order.documents.index') }}" @click="open = false"
                                                 class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
                                                 Order</a>
-                                            <a href="{{ route('purchase_invoice.documents.index') }}" @click="open = false"
+                                            <a href="{{ route('purchase_invoice.documents.index') }}"
+                                                @click="open = false"
                                                 class="block px-3 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Purchase
                                                 Invoice
                                             </a>
@@ -1558,9 +1639,11 @@
 
             <!-- Mobile Menu -->
             <div x-show="menuOpen" x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:enter-start="opacity-0 -translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
                 x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-1"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 -translate-y-1"
                 class="md:hidden border-t border-gray-200 bg-white">
                 <div class="px-2 pt-2 pb-3 space-y-1">
 

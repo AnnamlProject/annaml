@@ -211,6 +211,7 @@ Route::middleware(['auth'])->group(function () {
 
     // sales menu 
     Route::resource('linkedAccountSales', 'linkedAccountSalesController')->middleware('permission:linked_account_sales.access');
+    Route::resource('linkedAccountAsset', 'linkedAccountAssetController');
     Route::resource('sales_option', 'salesOptionsController')->middleware('permission:option_sales.access');
     Route::resource('sales_discount', 'SalesDiscountController')->middleware('permission:sales_discount.access');
 

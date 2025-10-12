@@ -2,19 +2,24 @@
 @section('content')
     <div class="py-8">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 @if (count($missingCodes) === 0)
                     <div class="text-center text-gray-500">
                         <i class="fas fa-check-circle text-green-500 text-3xl mb-3"></i>
-                        <p class="text-lg font-medium">Semua Linked Account Sales sudah terisi ✅</p>
-                        <a href="{{ route('linkedAccountSales.index') }}"
+                        <p class="text-lg font-medium">Semua Linked Account Asset sudah terisi ✅</p>
+                        <a href="{{ route('linkedAccountAsset.index') }}"
                             class="mt-4 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                             Kembali ke Daftar
                         </a>
                     </div>
                 @else
-                    <form action="{{ route('linkedAccountSales.store') }}" method="POST">
+                    <form action="{{ route('linkedAccountAsset.store') }}" method="POST">
                         @csrf
+
+                        <h2 class="font-bold text-lg"> Linked Account Asset Create</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             @foreach ($missingCodes as $kode)
                                 <div>
@@ -29,16 +34,10 @@
                                         {{-- Pilih daftar akun sesuai kategori kode --}}
                                         @php
                                             $options = collect();
-                                            if ($kode === 'Principal Bank Account') {
-                                                $options = $subBankAccounts->count() ? $subBankAccounts : $accounts;
-                                            } elseif ($kode === 'Account Receivable') {
-                                                $options = $akun2; // Kewajiban atau Aset, sesuaikan kebutuhan
-                                            } elseif ($kode === 'Freight Revenue' || $kode === 'Default Revenue') {
-                                                $options = $akun4; // Pendapatan
-                                            } elseif ($kode === 'Early Payment Discount') {
-                                                $options = $akun4; // Pendapatan juga?
-                                            } elseif ($kode === 'Prepaid Orders') {
-                                                $options = $akun1; // Aset
+                                            if ($kode === 'Expenses') {
+                                                $options = $akun5; // Kewajiban atau Aset, sesuaikan kebutuhan
+                                            } elseif ($kode === 'Accumulated Depreciation/Amortisation') {
+                                                $options = $akun1; // Kewajiban atau Aset, sesuaikan kebutuhan
                                             }
                                         @endphp
 
@@ -53,13 +52,13 @@
                         </div>
 
                         <div class="flex justify-end mt-5">
-                            <a href="{{ route('linkedAccountSales.index') }}"
+                            <a href="{{ route('linkedAccountAsset.index') }}"
                                 class="px-6 py-2 mr-3 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
-                                Kembali
+                                Cancel
                             </a>
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition">
-                                Simpan
+                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition">
+                                Process
                             </button>
                         </div>
                     </form>

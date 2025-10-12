@@ -81,6 +81,7 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             'kode_karyawan' => 'required|string',
             'nama_karyawan' => 'required|string',
+            'nama_panggilan' => 'required|string',
             'nik' => 'required|string',
             'tempat_lahir' => 'nullable|string',
             'tanggal_lahir' => 'nullable|date',
@@ -146,6 +147,7 @@ class EmployeeController extends Controller
         $this->validate($request, [
             'kode_karyawan' => 'required|string',
             'nama_karyawan' => 'required|string',
+            'nama_panggilan' => 'required|string',
             'nik' => 'required|string',
             'tempat_lahir' => 'nullable|string',
             'tanggal_lahir' => 'nullable|date',

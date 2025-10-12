@@ -135,7 +135,11 @@
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Nama Karyawan
+                                    Nama Sesuai KTP
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Nama Panggilan
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -243,6 +247,9 @@
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $Karyawan->nama_karyawan }}</div>
+                                    </td>
+                                    <td class="px-4 py-2 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $Karyawan->nama_panggilan }}</div>
                                     </td>
                                     <td class="px-4 py-2 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $Karyawan->nik }}</div>

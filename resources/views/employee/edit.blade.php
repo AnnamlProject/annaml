@@ -35,9 +35,14 @@
                             value="{{ $employee->kode_karyawan }}" required>
                     </div>
                     <div>
-                        <label>Nama Karyawan</label>
+                        <label>Nama Karyawan Sesuai KTP</label>
                         <input type="text" name="nama_karyawan" class="w-full border p-2"
                             value="{{ $employee->nama_karyawan }}" required>
+                    </div>
+                    <div>
+                        <label>Nama Panggilan</label>
+                        <input type="text" name="nama_panggilan" class="w-full border p-2"
+                            value="{{ $employee->nama_panggilan }}" required>
                     </div>
                     <div>
                         <label>User Login</label>

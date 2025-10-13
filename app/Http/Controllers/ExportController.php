@@ -6,6 +6,7 @@ use App\Exports\ChartOfAccountExport;
 use App\Exports\CustomersExport;
 use App\Exports\DepartemenExport;
 use App\Exports\EmployeeExport;
+use App\Exports\FiscalAccountExport;
 use App\Exports\IntangibleAssetExport;
 use App\Exports\ItemsExport;
 use App\Exports\JournalEntryExport;
@@ -20,6 +21,7 @@ use App\Exports\TaxRatesExport;
 use App\Exports\TransaksiWahanaExport;
 use App\Exports\VendorsExport;
 use App\Exports\WahanaExport;
+use App\FiscalAccount;
 use App\TransaksiWahana;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -94,5 +96,9 @@ class ExportController extends Controller
     public function exportJournalEntry()
     {
         return Excel::download(new JournalEntryExport, 'journal_entry.xlsx');
+    }
+    public function exportfiscal()
+    {
+        return Excel::download(new FiscalAccountExport, 'fiscal_account.xlsx');
     }
 }

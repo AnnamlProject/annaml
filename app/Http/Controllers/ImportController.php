@@ -6,6 +6,7 @@ use App\Imports\ChartOfAccountImport;
 use App\Imports\CustomersImport;
 use App\Imports\DepartemenImport;
 use App\Imports\EmployeeImport;
+use App\Imports\FiscalAccountImport;
 use App\Imports\IntangibleAssetImport;
 use App\Imports\ItemsImport;
 use App\Imports\JournalEntryImport;
@@ -266,5 +267,15 @@ class ImportController extends Controller
         } catch (\Throwable $e) {
             return back()->with('error', 'Terjadi kesalahan saat impor: ' . $e->getMessage());
         }
+    }
+
+    public function importfiscal(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,csv,xls',
+        ]);
+        Excel::import(new FiscalAccountImport, $request->file('file'));
+
+        return back()->with('success', 'Data Fiscal Account  berhasil diimpor.');
     }
 }

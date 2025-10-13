@@ -167,6 +167,10 @@ Route::middleware(['auth'])->group(function () {
 
     // fiscal
     Route::get('fiscal', [FiscalController::class, 'fiscal'])->name('fiscal.fiscal_report')->middleware('permission:fiscal.access');
+    Route::resource('fiscal_account', 'FiscalAccountController')->middleware('permission:fiscal_account.access');
+    Route::get('/export/fiscal', [ExportController::class, 'exportfiscal'])->name('export.fiscal');
+    Route::post('/import/fiscal', [ImportController::class, 'importfiscal'])->name('import.fiscal');
+
 
     Route::get('perhitungan_pajak_penghasilan', [PerhitunganPajakPenghasilanController::class, 'index'])->name('perhitungan_pajak_penghasilan.index')->middleware('permission:perhitungan_pajak_penghasilan.access');
     Route::post('/perhitungan-pajak/kredit-pajak/store', [PerhitunganPajakPenghasilanController::class, 'store'])->name('perhitungan_pajak.saveKreditPajak');

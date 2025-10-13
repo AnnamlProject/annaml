@@ -404,7 +404,7 @@
                         (res.accounts || []).forEach(function(a) {
                             const text =
                                 `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                            $select.append(`<option value="${a.account_id}">${text}</option>`);
+                            $select.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
                         // kalau form edit, bisa auto-select berdasarkan value lama

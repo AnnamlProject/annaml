@@ -89,8 +89,7 @@
                         <!-- Employee -->
                         <div>
                             <label class="block font-medium mb-1">Employee</label>
-                            <select name="sales_person_id" id="employee_id" class="w-full border rounded px-2 py-1 text-sm"
-                                required>
+                            <select name="sales_person_id" id="employee_id" class="w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Employee --</option>
                                 @foreach ($employee as $level)
                                     <option value="{{ $level->id }}"

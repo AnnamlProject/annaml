@@ -85,9 +85,8 @@
                         </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Sales Person</label>
-                            <select name="employee_id" id="employee_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
+                            <select name="sales_person_id" id="sales_person_id"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @foreach ($employees as $emp)
                                     <option value="{{ $emp->id }}"
                                         {{ $salesOrder->employee_id == $emp->id ? 'selected' : '' }}>

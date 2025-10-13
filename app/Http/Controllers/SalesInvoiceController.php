@@ -138,8 +138,7 @@ class SalesInvoiceController extends Controller
                 'shipping_date'       => $request->shipping_date,
                 'customers_id'        => $request->customers_id,
                 'sales_order_id'      => $request->sales_order_id,
-                'sales_person_id'     => $request->sales_person_id,
-                'sales_person_id'     => $request->sales_person_id,
+                'sales_person_id'     => $request->sales_person_id ?? null,
                 'location_id'     => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address'    => $request->shipping_address,
@@ -446,7 +445,7 @@ class SalesInvoiceController extends Controller
         $location_inventory = \App\LocationInventory::all();
         $items = \App\Item::all(); // semua item yang bisa dipilih
         $sales_taxes = \App\SalesTaxes::all();
-        $freightAccount = \App\LinkedAccounts::with('akun')
+        $freightAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Freight Revenue')
             ->first();
 
@@ -512,8 +511,7 @@ class SalesInvoiceController extends Controller
                 'invoice_date'             => $request->invoice_date,
                 'shipping_date'            => $request->shipping_date,
                 'customers_id'             => $request->customers_id,
-                'sales_order_id'           => $request->sales_order_id,
-                'sales_person_id'          => $request->sales_person_id,
+                'sales_order_id'           => $request->sales_order_id ?? null,
                 'location_id'              => $request->location_id,
                 'payment_method_account_id' => $request->payment_method_account_id,
                 'jenis_pembayaran_id'      => $request->jenis_pembayaran_id,

@@ -29,7 +29,7 @@ class SalesTaxesController extends Controller
             'active'             => 'nullable|boolean',
             'type'                => 'required|in:input_tax,withholding_tax',
             'rate' => 'required|numeric',
-            'kategori' => 'required|in:Inlude,Exclude',
+            'kategori' => 'required|in:Include,Exclude',
             'tax_code' => 'required|string'
         ]);
 

@@ -1489,7 +1489,7 @@
                                 @can('fiscal.access')
                                     <a href="{{ route('fiscal.fiscal_report') }}"
                                         class="block px-2 py-1 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Fiscal
-                                        Rekonsiliasi
+                                        Reconciliation
                                     </a>
                                 @endcan
 

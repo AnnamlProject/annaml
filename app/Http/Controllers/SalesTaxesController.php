@@ -72,7 +72,7 @@ class SalesTaxesController extends Controller
             'active'             => 'required',
             'rate' => 'required|numeric',
             'type'                => 'required|in:input_tax,withholding_tax',
-            'kategori' => 'required|in:Inlude,Exclude',
+            'kategori' => 'required|in:Include,Exclude',
             'tax_code' => 'required|string'
 
         ]);

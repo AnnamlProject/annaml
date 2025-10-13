@@ -185,7 +185,7 @@ Route::middleware(['auth'])->group(function () {
 
     // neraca
     Route::get('filter_neraca', [NeracaController::class, 'neracaFilter'])->name('neraca.filter_neraca')->middleware('permission:neraca.access');
-    Route::get('arus_kas_report', [NeracaController::class, 'neracaReport'])->name('neraca.neraca_report');
+    Route::get('neraca_report', [NeracaController::class, 'neracaReport'])->name('neraca.neraca_report');
     Route::get('/neraca/export', [NeracaController::class, 'export'])->name('neraca.export');
 
 

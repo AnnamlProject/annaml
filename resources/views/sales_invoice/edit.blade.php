@@ -144,7 +144,7 @@
                                             <th>Tax Value</th>
                                             <th>Final</th>
                                             <th>Account</th>
-                                            <th>Project</th>
+                                            <th>Specpose</th>
                                             <th></th>
                                         </tr>
                                     </thead>
@@ -294,10 +294,10 @@
                                                 </td>
 
                                                 <!-- Remove -->
-                                                <td class="text-center">
+                                                {{-- <td class="text-center">
                                                     <button type="button" class="remove-row text-red-500 font-bold"
                                                         data-index="{{ $i }}">×</button>
-                                                </td>
+                                                </td> --}}
                                             </tr>
                                         @endforeach
                                     </tbody>

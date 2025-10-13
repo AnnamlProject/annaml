@@ -221,11 +221,9 @@
                     class="space-y-2">
                     @csrf
                     <label class="block text-sm font-medium text-gray-700">Import File Excel:</label>
-                    <input type="file" name="file"
-                        class="block w-full text-sm border rounded  required>
-                    <button type="submit"
-                        class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
-                    <i class="fas fa-file-upload mr-1"></i> Import
+                    <input type="file" name="file" class="block w-full text-sm border rounded" required>
+                    <button type="submit" class="bg-green-500 text-white w-full py-1 rounded hover:bg-green-600 text-sm">
+                        <i class="fas fa-file-upload mr-1"></i> Import
                     </button>
                 </form>
             </div>

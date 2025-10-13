@@ -96,6 +96,23 @@
                         </div>
 
 
+                        @can('fiscal.access')
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fiscal Akun</label>
+                                <select name="fiscal_account_id" id="fiscal_account_id"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- Pilih Fiscal --</option>
+                                    @foreach ($fiscalAccount as $item)
+                                        <option value="{{ $item->id }}"
+                                            {{ old('fiscal_account_id', $chartOfAccounts->fiscal_account_id ?? '') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->kode_akun }} - {{ $item->nama_akun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endcan
+
+
                         <!-- Checkboxes -->
                         <div class="col-span-1 md:col-span-2 mt-4 space-y-2">
                             <div class="flex items-center">
@@ -162,11 +179,11 @@
                     <div class="mt-6 flex justify-end gap-4">
                         <a href="{{ route('chartOfAccount.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
-                            Batal
+                            Cancel
                         </a>
                         <button type="submit"
                             class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md">
-                            {{ isset($chartOfAccounts) ? 'Update' : 'Simpan' }}
+                            {{ isset($chartOfAccounts) ? 'Update' : 'Process' }}
                         </button>
                     </div>
                 </form>
@@ -228,7 +245,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#klasifikasi_akun_id').select2({
+            $('#klasifikasi_akun_id,#fiscal_account_id').select2({
                 placeholder: "-- Pilih --",
                 allowClear: true,
                 width: '100%'

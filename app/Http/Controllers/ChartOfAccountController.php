@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ChartOfAccount;
+use App\FiscalAccount;
 use App\KlasifikasiAkun;
 use App\NumberingAccount;
 use Illuminate\Contracts\View\View;
@@ -47,7 +48,9 @@ class ChartOfAccountController extends Controller
 
         $chartOfAccounts = null; // Tambahan agar blade tidak error
 
-        return view('chartOfAccount.create', compact('tipe_akun', 'parent_akun', 'headers', 'numberings', 'chartOfAccounts'));
+        $fiscalAccount = FiscalAccount::all();
+
+        return view('chartOfAccount.create', compact('tipe_akun', 'parent_akun', 'headers', 'numberings', 'chartOfAccounts', 'fiscalAccount'));
     }
 
     public function store(Request $request)
@@ -62,6 +65,7 @@ class ChartOfAccountController extends Controller
             'allow_project_allocation' => 'nullable|in:on,1,0',
             'catatan' => 'nullable|string',
             'catatan_pajak' => 'nullable|string',
+            'fiscal_account_id' => 'required|exists:fiscal_accounts,id',
             'klasifikasi_id' => 'required|exists:klasifikasi_akuns,id',
             'is_income_tax' => 'nullable|in:on,1,0',
         ]);
@@ -96,6 +100,7 @@ class ChartOfAccountController extends Controller
             'catatan' => $request->catatan,
             'catatan_pajak' => $request->catatan_pajak,
             'klasifikasi_id' => $request->klasifikasi_id,
+            'fiscal_account_id' => $request->fiscal_account_id,
             'is_income_tax' => $request->is_income_tax
         ]);
 
@@ -110,6 +115,7 @@ class ChartOfAccountController extends Controller
             'nama_akun' => 'required|string',
             'tipe_akun' => 'required|in:Aset,Kewajiban,Ekuitas,Pendapatan,Beban',
             'level_akun' => 'nullable|string',
+            'fiscal_account_id' => 'nullable|exists:fiscal_accounts,id',
             'klasifikasi_id' => 'nullable|exists:klasifikasi_akuns,id',
             'aktif' => 'nullable|in:on,1,0',
             'omit_zero_balance' => 'nullable|boolean',
@@ -142,6 +148,7 @@ class ChartOfAccountController extends Controller
             'nama_akun' => $request->nama_akun,
             'tipe_akun' => $request->tipe_akun,
             'level_akun' => $request->level_akun,
+            'fiscal_account_id' => $request->fiscal_account_id,
             'klasifikasi_id' => $request->klasifikasi_id,
             'aktif' => $request->has('aktif'),
             'omit_zero_balance' => $request->has('omit_zero_balance'),
@@ -160,10 +167,11 @@ class ChartOfAccountController extends Controller
         $tipe_akun = ['Aset', 'Kewajiban', 'Ekuitas', 'Pendapatan', 'Beban'];
         $parent_akun = ChartOfAccount::whereIn('level_akun', ['header', 'subheader'])->get();
         $klasifikasi = KlasifikasiAkun::all();
+        $fiscalAccount = FiscalAccount::all();
 
 
         //render view with post
-        return view('chartOfAccount.edit', compact('chartOfAccounts', 'tipe_akun', 'parent_akun', 'klasifikasi'));
+        return view('chartOfAccount.edit', compact('chartOfAccounts', 'tipe_akun', 'parent_akun', 'klasifikasi', 'fiscalAccount'));
     }
     public function show(string $id): View
     {

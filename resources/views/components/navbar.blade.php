@@ -1478,7 +1478,7 @@
                                         @endcan
 
                                         @can('fiscal_account_persamaan.create')
-                                            <a href=""
+                                            <a href="{{ route('fiscal_account_persamaan.index') }}"
                                                 class="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">Fiscal
                                                 Account
                                                 Persamaan</a>

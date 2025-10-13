@@ -14,6 +14,7 @@ use App\Http\Controllers\DepartementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeOffDayController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FiscalAccountPersamaanController;
 use App\Http\Controllers\FiscalController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IncomeStatementController;
@@ -166,9 +167,12 @@ Route::middleware(['auth'])->group(function () {
     // report
 
     // fiscal
+    Route::get('fiscal_account_persamaan', [FiscalAccountPersamaanController::class, 'index'])->name('fiscal_account_persamaan.index');
+    Route::get('fiscal_account_persamaan/{id}', [FiscalAccountPersamaanController::class, 'show'])->name('fiscal_account_persamaan.show');
     Route::get('fiscal', [FiscalController::class, 'fiscal'])->name('fiscal.fiscal_report')->middleware('permission:fiscal.access');
     Route::resource('fiscal_account', 'FiscalAccountController')->middleware('permission:fiscal_account.access');
     Route::get('/export/fiscal', [ExportController::class, 'exportfiscal'])->name('export.fiscal');
+
     Route::post('/import/fiscal', [ImportController::class, 'importfiscal'])->name('import.fiscal');
 
 

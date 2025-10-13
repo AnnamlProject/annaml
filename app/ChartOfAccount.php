@@ -20,6 +20,7 @@ class chartOfAccount extends Model
         'catatan',
         'catatan_pajak',
         'klasifikasi_id',
+        'fiscal_account_id',
         'is_income_tax'
     ];
     public function children()
@@ -64,5 +65,9 @@ class chartOfAccount extends Model
     public function paymentMethodDetails()
     {
         return $this->hasMany(PaymentMethodDetail::class, 'coa_id');
+    }
+    public function fiscalAccount()
+    {
+        return $this->belongsTo(FiscalAccount::class, 'fiscal_account_id');
     }
 }

@@ -10,7 +10,7 @@ class KomponenPenghasilan extends Model
     protected $fillable = [
         'nama_komponen',
         'tipe',
-        'kategori',
+        'deskripsi',
         'sifat',
         'periode_perhitungan',
         'status_komponen',

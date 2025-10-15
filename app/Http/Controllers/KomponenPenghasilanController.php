@@ -6,13 +6,18 @@ use App\KomponenPenghasilan;
 use App\LevelKaryawan;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KomponenPenghasilanController extends Controller
 {
     //
     public function index()
     {
-        $query = KomponenPenghasilan::with('levelKaryawan');
+        $query = DB::table('komponen_penghasilans')
+            ->leftJoin('level_karyawans', 'komponen_penghasilans.level_karyawan_id', '=', 'level_karyawans.id')
+            ->select('komponen_penghasilans.*', 'level_karyawans.nama_level')
+            ->orderBy('level_karyawans.nama_level')
+            ->orderBy('komponen_penghasilans.tipe');
 
 
         // Filter Level Karyawan
@@ -68,26 +73,50 @@ class KomponenPenghasilanController extends Controller
     }
     public function store(Request $request)
     {
+
+        // dd($request->all());
         $validated = $request->validate([
-            'nama_komponen' => 'required|string|max:255',
-            'tipe' => 'required|string|max:100',
-            'kategori' => 'required|string|max:100',
-            'sifat' => 'required|string|max:100',
-            'periode_perhitungan' => 'required|string|max:100',
-            'status_komponen' => 'required|string|max:100',
-            'level_karyawan_id' => 'required|exists:level_karyawans,id',
-            'cek_komponen' => 'nullable|boolean',
-            'is_kehadiran' => 'nullable|boolean',
+            'nama_komponen.*' => 'required|string|max:255',
+            'tipe.*' => 'required|string|max:100',
+            'kategori.*' => 'nullable|string|max:100',
+            'sifat.*' => 'required|string|max:100',
+            'periode_perhitungan.*' => 'required|string|max:100',
+            'status_komponen.*' => 'required|string|max:100',
+            'level_karyawan_id.*' => 'required|exists:level_karyawans,id',
+            'cek_komponen.*' => 'nullable|boolean',
+            'is_kehadiran.*' => 'nullable|boolean',
         ]);
 
         // Pastikan boolean terset benar
-        $validated['cek_komponen'] = $request->has('cek_komponen');
-        $validated['is_kehadiran'] = $request->has('is_kehadiran');
+        $validated['cek_komponen'] = $request->input('cek_komponen', []);
+        $validated['is_kehadiran'] = $request->input('is_kehadiran', []);
 
-        KomponenPenghasilan::create($validated);
+        $data = [];
+        for ($i = 0; $i < count($request->level_karyawan_id); $i++) {
+            if (empty($request->level_karyawan_id[$i])) continue;
 
-        return redirect()->route('komponen_penghasilan.index')
-            ->with('success', 'Data berhasil ditambahkan.');
+            $data[] = [
+                'level_karyawan_id' => $request->level_karyawan_id[$i],
+                'nama_komponen'          => $request->nama_komponen[$i],
+                'tipe'     => $request->tipe[$i],
+                'deskripsi'   => $request->deskripsi[$i] ?? null,
+                'sifat'     => $request->sifat[$i],
+                'periode_perhitungan'     => $request->periode_perhitungan[$i],
+                'status_komponen'   => $request->status_komponen[$i],
+                'cek_komponen' => isset($request->cek_komponen[$i]) ? 1 : 0,
+                'is_kehadiran' => isset($request->is_kehadiran[$i]) ? 1 : 0,
+                'created_at'    => now(),
+                'updated_at'    => now()
+            ];
+        }
+
+        // 4️⃣ Simpan data
+        if (count($data)) {
+            \App\KomponenPenghasilan::insert($data);
+            return redirect()->route('komponen_penghasilan.index')->with('success', 'Data berhasil ditambahkan.');
+        } else {
+            return back()->with('error', 'Tidak ada data yang dimasukkan.');
+        }
     }
 
     public function show($id)

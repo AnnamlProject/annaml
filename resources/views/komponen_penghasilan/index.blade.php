@@ -141,7 +141,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tipe</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Kategori</th>
+                                Deskripsi</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Sifat</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -157,10 +157,10 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2">{{ $item->levelKaryawan->nama_level }}</td>
+                                <td class="px-4 py-2">{{ $item->nama_level }}</td>
                                 <td class="px-4 py-2">{{ $item->nama_komponen }}</td>
                                 <td class="px-4 py-2">{{ $item->tipe }}</td>
-                                <td class="px-4 py-2">{{ $item->kategori }}</td>
+                                <td class="px-4 py-2">{{ $item->deskripsi }}</td>
                                 <td class="px-4 py-2">{{ $item->sifat }}</td>
                                 <td class="px-4 py-2">{{ $item->periode_perhitungan }}</td>
                                 <td class="px-4 py-2">{{ $item->status_komponen }}</td>

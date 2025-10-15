@@ -78,10 +78,9 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             @endcan
-                                        @endcan
-                                    </div>
-                                </td>
-                            </tr>
+                                        </div>
+                                    </td>
+                                </tr>
                             @empty
                                 <tr>
                                     <td colspan="7" class="px-6 py-12 text-center">

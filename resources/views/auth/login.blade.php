@@ -116,9 +116,9 @@
                         <div class="absolute inset-y-0 left-0 flex items-center pl-3 text-secondary">
                             <i class="bi bi-person-fill"></i>
                         </div>
-                        <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                        <input type="text" id="name" name="name" value="{{ old('name') }}" required
                             class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary placeholder-gray-400"
-                            placeholder="Email">
+                            placeholder="Username">
                     </div>
 
                     <div class="relative">
@@ -190,10 +190,10 @@
 
             // Form validation
             document.querySelector('form').addEventListener('submit', function(e) {
-                const email = document.getElementById('email').value;
+                const name = document.getElementById('name').value;
                 const password = document.getElementById('password').value;
 
-                if (!email || !password) {
+                if (!name || !password) {
                     e.preventDefault();
                     const errorDiv = document.createElement('div');
                     errorDiv.className =

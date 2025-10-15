@@ -22,10 +22,9 @@ class KomponenPenghasilanController extends Controller
 
         // Filter Level Karyawan
         if ($level_karyawan = request('filter_tipe')) {
-            $query->whereHas('levelKaryawan', function ($q) use ($level_karyawan) {
-                $q->where('nama_level', $level_karyawan);
-            });
+            $query->where('level_karyawans.nama_level', $level_karyawan);
         }
+
 
         // Filter Status
         if ($status = request('filter_status')) {
@@ -43,18 +42,20 @@ class KomponenPenghasilanController extends Controller
             // pastikan di tabel Wahana ada kolom 'status'
             // misalnya nilainya 'aktif' / 'nonaktif' atau 1/0
         }
-        $searchable = ['nama_komponen', 'kategori'];
+
+        $searchable = ['komponen_penghasilans.nama_komponen', 'komponen_penghasilans.deskripsi'];
 
         if ($search = request('search')) {
             $query->where(function ($q) use ($search, $searchable) {
                 foreach ($searchable as $col) {
                     $q->orWhere($col, 'like', "%{$search}%");
                 }
-                $q->orWhereHas('levelKaryawan', function ($q4) use ($search) {
-                    $q4->where('nama_level', 'like', "%{$search}%");
-                });
+
+                // ini menggantikan orWhereHas()
+                $q->orWhere('level_karyawans.nama_level', 'like', "%{$search}%");
             });
         }
+
 
 
         // Eksekusi query sekali di akhir

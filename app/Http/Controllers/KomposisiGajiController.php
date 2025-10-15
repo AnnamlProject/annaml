@@ -17,44 +17,32 @@ class KomposisiGajiController extends Controller
 
     public function index()
     {
-        $query = KomposisiGaji::with(['employee', 'employee.unitKerja', 'employee.levelKaryawan']);
+        $query = DB::table('komposisi_gajis')
+            ->leftJoin('employees', 'komposisi_gajis.kode_karyawan', '=', 'employees.id')
+            ->leftjoin('unit_kerjas', 'employees.unit_kerja_id', '=', 'unit_kerjas.id')
+            ->leftJoin('level_karyawans', 'employees.level_kepegawaian_id', '=', 'level_karyawans.id')
+            ->select('employees.nama_karyawan', 'unit_kerjas.nama_unit', 'employees.nik', 'employees.nama_panggilan', 'level_karyawans.nama_level', 'komposisi_gajis.id')
+            ->orderBy('level_karyawans.nama_level', 'asc');
 
         // Filter Level Karyawan
         if ($level_karyawan = request('filter_tipe')) {
-            $query->whereHas('employee.levelKaryawan', function ($q) use ($level_karyawan) {
-                $q->where('nama_level', $level_karyawan);
-            });
+            $query->where('level_karyawans.nama_level', $level_karyawan);
         }
-
         // Filter Unit
         if ($unit = request('filter_unit')) {
-            $query->whereHas('employee.unitKerja', function ($q) use ($unit) {
-                $q->where('nama_unit', $unit);
-            });
+            $query->where('unit_kerjas.nama_unit', $unit);
         }
 
         // Kolom searchable ada di tabel employee
         $searchable = ['kode_karyawan', 'nama_karyawan', 'nik', 'tempat_lahir'];
         if ($search = request('search')) {
-            $query->where(function ($q) use ($search, $searchable) {
-                // cari di tabel employees
-                $q->orWhereHas('employee', function ($qEmp) use ($search, $searchable) {
-                    $qEmp->where(function ($qq) use ($search, $searchable) {
-                        foreach ($searchable as $col) {
-                            $qq->orWhere($col, 'like', "%{$search}%");
-                        }
-                    });
-                });
-
-                // cari di level karyawan
-                $q->orWhereHas('employee.levelKaryawan', function ($q4) use ($search) {
-                    $q4->where('nama_level', 'like', "%{$search}%");
-                });
-
-                // cari di unit kerja
-                $q->orWhereHas('employee.unitKerja', function ($q1) use ($search) {
-                    $q1->where('nama_unit', 'like', "%{$search}%");
-                });
+            $query->where(function ($q) use ($search) {
+                $q->where('employees.kode_karyawan', 'like', "%{$search}%")
+                    ->orWhere('employees.nama_karyawan', 'like', "%{$search}%")
+                    ->orWhere('employees.nik', 'like', "%{$search}%")
+                    ->orWhere('employees.tempat_lahir', 'like', "%{$search}%")
+                    ->orWhere('unit_kerjas.nama_unit', 'like', "%{$search}%")
+                    ->orWhere('level_karyawans.nama_level', 'like', "%{$search}%");
             });
         }
 

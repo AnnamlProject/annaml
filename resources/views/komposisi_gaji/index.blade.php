@@ -101,10 +101,10 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2">{{ $item->employee->nama_karyawan }}</td>
-                                <td class="px-4 py-2">{{ $item->employee->nik }}</td>
-                                <td class="px-4 py-2">{{ $item->employee->unitKerja->nama_unit }}</td>
-                                <td class="px-4 py-2">{{ $item->employee->levelKaryawan->nama_level }}</td>
+                                <td class="px-4 py-2">{{ $item->nama_karyawan }}</td>
+                                <td class="px-4 py-2">{{ $item->nik }}</td>
+                                <td class="px-4 py-2">{{ $item->nama_unit }}</td>
+                                <td class="px-4 py-2">{{ $item->nama_level }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
                                         @can('komposisi_gaji.view')

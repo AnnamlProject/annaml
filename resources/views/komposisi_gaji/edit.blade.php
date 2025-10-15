@@ -3,8 +3,13 @@
 @section('content')
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-bold mb-4">Salary Components Create</h2>
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Salary Components Edit
+                </h4>
 
                 @if (session('error'))
                     <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
@@ -30,7 +35,11 @@
 
                     <div class="overflow-x-auto">
                         <table id="komponenTable" class="min-w-full border border-gray-200 table-auto">
-                            <thead class="bg-gray-100">
+                            @php
+                                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                            @endphp
+                            <thead
+                                class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                 <tr>
                                     <th class="px-4 py-2 border">Nama Komponen</th>
                                     <th class="px-4 py-2 border text-center">Jumlah Hari</th>
@@ -39,7 +48,7 @@
                                     <th class="px-4 py-2 border text-right">Total Nilai</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tbody-komposisi_gaji">
                                 @foreach ($details as $index => $detail)
                                     <tr>
                                         <td class="px-4 py-2 border">
@@ -83,88 +92,100 @@
                             </tfoot>
                         </table>
                     </div>
-                    @if ($komponenBaru->count())
-                        <div class="mt-8 border-t pt-6">
-                            <h3 class="text-lg font-semibold mb-4">Tambah Komponen Penghasilan</h3>
-                            <table class="min-w-full border border-gray-200 table-auto">
-                                <thead class="bg-gray-100">
-                                    <tr>
-                                        <th class="px-4 py-2 border">Nama Komponen</th>
-                                        <th class="px-4 py-2 border">Nilai</th>
-                                        <th class="px-4 py-2 border">Jumlah Hari</th>
-                                        <th class="px-4 py-2 border">Potongan</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($komponenBaru as $i => $k)
-                                        <tr>
-                                            <td class="px-4 py-2 border">
-                                                {{ $k->nama_komponen }}
-                                                <input type="hidden" name="baru[{{ $i }}][kode_komponen]"
-                                                    value="{{ $k->id }}">
-                                            </td>
-                                            <td class="px-4 py-2 border">
-                                                <input type="number" name="baru[{{ $i }}][nilai]"
-                                                    class="w-full border p-1 rounded">
-                                            </td>
-                                            <td class="px-4 py-2 border">
-                                                <input type="number" name="baru[{{ $i }}][jumlah_hari]"
-                                                    class="w-full border p-1 rounded">
-                                            </td>
-                                            <td class="px-4 py-2 border">
-                                                <input type="number" name="baru[{{ $i }}][potongan]"
-                                                    class="w-full border p-1 rounded">
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
 
+                    <div class="tambah_baris">
+                        <button type="button" class="px-4 py-2 bg-green-600 rounded text-white mt-3"
+                            onclick="tambahBaris()">Tambah Baris</button>
 
-                    <div class="mt-6">
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                            Update
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-2">
+                        <a href="{{ route('komposisi_gaji.index') }}"
+                            class="ml-2 px-6 py-2 bg-gray-100 text-gray-600 hover:underline">Cancel</a>
+                        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            Process
                         </button>
-                        <a href="{{ route('komposisi_gaji.index') }}" class="ml-2 text-gray-600 hover:underline">Batal</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     <script>
+        // 🔹 Format angka dengan 2 desimal
         function formatNumber(num) {
-            return Number(num).toLocaleString('en-US', {
+            return Number(num).toLocaleString('id-ID', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
 
+        // 🔹 Menghitung ulang total untuk setiap baris
         function calculateTotals() {
             let grandTotal = 0;
-            const rows = document.querySelectorAll('#komponenTable tbody tr');
+            const rows = document.querySelectorAll('#tbody-komposisi_gaji tr');
+            console.log('Jumlah baris:', rows.length);
 
             rows.forEach(row => {
-                const nilai = parseFloat(row.querySelector('.nilai').value) || 0;
-                const jumlahHari = parseFloat(row.querySelector('.jumlah_hari').value) || 0;
-                const potongan = parseFloat(row.querySelector('.potongan').value) || 0;
+                const nilai = parseFloat(row.querySelector('.nilai')?.value || 0);
+                const jumlahHari = parseFloat(row.querySelector('.jumlah_hari')?.value || 0);
+                const potongan = parseFloat(row.querySelector('.potongan')?.value || 0);
 
-                const total = (nilai + jumlahHari) - (potongan * jumlahHari);
+                const total = (nilai * jumlahHari) - (potongan * jumlahHari);
                 row.querySelector('.total').value = formatNumber(total);
-                row.querySelector('.total_raw').value = total;
-
                 grandTotal += total;
             });
 
+            // console.log('Grand total:', grandTotal);
             document.getElementById('grandTotal').textContent = formatNumber(grandTotal);
         }
 
+
+        // 🔹 Tambah baris baru dinamis
+        function tambahBaris() {
+            const tbody = document.getElementById('tbody-komposisi_gaji');
+            const rowCount = tbody.rows.length;
+            const row = tbody.insertRow();
+
+            row.innerHTML = `
+            <td class="px-4 py-2 border">
+                <select name="baru[${rowCount}][kode_komponen]"
+                        class="w-full border border-gray-300 rounded px-2 py-1">
+                    <option value="">-- Pilih --</option>
+                    @foreach ($komponenBaru as $g)
+                        <option value="{{ $g->id }}">{{ $g->nama_komponen }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td class="px-4 py-2 border">
+                <input type="number" name="baru[${rowCount}][jumlah_hari]"
+                       class="w-full border rounded p-1 text-center jumlah_hari" value="0">
+            </td>
+            <td class="px-4 py-2 border">
+                <input type="number" name="baru[${rowCount}][nilai]"
+                       class="w-full border rounded p-1 text-right nilai" value="0">
+            </td>
+            <td class="px-4 py-2 border">
+                <input type="number" name="baru[${rowCount}][potongan]"
+                       class="w-full border rounded p-1 text-right potongan" value="0">
+            </td>
+            <td class="px-4 py-2 border">
+                <input type="text"
+                                                class="total border rounded w-full p-1 bg-gray-100 text-right" readonly
+                                                value="0">
+            </td>
+        `;
+
+            // 🔹 Setelah baris baru ditambahkan, aktifkan event agar ikut hitung otomatis
+            row.querySelectorAll('.nilai, .jumlah_hari, .potongan').forEach(input => {
+                input.addEventListener('input', calculateTotals);
+            });
+        }
+
+        // 🔹 Saat halaman selesai dimuat, hitung total awal dan aktifkan event handler
         document.addEventListener('DOMContentLoaded', function() {
             calculateTotals();
 
-            const inputs = document.querySelectorAll('.nilai, .jumlah_hari, .potongan');
-            inputs.forEach(input => {
+            document.querySelectorAll('.nilai, .jumlah_hari, .potongan').forEach(input => {
                 input.addEventListener('input', calculateTotals);
             });
         });

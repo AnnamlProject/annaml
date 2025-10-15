@@ -53,9 +53,15 @@
                     </table>
                 </div>
 
-                <div class="mt-6">
-                    <a href="{{ route('komposisi_gaji.index') }}" class="text-blue-600 hover:underline">← Kembali ke
-                        Daftar</a>
+                <div class="mt-6 flex justify-end gap-3">
+                    <a href="{{ route('komposisi_gaji.index') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
+                        Back
+                    </a>
+                    <a href="{{ route('komposisi_gaji.edit', $komposisi->id) }}"
+                        class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                        Edit
+                    </a>
                 </div>
 
             </div>

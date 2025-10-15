@@ -22,4 +22,8 @@ class KomposisiGaji extends Model
     {
         return $this->hasMany(KomposisiGajiDetail::class, 'kode_komposisi_id');
     }
+    public function pembayaranDetails()
+    {
+        return $this->hasMany(PembayaranGajiDetail::class, 'komposisi_gaji_id');
+    }
 }

@@ -9,6 +9,7 @@ use App\KomponenPenghasilan;
 use App\KomposisiGajiDetail;
 use App\LevelKaryawan;
 use App\UnitKerja;
+use Illuminate\Support\Facades\DB;
 
 class KomposisiGajiController extends Controller
 {
@@ -183,11 +184,13 @@ class KomposisiGajiController extends Controller
 
         $kodeKomponenTersimpan = $details->pluck('kode_komponen')->toArray();
 
-        // Ambil komponen berdasarkan level karyawan & belum tersimpan
-        $karyawanTerpilih = \App\Employee::find($komposisi->kode_karyawan);
-        $komponenBaru = \App\KomponenPenghasilan::where('level_karyawan_id', $karyawanTerpilih->level_karyawan_id)
-            ->whereNotIn('id', $kodeKomponenTersimpan)
+        $komponenBaru = DB::table('komposisi_gajis')
+            ->leftJoin('employees', 'komposisi_gajis.kode_karyawan', '=', 'employees.id')
+            ->leftJoin('komponen_penghasilans', 'employees.level_kepegawaian_id', '=', 'komponen_penghasilans.level_karyawan_id')
+            ->where('komposisi_gajis.id', '=', $id)
+            ->select('komponen_penghasilans.*')
             ->get();
+
 
         return view('komposisi_gaji.edit', compact('komposisi', 'karyawan', 'details', 'komponenBaru'));
     }

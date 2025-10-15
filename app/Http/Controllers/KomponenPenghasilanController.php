@@ -134,6 +134,7 @@ class KomponenPenghasilanController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $request->validate([
             'nama_komponen' => 'required',
             'tipe' => 'required',
@@ -142,12 +143,13 @@ class KomponenPenghasilanController extends Controller
             'periode_perhitungan' => 'required',
             'status_komponen' => 'required',
             'level_karyawan_id' => 'required|exists:level_karyawans,id',
-            'cek_komponen' => 'nullable|boolean',
-            'is_kehadiran' => 'nullable|boolean',
+            'baru.*.kode_komponen' => 'nullable',
+            'baru.*.jumlah_hari' => 'nullable|numeric|min:0',
+            'baru.*.nilai' => 'nullable|numeric|min:0',
+            'baru.*.potongan' => 'nullable|numeric|min:0',
         ]);
 
         $data = KomponenPenghasilan::findOrFail($id);
-
         $data->update([
             'nama_komponen' => $request->nama_komponen,
             'tipe' => $request->tipe,
@@ -160,9 +162,25 @@ class KomponenPenghasilanController extends Controller
             'is_kehadiran' => $request->has('is_kehadiran') ? 1 : 0,
         ]);
 
+
+        if ($request->has('baru')) {
+            foreach ($request->baru as $item) {
+                DB::table('komposisi_gaji_details')->insert([
+                    'komposisi_gaji_id' => $id,
+                    'kode_komponen' => $item['kode_komponen'] ?? null,
+                    'jumlah_hari' => $item['jumlah_hari'] ?? 0,
+                    'nilai' => $item['nilai'] ?? 0,
+                    'potongan' => $item['potongan'] ?? 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
         return redirect()->route('komponen_penghasilan.index')
             ->with('success', 'Data berhasil diperbarui.');
     }
+
 
     public function destroy($id)
     {

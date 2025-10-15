@@ -4,8 +4,13 @@
 
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
-                <h2 class="text-lg font-bold mb-4">Salary Components Create</h2>
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Salary Components Create
+                </h4>
                 <form method="POST" enctype="multipart/form-data"
                     action="{{ isset($data) ? route('komponen_penghasilan.update', $data->id) : route('komposisi_gaji.store') }}">
 
@@ -42,7 +47,7 @@
                                 @foreach ($karyawan as $level)
                                     <option value="{{ $level->id }}"
                                         {{ old('kode_karyawan', $data->kode_karyawan ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_karyawan }}
+                                        {{ $level->nama_panggilan }}
                                     </option>
                                 @endforeach
                             </select>
@@ -57,15 +62,15 @@
 
 
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($data) ? 'Update' : 'Create' }}
-                        </button>
+                    <div class="mt-6 justify-end  flex space-x-4">
                         <a href="{{ route('komposisi_gaji.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($data) ? 'Update' : 'Process' }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -121,27 +126,36 @@
                             data.forEach((item, index) => {
                                 tableHTML += `
                                     <tr>
-                                        <td class="px-4 py-2 border">${item.nama_komponen}</td>
+                                        <td class="px-2 py-1 border">${item.nama_komponen}</td>
                                         <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
-                                        <td class="px-4 py-2 border">${item.tipe}</td>
-                                        <td class="px-4 py-2 border">${item.periode_perhitungan}</td>
-                                          <td class="px-4 py-2 border">
+                                        <td class="px-2 py-1 border">${item.tipe}</td>
+                                        <td class="px-2 py-1 border">${item.periode_perhitungan}</td>
+                                          <td class="px-2 py-1 border">
                                             <input type="number" name="komponen[${index}][jumlah_hari]" class="jumlah-hari border rounded w-full p-1" data-index="${index}">
                                         </td>
-                                        <td class="px-4 py-2 border">
-                                            <input type="text" name="komponen[${index}][nilai]" class="nilai border rounded w-full p-1" data-index="${index}">
+                                        <td class="px-2 py-1 border">
+                                            <input type="text" name="komponen[${index}][nilai]" class="nilai border text-right rounded w-full p-1" data-index="${index}">
                                         </td>
-                                        <td class="px-4 py-2 border">
-                                            <input type="text" name="komponen[${index}][potongan]" class="potongan border rounded w-full p-1" data-index="${index}">
+                                        <td class="px-2 py-1 border">
+                                            <input type="text" name="komponen[${index}][potongan]" class="potongan border text-right rounded w-full p-1" data-index="${index}">
                                         </td>
-                                        <td class="px-4 py-2 border">
-                                            <input type="text" name="komponen[${index}][total]" class="total border rounded w-full p-1 bg-gray-100" data-index="${index}" readonly>
+                                        <td class="px-2 py-1 border">
+                                            <input type="text" name="komponen[${index}][total]" class="total border text-right rounded w-full p-1 bg-gray-100" data-index="${index}" readonly>
                                         </td>
                                     </tr>
                                 `;
                             });
 
-                            tableHTML += '</tbody></table>';
+                            tableHTML += `
+                                            </tbody>
+                                            <tfoot>
+                                            <tr class="bg-gray-200 font-semibold">
+                                                <td colspan="6" class="px-4 py-2 border text-right">Total Keseluruhan:</td>
+                                                <td class="px-4 py-2 border text-right" id="grandTotal">0,00</td>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+                                        `;
                             komponenTable.innerHTML = tableHTML;
                             komponenContainer.classList.remove('hidden');
 
@@ -156,11 +170,21 @@
 
                                 const totalNilai = nilai * jumlahHari;
                                 const totalPotongan = potongan * jumlahHari;
-                                const totalKeseluruhan = totalNilai + totalPotongan;
+                                const totalKeseluruhan = totalNilai - totalPotongan;
 
                                 document.querySelector(`input[name="komponen[${index}][total]"]`)
                                     .value = formatNumber(totalKeseluruhan);
                             }
+
+                            function updateGrandTotal() {
+                                let sum = 0;
+                                komponenTable.querySelectorAll('.total').forEach(input => {
+                                    sum += parseFormattedNumber(input.value);
+                                });
+                                document.getElementById('grandTotal').textContent = formatNumber(
+                                    sum);
+                            }
+
 
                             // Event handler untuk semua input
                             komponenTable.querySelectorAll('.nilai, .jumlah-hari, .potongan')
@@ -168,6 +192,7 @@
                                     input.addEventListener('input', function() {
                                         const index = this.dataset.index;
                                         calculate(index);
+                                        updateGrandTotal();
                                     });
                                 });
 

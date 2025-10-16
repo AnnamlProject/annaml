@@ -105,12 +105,12 @@
                     <div class="mt-6 flex justify-end gap-4">
                         <a href="{{ route('journal_entry.index') }}" onclick="return confirmCancel(event)"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
-                            Batal
+                            Cancel
                         </a>
 
                         <button type="submit"
-                            class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-sm font-medium rounded-md">
-                            Simpan
+                            class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium rounded-md">
+                            Process
                         </button>
                     </div>
                 </form>
@@ -345,26 +345,62 @@
                 });
             }
 
-            // Format angka + hitung ulang total
-            function formatNumberInput(input) {
-                const raw = input.value.replace(/[^0-9]/g, '');
-                input.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
-            }
-
             function updateTotals() {
                 let totalDebit = 0;
                 let totalCredit = 0;
+
                 document.querySelectorAll('input[name^="items"][name$="[debits]"]').forEach(input => {
-                    let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                    let val = parseFloat(input.value.replace(/\./g, '').replace(',', '.')) || 0;
                     totalDebit += val;
                 });
                 document.querySelectorAll('input[name^="items"][name$="[credits]"]').forEach(input => {
-                    let val = parseFloat(input.value.replace(/\./g, '')) || 0;
+                    let val = parseFloat(input.value.replace(/\./g, '').replace(',', '.')) || 0;
                     totalCredit += val;
                 });
-                $('#total-debit').text(new Intl.NumberFormat('id-ID').format(totalDebit));
-                $('#total-credit').text(new Intl.NumberFormat('id-ID').format(totalCredit));
+
+                $('#total-debit').text(new Intl.NumberFormat('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(totalDebit));
+                $('#total-credit').text(new Intl.NumberFormat('id-ID', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(totalCredit));
             }
+
+            function formatNumberInput(input) {
+                let value = input.value;
+
+                // Izinkan pengguna mengetik koma dulu tanpa dihapus
+                if (value.endsWith(',')) {
+                    return; // jangan format dulu, tunggu user lanjutkan angka desimalnya
+                }
+
+                // Hapus semua karakter kecuali angka dan koma
+                value = value.replace(/[^\d,]/g, '');
+
+                if (value === '') {
+                    input.value = '';
+                    return;
+                }
+
+                // Pisahkan bagian ribuan dan desimal
+                let parts = value.split(',');
+                let integerPart = parts[0];
+                let decimalPart = parts[1] ? parts[1].slice(0, 2) : '';
+
+                // Tambahkan titik pemisah ribuan
+                integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+                // Gabungkan kembali
+                if (decimalPart !== '') {
+                    input.value = `${integerPart},${decimalPart}`;
+                } else {
+                    input.value = integerPart;
+                }
+            }
+
+
 
             // ✅ Tambahin event untuk format angka saat user input
             $(document).on('input', '.money-input', function() {

@@ -15,6 +15,7 @@ use App\Exports\KomponenPenghasilanExport;
 use App\Exports\ProjectExport;
 use App\Exports\PtkpExport;
 use App\Exports\ShiftKaryawanExport;
+use App\Exports\ShiftKaryawanTabelExport;
 use App\Exports\TangibleAssetExport;
 use App\Exports\TargetUnitExport;
 use App\Exports\TaxRatesExport;
@@ -93,6 +94,30 @@ class ExportController extends Controller
     {
         return Excel::download(new ShiftKaryawanExport, 'shift_karyawan.xlsx');
     }
+    public function exportShiftKaryawanTabel(Request $request)
+    {
+        $request->validate([
+            'tgl_awal' => 'required|date',
+            'tgl_akhir' => 'required|date|after_or_equal:tgl_awal',
+        ]);
+
+        $tgl_awal = date('Y-m-d', strtotime($request->tgl_awal));
+        $tgl_akhir = date('Y-m-d', strtotime($request->tgl_akhir));
+
+        $cekData = \App\ShiftKaryawanWahana::whereBetween('tanggal', [$tgl_awal, $tgl_akhir])->exists();
+
+        // Jika tidak ada data, kembali ke halaman sebelumnya dengan alert
+        if (!$cekData) {
+            return back()->with('error', 'Tidak ada data shift pada rentang tanggal tersebut.');
+        }
+
+        // Jika ada data, lanjutkan export
+        return Excel::download(
+            new ShiftKaryawanTabelExport($tgl_awal, $tgl_akhir),
+            'shift_karyawan_tabel.xlsx'
+        );
+    }
+
     public function exportJournalEntry()
     {
         return Excel::download(new JournalEntryExport, 'journal_entry.xlsx');

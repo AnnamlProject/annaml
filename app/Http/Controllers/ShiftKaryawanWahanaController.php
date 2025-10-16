@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\BonusKaryawan;
+use App\CrewShiftKaryawan;
 use App\Employee;
+use App\EmployeeOffDay;
 use App\Exports\EmployeeExport;
 use App\JenisHari;
 use App\ShiftKaryawanWahana;
 use App\UnitKerja;
 use App\Wahana;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShiftKaryawanWahanaController extends Controller
 {
@@ -86,40 +90,79 @@ class ShiftKaryawanWahanaController extends Controller
         $karyawan = Employee::all();
         $unitKerja = UnitKerja::all();
         $jenisHari = JenisHari::all();
-        return view('shift_karyawan.index', compact('data', 'unitkerja', 'jenis_hari', 'wahana', 'unitKerja', 'karyawan', 'jenisHari'));
+        $crew_shift = CrewShiftKaryawan::orderBy('nama')->get();
+        return view('shift_karyawan.index', compact('data', 'unitkerja', 'jenis_hari', 'wahana', 'unitKerja', 'karyawan', 'jenisHari', 'crew_shift'));
     }
     public function create()
     {
-        $karyawan = Employee::all();
+        $karyawan = Employee::select('nama_panggilan', 'id')->orderBy('nama_panggilan')->get();
         $unitKerja = UnitKerja::all();
-        $jenisHari = JenisHari::all();
-        return view('shift_karyawan.create', compact('karyawan', 'unitKerja', 'jenisHari'));
+        $crew = CrewShiftKaryawan::orderBy('nama')->get();
+        return view('shift_karyawan.create', compact('karyawan', 'unitKerja', 'crew'));
     }
+    public function getJenisHari($unit_kerja_id)
+    {
+        $jenisHari = JenisHari::where('unit_kerja_id', $unit_kerja_id)->get(['id', 'nama']);
+        return response()->json($jenisHari);
+    }
+
     public function store(Request $request)
     {
-        // Validasi input
+
+        // dd($request->all());
         $request->validate([
             'employee_id'   => 'required|exists:employees,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'wahana_id'     => 'required|exists:wahanas,id',
             'tanggal'       => 'required|date',
             'jenis_hari_id' => 'required|exists:jenis_haris,id',
+            'crew_id'       => 'required|exists:crew_shift_karyawans,id',
             'jam_mulai'     => 'required|date_format:H:i',
             'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
             'status'        => 'required|in:Penetapan,Perubahan,Tambahan',
             'keterangan'    => 'nullable|string',
-            'posisi'        => 'required|in:petugas_1,petugas_2,petugas_3,petugas_4,pengganti'
         ]);
 
-        // Hitung lama jam kerja
+        $query = JenisHari::where('id', $request->jenis_hari_id)
+            ->where('unit_kerja_id', $request->unit_kerja_id);
+
+        // dd($query->toSql(), $query->getBindings());
+
+        $jenisHari = $query->first();
+
+        $errors = [];
+
+        if ($jenisHari && $jenisHari->jam_selesai) {
+            $jamSelesaiInput = Carbon::parse($request->jam_selesai);
+            $jamSelesaiJenis = Carbon::parse($jenisHari->jam_selesai);
+
+            if ($jamSelesaiInput->greaterThan($jamSelesaiJenis)) {
+                $errors['jam_selesai'] = 'Jam selesai melebihi batas jam selesai untuk jenis hari tersebut.';
+            }
+        }
+
+        if ($jenisHari && $jenisHari->jam_mulai) {
+            $jamMulaiInput = Carbon::parse($request->jam_mulai);
+            $jamMulaiJenis = Carbon::parse($jenisHari->jam_mulai);
+
+            if ($jamMulaiInput->lessThan($jamMulaiJenis)) {
+                $errors['jam_mulai'] = 'Jam mulai lebih awal dari batas jam mulai untuk jenis hari tersebut.';
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->withErrors($errors);
+        }
+
+
+        // hitung durasi jam
         $jamMulai   = Carbon::parse($request->jam_mulai);
         $jamSelesai = Carbon::parse($request->jam_selesai);
         $lamaJam    = $jamMulai->diffInMinutes($jamSelesai) / 60;
 
-        // Ambil default jam kerja dari jenis_haris
-        $jenisHari   = \App\JenisHari::find($request->jenis_hari_id);
-        $defaultJam  = null;
-        $persentase  = null;
+        // hitung persentase jika ada default jam di jenis hari
+        $defaultJam = null;
+        $persentase = null;
 
         if ($jenisHari && $jenisHari->jam_mulai && $jenisHari->jam_selesai) {
             $defaultMulai   = Carbon::parse($jenisHari->jam_mulai);
@@ -131,8 +174,12 @@ class ShiftKaryawanWahanaController extends Controller
             }
         }
 
+        $batasJamNormal = 8;
+        $lemburJam = max(0, $lamaJam - $batasJamNormal);
+
         try {
-            // Simpan shift
+            DB::beginTransaction();
+
             $shift = ShiftKaryawanWahana::create([
                 'employee_id'    => $request->employee_id,
                 'unit_kerja_id'  => $request->unit_kerja_id,
@@ -142,13 +189,13 @@ class ShiftKaryawanWahanaController extends Controller
                 'jam_mulai'      => $request->jam_mulai,
                 'jam_selesai'    => $request->jam_selesai,
                 'lama_jam'       => $lamaJam,
+                'lembur_jam' => $lemburJam,
                 'persentase_jam' => $persentase,
                 'status'         => $request->status,
                 'keterangan'     => $request->keterangan,
-                'posisi' => $request->posisi,
+                'crew_id'        => $request->crew_id,
             ]);
 
-            // Buat bonus pending
             BonusKaryawan::create([
                 'employee_id'   => $shift->employee_id,
                 'shift_id'      => $shift->id,
@@ -157,17 +204,18 @@ class ShiftKaryawanWahanaController extends Controller
                 'bonus'         => 0,
                 'transportasi'  => 0,
                 'total'         => 0,
-                'status'        => 'Pending', // default
+                'status'        => 'Pending',
             ]);
+
+            DB::commit();
 
             return redirect()->route('shift_karyawan.index')
                 ->with('success', 'Shift karyawan + Bonus Pending berhasil ditambahkan.');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menyimpan shift: ' . $e->getMessage());
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menyimpan shift: ' . $e->getMessage());
         }
     }
-
     public function show($id)
     {
         $data = ShiftKaryawanWahana::findOrFail($id);
@@ -179,8 +227,9 @@ class ShiftKaryawanWahanaController extends Controller
         $karyawan = Employee::all();
         $unitKerja = UnitKerja::all();
         $jenisHari = JenisHari::all();
+        $crew = CrewShiftKaryawan::all();
 
-        return view('shift_karyawan.edit', compact('shift_karyawan', 'karyawan', 'unitKerja', 'jenisHari'));
+        return view('shift_karyawan.edit', compact('shift_karyawan', 'karyawan', 'unitKerja', 'jenisHari', 'crew'));
     }
     public function update(Request $request, $id)
     {
@@ -277,7 +326,7 @@ class ShiftKaryawanWahanaController extends Controller
         $rows = ShiftKaryawanWahana::query()
             ->select([
                 'shift_karyawan_wahanas.wahana_id',
-                'shift_karyawan_wahanas.posisi', // pastikan ada kolom ini di DB
+                'shift_karyawan_wahanas.crew_id',
                 'employees.id as employee_id',
                 'employees.nama_karyawan as employee_name',
             ])
@@ -288,12 +337,49 @@ class ShiftKaryawanWahanaController extends Controller
 
         $assignments = [];
         foreach ($rows as $r) {
-            $assignments[$r->wahana_id][$r->posisi] = [
+            $assignments[$r->wahana_id][$r->crew_id] = [
                 'employee_id' => $r->employee_id,
                 'name'        => $r->employee_name,
             ];
         }
 
         return response()->json(['assignments' => $assignments]);
+    }
+    public function exportShiftKaryawanPDF(Request $request)
+    {
+        $request->validate([
+            'tgl_awal' => 'required|date',
+            'tgl_akhir' => 'required|date|after_or_equal:tgl_awal',
+        ]);
+
+        $tgl_awal = date('Y-m-d', strtotime($request->tgl_awal));
+        $tgl_akhir = date('Y-m-d', strtotime($request->tgl_akhir));
+
+        // Ambil data shift per tanggal
+        $dataPerTanggal = ShiftKaryawanWahana::with(['wahana', 'karyawan', 'unitKerja'])
+            ->whereBetween('tanggal', [$tgl_awal, $tgl_akhir])
+            ->get()
+            ->groupBy('tanggal');
+
+        // Ambil data OFF per tanggal
+        $offPerTanggal = EmployeeOffDay::with('employee')
+            ->whereBetween('tanggal', [$tgl_awal, $tgl_akhir])
+            ->get()
+            ->groupBy('tanggal');
+
+        // data crew
+        $crewShift = CrewShiftKaryawan::orderBy('nama')->get();
+
+        if ($dataPerTanggal->isEmpty()) {
+            return back()->with('error', 'Tidak ada data shift pada rentang tanggal tersebut.');
+        }
+
+        $pdf = Pdf::loadView('shift_karyawan.shift_karyawan_pdf', [
+            'dataPerTanggal' => $dataPerTanggal,
+            'offPerTanggal' => $offPerTanggal,
+            'crewShift' => $crewShift,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('shift_karyawan_tabel.pdf');
     }
 }

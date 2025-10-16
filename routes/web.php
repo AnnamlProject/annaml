@@ -428,7 +428,13 @@ Route::middleware(['auth'])->group(function () {
 
     // shift karyawan wahana
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
+    Route::get('/get-jenis-hari/{unit_kerja_id}', [ShiftKaryawanWahanaController::class, 'getJenisHari']);
+
     Route::get('/export/ShiftKaryawan', [ExportController::class, 'exportShiftKaryawan'])->name('export.ShiftKaryawan');
+    Route::get('/export/ShiftKaryawanTabel', [ExportController::class, 'exportShiftKaryawanTabel'])->name('export.ShiftKaryawanTabel');
+    Route::get('/export-shift-karyawan-pdf', [ShiftKaryawanWahanaController::class, 'exportShiftKaryawanPDF'])
+        ->name('shift_karyawan.ShiftKaryawanPDF');
+
     Route::post('/import/ShiftKaryawan', [ImportController::class, 'importShiftKaryawan'])->name('import.ShiftKaryawan');
 
     Route::get('/wahana/by-unit/{unit}', [WahanaController::class, 'byUnit'])

@@ -19,9 +19,10 @@ class ShiftKaryawanWahana extends Model
         'jam_selesai',
         'lama_jam',
         'persentase_jam',
+        'lembur_jam',
         'status',
         'keterangan',
-        'posisi'
+        'crew_id'
     ];
     // Relasi ke Karyawan
     public function karyawan()
@@ -47,6 +48,10 @@ class ShiftKaryawanWahana extends Model
         return $this->belongsTo(JenisHari::class, 'jenis_hari_id');
     }
 
+    public function crewShift()
+    {
+        return $this->belongsTo(CrewShiftKaryawan::class, 'crew_id');
+    }
     // Accessor untuk menghitung lama_jam otomatis
     public function getLamaJamAttribute($value)
     {

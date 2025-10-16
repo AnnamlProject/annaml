@@ -98,12 +98,12 @@
                                         <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][debits]"
                                                 class="money-input debit-input w-full border rounded px-2 py-1 text-right"
-                                                value="{{ number_format($detail->debits, 0, ',', '.') }}" />
+                                                value="{{ number_format($detail->debits, 2, ',', '.') }}" />
                                         </td>
                                         <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][credits]"
                                                 class="money-input credit-input w-full border rounded px-2 py-1 text-right"
-                                                value="{{ number_format($detail->credits, 0, ',', '.') }}" />
+                                                value="{{ number_format($detail->credits, 2, ',', '.') }}" />
                                         </td>
                                         <td class="border px-2 py-1">
                                             <input type="text" name="items[{{ $i }}][comment]"
@@ -193,11 +193,11 @@
                     <div class="mt-6 flex justify-end gap-4">
                         <button type="button" onclick="history.go(-1)"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md">
-                            Batal
+                            Cancel
                         </button>
 
-                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                            Update
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                            Process
                         </button>
                     </div>
                 </form>
@@ -216,14 +216,64 @@
         }
 
         function formatNumber(value) {
-            return new Intl.NumberFormat('id-ID').format(value);
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
         }
+
+        // Format angka dua desimal dan update total
+        function formatNumberInput(input) {
+            let value = input.value;
+
+            // Jika pengguna baru mengetik koma, jangan langsung diformat
+            if (value.endsWith(',')) {
+                return;
+            }
+
+            // Hapus semua karakter kecuali angka dan koma
+            value = value.replace(/[^\d,]/g, '');
+
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+
+            // Pisahkan bagian ribuan dan desimal
+            let parts = value.split(',');
+            let integerPart = parts[0];
+            let decimalPart = parts[1] ? parts[1].slice(0, 2) : '';
+
+            // Tambahkan titik ribuan
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            // Gabungkan kembali
+            input.value = decimalPart ? `${integerPart},${decimalPart}` : integerPart;
+        }
+
+        // Event input
+        $(document).on('input', '.money-input', function() {
+            formatNumberInput(this);
+            updateTotals();
+        });
+
+        // Saat keluar dari input → paksa 2 desimal
+        $(document).on('blur', '.money-input', function() {
+            let val = this.value.replace(/\./g, '').replace(',', '.');
+            if (val === '') return;
+            this.value = new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(parseFloat(val));
+        });
 
         function updateTotals() {
             let totalDebit = 0,
                 totalCredit = 0;
+
             document.querySelectorAll('.debit-input').forEach(input => totalDebit += parseNumber(input.value));
             document.querySelectorAll('.credit-input').forEach(input => totalCredit += parseNumber(input.value));
+
             document.getElementById('total-debit').innerText = formatNumber(totalDebit);
             document.getElementById('total-credit').innerText = formatNumber(totalCredit);
         }
@@ -374,27 +424,23 @@
             updateTotals();
         });
 
-        // Format angka & update total
-        $(document).on('input', '.money-input', function() {
-            const raw = this.value.replace(/[^0-9]/g, '');
-            this.value = raw === '' ? '' : new Intl.NumberFormat('id-ID').format(raw);
-            updateTotals();
-        });
-
-        // Normalisasi sebelum submit
-        $('#journal-entry-form').on('submit', function() {
-            document.querySelectorAll('.money-input').forEach(input => {
-                const raw = input.value.replace(/\./g, '');
-                input.value = raw === '' ? '' : parseFloat(raw);
-            });
-        });
-
-        // Init awal
+        // ✅ Init & event submit aman (urutan paling bawah)
         $(document).ready(function() {
             $('.item-select').each(function() {
                 attachSelect2($(this));
             });
             updateTotals();
+
+            // ✅ Normalisasi sebelum submit
+            $('#journal-entry-form').on('submit', function() {
+                document.querySelectorAll('.money-input').forEach(input => {
+                    // dari "1.000,50" → "1000.50"
+                    let val = input.value
+                        .replace(/\./g, '') // buang titik ribuan
+                        .replace(',', '.'); // koma → titik desimal
+                    input.value = val; // biarkan string numerik
+                });
+            });
         });
     </script>
 @endpush

@@ -38,7 +38,7 @@
                                 @foreach ($karyawan as $g)
                                     <option value="{{ $g->id }}"
                                         {{ isset($shift_karyawan) && $shift_karyawan->employee_id == $g->id ? 'selected' : '' }}>
-                                        {{ $g->nama_karyawan }}
+                                        {{ $g->nama_panggilan }}
                                     </option>
                                 @endforeach
                             </select>
@@ -78,16 +78,11 @@
                             <label for="jenis_hari_id" class="block text-sm font-medium text-gray-700 mb-1">Jenis
                                 Hari</label>
                             <select name="jenis_hari_id" id="jenis_hari_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Jenis Hari --</option>
-                                @foreach ($jenisHari as $g)
-                                    <option value="{{ $g->id }}"
-                                        {{ isset($shift_karyawan) && $shift_karyawan->jenis_hari_id == $g->id ? 'selected' : '' }}>
-                                        {{ $g->nama }}
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
+
 
 
                         <div class="mb-2">
@@ -122,24 +117,16 @@
                         </div>
                         <div class="mb-2">
                             <label for="posisi" class="block text-sm font-medium text-gray-700 mb-1">Posisi</label>
-                            <select name="posisi" id="posisi" required
+
+                            <select name="crew_id" id="crew_id"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">-- Pilih--</option>
-                                <option value="petugas_1"
-                                    {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_1' ? 'selected' : '' }}>
-                                    Petugas 1</option>
-                                <option value="petugas_2"
-                                    {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_2' ? 'selected' : '' }}>
-                                    Petugas 2</option>
-                                <option value="petugas_3"
-                                    {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_3' ? 'selected' : '' }}>
-                                    Petugas 3</option>
-                                <option value="petugas_4"
-                                    {{ old('posisi', $shift_karyawan->posisi ?? '') == 'petugas_4' ? 'selected' : '' }}>
-                                    Petugas 4</option>
-                                <option value="pengganti"
-                                    {{ old('posisi', $shift_karyawan->posisi ?? '') == 'pengganti' ? 'selected' : '' }}>
-                                    Pengganti</option>
+                                <option value="">-- Pilih Crew --</option>
+                                @foreach ($crew as $g)
+                                    <option value="{{ $g->id }}"
+                                        {{ isset($shift_karyawan) && $shift_karyawan->crew_id == $g->id ? 'selected' : '' }}>
+                                        {{ $g->nama }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -171,6 +158,34 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const unitSelect = document.getElementById('unit_kerja_id');
+        const jenisSelect = document.getElementById('jenis_hari_id');
+
+        unitSelect.addEventListener('change', function() {
+            const unitId = this.value;
+
+            // Kosongkan dropdown jenis hari
+            jenisSelect.innerHTML = '<option value="">-- Pilih Jenis Hari --</option>';
+
+            if (!unitId) return;
+
+            fetch(`/get-jenis-hari/${unitId}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.id;
+                        opt.textContent = item.nama;
+                        jenisSelect.appendChild(opt);
+                    });
+                })
+                .catch(err => console.error('Gagal load jenis hari:', err));
+        });
+    });
+</script>
 
 <script>
     $(document).ready(function() {

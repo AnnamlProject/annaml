@@ -179,15 +179,40 @@ class JournalEntryController extends Controller
 
     public function store(Request $request)
     {
+        // Fungsi bantu untuk normalisasi angka format Indonesia → float
+        $normalizeNumber = function ($value) {
+            if ($value === null || $value === '') {
+                return null;
+            }
+
+            // Hilangkan karakter selain angka, titik, koma, atau minus
+            $value = preg_replace('/[^\d.,-]/', '', $value);
+
+            // Jika mengandung koma, berarti format Indonesia (1.000,50)
+            if (strpos($value, ',') !== false) {
+                // Hilangkan titik ribuan, ganti koma jadi titik desimal
+                $value = str_replace('.', '', $value);
+                $value = str_replace(',', '.', $value);
+            }
+            // Jika tidak ada koma → berarti sudah format internasional (1000.50)
+            // → biarkan titik tetap ada sebagai desimal
+
+            return (float) $value;
+        };
+
+
         // Bersihkan dan filter input
-        $cleanedItems = collect($request->items)->filter(function ($item) {
-            return isset($item['kode_akun']) && $item['kode_akun'] !== '';
-        })->map(function ($item) {
-            // Buang separator angka (titik/koma/spasi)
-            $item['debits'] = isset($item['debits']) && $item['debits'] !== '' ? str_replace(['.', ','], '', $item['debits']) : null;
-            $item['credits'] = isset($item['credits']) && $item['credits'] !== '' ? str_replace(['.', ','], '', $item['credits']) : null;
-            return $item;
-        })->values()->all();
+        $cleanedItems = collect($request->items)
+            ->filter(fn($item) => !empty($item['kode_akun']))
+            ->map(function ($item) use ($normalizeNumber) {
+                $item['debits']  = $normalizeNumber($item['debits'] ?? null);
+                $item['credits'] = $normalizeNumber($item['credits'] ?? null);
+                return $item;
+            })
+            ->values()
+            ->all();
+        // dump('RAW items:', $request->items);
+        // dump('CLEANED items:', $cleanedItems);
 
         // Gabungkan kembali ke dalam request
         $request->merge(['items' => $cleanedItems]);
@@ -210,49 +235,59 @@ class JournalEntryController extends Controller
         ]);
 
         // Hitung total debit & kredit
-        $totalDebit = collect($cleanedItems)->sum(function ($item) {
-            return (float) $item['debits'];
-        });
+        $totalDebit = collect($cleanedItems)->sum(fn($i) => (float) $i['debits']);
+        $totalKredit = collect($cleanedItems)->sum(fn($i) => (float) $i['credits']);
 
-        $totalKredit = collect($cleanedItems)->sum(function ($item) {
-            return (float) $item['credits'];
-        });
+        // dump('TOTAL DEBIT:', $totalDebit, 'TOTAL CREDUT:', $totalKredit);
 
-        // Cek kesamaan debit dan kredit
-        if ($totalDebit != $totalKredit) {
-            return back()->withInput()->with('error', 'Total Debit (' . number_format($totalDebit, 0, ',', '.') . ') dan Total Kredit (' . number_format($totalKredit, 0, ',', '.') . ') harus sama!');
+        // Gunakan toleransi kecil agar float rounding tidak bikin gagal
+        if (abs($totalDebit - $totalKredit) > 0.001) {
+            return back()->withInput()->with(
+                'error',
+                'Total Debit (' . number_format($totalDebit, 2, ',', '.') .
+                    ') dan Total Kredit (' . number_format($totalKredit, 2, ',', '.') .
+                    ') harus sama!'
+            );
+        }
+
+        // Cegah hanya sisi debit atau kredit
+        if (($totalDebit == 0 && $totalKredit > 0) || ($totalKredit == 0 && $totalDebit > 0)) {
+            return back()->withInput()->withErrors([
+                'items' => 'Harus ada lawan transaksi, tidak boleh hanya debit atau hanya kredit.'
+            ]);
         }
 
         // Simpan ke database
         DB::beginTransaction();
         try {
             $entry = JournalEntry::create([
-                'source' => $request->source,
+                'source'  => $request->source,
                 'tanggal' => $request->tanggal,
                 'comment' => $request->comment,
             ]);
 
-            foreach ($request->items as $item) {
-                JournalEntryDetail::create([
-                    'journal_entry_id'   => $entry->id,
+            foreach ($cleanedItems as $item) {
+                $entry->details()->create([
                     'kode_akun'          => $item['kode_akun'],
                     'departemen_akun_id' => $item['departemen_akun_id'] ?? null,
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
-                    'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak'] ?? 0,
+                    'project_id'         => $item['project_id'] ?? null,
+                    'pajak'              => $item['pajak'] ?? 0,
                     'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
-                    'kode_fiscal' => $item['kode_fiscal'] ?? null
+                    'kode_fiscal'        => $item['kode_fiscal'] ?? null,
                 ]);
             }
 
             DB::commit();
-            return redirect()->route('journal_entry.index')->with('success', 'Journal entry berhasil disimpan.');
+            return redirect()->route('journal_entry.index')
+                ->with('success', 'Journal entry berhasil disimpan.');
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             Log::error('Gagal menyimpan journal entry: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Gagal menyimpan journal entry: ' . $e->getMessage());
+            return back()->withInput()
+                ->with('error', 'Gagal menyimpan journal entry: ' . $e->getMessage());
         }
     }
 
@@ -351,17 +386,46 @@ class JournalEntryController extends Controller
     }
     public function update(Request $request, $id)
     {
-        // Bersihkan dan filter input
-        $cleanedItems = collect($request->items)->filter(function ($item) {
-            return isset($item['kode_akun']) && $item['kode_akun'] !== '';
-        })->map(function ($item) {
-            $item['debits'] = isset($item['debits']) && $item['debits'] !== '' ? str_replace(['.', ','], '', $item['debits']) : 0;
-            $item['credits'] = isset($item['credits']) && $item['credits'] !== '' ? str_replace(['.', ','], '', $item['credits']) : 0;
-            return $item;
-        })->values()->all();
 
-        $request->merge(['items' => $cleanedItems]);
         // dd($request->all());
+        // Fungsi bantu untuk normalisasi angka format Indonesia → float (contoh: "1.234,56" → 1234.56)
+        $normalizeNumber = function ($value) {
+            if ($value === null || $value === '') {
+                return null;
+            }
+
+            // Hilangkan karakter selain angka, titik, koma, atau minus
+            $value = preg_replace('/[^\d.,-]/', '', $value);
+
+            // Jika mengandung koma, berarti format Indonesia (1.000,50)
+            if (strpos($value, ',') !== false) {
+                // Hilangkan titik ribuan, ganti koma jadi titik desimal
+                $value = str_replace('.', '', $value);
+                $value = str_replace(',', '.', $value);
+            }
+            // Jika tidak ada koma → berarti sudah format internasional (1000.50)
+            // → biarkan titik tetap ada sebagai desimal
+
+            return (float) $value;
+        };
+
+
+        // Bersihkan dan filter input
+        $cleanedItems = collect($request->items)
+            ->filter(fn($item) => !empty($item['kode_akun']))
+            ->map(function ($item) use ($normalizeNumber) {
+                $item['debits']  = $normalizeNumber($item['debits'] ?? null);
+                $item['credits'] = $normalizeNumber($item['credits'] ?? null);
+                return $item;
+            })
+            ->values()
+            ->all();
+        // dump('RAW items:', $request->items);
+        // dump('CLEANED items:', $cleanedItems);
+
+        // Gabungkan hasil ke request agar validasi tetap bisa dipakai
+        $request->merge(['items' => $cleanedItems]);
+
         // Validasi dasar
         $request->validate([
             'source' => 'required|string|max:255',
@@ -377,22 +441,26 @@ class JournalEntryController extends Controller
             'items.*.pajak' => 'nullable|boolean',
             'items.*.penyesuaian_fiskal' => 'nullable|string',
             'items.*.kode_fiscal' => 'nullable|string',
-
-
         ]);
 
-        // ===== Tambahkan validasi manual di sini =====
+
+        // ===== Validasi manual tambahan =====
         $totalDebit  = collect($cleanedItems)->sum(fn($i) => (float) $i['debits']);
         $totalCredit = collect($cleanedItems)->sum(fn($i) => (float) $i['credits']);
+        // dump('TOTAL DEBIT:', $totalDebit, 'TOTAL CREDIT:', $totalCredit);
 
-        // Cek balance
-        if ($totalDebit !== $totalCredit) {
-            return back()->withInput()->withErrors(['items' => 'Total debit dan kredit harus sama.']);
+        // Gunakan toleransi float kecil (hindari mismatch 0.000001)
+        if (abs($totalDebit - $totalCredit) > 0.001) {
+            return back()->withInput()->withErrors([
+                'items' => 'Total debit (' . number_format($totalDebit, 2, ',', '.') . ') dan kredit (' . number_format($totalCredit, 2, ',', '.') . ') harus sama.'
+            ]);
         }
 
-        // Cek apakah hanya ada salah satu sisi
+        // Pastikan tidak hanya satu sisi transaksi
         if (($totalDebit == 0 && $totalCredit > 0) || ($totalCredit == 0 && $totalDebit > 0)) {
-            return back()->withInput()->withErrors(['items' => 'Harus ada lawan transaksi, tidak boleh hanya debit atau hanya kredit.']);
+            return back()->withInput()->withErrors([
+                'items' => 'Harus ada lawan transaksi — tidak boleh hanya debit atau hanya kredit.'
+            ]);
         }
 
         // Simpan ke database
@@ -402,7 +470,7 @@ class JournalEntryController extends Controller
 
             // Update header
             $entry->update([
-                'source' => $request->source,
+                'source'  => $request->source,
                 'tanggal' => $request->tanggal,
                 'comment' => $request->comment,
             ]);
@@ -410,27 +478,32 @@ class JournalEntryController extends Controller
             // Hapus detail lama
             $entry->details()->delete();
 
-            // Simpan item baru
-            foreach ($request->items as $item) {
+            // Simpan detail baru
+            foreach ($cleanedItems as $item) {
                 $entry->details()->create([
                     'departemen_akun_id' => $item['departemen_akun_id'] ?? null,
                     'kode_akun'          => $item['kode_akun'],
                     'debits'             => $item['debits'] ?? 0,
                     'credits'            => $item['credits'] ?? 0,
                     'comment'            => $item['comment'] ?? null,
-                    'project_id' => $item['project_id'] ?? null,
-                    'pajak' => $item['pajak'] ?? 0,
+                    'project_id'         => $item['project_id'] ?? null,
+                    'pajak'              => $item['pajak'] ?? 0,
                     'penyesuaian_fiskal' => $item['penyesuaian_fiskal'] ?? null,
-                    'kode_fiscal' => $item['kode_fiscal'] ?? null
+                    'kode_fiscal'        => $item['kode_fiscal'] ?? null,
                 ]);
             }
 
             DB::commit();
-            return redirect()->route('journal_entry.index')->with('success', 'Journal entry berhasil diperbarui.');
+
+            return redirect()
+                ->route('journal_entry.index')
+                ->with('success', 'Journal entry berhasil diperbarui.');
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             Log::error('Gagal update journal entry: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Gagal update journal entry: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal update journal entry: ' . $e->getMessage());
         }
     }
 }

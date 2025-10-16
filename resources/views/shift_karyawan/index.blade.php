@@ -137,6 +137,39 @@
                         <a href="{{ route('export.ShiftKaryawan') }}" class="block hover:bg-gray-50 p-2 rounded-lg">
                             <i class="fas fa-file-download mr-2 text-blue-500"></i> Export
                         </a>
+                        <form action="{{ route('export.ShiftKaryawanTabel') }}" method="GET" class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Export Format Tabel (Dengan Rentang
+                                Tanggal):</label>
+                            <div class="flex space-x-2">
+                                <input type="date" name="tgl_awal" class="border rounded px-2 py-1 text-sm w-1/2"
+                                    required>
+                                <input type="date" name="tgl_akhir" class="border rounded px-2 py-1 text-sm w-1/2"
+                                    required>
+                            </div>
+                            <button type="submit"
+                                class="bg-blue-500 text-white w-full py-1 rounded hover:bg-blue-600 text-sm mt-2">
+                                <i class="fas fa-file-download mr-1"></i> Export Format Tabel
+                            </button>
+                        </form>
+
+                        <div class="border rounded">
+                            <label for="font-bold text-lg mt-4">PDF Document</label>
+                            <form action="{{ route('shift_karyawan.ShiftKaryawanPDF') }}" method="GET" class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Export Format PDF (Rentang
+                                    Tanggal):</label>
+                                <div class="flex space-x-2">
+                                    <input type="date" name="tgl_awal" class="border rounded px-2 py-1 text-sm w-1/2"
+                                        required>
+                                    <input type="date" name="tgl_akhir" class="border rounded px-2 py-1 text-sm w-1/2"
+                                        required>
+                                </div>
+                                <button type="submit"
+                                    class="bg-red-500 text-white w-full py-1 rounded hover:bg-red-600 text-sm mt-2">
+                                    <i class="fas fa-file-pdf mr-1"></i> Export Format PDF
+                                </button>
+                            </form>
+
+                        </div>
                         <form action="{{ route('import.ShiftKaryawan') }}" method="POST" enctype="multipart/form-data"
                             class="space-y-2">
                             @csrf
@@ -165,6 +198,8 @@
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama Karyawan</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Crew</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Unit Kerja</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Level Karyawan</th>
@@ -174,9 +209,11 @@
                                 Tanggal</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Jenis Hari</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Jam
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Jam
                                 Mulai</th>
-                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Jam
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Jam
                                 Selesai</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Lama Jam</th>
@@ -196,6 +233,8 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
 
                                 <td class="px-4 py-2 text-center ">{{ optional($item->karyawan)->nama_karyawan ?? '-' }}
+                                </td>
+                                <td class="px-4 py-2 text-center ">{{ optional($item->crewShift)->nama ?? '-' }}
                                 </td>
                                 <td class="px-4 py-2 text-center ">{{ optional($item->unitKerja)->nama_unit ?? '-' }}</td>
                                 <td class="px-4 py-2 text-center ">
@@ -283,55 +322,44 @@
                 </div>
 
                 {{-- Tabel Wahana & Petugas --}}
-                <div class="relative border rounded-lg overflow-hidden">
-                    <div class="relative overflow-x-auto" style="max-height: calc(100vh - 330px); overflow-y: auto;">
-                        <table class="min-w-full border border-gray-200 text-sm">
-                            <thead class="bg-gray-50 sticky top-0 z-10">
+
+
+                <div class="relative overflow-x-auto" style="max-height: calc(100vh - 330px); overflow-y: auto;">
+                    <table class="min-w-full border border-gray-200 text-sm">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Wahana</th>
+                                @foreach ($crew_shift as $crew)
+                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">
+                                        {{ $crew->nama }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            <template x-for="w in wahanas" :key="w.id">
                                 <tr>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Wahana</th>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Petugas 1</th>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Petugas 2</th>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Petugas 3</th>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Petugas 4</th>
-                                    <th class="px-2 py-1 text-left font-semibold text-gray-700 border">Pengganti</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
-                                <template x-if="wahanas.length === 0">
-                                    <tr>
-                                        <td colspan="6" class="px-3 py-4 text-center text-gray-500">
-                                            Pilih <b>Unit Kerja</b> untuk menampilkan daftar Wahana.
+                                    <td class="border px-2 py-1" x-text="w.nama_wahana"></td>
+
+                                    <template x-for="crew in crew_shift" :key="crew.id">
+                                        <td class="border px-2 py-1">
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="truncate text-gray-700"
+                                                    x-text="displayPetugas(w.id, crew.id)"></span>
+                                                <button type="button"
+                                                    class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                    @click="openModal(w, crew)">
+                                                    Set
+                                                </button>
+                                            </div>
                                         </td>
-                                    </tr>
-                                </template>
-
-                                <template x-for="w in wahanas" :key="w.id">
-                                    <tr>
-                                        <td class="border px-2 py-1" x-text="w.nama_wahana"></td>
-
-                                        <!-- Kolom Petugas 1..4 & Pengganti -->
-                                        <template
-                                            x-for="pos in ['petugas_1','petugas_2','petugas_3','petugas_4','pengganti']"
-                                            :key="pos">
-                                            <td class="border px-2 py-1">
-                                                <!-- Placeholder nama petugas (jika mau ditarik dari server, silakan isi) -->
-                                                <div class="flex items-center justify-between gap-2">
-                                                    <span class="truncate text-gray-700"
-                                                        x-text="displayPetugas(w.id, pos)"></span>
-                                                    <button type="button"
-                                                        class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                                        @click="openModal(w, pos)">
-                                                        Set
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </template>
-                                    </tr>
-                                </template>
-                            </tbody>
-                        </table>
-                    </div>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
                 </div>
+
+
                 {{-- PANEL OFF: di bawah tabel, rata kiri --}}
                 <div class="mt-4 flex flex-col md:flex-row gap-4">
                     <div class="w-full md:w-1/3">
@@ -393,7 +421,7 @@
                     <div class="relative z-50 w-[90%] max-w-5xl bg-white rounded-xl shadow-xl">
                         <div class="flex items-center justify-between px-4 py-3 border-b">
                             <h3 class="font-semibold">
-                                Atur <span x-text="labelPosisi(modal.posisi)"></span> •
+                                Atur <span x-text="modal.posisi?.nama"></span> •
                                 <span x-text="modal.wahana?.nama_wahana"></span>
                             </h3>
                             <button class="px-3 py-1 rounded bg-gray-100 hover:bg-gray-200"
@@ -424,7 +452,8 @@
                                 <input type="hidden" name="wahana_id" :value="modal.wahana?.id ?? ''">
                                 <input type="hidden" name="unit_kerja_id" :value="unitId">
                                 <input type="hidden" name="tanggal" :value="tanggal">
-                                <input type="hidden" name="posisi" :value="modal.posisi">
+                                <input type="hidden" name="crew_id" :value="modal.posisi?.id ?? ''">
+
 
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                                     <div class="mb-2 md:col-span-2">
@@ -440,23 +469,24 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <p class="text-xs text-gray-500 mt-1">Posisi: <span class="font-medium"
-                                                x-text="labelPosisi(modal.posisi)"></span></p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            Posisi: <span class="font-medium" x-text="modal.posisi?.nama"></span>
+                                        </p>
                                     </div>
+
 
                                     <div class="mb-2">
                                         <label for="jenis_hari_id"
-                                            class="block text-sm font-medium text-gray-700 mb-1">Jenis Hari</label>
+                                            class="block text-sm font-medium text-gray-700 mb-1">Jenis
+                                            Hari</label>
                                         <select name="jenis_hari_id" id="jenis_hari_id"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-white">
                                             <option value="">-- Pilih Jenis Hari --</option>
-                                            @foreach ($jenisHari as $g)
-                                                <option value="{{ $g->id }}"
-                                                    {{ isset($shift_karyawan) && ($shift_karyawan->jenis_hari_id ?? null) == $g->id ? 'selected' : '' }}>
-                                                    {{ $g->nama }}
-                                                </option>
-                                            @endforeach
+                                            <template x-for="jh in jenisHaris" :key="jh.id">
+                                                <option :value="jh.id" x-text="jh.nama"></option>
+                                            </template>
                                         </select>
+
                                     </div>
 
                                     <div class="mb-2">
@@ -508,11 +538,11 @@
                                 <div class="flex justify-end gap-2 pt-2">
                                     <button type="button" @click="showModal=false"
                                         class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                                        Batal
+                                        Cancel
                                     </button>
                                     <button type="submit"
                                         class="px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">
-                                        {{ isset($shift_karyawan) ? '💾 Update' : '✅ Simpan' }}
+                                        {{ isset($shift_karyawan) ? '💾 Update' : ' Process' }}
                                     </button>
                                 </div>
                             </form>
@@ -559,6 +589,7 @@
             transition: background-color 0.2s ease;
         }
     </style>
+
     {{-- Alpine Component --}}
     <script>
         function kalenderPage() {
@@ -566,13 +597,17 @@
                 unitId: '',
                 tanggal: (new Date()).toISOString().slice(0, 10),
                 wahanas: [],
+                jenisHaris: [],
                 assignments: {},
 
+                // 🧩 tambahkan baris ini:
+                crew_shift: JSON.parse(`{!! json_encode($crew_shift) !!}`),
+
                 // ---- OFF state ----
-                offs: [], // [{id, employee_id, tanggal, nama_karyawan}]
-                offCandidates: [], // [{id, nama_karyawan}]
-                offIds: [], // [employee_id,...] (untuk disable/select)
-                newOffEmployeeIds: [], // multiselect
+                offs: [],
+                offCandidates: [],
+                offIds: [],
+                newOffEmployeeIds: [],
                 newOffNote: '',
 
                 showModal: false,
@@ -583,12 +618,12 @@
 
                 init() {
                     this.$watch('unitId', () => {
-                        this.refreshData()
+                        this.refreshData();
+                        this.loadJenisHari();
                     });
                     this.$watch('tanggal', () => {
                         this.refreshData()
                     });
-                    // Jika ada meta csrf:
                     this.csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
                 },
 
@@ -604,7 +639,7 @@
 
                     await this.loadWahana();
                     await this.loadAssignments();
-                    await this.loadOffs(); // <--- load panel OFF
+                    await this.loadOffs();
                 },
 
                 async loadWahana() {
@@ -622,6 +657,20 @@
                     } catch (e) {
                         console.error(e);
                         alert('Tidak dapat memuat daftar wahana untuk unit terpilih.');
+                    }
+                },
+
+                async loadJenisHari() {
+                    this.jenisHaris = [];
+                    if (!this.unitId) return;
+
+                    try {
+                        const res = await fetch(`/get-jenis-hari/${this.unitId}`);
+                        if (!res.ok) throw new Error('Gagal memuat jenis hari');
+                        this.jenisHaris = await res.json();
+                    } catch (e) {
+                        console.error(e);
+                        alert('Tidak dapat memuat jenis hari untuk unit terpilih.');
                     }
                 },
 
@@ -645,7 +694,6 @@
                     }
                 },
 
-                // ---------- OFF ----------
                 async loadOffs() {
                     try {
                         const params = new URLSearchParams({
@@ -680,11 +728,11 @@
                     try {
                         const res = await fetch("{{ route('off_days.store') }}", {
                             method: 'POST',
-                            credentials: 'same-origin', // <— penting: kirim cookie session
+                            credentials: 'same-origin',
                             headers: {
                                 'Content-Type': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': csrf, // <— penting: token dari meta
+                                'X-CSRF-TOKEN': csrf,
                             },
                             body: JSON.stringify({
                                 tanggal: this.tanggal,
@@ -693,10 +741,7 @@
                             })
                         });
 
-                        if (!res.ok) {
-                            const text = await res.text();
-                            throw new Error(text || 'Gagal menyimpan OFF');
-                        }
+                        if (!res.ok) throw new Error(await res.text() || 'Gagal menyimpan OFF');
 
                         await this.loadOffs();
                         await this.loadAssignments();
@@ -716,10 +761,10 @@
                         const url = "{{ route('off_days.destroy', ['off' => 'OFF_ID']) }}".replace('OFF_ID', offId);
                         const res = await fetch(url, {
                             method: 'DELETE',
-                            credentials: 'same-origin', // <— penting
+                            credentials: 'same-origin',
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': csrf, // <— penting
+                                'X-CSRF-TOKEN': csrf,
                             }
                         });
 
@@ -733,15 +778,11 @@
                     }
                 },
 
-
-
-                // ---------- /OFF ----------
-
-                openModal(wahana, posisi) {
+                openModal(wahana, crew) {
                     if (!this.unitId) return alert('Pilih Unit Kerja dahulu.');
                     if (!this.tanggal) return alert('Isi tanggal dahulu.');
                     this.modal.wahana = wahana;
-                    this.modal.posisi = posisi;
+                    this.modal.posisi = crew;
                     this.showModal = true;
                 },
 
@@ -756,10 +797,10 @@
                     return map[p] || p;
                 },
 
-                displayPetugas(wahanaId, posisi) {
+                displayPetugas(wahanaId, crewId) {
                     const w = this.assignments[wahanaId];
                     if (!w) return '-';
-                    const slot = w[posisi];
+                    const slot = w[crewId];
                     return slot ? slot.name : '-';
                 },
 
@@ -767,7 +808,7 @@
                     await this.loadAssignments();
                     this.showModal = false;
                 },
-            }
+            };
         }
     </script>
 

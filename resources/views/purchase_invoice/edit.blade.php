@@ -119,7 +119,11 @@
                             <h3 class="font-semibold text-lg mb-2">🛒 Order Items</h3>
                             <div class="overflow-auto">
                                 <table class="w-full border text-sm text-left shadow-md">
-                                    <thead class="bg-blue-100 text-gray-700">
+                                    @php
+                                        $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+                                    @endphp
+                                    <thead
+                                        class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                         <tr>
                                             <th class="p-2">Item</th>
                                             <th>Qty</th>
@@ -245,7 +249,7 @@
                                                 <td>
                                                     <input type="text" readonly
                                                         class="w-full border px-2 py-1 bg-gray-50"
-                                                        value="{{ optional($detail->account)->nama_akun }}">
+                                                        value="{{ optional($detail->account)->kode_akun }}-{{ optional($detail->account)->nama_akun }}">
                                                     <input type="hidden" name="items[{{ $i }}][account_id]"
                                                         value="{{ $detail->account_id }}">
                                                 </td>
@@ -432,6 +436,7 @@
 
             const freightAccount = {
                 id: "{{ $freightAccount->akun_id ?? '' }}",
+                kode: "{{ $freightAccount->akun->kode_akun ?? '-' }}",
                 name: "{{ $freightAccount->akun->nama_akun ?? 'Freight Expense' }}"
             };
 
@@ -458,7 +463,7 @@
                         clearAccounts();
                         (res.accounts || []).forEach(function(a) {
                             const text = `${a.kode_akun || '-'} - ${a.nama_akun || '-'}`;
-                            $account.append(`<option value="${a.account_id}">${text}</option>`);
+                            $account.append(`<option value="${a.detail_id}">${text}</option>`);
                         });
 
                         // ✅ Preselect account lama
@@ -590,7 +595,7 @@
                         if (taxType === 'input_tax') {
                             rows.push({
                                 accountCode: taxAccountCode,
-                                account: taxAccountName,
+                                account: `${taxAccountCode}-${taxAccountName}`,
                                 debit: taxAmount,
                                 credit: 0
                             });
@@ -598,7 +603,7 @@
                         } else if (taxType === 'withholding_tax') {
                             rows.push({
                                 accountCode: taxAccountCode,
-                                account: taxAccountName,
+                                account: `${taxAccountCode}-${taxAccountName}`,
                                 debit: 0,
                                 credit: taxAmount
                             });
@@ -611,7 +616,7 @@
                 const freight = parseFloat($('#freight').val()) || 0;
                 if (freight > 0) {
                     rows.push({
-                        account: freightAccount.name,
+                        account: `${freightAccount.kode} - ${freightAccount.name}`,
                         debit: freight,
                         credit: 0,
                         account_id: freightAccount.id

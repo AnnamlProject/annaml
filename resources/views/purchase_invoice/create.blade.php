@@ -466,6 +466,7 @@
             // 🚚 akun Freight dari backend (lempar via Blade)
             const freightAccount = {
                 id: "{{ $freightAccount->akun_id ?? '' }}",
+                kode: "{{ $freightAccount->akun->kode_akun ?? '-' }}",
                 name: "{{ $freightAccount->akun->nama_akun ?? 'Freight Expense' }}"
             };
 
@@ -507,52 +508,52 @@
             function addEmptyRow() {
                 const index = rowIndex++;
                 const row = `
-            <tr class="item-row" data-index="${index}">
-                <td><select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select></td>
-                <td><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][back_order]" class="back-${index} w-full bg-gray-100 border rounded" readonly /></td>
-                <td><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
-                <td><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly /></td>
-                <td><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
-                <td><input type="number" step="0.01" name="items[${index}][discount]" class="disc-${index} w-full border rounded" /></td>
-                <td>
-                    <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
-                        <option value="">-- Pilih Pajak --</option>
-                        @foreach ($sales_taxes as $item)
-                            <option value="{{ $item->id }}" 
-                                    data-rate="{{ $item->rate }}" 
-                                    data-type="{{ $item->type }}"
-                                    data-account="{{ $item->purchase_account_id }}"  
-                                    data-account-code="{{ $item->purchaseAccount->kode_akun ?? '' }}"
-                                    data-account-name="{{ $item->purchaseAccount->nama_akun ?? '' }}">
-                                 ({{ $item->rate }}%)
-                            </option>
-                        @endforeach
-                    </select>
-                </td>
-                <td><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
-                    <input type="hidden" name="items[${index}][tax_amount]" class="tax_amount_raw-${index}" />
-                </td>
-                <td><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
-                    <input type="hidden" name="items[${index}][amount]" class="amount_raw-${index}" />
-                </td>
-                <td>
-                    <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
-                    <input type="hidden" name="items[${index}][account_id]" class="account-id-${index}" />
-                </td>
-                <td>
-                    <select name="items[${index}][project_id]" class="w-full border rounded">
-                        <option value="">-- Pilih Project --</option>
-                        @foreach ($project as $item)
-                            <option value="{{ $item->id }}">{{ $item->nama_project }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                <td class="text-center">
-                    <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button>
-                </td>
-            </tr>`;
+                <tr class="item-row" data-index="${index}">
+                    <td><select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select></td>
+                    <td><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
+                    <td><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
+                    <td><input type="number" name="items[${index}][back_order]" class="back-${index} w-full bg-gray-100 border rounded" readonly /></td>
+                    <td><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
+                    <td><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly /></td>
+                    <td><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
+                    <td><input type="number" step="0.01" name="items[${index}][discount]" class="disc-${index} w-full border rounded" /></td>
+                    <td>
+                        <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
+                            <option value="">-- Pilih Pajak --</option>
+                            @foreach ($sales_taxes as $item)
+                                <option value="{{ $item->id }}" 
+                                        data-rate="{{ $item->rate }}" 
+                                        data-type="{{ $item->type }}"
+                                        data-account="{{ $item->purchase_account_id }}"  
+                                        data-account-code="{{ $item->purchaseAccount->kode_akun ?? '' }}"
+                                        data-account-name="{{ $item->purchaseAccount->nama_akun ?? '' }}">
+                                    ({{ $item->rate }}%)
+                                </option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                        <input type="hidden" name="items[${index}][tax_amount]" class="tax_amount_raw-${index}" />
+                    </td>
+                    <td><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                        <input type="hidden" name="items[${index}][amount]" class="amount_raw-${index}" />
+                    </td>
+                    <td>
+                        <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
+                        <input type="hidden" name="items[${index}][account_id]" class="account-id-${index}" />
+                    </td>
+                    <td>
+                        <select name="items[${index}][project_id]" class="w-full border rounded">
+                            <option value="">-- Pilih Project --</option>
+                            @foreach ($project as $item)
+                                <option value="{{ $item->id }}">{{ $item->nama_project }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button>
+                    </td>
+                </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
                 attachSelect2(index);
             }
@@ -591,9 +592,14 @@
                 <td><input type="text" name="items[${index}][amount_display]" value="${formatNumber(item.amount)}" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][amount]" value="${item.amount}" class="amount_raw-${index}" />
                 </td>
-                <td><input type="text" value="${item.account_name}" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
+                <td>
+                    <input type="text"
+                            value="${item.account_name}"
+                            class="w-full border rounded bg-gray-100 account-name-${index}"
+                            readonly />
                     <input type="hidden" name="items[${index}][account_id]" value="${item.account_id}" />
-                </td>
+                    </td>
+
                 <td>
                     <select name="items[${index}][project_id]" class="w-full border rounded">
                         <option value="">-- Pilih Project --</option>
@@ -632,6 +638,8 @@
                                 discount: item.discount,
                                 account_id: item.account_id,
                                 account_name: item.account_name,
+                                account_code: item.account_code
+
                             }))
                         }),
                         cache: true
@@ -641,7 +649,7 @@
                     $(`.desc-${index}`).val(data.item_description);
                     $(`.unit-${index}`).val(data.unit);
                     $(`.purchase-${index}`).val(data.purchase_price);
-                    $(`.account-name-${index}`).val(data.account_name);
+                    $(`.account-name-${index}`).val(`${data.account_code} - ${data.account_name}`);
                     $(`.account-id-${index}`).val(data.account_id);
                     calculateAmount(index);
                 });
@@ -767,7 +775,7 @@
                 const freight = parseFloat($('#freight').val()) || 0;
                 if (freight > 0) {
                     journalRows.push({
-                        accountCode: '',
+                        accountCode: freightAccount.kode,
                         account: freightAccount.name,
                         debit: freight,
                         credit: 0

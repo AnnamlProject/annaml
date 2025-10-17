@@ -189,7 +189,7 @@ class PurchaseInvoiceController extends Controller
                     'purchase_invoice_id' => $purchaseInvoice->id,
                     'item_id'             => $row['item_id'],
                     'quantity'            => $row['quantity'],
-                    'order'               => $row['order'],
+                    'order'               => $row['order'] ?? 0,
                     'back_order'          => $row['back_order'] ?? 0,
                     'unit'                => $row['unit'],
                     'item_description'    => $row['item_description'],

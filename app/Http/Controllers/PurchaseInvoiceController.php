@@ -73,6 +73,7 @@ class PurchaseInvoiceController extends Controller
                     'amount'       => $detail->amount ?? 0,
                     'account_id'   => $detail->account_id ?? null,
                     'account_name' => $detail->account->nama_akun ?? '',
+                    'account_code' => $detail->account->kode_akun ?? '',
                 ];
             })->values(),
         ]);
@@ -162,7 +163,7 @@ class PurchaseInvoiceController extends Controller
                 'date_invoice'        => $request->date_invoice,
                 'shipping_date'       => $request->shipping_date,
                 'vendor_id'           => $request->vendor_id,
-                'account_id'          => $request->header_account_id,
+                'payment_method_account_id'          => $request->header_account_id,
                 'purchase_order_id'   => $request->purchase_order_id,
                 'location_id'         => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
@@ -456,7 +457,7 @@ class PurchaseInvoiceController extends Controller
             'date_invoice'        => 'required|date',
             'shipping_date'       => 'required|date',
             'vendor_id'           => 'required|exists:vendors,id',
-            'header_account_id'   => 'required|exists:payment_method_details,id',
+            'payment_method_account_id'   => 'required|exists:payment_method_details,id',
             'location_id'         => 'required|exists:location_inventories,id',
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
@@ -487,7 +488,7 @@ class PurchaseInvoiceController extends Controller
                 'shipping_date'       => $request->shipping_date,
                 'vendor_id'           => $request->vendor_id,
                 'location_id'         => $request->location_id,
-                'account_id'          => $request->header_account_id,
+                'payment_method_account_id'          => $request->payment_method_account_id,
                 'purchase_order_id'   => $request->purchase_order_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address'    => $request->shipping_address,
@@ -672,19 +673,36 @@ class PurchaseInvoiceController extends Controller
             $grandTotal = $subtotal + $taxTotal + $freight;
 
             if ($grandTotal > 0) {
-                $pmDetail = \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)
-                    ->where('is_default', 1)
-                    ->first()
-                    ?? \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)->first();
+                // 🔹 Gunakan payment_method_detail_id dari request
+                $pmDetail = null;
 
+                if ($request->filled('payment_method_account_id')) {
+                    $pmDetail = \App\PaymentMethodDetail::find($request->payment_method_account_id);
+                }
+
+                // 🔹 Jika user tidak memilih, fallback ke default
+                if (!$pmDetail) {
+                    $pmDetail = \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)
+                        ->where('is_default', 1)
+                        ->first()
+                        ?? \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)->first();
+                }
+
+                // 🔹 Ambil kode akun dari COA yang terkait dengan PaymentMethodDetail
                 $pmKode = $coaCode(optional($pmDetail)->account_id);
 
+                // 🔹 Simpan jurnal dengan akun sesuai pilihan user
                 \App\JournalEntryDetail::create([
                     'journal_entry_id' => $journal->id,
                     'kode_akun'        => $pmKode,
                     'debits'           => 0,
                     'credits'          => $grandTotal,
                     'comment'          => 'Payment / Credit',
+                ]);
+
+                // (Opsional) Jika Anda ingin menyimpan untuk tracking:
+                $purchaseInvoice->update([
+                    'payment_method_detail_id' => $pmDetail->id ?? null,
                 ]);
             }
 

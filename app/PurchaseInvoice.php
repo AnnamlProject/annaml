@@ -18,7 +18,7 @@ class PurchaseInvoice extends Model
         'early_payment_terms',
         'messages',
         'vendor_id',
-        'account_id',
+        'payment_method_account_id',
         'location_id',
         'status_purchase',
 
@@ -30,7 +30,7 @@ class PurchaseInvoice extends Model
     }
     public function paymentmethodDetail()
     {
-        return $this->belongsTo(PaymentMethodDetail::class, 'account_id');
+        return $this->belongsTo(PaymentMethodDetail::class, 'payment_method_account_id');
     }
     public function vendor()
     {

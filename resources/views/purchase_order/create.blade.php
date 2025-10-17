@@ -29,7 +29,7 @@
                     <div class="grid grid-cols-4 gap-2 text-xs">
                         <!-- Vendor -->
                         <div>
-                            <label class="block font-medium mb-1">Vendor</label>
+                            <label class="block font-medium mb-1">Vendor<span class="text-red-500">*</span></label>
 
                             <select id="vendor_id" name="vendor_id"
                                 class="w-full border border-gray-300 rounded px-2 py-1 bg-gray-50 text-xs" required>
@@ -46,7 +46,7 @@
                         <!-- Payment Method -->
                         {{-- Kolom Kiri: Payment Method --}}
                         <div>
-                            <label class="block font-medium mb-1">Payment Method</label>
+                            <label class="block font-medium mb-1">Payment Method<span class="text-red-500">*</span></label>
                             <select id="jenis_pembayaran_id" name="jenis_pembayaran_id"
                                 class="w-full border rounded px-2 py-1 text-sm" required>
                                 <option value="">-- Payment Method --</option>
@@ -62,14 +62,15 @@
                         {{-- Kolom Kanan: Account (otomatis terisi, 1 saja) --}}
                         <div id="pm-account-panel"
                             class="{{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
-                            <label class="block font-medium mb-1">Account</label>
+                            <label class="block font-medium mb-1">Account<span class="text-red-500">*</span></label>
                             <select id="pm-account-id" name="account_id" class="w-full border rounded px-2 py-1 text-sm">
                                 <option value="">-- Pilih Account --</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block font-medium mb-1">Location Inventory</label>
+                            <label class="block font-medium mb-1">Location Inventory<span
+                                    class="text-red-500">*</span></label>
                             <select id="location_id" name="location_id" class="w-full border rounded px-2 py-1 text-sm"
                                 required>
                                 <option value="">-- Location Inventory --</option>
@@ -87,7 +88,7 @@
                         <!-- Order Number -->
                         <div>
                             <label for="order_number" class="block text-gray-700 font-medium mb-1">Order
-                                Number</label>
+                                Number<span class="text-red-500">*</span></label>
                             <input type="text" id="order_number" name="order_number"
                                 value="{{ old('order_number', $purchase_order->order_number ?? '') }}"
                                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -105,7 +106,8 @@
 
                         <!-- Date Order -->
                         <div>
-                            <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order</label>
+                            <label for="date_order" class="block text-gray-700 font-medium mb-1">Date Order<span
+                                    class="text-red-500">*</span></label>
                             <input type="date" name="date_order" required
                                 value="{{ old('date_order', $purchase_order->date_order ?? now()->toDateString()) }}"
                                 class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
@@ -114,7 +116,8 @@
 
                         <!-- Shipping Date -->
                         <div>
-                            <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date</label>
+                            <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping
+                                Date<span class="text-red-500">*</span></label>
                             <input type="date" name="shipping_date" required
                                 value="{{ old('shipping_date', $purchase_order->shipping_date ?? now()->toDateString()) }}"
                                 class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
@@ -123,8 +126,8 @@
                         <!-- Shipping Address -->
                         <div class="col-span-2">
                             <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                Address</label>
-                            <textarea id="shipping_address" name="shipping_address" rows="2" required
+                                Address <span class="text-red-500">*</span></label>
+                            <textarea id="shipping_address" name="shipping_address" rows="2" placeholder="Masukkan shipping date" required
                                 class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">{{ old('shipping_address', $purchase_order->shipping_address ?? '') }}</textarea>
                             @error('shipping_address')
                                 <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

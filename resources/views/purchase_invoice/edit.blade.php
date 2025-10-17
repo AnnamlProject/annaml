@@ -55,7 +55,7 @@
 
                             <div id="account-wrapper" class="hidden">
                                 <label class="font-medium text-gray-700 block mb-1">Account</label>
-                                <select id="account_id" name="header_account_id"
+                                <select id="account_id" name="payment_method_account_id"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
                                     <option value="">-- Pilih Account --</option>
                                 </select>
@@ -467,7 +467,8 @@
                         });
 
                         // ✅ Preselect account lama
-                        const oldVal = "{{ old('account_id', $purchaseInvoice->account_id ?? '') }}";
+                        const oldVal =
+                            "{{ old('payment_method_account_id', $purchaseInvoice->payment_method_account_id ?? '') }}";
                         if (oldVal) {
                             $account.val(oldVal);
                         }

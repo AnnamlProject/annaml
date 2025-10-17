@@ -54,7 +54,7 @@
                             </div>
                             <div>
                                 <label for="invoice_number" class="block text-gray-700 font-medium mb-1">Invoice
-                                    Number</label>
+                                    Number <span class="text-red-600">*</span></label>
                                 <input type="text" id="invoice_number" name="invoice_number"
                                     value="{{ old('invoice_number', $purchase_invoice->invoice_number ?? '') }}"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -73,7 +73,8 @@
 
                             <!-- Nama purchase_invoice_asset -->
                             <div>
-                                <label class="block font-medium mb-1">Payment Method</label>
+                                <label class="block font-medium mb-1">Payment Method <span
+                                        class="text-red-600">*</span></label>
                                 <select id="jenis_pembayaran_id" name="jenis_pembayaran_id"
                                     class="w-full border rounded px-2 py-1 text-sm" required>
                                     <option value="">-- Payment Method --</option>
@@ -97,6 +98,7 @@
                             </div>
                             <div>
                                 <label for="location_id" class="block text-gray-700 font-medium mb-1">Location Inventory
+                                    <span class="text-red-600">*</span>
                                 </label>
                                 <select name="location_id" id="location_id"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -114,7 +116,8 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="Vendor" class="block text-gray-700 font-medium mb-1">Vendor
+                                <label for="Vendor" class="block text-gray-700 font-medium mb-1">Vendor <span
+                                        class="text-red-600">*</span>
                                 </label>
                                 <select name="vendor_id" id="vendor_id"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -132,7 +135,8 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="date_invoice" class="block text-gray-700 font-medium mb-1">Invoice Date
+                                <label for="date_invoice" class="block text-gray-700 font-medium mb-1">Invoice Date <span
+                                        class="text-red-600">*</span>
                                 </label>
                                 <input type="date" id="name" name="date_invoice" required
                                     value="{{ old('date_invoice', $purchase_invoice->date_invoice ?? now()->toDateString()) }}"
@@ -142,7 +146,8 @@
                                 @enderror
                             </div>
                             <div>
-                                <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
+                                <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date <span
+                                        class="text-red-600">*</span>
                                 </label>
                                 <input type="date" id="name" name="shipping_date" required
                                     value="{{ old('shipping_date', $purchase_invoice->shipping_date ?? now()->toDateString()) }}"
@@ -154,7 +159,7 @@
                             <!-- deskripsi purchase_invoice_asset -->
                             <div class="mb-4 md:col-span-2">
                                 <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                    Address</label>
+                                    Address <span class="text-red-600">*</span></label>
                                 <textarea id="shipping_address" name="shipping_address" rows="3"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_invoice->shipping_address ?? '') }}</textarea>
                                 @error('shipping_address')
@@ -164,34 +169,31 @@
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold mb-4">Order Items</h3>
-
-                            <!-- Scrollable Table -->
-                            <div class="overflow-x-auto border rounded shadow-sm">
-
-                                <table class="min-w-full table-auto border-collapse text-xs text-left" id="item-table">
+                            <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
+                                <table class="min-w-max border-collapse border text-sm whitespace-nowrap">
                                     @php
                                         $themeColor = \App\Setting::get('theme_color', '#4F46E5');
                                     @endphp
                                     <thead
                                         class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                         <tr>
-                                            <th class="px-4 py-2">Item Number</th>
-                                            <th class="px-2 py-1">Qty</th>
-                                            <th class="px-2 py-1">Order</th>
-                                            <th class="px-2 py-1">Back Order</th>
-                                            <th class="px-2 py-1">Unit</th>
-                                            <th class="px-2 py-1">Description</th>
-                                            <th class="px-2 py-1">Price</th>
-                                            <th class="px-2 py-1">Discount</th>
-                                            <th class="px-2 py-1">Tax</th>
-                                            <th class="px-2 py-1">Tax Amount</th>
-                                            <th class="px-2 py-1">Amount</th>
-                                            <th class="px-2 py-1">Account</th>
-                                            <th class="px-2 py-1">Project</th>
-                                            <th class="px-2 py-1">#</th>
+                                            <th class="border px-4 py-2 w-56">Item Number</th>
+                                            <th class="border px-2 py-1 text-center w-24">Qty</th>
+                                            <th class="border px-2 py-1 text-center w-24">Order</th>
+                                            <th class="border px-2 py-1 text-center w-24">Back Order</th>
+                                            <th class="border px-2 py-1 text-center w-28">Unit</th>
+                                            <th class="border px-2 py-1 text-center w-38">Description</th>
+                                            <th class="border px-2 py-1 text-center">Price</th>
+                                            <th class="border px-2 py-1 text-center">Discount</th>
+                                            <th class="border px-2 py-1 text-center">Tax</th>
+                                            <th class="border px-2 py-1 text-center">Tax Amount</th>
+                                            <th class="border px-2 py-1 text-center">Amount</th>
+                                            <th class="border px-2 py-1 text-center">Account</th>
+                                            <th class="border px-2 py-1 text-center">Project</th>
+                                            <th class="border px-2 py-1">#</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="items-body">
+                                    <tbody id="items-body" class="bg-white">
                                         <!-- Akan diisi lewat JavaScript -->
                                     </tbody>
                                     <tfoot>
@@ -409,7 +411,7 @@
 
                         // kalau form edit, bisa auto-select berdasarkan value lama
                         const oldVal =
-                            "{{ old('account_id', $purchase_invoice->account_id ?? '') }}";
+                            "{{ old('payment_method_account_id', $purchase_invoice->payment_method_account_id ?? '') }}";
                         if (oldVal) $select.val(oldVal);
 
                         $panel.removeClass('hidden');
@@ -509,15 +511,15 @@
                 const index = rowIndex++;
                 const row = `
                 <tr class="item-row" data-index="${index}">
-                    <td><select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select></td>
-                    <td><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
-                    <td><input type="number" name="items[${index}][order]" class="order-${index} w-full border rounded" /></td>
-                    <td><input type="number" name="items[${index}][back_order]" class="back-${index} w-full bg-gray-100 border rounded" readonly /></td>
-                    <td><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
-                    <td><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly /></td>
-                    <td><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
-                    <td><input type="number" step="0.01" name="items[${index}][discount]" class="disc-${index} w-full border rounded" /></td>
-                    <td>
+                    <td class="border px-4 py-2"><select name="items[${index}][item_id]" class="item-select w-full border rounded" data-index="${index}"></select></td>
+                    <td class="border px-4 py-2"><input type="number" name="items[${index}][quantity]" class="qty-${index} w-full border rounded" /></td>
+                    <td class="border px-4 py-2"><input type="number" name="items[${index}][order]" class="w-full border bg-gray-100 rounded"  readonly/></td>
+                    <td class="border px-4 py-2"><input type="number" name="items[${index}][back_order]" class="w-full bg-gray-100 border rounded" readonly /></td>
+                    <td class="border px-4 py-2"><input type="text" name="items[${index}][unit]" class="unit-${index} w-full border bg-gray-100 rounded" readonly /></td>
+                    <td class="border px-4 py-2"><input type="text" name="items[${index}][item_description]" class="desc-${index} w-full border bg-gray-100 rounded" readonly /></td>
+                    <td class="border px-4 py-2"><input type="number" step="0.01" name="items[${index}][price]" class="purchase-${index} w-full border rounded" /></td>
+                    <td class="border px-4 py-2"><input type="number" step="0.01" name="items[${index}][discount]" class="disc-${index} w-full border rounded" /></td>
+                    <td class="border px-4 py-2">
                         <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                             <option value="">-- Pilih Pajak --</option>
                             @foreach ($sales_taxes as $item)
@@ -532,17 +534,17 @@
                             @endforeach
                         </select>
                     </td>
-                    <td><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                    <td class="border px-4 py-2"><input type="text" name="items[${index}][tax_amount_display]" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                         <input type="hidden" name="items[${index}][tax_amount]" class="tax_amount_raw-${index}" />
                     </td>
-                    <td><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                    <td class="border px-4 py-2"><input type="text" name="items[${index}][amount_display]" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                         <input type="hidden" name="items[${index}][amount]" class="amount_raw-${index}" />
                     </td>
-                    <td>
+                    <td class="border px-4 py-2">
                         <input type="text" class="w-full border rounded bg-gray-100 account-name-${index}" readonly />
                         <input type="hidden" name="items[${index}][account_id]" class="account-id-${index}" />
                     </td>
-                    <td>
+                    <td class="border px-4 py-2">
                         <select name="items[${index}][project_id]" class="w-full border rounded">
                             <option value="">-- Pilih Project --</option>
                             @foreach ($project as $item)
@@ -550,7 +552,7 @@
                             @endforeach
                         </select>
                     </td>
-                    <td class="text-center">
+                    <td class="text-center border px-4 py-2">
                         <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button>
                     </td>
                 </tr>`;
@@ -563,15 +565,15 @@
                 const index = rowIndex++;
                 const row = `
             <tr class="item-row" data-index="${index}">
-                <td><input type="hidden" name="items[${index}][item_id]" value="${item.id}">${item.item_number}</td>
-                <td><input type="number" name="items[${index}][quantity]" value="${item.quantity}" class="qty-${index} w-full border rounded" /></td>
-                <td><input type="number" name="items[${index}][order]" value="${item.order}" class="order-${index} w-full border bg-gray-200 rounded" readonly/></td>
-                <td><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border bg-gray-100 bg-gray-200 rounded" readonly /></td>
-                <td><input type="text" name="items[${index}][unit]" value="${item.unit}" class="unit-${index} w-full bg-gray-100 border rounded" readonly/></td>
-                <td><input type="text" name="items[${index}][item_description]" value="${item.description}" class="desc-${index} w-full bg-gray-100 border rounded" readonly /></td>
-                <td><input type="number" step="0.01" name="items[${index}][price]" value="${item.price}" class="purchase-${index} w-full border rounded" /></td>
-                <td><input type="number" step="0.01" name="items[${index}][discount]" value="${item.discount}" class="disc-${index} w-full border rounded" /></td>
-                <td>
+                <td class="border px-4 py-2"><input type="hidden" name="items[${index}][item_id]" value="${item.id}">${item.item_number}</td>
+                <td class="border px-4 py-2"><input type="number" name="items[${index}][quantity]" value="${item.quantity}" class="qty-${index} w-full border rounded" /></td>
+                <td class="border px-4 py-2"><input type="number" name="items[${index}][order]" value="${item.order}" class="order-${index} w-full border bg-gray-200 rounded" readonly/></td>
+                <td class="border px-4 py-2"><input type="number" name="items[${index}][back_order]" value="${item.back_order}" class="back-${index} w-full border bg-gray-100 bg-gray-200 rounded" readonly /></td>
+                <td class="border px-4 py-2"><input type="text" name="items[${index}][unit]" value="${item.unit}" class="unit-${index} w-full bg-gray-100 border rounded" readonly/></td>
+                <td class="border px-4 py-2"><input type="text" name="items[${index}][item_description]" value="${item.description}" class="desc-${index} w-full bg-gray-100 border rounded" readonly /></td>
+                <td class="border px-4 py-2"><input type="number" step="0.01" name="items[${index}][price]" value="${item.price}" class="purchase-${index} w-full border rounded" /></td>
+                <td class="border px-4 py-2"><input type="number" step="0.01" name="items[${index}][discount]" value="${item.discount}" class="disc-${index} w-full border rounded" /></td>
+                <td class="border px-4 py-2">
                     <select name="items[${index}][tax_id]" class="tax-${index} w-full border rounded">
                         <option value="">-- Pilih Pajak --</option>
                         @foreach ($sales_taxes as $tax)
@@ -586,21 +588,21 @@
                         @endforeach
                     </select>
                 </td>
-                <td><input type="text" name="items[${index}][tax_amount_display]" value="${formatNumber(item.tax_amount)}" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                <td class="border px-4 py-2"><input type="text" name="items[${index}][tax_amount_display]" value="${formatNumber(item.tax_amount)}" class="tax_amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][tax_amount]" value="${item.tax_amount}" class="tax_amount_raw-${index}" />
                 </td>
-                <td><input type="text" name="items[${index}][amount_display]" value="${formatNumber(item.amount)}" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
+                <td class="border px-4 py-2"><input type="text" name="items[${index}][amount_display]" value="${formatNumber(item.amount)}" class="amount-${index} w-full border bg-gray-100 rounded text-right" readonly />
                     <input type="hidden" name="items[${index}][amount]" value="${item.amount}" class="amount_raw-${index}" />
                 </td>
-                <td>
+                <td class="border px-4 py-2">
                     <input type="text"
-                            value="${item.account_name}"
+                            value="${item.account_code}-${item.account_name}"
                             class="w-full border rounded bg-gray-100 account-name-${index}"
                             readonly />
                     <input type="hidden" name="items[${index}][account_id]" value="${item.account_id}" />
                     </td>
 
-                <td>
+                <td class="border px-4 py-2">
                     <select name="items[${index}][project_id]" class="w-full border rounded">
                         <option value="">-- Pilih Project --</option>
                         @foreach ($project as $item)
@@ -608,6 +610,9 @@
                         @endforeach
                     </select>
                 </td>
+                 <td class="text-center border px-4 py-2">
+                        <button type="button" class="remove-row px-2 py-1 bg-red-500 text-white rounded" data-index="${index}">X</button>
+                    </td>
             </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
                 calculateBackOrder(index);

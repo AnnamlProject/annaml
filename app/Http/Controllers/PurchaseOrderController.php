@@ -128,6 +128,7 @@ class PurchaseOrderController extends Controller
                 'freight'              => preg_replace('/[^0-9.\-]/', '', $request->freight ?? 0),
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
+                'status_purchase' => 0
             ]);
 
             // 5️⃣ Simpan detail ke purchase_order_details

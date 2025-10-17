@@ -19,7 +19,8 @@ class PurchaseOrder extends Model
         'freight',
         'early_payment_terms',
         'messages',
-        'location_id'
+        'location_id',
+        'status_purchase'
     ];
 
     public function jenisPembayaran()

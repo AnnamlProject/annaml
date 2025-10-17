@@ -8,6 +8,7 @@ use App\ItemBuild;
 use App\itemCategory;
 use App\PriceListInventory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -166,6 +167,10 @@ class ItemController extends Controller
             'units',
             'accounts',
             'taxes',
+            'accounts.assetAccount',
+            'accounts.expenseAccount',
+            'accounts.revenueAccount',
+            'accounts.cogsAccount',
             'quantities' => function ($q) use ($locationId) {
                 if ($locationId) {
                     $q->where('location_id', $locationId);
@@ -188,6 +193,21 @@ class ItemController extends Controller
             ->get();
 
 
+        foreach ($items as $it) {
+            Log::info('DEBUG Item Account Info', [
+                'id' => $it->id,
+                'item_number' => $it->item_number,
+                'context' => $context,
+                'asset_code' => optional($it->accounts->assetAccount)->kode_akun,
+                'cogs_code' => optional($it->accounts->cogsAccount)->kode_akun,
+                'revenue_code' => optional($it->accounts->revenueAccount)->kode_akun,
+                'account_code' => optional($it->accounts->assetAccount)->kode_akun
+                    ?? optional($it->accounts->expenseAccount)->kode_akun
+                    ?? optional($it->accounts->revenueAccount)->kode_akun
+                    ?? optional($it->accounts->cogsAccount)->kode_akun,
+            ]);
+        }
+
         return response()->json($items->map(function ($item) use ($context) {
             switch ($context) {
                 case 'purchase':
@@ -195,18 +215,22 @@ class ItemController extends Controller
                     $accountName = optional($item->accounts->assetAccount)->nama_akun
                         ?? optional($item->accounts->expenseAccount)->nama_akun
                         ?? '-';
+                    $accountKode = optional($item->accounts->assetAccount)->kode_akun
+                        ?? optional($item->accounts->expenseAccount)->kode_akun ?? '-';
                     $unit = $item->units->buying_unit ?? '-';
                     break;
 
                 case 'sales':
                     $accountId   = $item->accounts->revenue_account_id ?? null;
                     $accountName = optional($item->accounts->revenueAccount)->nama_akun ?? '-';
+                    $accountKode = optional($item->accounts->revenueAccount)->kode_akun ?? '-';
                     $unit = $item->units->selling_unit ?? '-';
                     break;
 
                 default:
                     $accountId   = $item->accounts->cogs_account_id ?? null;
                     $accountName = optional($item->accounts->cogsAccount)->nama_akun ?? '-';
+                    $accountKode = optional($item->accounts->cogsAccount)->kode_akun ?? '-';
                     $unit = $item->units->selling_unit ?? '-';
                     break;
             }
@@ -215,6 +239,11 @@ class ItemController extends Controller
             $onHandQty   = $item->quantities->sum('on_hand_qty');
             $onHandValue = $item->quantities->sum('on_hand_value');
             $unitCost    = $onHandQty > 0 ? $onHandValue / $onHandQty : 0;
+
+
+            // Tambahkan ini sebelum return
+
+
 
             return [
                 'id'                 => $item->id,
@@ -225,10 +254,13 @@ class ItemController extends Controller
                 'tax_rate'           => $item->taxes->first()->rate ?? 0,
                 'account_id'         => $accountId,
                 'account_name'       => $accountName,
+                'account_code' => $accountKode ?? '-',
                 'type'               => $item->type,
                 'unit_cost'          => $unitCost,
                 'cogs_account_name'  => optional($item->accounts->cogsAccount)->nama_akun ?? 'COGS',
+                'cogs_account_code'  => optional($item->accounts->cogsAccount)->kode_akun ?? '',
                 'asset_account_name' => optional($item->accounts->assetAccount)->nama_akun ?? 'Inventory',
+                'asset_account_code' => optional($item->accounts->assetAccount)->kode_akun ?? '',
             ];
         }));
     }

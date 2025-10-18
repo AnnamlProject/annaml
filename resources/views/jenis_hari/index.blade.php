@@ -48,7 +48,7 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-4 py-2">{{ $item->unitKerja->nama_unit }}</td>
+                                <td class="px-4 py-2">{{ $item->unitKerja->nama_unit ?? '' }}</td>
                                 <td class="px-4 py-2">{{ $item->nama }}</td>
                                 <td class="px-4 py-2">{{ $item->jam_mulai }}</td>
                                 <td class="px-4 py-2">{{ $item->jam_selesai }}</td>

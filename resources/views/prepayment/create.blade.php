@@ -226,6 +226,7 @@
                     totalCredit = 0;
 
                 const paidAccount = {
+                    kode: "{{ $paidAccount->akun->kode_akun ?? '' }}",
                     name: "{{ $paidAccount->akun->nama_akun ?? 'Kas/Bank' }}"
                 };
 
@@ -245,7 +246,7 @@
 
                     // Debit akun kas/bank
                     rows.push({
-                        account: paidAccount.name,
+                        account: `${paidAccount.kode}-${paidAccount.name}`,
                         debit: amount,
                         credit: 0
                     });

@@ -28,7 +28,8 @@ class PrepaymentController extends Controller
         $paidAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Prepayments Prepaid Orders')
             ->first();
-        return view('prepayment.create', compact('vendor', 'account', 'paidAccount'));
+        $prepaymentAccount = chartOfAccount::all();
+        return view('prepayment.create', compact('vendor', 'account', 'paidAccount', 'prepaymentAccount'));
     }
     public function store(Request $request)
     {
@@ -44,6 +45,7 @@ class PrepaymentController extends Controller
             'tanggal_prepayment'              => 'required|date',
             'vendor_id' => 'required|exists:vendors,id',
             'account_header_id' => 'required|exists:chart_of_accounts,id',
+            'account_prepayment' => 'required|exists:chart_of_accounts,id',
             'reference'            => 'required|string|max:255',
             'amount' => 'required|numeric',
             'comment'             => 'nullable|string',
@@ -57,6 +59,7 @@ class PrepaymentController extends Controller
                 'tanggal_prepayment'              => $validated['tanggal_prepayment'],
                 'vendor_id' => $validated['vendor_id'],
                 'account_id'            => $validated['account_header_id'],
+                'account_prepayment'            => $validated['account_prepayment'],
                 'amount'             => $validated['amount'],
                 'reference' => $validated['reference'],
                 'comment'             => $validated['comment'] ?? null,
@@ -77,20 +80,20 @@ class PrepaymentController extends Controller
 
 
             // Journal Debit Prepayment
-            $accountPrepayment = ChartOfAccount::find($validated['account_header_id']);
+            $accountPembayaran = ChartOfAccount::find($validated['account_header_id']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $accountPrepayment->kode_akun,
+                'kode_akun' => $accountPembayaran->kode_akun,
                 'debits'    => $expense->amount,
                 'credits'   => 0,
                 'comment'   => "Prepayment {$expense->id}",
             ]);
 
             // Journal Credit Kas/Bank
-            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepayments Prepaid Orders')->first();
+            $accountPrepayment = ChartOfAccount::find($validated['account_prepayment']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'kode_akun' => $accountPrepayment->kode_akun,
                 'debits'    => 0,
                 'credits'   => $expense->amount,
                 'comment'   => "Pembayaran Prepayment {$expense->id}",
@@ -114,13 +117,14 @@ class PrepaymentController extends Controller
 
     public function edit($id)
     {
-        $prepayment = Prepayment::with(['vendor', 'account'])->findOrFail($id);
+        $prepayment = Prepayment::with(['vendor', 'account', 'accountPrepayment'])->findOrFail($id);
         $vendor = Vendors::all();
         $account = chartOfAccount::all();
+        $prepaymentAccount = chartOfAccount::all();
         $paidAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Prepayments Prepaid Orders')
             ->first();
-        return view('prepayment.edit', compact('prepayment', 'vendor', 'account', 'paidAccount'));
+        return view('prepayment.edit', compact('prepayment', 'vendor', 'account', 'paidAccount', 'prepaymentAccount'));
     }
 
     public function update(Request $request, $id)
@@ -134,6 +138,7 @@ class PrepaymentController extends Controller
             'tanggal_prepayment'              => 'required|date',
             'vendor_id' => 'required|exists:vendors,id',
             'account_header_id' => 'required|exists:chart_of_accounts,id',
+            'account_prepayment' => 'required|exists:chart_of_accounts,id',
             'reference'            => 'required|string|max:255',
             'amount' => 'required|numeric',
             'comment'             => 'nullable|string',
@@ -146,6 +151,7 @@ class PrepaymentController extends Controller
                 'tanggal_prepayment'              => $validated['tanggal_prepayment'],
                 'vendor_id' => $validated['vendor_id'],
                 'account_id'            => $validated['account_header_id'],
+                'account_prepayment'            => $validated['account_prepayment'],
                 'amount'             => $validated['amount'],
                 'reference' => $validated['reference'],
                 'comment'             => $validated['comment'] ?? null,
@@ -175,20 +181,20 @@ class PrepaymentController extends Controller
 
 
             // Journal Debit Prepayment
-            $accountPrepayment = ChartOfAccount::find($validated['account_header_id']);
+            $accountPembayaran = ChartOfAccount::find($validated['account_header_id']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $accountPrepayment->kode_akun,
+                'kode_akun' => $accountPembayaran->kode_akun,
                 'debits'    => $expense->amount,
                 'credits'   => 0,
                 'comment'   => "Prepayment {$expense->id}",
             ]);
 
             // Journal Credit Kas/Bank
-            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepayments Prepaid Orders')->first();
+            $accountPrepayment = ChartOfAccount::find($validated['account_prepayment']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'kode_akun' => $accountPrepayment->kode_akun,
                 'debits'    => 0,
                 'credits'   => $expense->amount,
                 'comment'   => "Pembayaran Prepayment {$expense->id}",
@@ -215,7 +221,7 @@ class PrepaymentController extends Controller
             }
 
             // Hapus detail + header
-            $expense->details()->delete();
+            // $expense->details()->delete();
             $expense->delete();
         });
 

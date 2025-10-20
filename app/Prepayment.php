@@ -12,6 +12,7 @@ class Prepayment extends Model
         'reference',
         'vendor_id',
         'account_id',
+        'account_prepayment',
         'amount',
         'comment',
     ];
@@ -28,5 +29,9 @@ class Prepayment extends Model
     public function allocations()
     {
         return $this->hasMany(PrepaymentAllocation::class);
+    }
+    public function accountPrepayment()
+    {
+        return $this->belongsTo(chartOfAccount::class, 'account_prepayment');
     }
 }

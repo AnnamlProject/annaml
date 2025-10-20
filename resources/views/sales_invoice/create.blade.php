@@ -473,6 +473,7 @@
             // 🚚 akun Freight dari backend (lempar via Blade)
             const freightAccount = {
                 id: "{{ $freightAccount->akun_id ?? '' }}",
+                kode: "{{ $freightAccount->akun->kode_akun ?? '-' }}",
                 name: "{{ $freightAccount->akun->nama_akun ?? 'Freight Revenue' }}"
             };
 
@@ -501,7 +502,7 @@
                         const def = (res.accounts || []).find(x => x.is_default) || (res.accounts || [])[0];
                         if (def) {
                             $pmAccount.val(def.detail_id);
-                            console.log('✅ Auto pilih account:', def);
+                            // console.log('✅ Auto pilih account:', def);
                         }
 
                         $panel.removeClass('hidden');
@@ -610,8 +611,86 @@
                 document.querySelectorAll('#items-body .item-row').forEach(row => {
                     const idx = row.dataset.index;
                     const accountName = document.querySelector(`.account-name-${idx}`)?.value || 'Item';
+                    const accountCode = document.querySelector(`.account-code-${idx}`)?.value || 'Item';
                     const amount = parseNumber(document.querySelector(`.amount-${idx}`)?.value);
                     const taxAmount = parseNumber(document.querySelector(`.taxval-${idx}`)?.value);
+
+
+                    // Payment → Debit (ambil teks dari option)
+                    const paymentAccountName = document.querySelector('#pm-account-id option:checked')
+                        ?.text || '';
+                    const grandTotal = parseNumber(grandTotalInput.value);
+                    if (grandTotal > 0 && paymentAccountName) {
+                        journalRows.push({
+                            account: paymentAccountName,
+                            debit: grandTotal,
+                            credit: 0
+                        });
+                        totalDebit += grandTotal;
+                    }
+                    // Pajak → tergantung type
+                    if (taxAmount > 0) {
+                        const taxSelect = document.querySelector(`.tax-${idx}`);
+                        const taxAccountName = taxSelect?.selectedOptions[0]?.dataset.accountName || 'Tax';
+                        const taxAccountCode = taxSelect?.selectedOptions[0]?.dataset.accountCode || 'Tax';
+                        const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+
+                        if (taxType === 'withholding_tax') {
+                            // PPh ditahan pelanggan → Debit akun PPh Dipotong (aset/contra AR)
+                            journalRows.push({
+                                account: `${taxAccountCode}-${taxAccountName}`,
+                                debit: taxAmount,
+                                credit: 0
+                            });
+                            totalDebit += taxAmount;
+                        } else {
+                            // PPN Keluaran → Credit kewajiban
+                            journalRows.push({
+                                account: `${taxAccountCode}-${taxAccountName}`,
+                                debit: 0,
+                                credit: taxAmount
+                            });
+                            totalCredit += taxAmount;
+                        }
+                    }
+                    // Freight → Credit
+                    const freight = parseNumber(freightInput.value);
+                    if (freight > 0) {
+                        journalRows.push({
+                            account: `${freightAccount.kode} - ${freightAccount.name}`,
+                            debit: 0,
+                            credit: freight
+                        });
+                        totalCredit += freight;
+                    }
+
+
+                    // HPP untuk Inventory (kalau memang kamu butuh; dibiarkan sesuai script awal)
+                    const type = row.dataset.type;
+                    const qty = parseNumber(document.querySelector(`.qty-${idx}`)?.value);
+                    const unitCost = parseNumber(row.dataset.unitCost);
+                    const cogsAccount = row.dataset.cogsAccountName || 'COGS';
+                    const cogsCode = row.dataset.cogsAccountCode || '';
+                    const assetAccount = row.dataset.assetAccountName || 'Inventory';
+                    const assetCode = row.dataset.assetAccountCode || '';
+
+                    if (type === 'inventory' && unitCost > 0 && qty > 0) {
+                        const hpp = qty * unitCost;
+                        // Debit COGS
+                        journalRows.push({
+                            account: `${cogsCode}-${cogsAccount}`,
+                            debit: hpp,
+                            credit: 0
+                        });
+                        totalDebit += hpp;
+                        // Credit Inventory
+                        journalRows.push({
+                            account: `${assetCode}-${assetAccount}`,
+                            debit: 0,
+                            credit: hpp
+                        });
+                        totalCredit += hpp;
+                    }
 
                     // Pendapatan → Credit
                     if (amount > 0) {
@@ -622,80 +701,7 @@
                         });
                         totalCredit += amount;
                     }
-
-                    // Pajak → tergantung type
-                    if (taxAmount > 0) {
-                        const taxSelect = document.querySelector(`.tax-${idx}`);
-                        const taxAccountName = taxSelect?.selectedOptions[0]?.dataset.accountName || 'Tax';
-                        const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
-
-                        if (taxType === 'withholding_tax') {
-                            // PPh ditahan pelanggan → Debit akun PPh Dipotong (aset/contra AR)
-                            journalRows.push({
-                                account: taxAccountName,
-                                debit: taxAmount,
-                                credit: 0
-                            });
-                            totalDebit += taxAmount;
-                        } else {
-                            // PPN Keluaran → Credit kewajiban
-                            journalRows.push({
-                                account: taxAccountName,
-                                debit: 0,
-                                credit: taxAmount
-                            });
-                            totalCredit += taxAmount;
-                        }
-                    }
-
-                    // HPP untuk Inventory (kalau memang kamu butuh; dibiarkan sesuai script awal)
-                    const type = row.dataset.type;
-                    const qty = parseNumber(document.querySelector(`.qty-${idx}`)?.value);
-                    const unitCost = parseNumber(row.dataset.unitCost);
-                    const cogsAccount = row.dataset.cogsAccountName || 'COGS';
-                    const assetAccount = row.dataset.assetAccountName || 'Inventory';
-
-                    if (type === 'inventory' && unitCost > 0 && qty > 0) {
-                        const hpp = qty * unitCost;
-                        // Debit COGS
-                        journalRows.push({
-                            account: cogsAccount,
-                            debit: hpp,
-                            credit: 0
-                        });
-                        totalDebit += hpp;
-                        // Credit Inventory
-                        journalRows.push({
-                            account: assetAccount,
-                            debit: 0,
-                            credit: hpp
-                        });
-                        totalCredit += hpp;
-                    }
                 });
-
-                // Freight → Credit
-                const freight = parseNumber(freightInput.value);
-                if (freight > 0) {
-                    journalRows.push({
-                        account: freightAccount.name,
-                        debit: 0,
-                        credit: freight
-                    });
-                    totalCredit += freight;
-                }
-
-                // Payment → Debit (ambil teks dari option)
-                const paymentAccountName = document.querySelector('#pm-account-id option:checked')?.text || '';
-                const grandTotal = parseNumber(grandTotalInput.value);
-                if (grandTotal > 0 && paymentAccountName) {
-                    journalRows.push({
-                        account: paymentAccountName,
-                        debit: grandTotal,
-                        credit: 0
-                    });
-                    totalDebit += grandTotal;
-                }
 
                 // Render jurnal
                 if (journalRows.length === 0) {
@@ -771,7 +777,6 @@
                     data-unit-cost="0" 
                     data-cogs-account-name="" 
                     data-asset-account-name="">
-                    
                     <td><select name="items[${index}][item_id]" data-index="${index}" class="w-full border rounded"></select></td>
                     <td><input type="text" name="items[${index}][description]" class="w-full border rounded  desc-${index}" readonly></td>
                     <td><input type="text" name="items[${index}][quantity]" class="w-full border rounded  qty-${index}"></td>
@@ -790,6 +795,7 @@
                                         data-rate="{{ $item->rate }}" 
                                         data-type="{{ $item->type }}" 
                                         data-account="{{ $item->sales_account_id }}"  
+                                        data-account-code="{{ $item->salesAccount->kode_akun ?? '' }}"
                                         data-account-name="{{ $item->salesAccount->nama_akun ?? '' }}">
                                     ({{ $item->rate }}%)
                                 </option>
@@ -819,10 +825,12 @@
             function addRowFromPO(item) {
                 const index = rowIndex++;
                 const row = `
-            <tr class="item-row" data-index="${index}" data-type="${item.type}" 
+             <tr class="item-row" data-index="${index}" data-type="${item.type}" 
                 data-unit-cost="${item.unit_cost}" 
                 data-cogs-account-name="${item.cogs_account_name}" 
-                data-asset-account-name="${item.asset_account_name}">
+                data-cogs-account-code="${item.cogs_account_code}" 
+                data-asset-account-name="${item.asset_account_name}"
+                data-asset-account-code="${item.asset_account_code}">
                 
                 <td class="border px-2 py-1">
                     <input type="hidden" name="items[${index}][item_id]" value="${item.id}">
@@ -838,11 +846,11 @@
                 </td>
                 <td class="border px-2 py-1">
                     <input type="text" name="items[${index}][order_quantity]" value="${formatNumber(item.order ?? 0)}" 
-                        class="w-full border rounded order-${index}">
+                        class="w-full bg-gray-100 border rounded order-${index}" readonly>
                 </td>
                 <td class="border px-2 py-1">
                     <input type="text" name="items[${index}][back_order]" value="${formatNumber(item.back_order ?? 0)}" 
-                        class="w-full border rounded back-${index}" readonly>
+                        class="w-full border bg-gray-100 rounded back-${index}" readonly>
                 </td>
                 <td class="border px-2 py-1">
                     <input type="text" name="items[${index}][unit]" value="${item.unit ?? ''}" 
@@ -874,6 +882,7 @@
                                     data-rate="{{ $tax->rate }}"
                                     data-type="{{ $tax->type }}"
                                     data-account="{{ $tax->sales_account_id }}"  
+                                    data-account-code="{{ $tax->salesAccount->kode_akun ?? '' }}"
                                     data-account-name="{{ $tax->salesAccount->nama_akun ?? '' }}">
                                 {{ $tax->name }} ({{ $tax->rate }}%)
                             </option>
@@ -893,7 +902,7 @@
                 </td>
 
                 <td class="border px-2 py-1">
-                    <input type="text" value="${item.account_name}" 
+                    <input type="text" value="${item.account_code}-${item.account_name}" 
                         class="account-name-${index} w-full border rounded bg-gray-100" readonly>
                     <input type="hidden" name="items[${index}][account_id]" value="${item.account_id}">
                 </td>
@@ -948,13 +957,16 @@
                                 tax_rate: item.tax,
                                 account_id: item.account_id,
                                 account_name: item.account_name,
+                                account_code: item.account_code,
                                 stock_quantity: item.on_hand_qty,
 
                                 // Tambahan utk HPP
                                 type: item.type, // inventory / service
                                 unit_cost: item.unit_cost, // dari controller
                                 cogs_account_name: item.cogs_account_name,
-                                asset_account_name: item.asset_account_name
+                                asset_account_name: item.asset_account_name,
+                                cogs_account_code: item.cogs_account_code,
+                                asset_account_code: item.asset_account_code
                             }))
                         }),
                         cache: true
@@ -966,7 +978,7 @@
                     $(`.desc-${index}`).val(data.item_name);
                     $(`.unit-${index}`).val(data.unit);
                     // ($`.tax-${index}`).val(data.tax_rate); // biarkan user pilih pajak dari dropdown (id), jangan paksa rate
-                    $(`.account-name-${index}`).val(data.account_name);
+                    $(`.account-name-${index}`).val(`${data.account_code} - ${data.account_name}`);
                     $(`.account-id-${index}`).val(data.account_id);
                     $(`.qty-${index}`).val(formatNumber(data.stock_quantity));
 
@@ -975,7 +987,9 @@
                     tr.dataset.type = data.type || '';
                     tr.dataset.unitCost = data.unit_cost || 0;
                     tr.dataset.cogsAccountName = data.cogs_account_name || 'COGS';
+                    tr.dataset.cogsAccountCode = data.cogs_account_code || '';
                     tr.dataset.assetAccountName = data.asset_account_name || 'Inventory';
+                    tr.dataset.assetAccountCode = data.asset_account_code || '';
 
                     // Hitung ulang amount
                     calculateAmount(index);

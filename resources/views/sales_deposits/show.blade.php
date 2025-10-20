@@ -17,55 +17,14 @@
                 <div><strong>Deposit Reference:</strong> {{ $deposit->deposit_reference ?? '-' }}</div>
                 <div><strong>Comment:</strong> {{ $deposit->comment ?? '-' }}</div>
             </div>
-
-            {{-- Tabel Detail --}}
-            <h3 class="text-xl font-semibold mt-10 mb-4 text-gray-800">Detail Penggunaan Deposit</h3>
-
-            <div class="overflow-x-auto border rounded">
-                <table class="w-full text-sm text-gray-700">
-                    <thead class="bg-gray-100 uppercase text-xs font-semibold">
-                        <tr>
-                            <th class="px-3 py-2 text-left">Invoice Number</th>
-                            <th class="px-3 py-2 text-left">Invoice Date</th>
-                            <th class="px-3 py-2 text-right">Original Amount</th>
-                            <th class="px-3 py-2 text-right">Amount Owing</th>
-                            <th class="px-3 py-2 text-right">Discount Available</th>
-                            <th class="px-3 py-2 text-right">Discount Taken</th>
-                            <th class="px-3 py-2 text-right">Amount Used</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        @forelse ($deposit->details as $detail)
-                            <tr>
-                                <td class="px-3 py-2">{{ $detail->invoice->invoice_number ?? '-' }}</td>
-                                <td class="px-3 py-2">{{ $detail->invoice_date }}</td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($detail->original_amount, 2, ',', '.') }}</td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($detail->amount_owing, 2, ',', '.') }}</td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($detail->discount_available, 2, ',', '.') }}</td>
-                                <td class="px-3 py-2 text-right">
-                                    {{ number_format($detail->discount_taken, 2, ',', '.') }}</td>
-                                <td class="px-3 py-2 text-right font-semibold">
-                                    {{ number_format($detail->used_amount, 2, ',', '.') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-3 py-3 text-center text-gray-500">Tidak ada penggunaan
-                                    deposit.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
             {{-- Tombol kembali --}}
-            <div class="mt-6">
+            <div class="mt-6 flex justify-end gap-2">
                 <a href="{{ route('sales_deposits.index') }}"
-                    class="inline-block px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                    Kembali
+                    class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                    Back
                 </a>
+                <a href="{{ route('sales_deposits.edit', $deposit->id) }}"
+                    class="inline-block px-4 py-2 bg-yellow-600 text-white rounded transition">Edit</a>
             </div>
         </div>
     </div>

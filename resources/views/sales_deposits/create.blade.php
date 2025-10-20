@@ -2,7 +2,20 @@
 @section('content')
     <div class="py-10">
         <div class="w-full px-4 sm:px-6 lg:px-8">
-            <div class="bg-white shadow-md rounded-lg p-6">
+            @php
+                $themeColor = \App\Setting::get('theme_color', '#4F46E5');
+            @endphp
+            <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
+                <div id="tabs" class="type-section">
+                    <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
+                        <li><a href="#select_item" class="tab-link active">Proces Deposit</a></li>
+                        <li><a href="#journal_report" class="tab-link">Journal report</a></li>
+                    </ul>
+                </div>
+
+                <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
+                    Deposits Create
+                </h4>
                 <form method="POST"
                     action="{{ isset($sales_deposits) ? route('sales_deposits.update', $sales_deposits->id) : route('sales_deposits.store') }}">
                     @csrf
@@ -19,207 +32,158 @@
                             </ul>
                         </div>
                     @endif
+                    <div class="tab-content" id="select_item">
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        {{-- payment method --}}
-                        <div class="mb-4">
-                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
-                            </label>
-                            <select name="jenis_pembayaran_id"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Payment Method--</option>
-                                @foreach ($jenis_pembayaran as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('jenis_pembayaran_id', $sales_deposits->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_jenis }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('jenis_pembayaran_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4">
-                            <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Deposit To
-                            </label>
-                            <select name="account_id" id="account_header_id"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Pilih--</option>
-                                @foreach ($account as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('account_id', $sales_deposits->account_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_akun }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('account_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            {{-- payment method --}}
+                            <div class="mb-4">
+                                <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Payment Method
+                                </label>
+                                <select name="jenis_pembayaran_id"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                    <option value="">-- Payment Method--</option>
+                                    @foreach ($jenis_pembayaran as $level)
+                                        <option value="{{ $level->id }}"
+                                            {{ old('jenis_pembayaran_id', $sales_deposits->jenis_pembayaran_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ $level->nama_jenis }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('jenis_pembayaran_id')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div class="mb-4">
+                                <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Deposit To
+                                </label>
+                                <select name="account_id" id="account_header_id"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                    <option value="">-- Pilih--</option>
+                                    @foreach ($account as $level)
+                                        <option value="{{ $level->id }}"
+                                            {{ old('account_id', $sales_deposits->account_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ $level->kode_akun }}-{{ $level->nama_akun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('account_id')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        {{-- customers --}}
-                        <div class="mb-4">
-                            <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
-                            </label>
-                            <select name="customers_id" id="customers_id"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
-                                <option value="">-- Customers--</option>
-                                @foreach ($customer as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('customer_id', $sales_deposits->customer_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_customers }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('customer_id')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            {{-- customers --}}
+                            <div class="mb-4">
+                                <label for="customers" class="block text-gray-700 font-medium mb-1">Customers
+                                </label>
+                                <select name="customers_id" id="customers_id"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                    <option value="">-- Customers--</option>
+                                    @foreach ($customer as $level)
+                                        <option value="{{ $level->id }}"
+                                            {{ old('customer_id', $sales_deposits->customer_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ $level->nama_customers }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('customer_id')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        {{-- deposit number --}}
-                        <div class="mb-4">
-                            <label for="deposit_no" class="block text-gray-700 font-medium mb-1">Deposits
-                                Number</label>
-                            <input type="text" id="deposit_no" name="deposit_no"
-                                value="{{ old('deposit_no', $sales_deposits->deposit_no ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {{-- deposit number --}}
+                            <div class="mb-4">
+                                <label for="deposit_no" class="block text-gray-700 font-medium mb-1">Deposits
+                                    Number</label>
+                                <input type="text" id="deposit_no" name="deposit_no"
+                                    value="{{ old('deposit_no', $sales_deposits->deposit_no ?? '') }}"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                            {{-- <label class="inline-flex items-center mt-2">
+                                {{-- <label class="inline-flex items-center mt-2">
                                 <input type="checkbox" id="auto_generate" name="auto_generate" value="1"
                                     class="form-checkbox text-blue-600" onchange="toggleAutoGenerate()">
                                 <span class="ml-2 text-sm text-gray-700">Generate Invoice Number secara otomatis</span>
                             </label> --}}
 
-                            @error('deposit_no')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                                @error('deposit_no')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            {{-- deposit date --}}
+                            <div class="mb-4">
+                                <label for="deposit_date" class="block text-gray-700 font-medium mb-1">Date
+                                </label>
+                                <input type="date" id="name" name="deposit_date" required
+                                    value="{{ old('deposit_date', $sales_deposits->deposit_date ?? '') }}"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                @error('deposit_date')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label for="deposit reference" class="block text-gray-700 font-medium mb-1">Deposit
+                                    Reference No</label>
+                                <input type="text" name="deposit_reference" placeholder="Masukkan No depesit reference"
+                                    value="{{ old('deposit_reference', $sales_deposits->deposit_reference ?? '') }}"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring=blue-500">
+                            </div>
+                            <div>
+                                <label for="Deposit Amount" class="block text-gray-700 font-medium mb-1">Deposit
+                                    Amount</label>
+                                <div class="flex">
+                                    <span
+                                        class="inline-flex items-center px-3 rounded-l-md bg-gray-100 border border-r-0 border-gray-300 text-gray-600 text-sm">Rp</span>
+                                    <input type="text" name="deposit_amount" step="0.01" id="amount" required
+                                        value="{{ old('deposit_amount', $sales_deposits->deposit_amount ?? '') }}"
+                                        class="w-full border number-format rounded px-2 py-1 text-right font-semibold" />
+                                </div>
+                            </div>
                         </div>
-                        {{-- deposit date --}}
-                        <div class="mb-4">
-                            <label for="deposit_date" class="block text-gray-700 font-medium mb-1">Date
-                            </label>
-                            <input type="date" id="name" name="deposit_date" required
-                                value="{{ old('deposit_date', $sales_deposits->deposit_date ?? '') }}"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('deposit_date')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
+                        <div>
+                            <label for="comment" class="block text-gray-700 font-medium mb-1">Comment</label>
+                            <textarea name="comment" class="w-full border rounded px-2 py-1" placeholder="Masukkan comment(opsional)"></textarea>
                         </div>
+
+                        <!-- Order Items Table -->
+
                     </div>
-
-                    <!-- Order Items Table -->
-                    <div class="mt-10">
-
-                        <!-- Scrollable Table -->
-                        <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
-                            <table class="w-full text-sm text-gray-700" id="item-table">
-                                <thead class="bg-gray-100 text-gray-700 uppercase text-xs font-semibold">
-                                    <tr>
-                                        <th class="px-3 py-2 text-left">Invoice Date</th>
-                                        <th class="px-3 py-2 text-left">Invoice / Deposit</th>
-                                        <th class="px-3 py-2 text-right">Original Amount</th>
-                                        <th class="px-3 py-2 text-right">Amount Owing</th>
-                                        <th class="px-3 py-2 text-right">Discount Available</th>
-                                        <th class="px-3 py-2 text-right">Discount Taken</th>
-                                        <th class="px-3 py-2 text-right">Amount Received</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody id="invoice-rows" class="divide-y">
-                                    <tr>
-                                        <td class="px-3 py-2">
-                                            <input type="date" name="items[0][invoice_date]"
-                                                class="w-full border rounded px-2 py-1" />
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <select name="items[0][sales_invoice_id]"
-                                                class="w-full border rounded px-2 py-1">
-                                                <option value="">-- Pilih Invoice --</option>
-                                                @foreach ($sales_invoices as $inv)
-                                                    <option value="{{ $inv->id }}">{{ $inv->invoice_number }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="items[0][original_amount]"
-                                                class="w-full border rounded px-2 py-1 text-right" step="0.01" />
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="items[0][amount_owing]"
-                                                class="w-full border rounded px-2 py-1 text-right" step="0.01" />
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="items[0][discount_available]"
-                                                class="w-full border rounded px-2 py-1 text-right" step="0.01" />
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="items[0][discount_taken]"
-                                                class="w-full border rounded px-2 py-1 text-right" step="0.01" />
-                                        </td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="items[0][amount_received]"
-                                                class="w-full border rounded px-2 py-1 text-right" step="0.01" />
-                                        </td>
-                                    </tr>
-                                </tbody>
-
-                                <tfoot class="bg-gray-50 border-t">
-                                    <tr>
-                                        <td colspan="6" class="px-3 py-2  text-right font-semibold text-sm">Deposit
-                                            Amount:</td>
-                                        <td class="px-3 py-2">
-                                            <input type="text" name="deposit_amount" step="0.01"
-                                                class="w-full border number-format rounded px-2 py-1 text-right font-semibold" />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="6" class="px-3 py-2 text-right font-semibold text-sm">Total
-                                            Amount Received:</td>
-                                        <td class="px-3 py-2">
-                                            <input type="number" name="total_amount_received" step="0.01"
-                                                class="w-full border rounded px-2 py-1 text-right font-semibold bg-gray-100"
-                                                readonly />
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-
-                        <div class="mb-4 mt-4">
-                            <label for="deposit_reference" class="block text-gray-700 font-medium mb-1">Deposit
-                                Reference No
-                            </label>
-                            <input type="text" id="name" name="deposit_reference"
-                                value="{{ old('deposit_reference', $sales_deposits->deposit_reference ?? '') }}"
-                                class="w-1/3 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            @error('deposit_reference')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="mb-4 md:col-span-2 ">
-                            <label for="comment" class="block text-gray-700 font-medium mb-1">Comment
-                            </label>
-                            <textarea id="comment" name="comment" rows="3"
-                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('comment', $sales_deposits->comment ?? '') }}</textarea>
-                            @error('comment')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div id="journal_report" class="tab-content hidden mt-6">
+                        <h2 class="text-lg font-semibold mb-4">Journal Report</h2>
+                        <table class="w-full border border-gray-300 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="border text-left px-2 py-1">Account</th>
+                                    <th class="border text-right px-2 py-1">Debit</th>
+                                    <th class="border text-right px-2 py-1">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody class="journal-body">
+                                <tr>
+                                    <td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-50 font-semibold">
+                                <tr>
+                                    <td class="border px-2 py-1 text-right">Total</td>
+                                    <td class="border px-2 py-1 text-right total-debit">0.00</td>
+                                    <td class="border px-2 py-1 text-right total-credit">0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                     <!-- Buttons -->
-                    <div class="mt-6 flex space-x-4">
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">
-                            {{ isset($sales_deposits) ? 'Update' : 'Create' }}
-                        </button>
+                    <div class="mt-6 flex justify-end space-x-4">
                         <a href="{{ route('sales_deposits.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
+                        <button type="submit"
+                            class="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition">
+                            {{ isset($sales_deposits) ? 'Update' : 'Process' }}
+                        </button>
+
                     </div>
                 </form>
             </div>
@@ -273,29 +237,23 @@
         });
     </script>
     <script>
-        function toggleAutoGenerate() {
-            const checkbox = document.getElementById('auto_generate');
-            const invoiceInput = document.getElementById('invoice_number');
+        // Tab switching
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
 
-            if (checkbox.checked) {
-                invoiceInput.readOnly = true;
-                invoiceInput.value = 'Auto-generated'; // opsional: tampilkan teks dummy
-            } else {
-                invoiceInput.readOnly = false;
-                invoiceInput.value = '';
-            }
-        }
+                // Reset semua tab
+                document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
 
-        // Jalankan saat halaman dimuat
-        window.onload = function() {
-            toggleAutoGenerate();
-
-            // Tambahkan value agar checkbox bisa dikenali server
-            const autoCheckbox = document.getElementById('auto_generate');
-            autoCheckbox.name = "auto_generate";
-            autoCheckbox.value = 1;
-        };
+                // Aktifkan tab yang diklik
+                this.classList.add('active');
+                const target = document.querySelector(this.getAttribute('href'));
+                target.classList.remove('hidden');
+            });
+        });
     </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const inputs = document.querySelectorAll('.number-format');
@@ -308,4 +266,74 @@
             });
         });
     </script>
+    <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 2
+            }).format(num);
+        }
+
+        function generateJournalPreview() {
+            const journalBody = document.querySelector('.journal-body');
+            journalBody.innerHTML = '';
+
+            let rows = [];
+            let totalDebit = 0,
+                totalCredit = 0;
+
+            const paidAccount = {
+                kode: "{{ $paidAccount->akun->kode_akun ?? '' }}",
+                name: "{{ $paidAccount->akun->nama_akun ?? 'prepaid order' }}"
+            };
+
+            const fromAccountName = document.querySelector('#account_header_id option:checked')?.textContent;
+            const amountInput = document.querySelector('#amount');
+            const amount = parseFloat(amountInput.value.replace(/\D/g, '')) || 0;
+
+            if (amount > 0 && fromAccountName) {
+                // Credit akun prepayment (akun lawan)
+                // Credit akun prepayment
+                rows.push({
+                    account: fromAccountName,
+                    debit: amount,
+                    credit: 0
+                });
+                totalDebit += amount;
+
+                // Debit akun kas/bank
+                rows.push({
+                    account: `${paidAccount.kode}-${paidAccount.name}`,
+                    debit: 0,
+                    credit: amount
+                });
+                totalCredit += amount;
+
+            }
+
+            if (rows.length === 0) {
+                journalBody.innerHTML =
+                    `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal</td></tr>`;
+            } else {
+                rows.forEach(r => {
+                    journalBody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="border px-2 py-1">${r.account}</td>
+                    <td class="border px-2 py-1 text-right">${formatNumber(r.debit)}</td>
+                    <td class="border px-2 py-1 text-right">${formatNumber(r.credit)}</td>
+                </tr>
+            `);
+                });
+            }
+
+            document.querySelector('.total-debit').textContent = formatNumber(totalDebit);
+            document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
+        }
+
+        // Trigger otomatis saat input berubah
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('#amount').addEventListener('input', generateJournalPreview);
+            document.querySelector('#account_header_id').addEventListener('change', generateJournalPreview);
+        });
+    </script>
+
 @endsection

@@ -120,7 +120,8 @@ class VendorsController extends Controller
     {
         $vendor = Vendors::with([
             'invoices.details', // include relasi detail invoice
-            'prepayments'
+            'prepayments',
+            'invoices.paymentmethodDetail'
         ])->findOrFail($vendorId);
 
         // Hitung total untuk setiap invoice
@@ -139,6 +140,9 @@ class VendorsController extends Controller
             // Kamu bisa tambahkan juga field amount_owing jika sudah ada payment sebelumnya
             $invoice->amount_owing = $invoice->original_amount; // sementara sama dengan original amount
 
+            $invoice->header_account_id = $invoice->payment_method_account_id ?? null;
+            $invoice->header_account_code = $invoice->paymentmethodDetail->chartOfAccount->kode_akun ?? null;
+            $invoice->header_account_name = $invoice->paymentmethodDetail->chartOfAccount->nama_akun ?? null;
             return $invoice;
         });
 

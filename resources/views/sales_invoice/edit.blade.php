@@ -154,7 +154,9 @@
                                                 data-index="{{ $i }}" data-type="{{ $detail->item_type }}"
                                                 data-unit-cost="{{ $detail->computed_unit_cost ?? 0 }}"
                                                 data-cogs-account-name="{{ $detail->cogs_account_name }}"
-                                                data-asset-account-name="{{ $detail->asset_account_name }}">
+                                                data-cogs-account-code="{{ $detail->cogs_account_code }}"
+                                                data-asset-account-name="{{ $detail->asset_account_name }}"
+                                                data-asset-account-code="{{ $detail->asset_account_code }}">
 
                                                 <!-- Item ID -->
                                                 <td>
@@ -256,6 +258,7 @@
                                                                 data-rate="{{ $tax->rate }}"
                                                                 data-type="{{ $tax->type }}"
                                                                 data-account="{{ $tax->sales_account_id }}"
+                                                                data-account-code="{{ $tax->salesAccount->kode_akun ?? '' }}"
                                                                 data-account-name="{{ $tax->salesAccount->nama_akun ?? '' }}"
                                                                 {{ $detail->tax_id == $tax->id ? 'selected' : '' }}>
                                                                 ({{ $tax->rate }}%)
@@ -291,6 +294,20 @@
                                                         value="{{ optional($detail->account)->nama_akun }}">
                                                     <input type="hidden" name="items[{{ $i }}][account]"
                                                         value="{{ $detail->account_id }}">
+                                                </td>
+
+
+                                                <td>
+                                                    <select name="items[{{ $i }}][project_id]"
+                                                        class="w-full border rounded project-{{ $i }}">
+                                                        <option value="">-- Pilih Project --</option>
+                                                        @foreach ($project as $pro)
+                                                            <option value="{{ $pro->id }}"
+                                                                {{ $detail->project_id == $pro->id ? 'selected' : '' }}>
+                                                                {{ $pro->nama_project }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                                 </td>
 
                                                 <!-- Remove -->
@@ -479,6 +496,7 @@
 
             const freightAccount = {
                 id: "{{ $freightAccount->akun_id ?? '' }}",
+                kode: "{{ $freightAccount->akun->kode_akun ?? '-' }}",
                 name: "{{ $freightAccount->akun->nama_akun ?? 'Freight Revenue' }}"
             };
 
@@ -614,24 +632,36 @@
                     const taxAmount = parseNumber(document.querySelector(`.taxval-hidden-${idx}`)?.value);
 
                     // ===== DEBUG HEADER PER ITEM =====
-                    console.groupCollapsed(`🧾 Item #${idx}: ${accountName}`);
-                    console.log('Row data:', {
-                        type: row.dataset.type,
-                        qty: document.querySelector(`.qty-${idx}`)?.value,
-                        unitCost: row.dataset.unitCost,
-                        amount,
-                        taxAmount
-                    });
+                    // console.groupCollapsed(`🧾 Item #${idx}: ${accountName}`);
+                    // console.log('Row data:', {
+                    //     type: row.dataset.type,
+                    //     qty: document.querySelector(`.qty-${idx}`)?.value,
+                    //     unitCost: row.dataset.unitCost,
+                    //     amount,
+                    //     taxAmount
+                    // });
 
-                    // Pendapatan → Credit
-                    if (amount > 0) {
+                    // ✅ Payment → Debit
+                    const paymentOption = document.querySelector('#account_id option:checked');
+                    const paymentAccountName = paymentOption?.text?.trim() || '';
+                    const grandTotal = parseNumber(grandTotalInput.value);
+
+                    // console.log('Debug payment:', {
+                    //     paymentAccountName,
+                    //     grandTotal
+                    // });
+
+                    if (grandTotal > 0 && paymentAccountName) {
                         journalRows.push({
-                            account: accountName,
-                            debit: 0,
-                            credit: amount
+                            account: paymentAccountName,
+                            debit: grandTotal,
+                            credit: 0
                         });
-                        totalCredit += amount;
+                        totalDebit += grandTotal;
+                    } else if (!paymentAccountName) {
+                        // console.warn('⚠️ Payment account kosong — pastikan sudah memilih metode pembayaran.');
                     }
+
 
                     // Pajak
                     if (taxAmount > 0) {
@@ -639,35 +669,45 @@
                         const opt = taxSelect?.selectedOptions[0];
                         const taxType = opt?.dataset.type || 'input_tax';
                         const taxAccountName = opt?.dataset.accountName || 'Tax';
-
+                        const taxAccountCode = opt?.dataset.accountCode || '';
                         if (!opt?.dataset.type) {
                             // console.warn(
                             //     `⚠️ [Item #${idx}] Tax type undefined. Check SalesTaxes.type in DB or HTML data-type attribute.`
                             // );
                         }
 
-                        console.log('Tax detail:', {
-                            taxType,
-                            taxAccountName,
-                            rate: opt?.dataset.rate,
-                            accountId: opt?.dataset.account
-                        });
+                        // console.log('Tax detail:', {
+                        //     taxType,
+                        //     taxAccountName,
+                        //     rate: opt?.dataset.rate,
+                        //     accountId: opt?.dataset.account
+                        // });
 
                         if (taxType === 'withholding_tax') {
                             journalRows.push({
-                                account: taxAccountName,
+                                account: `${taxAccountCode}-${taxAccountName}`,
                                 debit: taxAmount,
                                 credit: 0
                             });
                             totalDebit += taxAmount;
                         } else {
                             journalRows.push({
-                                account: taxAccountName,
+                                account: `${taxAccountCode}-${taxAccountName}`,
                                 debit: 0,
                                 credit: taxAmount
                             });
                             totalCredit += taxAmount;
                         }
+                    }
+                    // Freight → Credit
+                    const freight = parseNumber(freightInput.value);
+                    if (freight > 0) {
+                        journalRows.push({
+                            account: `${freightAccount.kode}-${freightAccount.name}`,
+                            debit: 0,
+                            credit: freight
+                        });
+                        totalCredit += freight;
                     }
 
                     // HPP / Inventory
@@ -675,20 +715,22 @@
                     const qty = parseNumber(document.querySelector(`.qty-${idx}`)?.value);
                     const unitCost = parseNumber(row.dataset.unitCost);
                     const cogsAccount = row.dataset.cogsAccountName || 'COGS';
+                    const cogsCode = row.dataset.cogsAccountCode || '';
                     const assetAccount = row.dataset.assetAccountName || 'Inventory';
+                    const assetCode = row.dataset.assetAccountCode || '';
 
                     if (type === 'inventory' && unitCost > 0 && qty > 0) {
                         const hpp = qty * unitCost;
                         console.log(`💰 HPP aktif: ${hpp} (${qty} x ${unitCost})`);
 
                         journalRows.push({
-                            account: cogsAccount,
+                            account: `${cogsCode}-${cogsAccount}`,
                             debit: hpp,
                             credit: 0
                         });
                         totalDebit += hpp;
                         journalRows.push({
-                            account: assetAccount,
+                            account: `${assetCode}-${assetAccount}`,
                             debit: 0,
                             credit: hpp
                         });
@@ -702,48 +744,32 @@
                         //         'type!=inventory or unitCost/qty=0' : 'ok'
                         // });
                     }
+                    // Pendapatan → Credit
+                    if (amount > 0) {
+                        journalRows.push({
+                            account: accountName,
+                            debit: 0,
+                            credit: amount
+                        });
+                        totalCredit += amount;
+                    }
 
-                    console.groupEnd();
+                    // console.groupEnd();
                 });
 
-                // Freight → Credit
-                const freight = parseNumber(freightInput.value);
-                if (freight > 0) {
-                    journalRows.push({
-                        account: freightAccount.name,
-                        debit: 0,
-                        credit: freight
-                    });
-                    totalCredit += freight;
-                }
 
-                // ✅ Payment → Debit
-                const paymentOption = document.querySelector('#account_id option:checked');
-                const paymentAccountName = paymentOption?.text?.trim() || '';
-                const grandTotal = parseNumber(grandTotalInput.value);
 
-                // console.log('Debug payment:', {
-                //     paymentAccountName,
-                //     grandTotal
-                // });
 
-                if (grandTotal > 0 && paymentAccountName) {
-                    journalRows.push({
-                        account: paymentAccountName,
-                        debit: grandTotal,
-                        credit: 0
-                    });
-                    totalDebit += grandTotal;
-                } else if (!paymentAccountName) {
-                    // console.warn('⚠️ Payment account kosong — pastikan sudah memilih metode pembayaran.');
-                }
 
                 // Render tabel
                 if (journalRows.length === 0) {
                     journalBody.innerHTML = `
-            <tr><td colspan="3" class="text-center py-2 text-gray-500">
-                Tidak ada journal
-            </td></tr>`;
+            <tr>
+                <td colspan="3" class="text-center py-2 text-gray-500">
+                    Tidak ada journal
+                </td>
+            </tr>
+        `;
                 } else {
                     journalRows.forEach(row => {
                         journalBody.insertAdjacentHTML('beforeend', `
@@ -755,6 +781,7 @@
             `);
                     });
                 }
+
 
                 document.querySelector('.total-debit').textContent = formatNumber(totalDebit);
                 document.querySelector('.total-credit').textContent = formatNumber(totalCredit);

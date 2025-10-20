@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\ChartOfAccount;
 use App\Customers;
 use App\jenis_pembayaran;
+use App\JournalEntry;
 use App\PaymentMethod;
 use App\SalesDeposit;
 use App\SalesDepositDetail;
@@ -27,8 +28,11 @@ class SalesDepositController extends Controller
         $customer = Customers::all();
         $jenis_pembayaran = PaymentMethod::all();
         $sales_invoices = SalesInvoice::all();
+        $paidAccount = \App\linkedAccounts::with('akun')
+            ->where('kode', 'Prepaid Orders')
+            ->first();
 
-        return view('sales_deposits.create', compact('account', 'customer', 'jenis_pembayaran', 'sales_invoices'));
+        return view('sales_deposits.create', compact('account', 'customer', 'jenis_pembayaran', 'sales_invoices', 'paidAccount'));
     }
 
     public function store(Request $request)
@@ -48,14 +52,6 @@ class SalesDepositController extends Controller
             'deposit_reference' => 'nullable|string',
             'comment' => 'nullable|string',
             'deposit_amount' => 'required|numeric|min:0',
-            'items' => 'nullable|array',
-            'items.*.invoice_date' => 'nullable|date',
-            'items.*.sales_invoice_id' => 'nullable|exists:sales_invoices,id',
-            'items.*.original_amount' => 'nullable|numeric|min:0',
-            'items.*.amount_owing' => 'nullable|numeric|min:0',
-            'items.*.discount_available' => 'nullable|numeric|min:0',
-            'items.*.discount_taken' => 'nullable|numeric|min:0',
-            'items.*.amount_received' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -72,25 +68,38 @@ class SalesDepositController extends Controller
                 'deposit_amount'         => $validatedData['deposit_amount'],
                 'comment'                => $validatedData['comment'] ?? null,
             ]);
+            // === 4) Buat Journal Entry ===
+            $journal = JournalEntry::create([
+                'source'  => 'Deposits#' . $deposit->id,
+                'tanggal'  => $validatedData['deposit_date'],
+                'comment'  => $validatedData['comment'] ?? null,
+            ]);
+            $totalCredit = 0;
+            $totalDebit  = 0;
 
-            // Simpan detail jika ada
-            if (!empty($validatedData['items']) && is_array($validatedData['items'])) {
-                foreach ($validatedData['items'] as $index => $item) {
-                    if (!isset($item['amount_received']) || $item['amount_received'] <= 0) {
-                        continue;
-                    }
+            $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
 
-                    SalesDepositDetail::create([
-                        'deposit_id'         => $deposit->id,
-                        'sales_invoice_id'   => $item['sales_invoice_id'] ?? null,
-                        'original_amount'    => $item['original_amount'] ?? 0,
-                        'amount_owing'       => $item['amount_owing'] ?? 0,
-                        'discount_available' => $item['discount_available'] ?? 0,
-                        'discount_taken'     => $item['discount_taken'] ?? 0,
-                        'invoice_date'       => $item['invoice_date'] ?? null,
-                    ]);
-                }
-            }
+
+            // Journal Debit Prepayment
+            $accountDeposits = ChartOfAccount::find($validatedData['account_id']);
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $accountDeposits->kode_akun,
+                'debits'    => $deposit->deposit_amount,
+                'credits'   => 0,
+                'comment'   => "Deposit {$deposit->id}",
+            ]);
+
+            // Journal Credit Kas/Bank
+            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepaid Orders')->first();
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'debits'    => 0,
+                'credits'   => $deposit->deposit_amount,
+                'comment'   => "Pembayaran Deposit {$deposit->id}",
+            ]);
+
 
             DB::commit();
             return redirect()->route('sales_deposits.index')->with('success', 'Sales Deposit berhasil disimpan.');
@@ -104,38 +113,41 @@ class SalesDepositController extends Controller
 
     public function show($id)
     {
-        $deposit = SalesDeposit::with(['customer', 'jenis_pembayaran', 'account', 'details.invoice'])->findOrFail($id);
+        $deposit = SalesDeposit::with(['customer', 'jenis_pembayaran', 'account'])->findOrFail($id);
         return view('sales_deposits.show', compact('deposit'));
     }
 
     public function edit($id)
     {
-        $sales_deposits = SalesDeposit::with('details')->findOrFail($id);
+        $sales_deposits = SalesDeposit::findOrFail($id);
         $jenis_pembayaran = PaymentMethod::all();
         $account = ChartOfAccount::all();
         $customer = Customers::all();
         $sales_invoices = SalesInvoice::all();
+        $paidAccount = \App\linkedAccounts::with('akun')
+            ->where('kode', 'Prepaid Orders')
+            ->first();
 
         return view('sales_deposits.edit', compact(
             'sales_deposits',
             'jenis_pembayaran',
             'account',
             'customer',
-            'sales_invoices'
+            'sales_invoices',
+            'paidAccount'
         ));
     }
 
     public function update(Request $request, $id)
     {
-        // Ubah format angka: "1.000.000,50" → "1000000.50"
-        $formattedAmount = str_replace(',', '.', str_replace('.', '', $request->deposit_amount));
-        $request->merge(['deposit_amount' => $formattedAmount]);
 
-        // Log setelah merge
-        Log::debug('Formatted Request:', $request->all());
+
+        $request->merge([
+            'deposit_amount' => str_replace('.', '', $request->deposit_amount),
+        ]);
 
         // Validasi
-        $request->validate([
+        $validated = $request->validate([
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'account_id' => 'required|exists:chart_of_accounts,id',
             'customers_id' => 'required|exists:customers,id',
@@ -144,14 +156,6 @@ class SalesDepositController extends Controller
             'deposit_reference' => 'nullable|string',
             'comment' => 'nullable|string',
             'deposit_amount' => 'required|numeric|min:0',
-            'items' => 'nullable|array',
-            'items.*.invoice_date' => 'nullable|date',
-            'items.*.sales_invoice_id' => 'nullable|exists:sales_invoices,id',
-            'items.*.original_amount' => 'nullable|numeric|min:0',
-            'items.*.amount_owing' => 'nullable|numeric|min:0',
-            'items.*.discount_available' => 'nullable|numeric|min:0',
-            'items.*.discount_taken' => 'nullable|numeric|min:0',
-            'items.*.amount_received' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -170,36 +174,50 @@ class SalesDepositController extends Controller
                 'comment'            => $request->comment,
             ]);
 
-            Log::debug('SalesDeposit updated', ['id' => $deposit->id]);
+            // Log::debug('SalesDeposit updated', ['id' => $deposit->id]);
 
-            // Hapus detail lama
-            SalesDepositDetail::where('deposit_id', $deposit->id)->delete();
-            Log::debug('Deleted old details');
+            // Log::debug('Deleted old details');
 
-            // Tambah ulang detail jika ada
-            if ($request->has('items')) {
-                foreach ($request->items as $index => $item) {
-                    Log::debug("Processing item $index", $item);
+            $journalSource = 'Deposits#' . $deposit->id;
 
-                    if (!isset($item['amount_received']) || $item['amount_received'] <= 0) {
-                        Log::debug("Item $index skipped (empty amount_received)");
-                        continue;
-                    }
-
-                    SalesDepositDetail::create([
-                        'deposit_id'         => $deposit->id,
-                        'sales_invoice_id'   => $item['sales_invoice_id'] ?? null,
-                        'original_amount'    => $item['original_amount'] ?? 0,
-                        'amount_owing'       => $item['amount_owing'] ?? 0,
-                        'discount_available' => $item['discount_available'] ?? 0,
-                        'discount_taken'     => $item['discount_taken'] ?? 0,
-                        'invoice_date'       => $item['invoice_date'] ?? null,
-                        'used_amount'        => $item['amount_received'] ?? 0,
-                    ]);
-
-                    Log::debug("Detail $index saved");
-                }
+            // hapus jurnal lama
+            $oldJournal = JournalEntry::where('source', $journalSource)->first();
+            if ($oldJournal) {
+                $oldJournal->details()->delete();
+                $oldJournal->delete();
             }
+
+            // buat jurnal baru
+            $journal = JournalEntry::create([
+                'source'   => $journalSource,
+                'tanggal'  => $validated['deposit_date'],
+                'comment'  => $validated['comment'] ?? null,
+            ]);
+
+            $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
+
+            if (!$coaCode) {
+                throw new \Exception("Linked account 'Prepayments Prepaid Orders' tidak ditemukan");
+            }
+            // Journal Debit Prepayment
+            $accountPrepayment = ChartOfAccount::find($validated['account_id']);
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $accountPrepayment->kode_akun,
+                'debits'    => $deposit->deposit_amount,
+                'credits'   => 0,
+                'comment'   => "Deposit {$deposit->id}",
+            ]);
+
+            // Journal Credit Kas/Bank
+            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepaid Orders')->first();
+            $journal->details()->create([
+                'journal_entry_id' => $journal->id,
+                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'debits'    => 0,
+                'credits'   => $deposit->deposit_amount,
+                'comment'   => "Pembayaran Deposit {$deposit->id}",
+            ]);
 
             DB::commit();
             return redirect()->route('sales_deposits.index')->with('success', 'Sales Deposit berhasil diperbarui.');
@@ -221,11 +239,15 @@ class SalesDepositController extends Controller
 
         try {
             // Ambil invoice beserta detail
-            $deposits = SalesDeposit::with('details')->findOrFail($id);
+            $deposits = SalesDeposit::findOrFail($id);
 
-            // Hapus semua detail terlebih dahulu
-            $deposits->details()->delete();
+            // Hapus jurnal otomatis ikut terhapus kalau pakai onDelete('cascade')
+            $journal = JournalEntry::where('source', 'Deposits#' . $deposits->id)->first();
 
+            if ($journal) {
+                $journal->details()->delete();
+                $journal->delete();
+            }
             // Hapus deposits utamanya
             $deposits->delete();
 

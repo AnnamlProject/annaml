@@ -92,14 +92,17 @@ class SalesInvoiceController extends Controller
 
                     // Pendapatan (dari detail.account)
                     'account_id'          => $detail->account_id,
+                    'account_code'        => $detail->account->kode_akun ?? '',
                     'account_name'        => $detail->account->nama_akun ?? '',
 
                     // Tambahan untuk HPP
                     'type'                => $item->type,
                     'unit_cost'           => $unitCost,
                     'cogs_account_id'     => $item->accounts->cogs_account_id ?? null,
+                    'cogs_account_code'   => optional($item->accounts->cogsAccount)->kode_akun ?? '',
                     'cogs_account_name'   => optional($item->accounts->cogsAccount)->nama_akun ?? 'COGS',
                     'asset_account_id'    => $item->accounts->asset_account_id ?? null,
+                    'asset_account_code'  => optional($item->accounts->assetAccount)->kode_akun ?? 'Inventory',
                     'asset_account_name'  => optional($item->accounts->assetAccount)->nama_akun ?? 'Inventory',
                 ];
             }),
@@ -138,6 +141,7 @@ class SalesInvoiceController extends Controller
                 'shipping_date'       => $request->shipping_date,
                 'customers_id'        => $request->customers_id,
                 'sales_order_id'      => $request->sales_order_id,
+                'payment_method_account_id'      => $request->payment_method_account_id,
                 'sales_person_id'     => $request->sales_person_id ?? null,
                 'location_id'     => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
@@ -480,7 +484,9 @@ class SalesInvoiceController extends Controller
 
             // Simpan juga nama akun COGS dan Inventory untuk preview
             $detail->cogs_account_name = optional($item->accounts->cogsAccount)->nama_akun ?? 'COGS';
+            $detail->cogs_account_code = optional($item->accounts->cogsAccount)->kode_akun ?? '';
             $detail->asset_account_name = optional($item->accounts->assetAccount)->nama_akun ?? 'Inventory';
+            $detail->asset_account_code = optional($item->accounts->assetAccount)->kode_akun ?? '';
         }
 
         return view('sales_invoice.edit', compact(

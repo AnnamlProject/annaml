@@ -64,6 +64,19 @@
                                     </select>
                                 </div>
                                 <div>
+                                    <label for="account_id"
+                                        class="block text-sm font-semibold text-gray-700 mb-1">Prepayment Account</label>
+                                    <select name="account_prepayment" id="account_prepayment"
+                                        class="w-full account-select rounded-md border border-gray-300 px-3 py-2" required>
+                                        <option value="">--Pilih---</option>
+                                        @foreach ($prepaymentAccount as $acc)
+                                            <option value="{{ $acc->id }}">
+                                                {{ $acc->kode_akun }}-{{ $acc->nama_akun }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
                                     <label for="vendor_id"
                                         class="block text-sm font-semibold text-gray-700 mb-1">Vendor</label>
                                     <select name="vendor_id" id="vendor_id"
@@ -172,7 +185,7 @@
 
         <script>
             $(document).ready(function() {
-                $('#account_header_id').select2({
+                $('#account_header_id,#account_prepayment').select2({
                     placeholder: "-- Pilih --",
                     allowClear: true,
                     width: '100%'
@@ -231,6 +244,7 @@
                 };
 
                 const fromAccountName = document.querySelector('#account_header_id option:checked')?.textContent;
+                const fromAccountPrepayment = document.querySelector('#account_prepayment option:checked')?.textContent;
                 const amountInput = document.querySelector('#amount');
                 const amount = parseFloat(amountInput.value.replace(/\D/g, '')) || 0;
 
@@ -239,18 +253,18 @@
                     // Credit akun prepayment
                     rows.push({
                         account: fromAccountName,
-                        debit: 0,
-                        credit: amount
-                    });
-                    totalCredit += amount;
-
-                    // Debit akun kas/bank
-                    rows.push({
-                        account: `${paidAccount.kode}-${paidAccount.name}`,
                         debit: amount,
                         credit: 0
                     });
                     totalDebit += amount;
+
+                    // Debit akun kas/bank
+                    rows.push({
+                        account: fromAccountPrepayment,
+                        debit: 0,
+                        credit: amount
+                    });
+                    totalCredit += amount;
 
                 }
 
@@ -273,10 +287,13 @@
                 document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
             }
 
-            // Trigger otomatis saat input berubah
-            document.addEventListener('DOMContentLoaded', function() {
-                document.querySelector('#amount').addEventListener('input', generateJournalPreview);
-                document.querySelector('#account_header_id').addEventListener('change', generateJournalPreview);
+            $(document).ready(function() {
+                // Trigger realtime update
+                $(document).on('change', '#account_header_id, #account_prepayment', generateJournalPreview);
+                $(document).on('input', '#amount', generateJournalPreview);
+
+                // Render awal
+                generateJournalPreview();
             });
         </script>
 

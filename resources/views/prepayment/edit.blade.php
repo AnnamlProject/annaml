@@ -56,15 +56,29 @@
                                     @foreach ($account as $acc)
                                         <option value="{{ $acc->id }}"
                                             {{ old('account_id', $prepayment->account_id) == $acc->id ? 'selected' : '' }}>
-                                            {{ $acc->kode_akun }} {{ $acc->nama_akun }}
+                                            {{ $acc->kode_akun }} - {{ $acc->nama_akun }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+
                         </div>
 
 
                         <div class="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <label class="block font-medium mb-1">From Account Prepayment</label>
+                                <select name="account_prepayment" id="account_prepayment"
+                                    class="w-full border rounded px-2 py-1 text-sm" required>
+                                    <option value="">-- Account --</option>
+                                    @foreach ($prepaymentAccount as $acc)
+                                        <option value="{{ $acc->id }}"
+                                            {{ old('account_prepayment', $prepayment->account_prepayment) == $acc->id ? 'selected' : '' }}>
+                                            {{ $acc->kode_akun }} - {{ $acc->nama_akun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div>
                                 <label class="block font-medium mb-1">Vendor</label>
                                 <select name="vendor_id" id="vendor_id" class="w-full border rounded px-2 py-1 text-sm"
@@ -122,13 +136,14 @@
                     </div>
 
                     <!-- Buttons -->
-                    <div class="mt-4 flex space-x-2">
-                        <button type="submit"
-                            class="px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded hover:bg-blue-700">
-                            Update
-                        </button>
+                    <div class="mt-4 flex justify-end space-x-2">
+
                         <a href="{{ route('prepayment.index') }}"
                             class="px-4 py-1 bg-gray-300 text-sm text-gray-700 rounded hover:bg-gray-400">Cancel</a>
+                        <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded hover:bg-green-700">
+                            Process
+                        </button>
                     </div>
                 </form>
             </div>
@@ -151,6 +166,7 @@
             min-height: 34px;
         }
     </style>
+
     <script>
         // Tab switching
         document.querySelectorAll('.tab-link').forEach(link => {
@@ -182,7 +198,7 @@
     </script>
     <script>
         $(document).ready(function() {
-            $('#account_header_id').select2({
+            $('#account_header_id,#account_prepayment').select2({
                 placeholder: "-- Pilih --",
                 allowClear: true,
                 width: '100%'
@@ -232,33 +248,26 @@
             const journalBody = document.querySelector('.journal-body');
             journalBody.innerHTML = '';
 
+            const fromAccountName = $('#account_header_id option:selected').text();
+            const fromAccountPrepayment = $('#account_prepayment option:selected').text();
+            const amount = parseFloat($('#amount').val().replace(/\D/g, '')) || 0;
+
             let rows = [];
             let totalDebit = 0,
                 totalCredit = 0;
 
-            const paidAccount = {
-                kode: "{{ $paidAccount->akun->kode_akun ?? '' }}",
-                name: "{{ $paidAccount->akun->nama_akun ?? 'Kas/Bank' }}"
-            };
-
-            const fromAccountName = document.querySelector('#account_header_id option:checked')?.textContent;
-            const amountInput = document.querySelector('#amount');
-            const amount = parseFloat(amountInput.value.replace(/\D/g, '')) || 0;
-
-            if (amount > 0 && fromAccountName) {
+            if (amount > 0 && fromAccountName && fromAccountPrepayment) {
                 rows.push({
                     account: fromAccountName,
-                    debit: 0,
-                    credit: amount
-                });
-                totalCredit += amount;
-
-                rows.push({
-                    account: `${paidAccount.kode}-${paidAccount.name}`,
                     debit: amount,
                     credit: 0
                 });
-                totalDebit += amount;
+                rows.push({
+                    account: fromAccountPrepayment,
+                    debit: 0,
+                    credit: amount
+                });
+                totalDebit = totalCredit = amount;
             }
 
             if (rows.length === 0) {
@@ -280,20 +289,12 @@
             document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Aktifkan select2
-            $('.account-select, #account_header_id').select2({
-                placeholder: "Pilih...",
-                allowClear: true,
-                width: 'resolve'
-            });
+        $(document).ready(function() {
+            $('#account_header_id, #account_prepayment, #amount').on('change input', generateJournalPreview);
 
-            // Render awal pakai nilai dari DB
+            // render awal saat form pertama kali dibuka
             generateJournalPreview();
-
-            // Listener perubahan
-            document.querySelector('#amount').addEventListener('input', generateJournalPreview);
-            document.querySelector('#account_header_id').addEventListener('change', generateJournalPreview);
         });
     </script>
+
 @endsection

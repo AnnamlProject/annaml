@@ -10,7 +10,7 @@ class CrewShiftKaryawanControlller extends Controller
     //
     public function index()
     {
-        $data = CrewShiftKaryawan::orderBy('nama', 'asc')->get();
+        $data = CrewShiftKaryawan::orderBy('nama')->get();
         return view('crew_shift_karyawan.index', compact('data'));
     }
     public function create()

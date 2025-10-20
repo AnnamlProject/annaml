@@ -87,6 +87,7 @@ class PrepaymentController extends Controller
                 'debits'    => $expense->amount,
                 'credits'   => 0,
                 'comment'   => "Prepayment {$expense->id}",
+                'status' => 2
             ]);
 
             // Journal Credit Kas/Bank
@@ -97,6 +98,7 @@ class PrepaymentController extends Controller
                 'debits'    => 0,
                 'credits'   => $expense->amount,
                 'comment'   => "Pembayaran Prepayment {$expense->id}",
+                'status' => 2
             ]);
             DB::commit();
 
@@ -188,6 +190,7 @@ class PrepaymentController extends Controller
                 'debits'    => $expense->amount,
                 'credits'   => 0,
                 'comment'   => "Prepayment {$expense->id}",
+                'status' => 2,
             ]);
 
             // Journal Credit Kas/Bank
@@ -198,6 +201,7 @@ class PrepaymentController extends Controller
                 'debits'    => 0,
                 'credits'   => $expense->amount,
                 'comment'   => "Pembayaran Prepayment {$expense->id}",
+                'status' => 2
             ]);
 
             DB::commit();

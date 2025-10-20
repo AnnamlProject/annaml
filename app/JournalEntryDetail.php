@@ -14,6 +14,7 @@ class JournalEntryDetail extends Model
         'debits',
         'credits',
         'comment',
+        'status',
         'kode_akun',
         'project_id',
         'pajak',

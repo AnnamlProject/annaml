@@ -25,6 +25,7 @@ class SalesDepositController extends Controller
     public function create()
     {
         $account = chartOfAccount::all();
+        $deposit = ChartOfAccount::all();
         $customer = Customers::all();
         $jenis_pembayaran = PaymentMethod::all();
         $sales_invoices = SalesInvoice::all();
@@ -32,7 +33,7 @@ class SalesDepositController extends Controller
             ->where('kode', 'Prepaid Orders')
             ->first();
 
-        return view('sales_deposits.create', compact('account', 'customer', 'jenis_pembayaran', 'sales_invoices', 'paidAccount'));
+        return view('sales_deposits.create', compact('account', 'customer', 'jenis_pembayaran', 'sales_invoices', 'paidAccount', 'deposit'));
     }
 
     public function store(Request $request)
@@ -46,6 +47,7 @@ class SalesDepositController extends Controller
         $validatedData = $request->validate([
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'account_id' => 'required|exists:chart_of_accounts,id',
+            'account_deposit' => 'required|exists:chart_of_accounts,id',
             'customers_id' => 'required|exists:customers,id',
             'deposit_no' => 'required|string|unique:sales_deposits,deposit_no',
             'deposit_date' => 'required|date',
@@ -63,6 +65,7 @@ class SalesDepositController extends Controller
                 'deposit_date'           => $validatedData['deposit_date'],
                 'jenis_pembayaran_id'    => $validatedData['jenis_pembayaran_id'],
                 'account_id'             => $validatedData['account_id'],
+                'account_deposit'             => $validatedData['account_deposit'],
                 'customer_id'            => $validatedData['customers_id'],
                 'deposit_reference'      => $validatedData['deposit_reference'] ?? null,
                 'deposit_amount'         => $validatedData['deposit_amount'],
@@ -81,23 +84,25 @@ class SalesDepositController extends Controller
 
 
             // Journal Debit Prepayment
-            $accountDeposits = ChartOfAccount::find($validatedData['account_id']);
+            $accountPayment = ChartOfAccount::find($validatedData['account_id']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $accountDeposits->kode_akun,
+                'kode_akun' => $accountPayment->kode_akun,
                 'debits'    => $deposit->deposit_amount,
                 'credits'   => 0,
                 'comment'   => "Deposit {$deposit->id}",
+                'status' => 2
             ]);
 
             // Journal Credit Kas/Bank
-            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepaid Orders')->first();
+            $accountDeposits = ChartOfAccount::find($validatedData['account_deposit']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'kode_akun' => $accountDeposits->kode_akun,
                 'debits'    => 0,
                 'credits'   => $deposit->deposit_amount,
                 'comment'   => "Pembayaran Deposit {$deposit->id}",
+                'status' => 2
             ]);
 
 
@@ -122,6 +127,7 @@ class SalesDepositController extends Controller
         $sales_deposits = SalesDeposit::findOrFail($id);
         $jenis_pembayaran = PaymentMethod::all();
         $account = ChartOfAccount::all();
+        $deposit = ChartOfAccount::all();
         $customer = Customers::all();
         $sales_invoices = SalesInvoice::all();
         $paidAccount = \App\linkedAccounts::with('akun')
@@ -134,7 +140,8 @@ class SalesDepositController extends Controller
             'account',
             'customer',
             'sales_invoices',
-            'paidAccount'
+            'paidAccount',
+            'deposit'
         ));
     }
 
@@ -150,6 +157,7 @@ class SalesDepositController extends Controller
         $validated = $request->validate([
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'account_id' => 'required|exists:chart_of_accounts,id',
+            'account_deposit' => 'required|exists:chart_of_accounts,id',
             'customers_id' => 'required|exists:customers,id',
             'deposit_no' => 'required|string|unique:sales_deposits,deposit_no,' . $id,
             'deposit_date' => 'required|date',
@@ -168,6 +176,7 @@ class SalesDepositController extends Controller
                 'deposit_date'       => $request->deposit_date,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'account_id'         => $request->account_id,
+                'account_deposit'         => $request->account_deposit,
                 'customer_id'        => $request->customers_id,
                 'deposit_reference'  => $request->deposit_reference,
                 'deposit_amount'     => $request->deposit_amount, // Sudah diformat
@@ -200,20 +209,20 @@ class SalesDepositController extends Controller
                 throw new \Exception("Linked account 'Prepayments Prepaid Orders' tidak ditemukan");
             }
             // Journal Debit Prepayment
-            $accountPrepayment = ChartOfAccount::find($validated['account_id']);
+            $accountPayment = ChartOfAccount::find($validated['account_id']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $accountPrepayment->kode_akun,
+                'kode_akun' => $accountPayment->kode_akun,
                 'debits'    => $deposit->deposit_amount,
                 'credits'   => 0,
                 'comment'   => "Deposit {$deposit->id}",
             ]);
 
             // Journal Credit Kas/Bank
-            $kasAccount = \App\LinkedAccounts::where('kode', 'Prepaid Orders')->first();
+            $accountDeposit = ChartOfAccount::find($validated['account_deposit']);
             $journal->details()->create([
                 'journal_entry_id' => $journal->id,
-                'kode_akun' => $coaCode(optional($kasAccount)->akun_id),
+                'kode_akun' => $accountDeposit->kode_akun,
                 'debits'    => 0,
                 'credits'   => $deposit->deposit_amount,
                 'comment'   => "Pembayaran Deposit {$deposit->id}",

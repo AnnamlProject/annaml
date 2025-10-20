@@ -76,39 +76,78 @@
 
                                     <tr class="item-row" data-index="{{ $i }}"
                                         data-tipe-akun="{{ $detail->chartOfAccount->tipe_akun ?? '' }}">
-                                        <td class="border px-2 py-1">
-                                            {{-- Select akun --}}
-                                            <select class="item-select w-full border rounded"
-                                                name="items[{{ $i }}][kode_akun]"
-                                                data-index="{{ $i }}">
-                                                <option value="{{ $detail->kode_akun }}" selected>
-                                                    {{ $detail->kode_akun }} -
-                                                    {{ $detail->chartOfAccount->nama_akun ?? '-' }}
-                                                    @if ($detail->departemenAkun)
-                                                        - {{ $detail->departemenAkun->departemen->deskripsi ?? '-' }}
-                                                    @endif
-                                                </option>
-                                            </select>
+                                        @if ($detail->status == 0)
+                                            <td class="border px-2 py-1">
+                                                {{-- Select akun --}}
+                                                <select class="item-select w-full border rounded"
+                                                    name="items[{{ $i }}][kode_akun]"
+                                                    data-index="{{ $i }}">
+                                                    <option value="{{ $detail->kode_akun }}" selected>
+                                                        {{ $detail->kode_akun }} -
+                                                        {{ $detail->chartOfAccount->nama_akun ?? '-' }}
+                                                        @if ($detail->departemenAkun)
+                                                            - {{ $detail->departemenAkun->departemen->deskripsi ?? '-' }}
+                                                        @endif
+                                                    </option>
+                                                </select>
 
-                                            {{-- hidden departemen --}}
-                                            <input type="hidden" name="items[{{ $i }}][departemen_akun_id]"
-                                                class="departemen-akun" value="{{ $detail->departemen_akun_id }}">
-                                        </td>
+                                                {{-- hidden departemen --}}
+                                                <input type="hidden" name="items[{{ $i }}][departemen_akun_id]"
+                                                    class="departemen-akun" value="{{ $detail->departemen_akun_id }}">
+                                            </td>
 
-                                        <td class="border px-2 py-1">
-                                            <input type="text" name="items[{{ $i }}][debits]"
-                                                class="money-input debit-input w-full border rounded px-2 py-1 text-right"
-                                                value="{{ number_format($detail->debits, 2, ',', '.') }}" />
-                                        </td>
-                                        <td class="border px-2 py-1">
-                                            <input type="text" name="items[{{ $i }}][credits]"
-                                                class="money-input credit-input w-full border rounded px-2 py-1 text-right"
-                                                value="{{ number_format($detail->credits, 2, ',', '.') }}" />
-                                        </td>
-                                        <td class="border px-2 py-1">
-                                            <input type="text" name="items[{{ $i }}][comment]"
-                                                class="w-full border rounded px-2 py-1" value="{{ $detail->comment }}" />
-                                        </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][debits]"
+                                                    class="money-input debit-input w-full border rounded px-2 py-1 text-right"
+                                                    value="{{ number_format($detail->debits, 2, ',', '.') }}" />
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][credits]"
+                                                    class="money-input credit-input w-full border rounded px-2 py-1 text-right"
+                                                    value="{{ number_format($detail->credits, 2, ',', '.') }}" />
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][comment]"
+                                                    class="w-full border rounded px-2 py-1"
+                                                    value="{{ $detail->comment }}" />
+                                            </td>
+                                        @else
+                                            <td class="border px-2 py-1">
+                                                {{-- Select akun --}}
+                                                <select class="item-select w-full border rounded" disabled
+                                                    name="items[{{ $i }}][kode_akun]"
+                                                    data-index="{{ $i }}">
+                                                    <option value="{{ $detail->kode_akun }}" selected>
+                                                        {{ $detail->kode_akun }} -
+                                                        {{ $detail->chartOfAccount->nama_akun ?? '-' }}
+                                                        @if ($detail->departemenAkun)
+                                                            - {{ $detail->departemenAkun->departemen->deskripsi ?? '-' }}
+                                                        @endif
+                                                    </option>
+                                                </select>
+
+                                                {{-- hidden departemen --}}
+                                                <input type="hidden" name="items[{{ $i }}][departemen_akun_id]"
+                                                    disabled class="departemen-akun"
+                                                    value="{{ $detail->departemen_akun_id }}">
+                                            </td>
+
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][debits]" disabled
+                                                    class="money-input debit-input w-full border rounded px-2 py-1 text-right"
+                                                    value="{{ number_format($detail->debits, 2, ',', '.') }}" />
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][credits]" disabled
+                                                    class="money-input credit-input w-full border rounded px-2 py-1 text-right"
+                                                    value="{{ number_format($detail->credits, 2, ',', '.') }}" />
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" name="items[{{ $i }}][comment]" disabled
+                                                    class="w-full border rounded px-2 py-1"
+                                                    value="{{ $detail->comment }}" />
+                                            </td>
+                                        @endif
 
                                         @can('specpose.access')
                                             <td class="border px-2 py-1">
@@ -161,13 +200,25 @@
                                             </td>
                                         @endcan
 
-                                        <td class="border px-2 py-1 text-center">
-                                            <button type="button"
-                                                class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
 
-                                            <button type="button"
-                                                class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
-                                        </td>
+                                        @if ($detail->status == 0)
+                                            <td class="border px-2 py-1 text-center">
+                                                <button type="button"
+                                                    class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
+
+                                                <button type="button"
+                                                    class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
+                                            </td>
+                                        @else
+                                            <td class="border px-2 py-1 text-center">
+                                                <button type="button" disabled
+                                                    class="add-row px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">+</button>
+
+                                                <button type="button" disabled
+                                                    class="remove-row px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">X</button>
+                                            </td>
+                                        @endif
+
                                     </tr>
                                 @endforeach
                             </tbody>

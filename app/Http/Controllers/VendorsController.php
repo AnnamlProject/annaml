@@ -119,9 +119,9 @@ class VendorsController extends Controller
     public function getInvoicesAndPrepayments($vendorId)
     {
         $vendor = Vendors::with([
-            'invoices.details', // include relasi detail invoice
-            'prepayments',
-            'invoices.paymentmethodDetail'
+            'invoices.details',                 // relasi detail invoice
+            'invoices.paymentmethodDetail.chartOfAccount', // relasi akun invoice
+            'prepayments.accountPrepayment',
         ])->findOrFail($vendorId);
 
         // Hitung total untuk setiap invoice
@@ -136,19 +136,29 @@ class VendorsController extends Controller
             }
 
             $invoice->original_amount = $subtotal + $total_tax + ($invoice->freight ?? 0);
+            $invoice->amount_owing = $invoice->original_amount;
 
-            // Kamu bisa tambahkan juga field amount_owing jika sudah ada payment sebelumnya
-            $invoice->amount_owing = $invoice->original_amount; // sementara sama dengan original amount
+            $invoice->invoice_number_id = $invoice->id;
 
+            // Header account (misalnya Hutang Dagang)
             $invoice->header_account_id = $invoice->payment_method_account_id ?? null;
             $invoice->header_account_code = $invoice->paymentmethodDetail->chartOfAccount->kode_akun ?? null;
             $invoice->header_account_name = $invoice->paymentmethodDetail->chartOfAccount->nama_akun ?? null;
+
             return $invoice;
+        });
+
+        // Tambahkan informasi akun untuk prepayment
+        $prepayments = $vendor->prepayments->map(function ($p) {
+            $p->account_prepayment_id = $p->account_prepayment;
+            $p->account_prepayment_code = $p->accountPrepayment->kode_akun ?? null;
+            $p->account_prepayment_name = $p->accountPrepayment->nama_akun ?? null;
+            return $p;
         });
 
         return response()->json([
             'invoices' => $invoices,
-            'prepayments' => $vendor->prepayments,
+            'prepayments' => $prepayments,
         ]);
     }
 }

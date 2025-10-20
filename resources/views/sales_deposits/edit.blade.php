@@ -47,7 +47,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="font-medium text-gray-700 block mb-1">Deposit To</label>
+                                <label class="font-medium text-gray-700 block mb-1">Account</label>
                                 <select name="account_id" id="account_header_id" required
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih --</option>
@@ -55,6 +55,19 @@
                                         <option value="{{ $jenis->id }}"
                                             {{ $sales_deposits->account_id == $jenis->id ? 'selected' : '' }}>
                                             {{ $jenis->kode_akun }}-{{ $jenis->nama_akun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="font-medium text-gray-700 block mb-1">Account Deposit</label>
+                                <select name="account_deposit" id="account_deposit" required
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- Pilih --</option>
+                                    @foreach ($deposit as $dep)
+                                        <option value="{{ $dep->id }}"
+                                            {{ $sales_deposits->account_deposit == $dep->id ? 'selected' : '' }}>
+                                            {{ $dep->kode_akun }}-{{ $dep->nama_akun }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -89,7 +102,7 @@
                                 <label class="font-medium text-gray-700 block mb-1">Deposit Amount</label>
                                 <input type="text" name="deposit_amount" id="amount"
                                     class="w-full number-format border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value="{{ old('deposit_amount', number_format($sales_deposits->deposit_amount, 2, ',', '.')) }}"
+                                    value="{{ old('deposit_amount', number_format($sales_deposits->deposit_amount, 0, ',', '.')) }}"
                                     required>
                             </div>
 
@@ -172,7 +185,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#account_header_id').select2({
+            $('#account_header_id,#account_deposit').select2({
                 placeholder: "-- Pilih --",
                 allowClear: true,
                 width: '100%'
@@ -248,6 +261,7 @@
             };
 
             const fromAccountName = document.querySelector('#account_header_id option:checked')?.textContent;
+            const fromAccountDeposit = document.querySelector('#account_deposit option:checked')?.textContent;
             const amountInput = document.querySelector('#amount');
             const rawValue = amountInput.value.replace(/\./g, '').replace(',', '.');
             const amount = parseFloat(rawValue) || 0;
@@ -262,7 +276,7 @@
                 totalDebit += amount;
 
                 rows.push({
-                    account: `${paidAccount.kode}-${paidAccount.name}`,
+                    account: fromAccountDeposit,
                     debit: 0,
                     credit: amount
                 });
@@ -300,8 +314,13 @@
             generateJournalPreview();
 
             // Listener perubahan
-            document.querySelector('#amount').addEventListener('input', generateJournalPreview);
-            document.querySelector('#account_header_id').addEventListener('change', generateJournalPreview);
+            $(document).ready(function() {
+                $('#account_header_id, #account_deposit, #amount').on('change input',
+                    generateJournalPreview);
+
+                // render awal saat form pertama kali dibuka
+                generateJournalPreview();
+            });
         });
     </script>
 

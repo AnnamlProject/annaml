@@ -55,7 +55,7 @@
                                 @enderror
                             </div>
                             <div class="mb-4">
-                                <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Deposit To
+                                <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Account
                                 </label>
                                 <select name="account_id" id="account_header_id"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -69,6 +69,24 @@
                                     @endforeach
                                 </select>
                                 @error('account_id')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div class="mb-4">
+                                <label for="nama_metode" class="block text-gray-700 font-medium mb-1">Deposit Account
+                                </label>
+                                <select name="account_deposit" id="account_deposit"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required>
+                                    <option value="">-- Pilih--</option>
+                                    @foreach ($deposit as $dep)
+                                        <option value="{{ $dep->id }}"
+                                            {{ old('account_deposit', $sales_deposits->account_deposit ?? '') == $dep->id ? 'selected' : '' }}>
+                                            {{ $dep->kode_akun }}-{{ $dep->nama_akun }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('account_deposit')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -198,7 +216,7 @@
 
     <script>
         $(document).ready(function() {
-            $('#account_header_id').select2({
+            $('#account_header_id,#account_deposit').select2({
                 placeholder: "-- Pilih --",
                 allowClear: true,
                 width: '100%'
@@ -287,6 +305,7 @@
             };
 
             const fromAccountName = document.querySelector('#account_header_id option:checked')?.textContent;
+            const fromAccountDeposit = document.querySelector('#account_deposit option:checked')?.textContent;
             const amountInput = document.querySelector('#amount');
             const amount = parseFloat(amountInput.value.replace(/\D/g, '')) || 0;
 
@@ -302,7 +321,7 @@
 
                 // Debit akun kas/bank
                 rows.push({
-                    account: `${paidAccount.kode}-${paidAccount.name}`,
+                    account: fromAccountDeposit,
                     debit: 0,
                     credit: amount
                 });
@@ -330,9 +349,13 @@
         }
 
         // Trigger otomatis saat input berubah
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('#amount').addEventListener('input', generateJournalPreview);
-            document.querySelector('#account_header_id').addEventListener('change', generateJournalPreview);
+        $(document).ready(function() {
+            // Trigger realtime update
+            $(document).on('change', '#account_header_id, #account_deposit', generateJournalPreview);
+            $(document).on('input', '#amount', generateJournalPreview);
+
+            // Render awal
+            generateJournalPreview();
         });
     </script>
 

@@ -11,6 +11,7 @@ class SalesDeposit extends Model
         'deposit_no',
         'jenis_pembayaran_id',
         'account_id',
+        'account_deposit',
         'deposit_date',
         'customer_id',
         'deposit_reference',
@@ -33,5 +34,9 @@ class SalesDeposit extends Model
     public function details()
     {
         return $this->hasMany(SalesDepositDetail::class, 'deposit_id');
+    }
+    public function accountDeposit()
+    {
+        return $this->belongsTo(chartOfAccount::class, 'account_deposit');
     }
 }

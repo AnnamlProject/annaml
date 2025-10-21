@@ -98,6 +98,7 @@
                                         $subtotal = 0;
                                         $totalInputTax = 0; // PPN (+)
                                         $totalWithholding = 0; // PPh (-)
+                                        $total_tax = 0;
                                     @endphp
                                     @foreach ($salesInvoice->details as $item)
                                         @php
@@ -144,10 +145,14 @@
                                 </tbody>
                                 <tfoot>
                                     @php
-                                        $subtotal = $salesInvoice->details->sum('amount');
+                                        $amount = $salesInvoice->details->sum('amount');
                                         $totalTax = $salesInvoice->details->sum('tax');
+                                        $subtotal = $amount + $totalTax;
                                         $freight = $salesInvoice->freight ?? 0;
-                                        $grandTotal = $subtotal + $totalTax + $freight;
+
+                                        $withholding_rate = optional($salesInvoice->withholding)->rate ?? 0;
+                                        $witholding_value = $subtotal * ($withholding_rate / 100);
+                                        $grandTotal = $subtotal - $witholding_value + $freight;
                                     @endphp
                                     <tr>
                                         <td colspan="9" class="border px-3 py-2 text-right font-bold">Subtotal</td>
@@ -156,8 +161,16 @@
                                         <td colspan="2"></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Total Pajak</td>
-                                        <td class="border px-3 py-2 text-right font-bold">{{ number_format($totalTax) }}
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Tax</td>
+                                        <td class="border px-3 py-2 text-right font-bold">
+                                            {{ $salesInvoice->withholding->rate ?? '' }}%
+                                        </td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="border px-3 py-2 text-right font-bold">Tax Value</td>
+                                        <td class="border px-3 py-2 text-right font-bold">
+                                            {{ number_format($witholding_value) }}
                                         </td>
                                         <td colspan="2"></td>
                                     </tr>

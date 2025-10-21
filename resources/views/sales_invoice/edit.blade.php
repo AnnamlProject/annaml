@@ -140,9 +140,9 @@
                                             <th>Discount</th>
                                             <th>Price</th>
                                             <th>Amount</th>
-                                            <th>Tax %</th>
-                                            <th>Tax Value</th>
-                                            <th>Final</th>
+                                            <th>Vat </th>
+                                            <th>Vat Value</th>
+                                            <th>Subtotal</th>
                                             <th>Account</th>
                                             <th>Specpose</th>
                                             <th></th>
@@ -300,7 +300,7 @@
                                                 <td>
                                                     <select name="items[{{ $i }}][project_id]"
                                                         class="w-full border rounded project-{{ $i }}">
-                                                        <option value="">-- Pilih Project --</option>
+                                                        <option value="">-- Pilih Specpose --</option>
                                                         @foreach ($project as $pro)
                                                             <option value="{{ $pro->id }}"
                                                                 {{ $detail->project_id == $pro->id ? 'selected' : '' }}>
@@ -328,11 +328,37 @@
                                             <td colspan="3" class="border px-2 py-1"></td>
                                         </tr>
                                         <tr>
-                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Total Pajak
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Tax
                                             </td>
                                             <td colspan="2" class="border px-2 py-1">
-                                                <input type="text" id="total-tax"
-                                                    class="w-full border rounded text-right bg-gray-100" readonly>
+                                                <select name="withholding_tax" id="global-tax"
+                                                    class="w-full border rounded text-right">
+                                                    <option value="">--
+                                                        Pilih Pajak --</option>
+                                                    @foreach ($withholding as $tax)
+                                                        <option value="{{ $tax->id }}"
+                                                            data-rate="{{ $tax->rate }}"
+                                                            data-type="{{ $tax->type }}"
+                                                            data-account="{{ $tax->sales_account_id }}"
+                                                            data-account-code="{{ $tax->salesAccount->kode_akun ?? '' }}"
+                                                            data-account-name="{{ $tax->salesAccount->nama_akun ?? '' }}"
+                                                            {{ $salesInvoice->withholding_tax == $tax->id ? 'selected' : '' }}>
+                                                            ({{ $tax->rate }}%)
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td colspan="3" class="border px-2 py-1"></td>
+                                        </tr>
+                                        <!-- tax value-->
+                                        <tr>
+                                            <td colspan="9" class="text-right font-bold border px-2 py-1">Tax Value
+                                            </td>
+                                            <td colspan="2" class="border px-2 py-1">
+                                                <input type="text" id="global-tax-value" name="withholding_value"
+                                                    class="w-full border rounded text-right bg-gray-100 mt-1"
+                                                    value="{{ old('withholding_value', $salesInvoice->withholding_value ?? '') }}"
+                                                    readonly>
                                             </td>
                                             <td colspan="3" class="border px-2 py-1"></td>
                                         </tr>
@@ -590,29 +616,37 @@
                 let subtotal = 0,
                     totalTax = 0,
                     grandTotal = 0;
+                totalInputTax = 0;
 
                 document.querySelectorAll('tr.item-row').forEach(row => {
                     const index = row.dataset.index;
+                    const final = parseNumber(document.querySelector(`.final-hidden-${index}`)?.value);
                     const amount = parseNumber(document.querySelector(`.amount-hidden-${index}`)?.value);
                     const taxVal = parseNumber(document.querySelector(`.taxval-hidden-${index}`)?.value);
                     const taxType = document.querySelector(`.tax-${index}`)?.selectedOptions[0]?.dataset
                         .type || 'input_tax';
 
-                    subtotal += amount;
-
-                    if (taxType === 'input_tax') totalTax += taxVal;
-                    else if (taxType === 'withholding_tax') totalTax -= taxVal;
+                    subtotal += final;
+                    if (taxType === 'input_tax') totalInputTax += taxVal;
                 });
 
                 const freight = parseNumber(document.getElementById('freight')?.value);
-                grandTotal = subtotal + totalTax + freight;
+                const globalTaxSelect = document.getElementById('global-tax');
+                const globalTaxRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValueInput = document.getElementById('global-tax-value');
+
+                const withholdingValue = subtotal * (globalTaxRate / 100);
+                withholdingValueInput.value = formatNumber(withholdingValue);
+
+                grandTotal = subtotal - withholdingValue + freight;
 
                 document.getElementById('subtotal').value = formatNumber(subtotal);
-                document.getElementById('total-tax').value = formatNumber(totalTax);
                 document.getElementById('grand-total').value = formatNumber(grandTotal);
 
                 generateJournalPreview();
             }
+
+            document.getElementById('global-tax').addEventListener('change', calculateTotals);
 
             function generateJournalPreview() {
                 const journalBody = document.querySelector('.journal-body');
@@ -721,7 +755,7 @@
 
                     if (type === 'inventory' && unitCost > 0 && qty > 0) {
                         const hpp = qty * unitCost;
-                        console.log(`💰 HPP aktif: ${hpp} (${qty} x ${unitCost})`);
+                        // console.log(`💰 HPP aktif: ${hpp} (${qty} x ${unitCost})`);
 
                         journalRows.push({
                             account: `${cogsCode}-${cogsAccount}`,
@@ -752,6 +786,25 @@
                             credit: amount
                         });
                         totalCredit += amount;
+                    }
+                    const globalTaxSelect = document.getElementById('global-tax');
+                    const withholdingRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                    const withholdingValue = parseNumber(document.getElementById('global-tax-value')
+                        ?.value);
+                    if (withholdingValue > 0) {
+                        const withholdingAccountName = globalTaxSelect?.selectedOptions[0]?.dataset
+                            .accountName ||
+                            'PPh Dipotong';
+                        const withholdingAccountCode = globalTaxSelect?.selectedOptions[0]?.dataset
+                            .accountCode ||
+                            'PPH';
+
+                        journalRows.push({
+                            account: `${withholdingAccountCode} - ${withholdingAccountName}`,
+                            debit: withholdingValue,
+                            credit: 0
+                        });
+                        totalDebit += withholdingValue;
                     }
 
                     // console.groupEnd();

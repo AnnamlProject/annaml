@@ -40,13 +40,14 @@ class SalesInvoiceController extends Controller
         $accounts = chartOfAccount::all();
         $sales_order = SalesOrder::all();
         $project = Project::all();
-        $sales_taxes = SalesTaxes::all();
+        $sales_taxes = SalesTaxes::where('type', 'input_tax')->get();
+        $withholding = SalesTaxes::where('type', 'withholding_tax')->get();
         $freightAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Freight Revenue')
             ->first();
         $lokasi_inventory = LocationInventory::all();
 
-        return view('sales_invoice.create', compact('customer', 'jenis_pembayaran', 'employee', 'items', 'accounts', 'sales_order', 'project', 'sales_taxes', 'freightAccount', 'lokasi_inventory'));
+        return view('sales_invoice.create', compact('customer', 'jenis_pembayaran', 'employee', 'items', 'accounts', 'sales_order', 'project', 'sales_taxes', 'freightAccount', 'lokasi_inventory', 'withholding'));
     }
 
     public function getItemsFromSalesOrder($salesOrderId)
@@ -134,16 +135,18 @@ class SalesInvoiceController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1) Header
+            // 1️⃣ HEADER
             $salesInvoice = \App\SalesInvoice::create([
                 'invoice_number'      => $this->generateKodeOrder($request->invoice_date),
                 'invoice_date'        => $request->invoice_date,
                 'shipping_date'       => $request->shipping_date,
                 'customers_id'        => $request->customers_id,
                 'sales_order_id'      => $request->sales_order_id,
-                'payment_method_account_id'      => $request->payment_method_account_id,
+                'payment_method_account_id' => $request->header_account_id,
+                'withholding_tax'     => $request->withholding_tax,
+                'withholding_value'   => (float) str_replace(',', '', $request->withholding_value),
                 'sales_person_id'     => $request->sales_person_id ?? null,
-                'location_id'     => $request->location_id,
+                'location_id'         => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address'    => $request->shipping_address,
                 'freight'             => (float) str_replace(',', '', $request->freight),
@@ -151,35 +154,31 @@ class SalesInvoiceController extends Controller
                 'messages'            => $request->messages,
                 'status_sales_invoice' => 1,
             ]);
-            dump('📌 SalesInvoice tersimpan:', $salesInvoice->toArray());
+            // dump('📌 SalesInvoice tersimpan:', $salesInvoice->toArray());
 
-
-            // 3b) Update status PO
+            // 3b) Update status SO
             if ($request->sales_order_id) {
                 \App\SalesOrder::whereKey($request->sales_order_id)
                     ->update(['status_sales' => 1]);
-                // dump('Purchase Order update status_sales=2:', $request->sales_order_id);
             }
-            // 2) Detail + kalkulasi ter-cache
-            $lines = [];  // simpan angka bersih untuk jurnal & stok
+
+            // 2️⃣ DETAIL ITEM + perhitungan stok
+            $lines = [];
 
             foreach ($request->items as $row) {
-                $base_price = (float) str_replace(',', '', $row['base_price']  ?? 0);
-                $discount   = (float) str_replace(',', '', $row['discount']    ?? 0);
-                $price      = (float) str_replace(',', '', $row['price']       ?? 0);
-                $amount     = (float) str_replace(',', '', $row['amount']      ?? 0);
-                // konsolidasikan pajak: sumbernya tax_value dari form
-                $tax_amount = (float) str_replace(',', '', $row['tax_value']   ?? 0);
+                $base_price = (float) str_replace(',', '', $row['base_price'] ?? 0);
+                $discount   = (float) str_replace(',', '', $row['discount'] ?? 0);
+                $price      = (float) str_replace(',', '', $row['price'] ?? 0);
+                $amount     = (float) str_replace(',', '', $row['amount'] ?? 0);
+                $tax_amount = (float) str_replace(',', '', $row['tax_value'] ?? 0);
                 $tax_id     = $row['tax_id'] ?? null;
-
-                // qty yang dipakai untuk pengiriman/HPP adalah order_quantity (bukan quantity total SO)
                 $shippedQty = (float) str_replace(',', '', $row['quantity'] ?? 0);
 
                 $detail = \App\SalesInvoiceDetail::create([
                     'sales_invoice_id' => $salesInvoice->id,
                     'item_id'          => $row['item_id'],
                     'quantity'         => $shippedQty,
-                    'order_quantity'   => $shippedQty,                 // << dipakai utk HPP
+                    'order_quantity'   => $shippedQty,
                     'back_order'       => (float) str_replace(',', '', $row['back_order'] ?? 0),
                     'unit'             => $row['unit'],
                     'description'      => $row['description'],
@@ -187,12 +186,35 @@ class SalesInvoiceController extends Controller
                     'discount'         => $discount,
                     'price'            => $price,
                     'amount'           => $amount,
-                    'tax'              => $tax_amount,                 // simpan nilai pajak yg sama
+                    'tax'              => $tax_amount,
                     'account_id'       => $row['account_id'],
                     'project_id'       => $row['project_id'],
                     'tax_id'           => $tax_id,
                 ]);
-                dump("📝 Detail tersimpan untuk item {$row['item_id']}:", $detail->toArray());
+                // dump("📝 Detail tersimpan untuk item {$row['item_id']}:", $detail->toArray());
+
+                // ⚙️ Ambil definisi unit
+                $itemUnit = \App\ItemUnit::where('item_id', $row['item_id'])->first();
+                $qty = (float) $row['quantity'];
+                $unit = $row['unit'] ?? null;
+
+                // 🔹 Konversi selling/buying unit → stocking unit
+                if ($itemUnit) {
+                    if ($unit === $itemUnit->unit_of_measure) {
+                        $qtyChange = $qty;
+                    } elseif ($unit === $itemUnit->selling_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->selling_relationship);
+                    } elseif ($unit === $itemUnit->buying_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->buying_relationship);
+                    } else {
+                        $qtyChange = $qty;
+                    }
+                } else {
+                    $qtyChange = $qty;
+                }
+
+                // 🔻 Karena penjualan → stok berkurang
+                $qtyChange = -$qtyChange;
 
                 // Ambil unit cost SEBELUM stok disesuaikan
                 $iq = \App\ItemQuantities::where('item_id', $row['item_id'])
@@ -203,11 +225,23 @@ class SalesInvoiceController extends Controller
                     ? ($iq->on_hand_value / $iq->on_hand_qty)
                     : 0.0;
 
-                $cogsAmount   = $shippedQty * $unitCost;
-                $qtyChange    = -$shippedQty;
-                $valueChange  = -$cogsAmount;
+                $cogsAmount  = abs($qtyChange) * $unitCost;
+                $valueChange = -$cogsAmount;
 
-                // Simpan untuk jurnal (jangan hitung ulang sesudah stok berubah)
+                // ✅ Kurangi stok (pakai adjustItemQuantity)
+                $this->adjustItemQuantity($row['item_id'], $request->location_id, $qtyChange, $valueChange, true);
+
+                // dump("📦 Update Inventory untuk Item #{$row['item_id']}", [
+                //     'qty_before'   => optional($iq)->on_hand_qty,
+                //     'value_before' => optional($iq)->on_hand_value,
+                //     'qtyChange'    => $qtyChange,
+                //     'valueChange'  => $valueChange,
+                //     'unitCost'     => $unitCost,
+                //     'qty_after'    => (optional($iq)->on_hand_qty ?? 0) + $qtyChange,
+                //     'value_after'  => (optional($iq)->on_hand_value ?? 0) + $valueChange,
+                // ]);
+
+                // Simpan cache untuk jurnal
                 $lines[] = [
                     'item_id'      => $row['item_id'],
                     'desc'         => $row['description'],
@@ -219,28 +253,15 @@ class SalesInvoiceController extends Controller
                     'unit_cost'    => $unitCost,
                     'cogs_amount'  => $cogsAmount,
                 ];
-
-                // Kurangi stok berdasarkan shippedQty (order_quantity)
-                $this->adjustItemQuantity($row['item_id'], $request->location_id, $qtyChange, $valueChange);
-
-                dump("📦 Update Inventory untuk Item #{$row['item_id']}", [
-                    'qty_before'   => optional($iq)->on_hand_qty,
-                    'value_before' => optional($iq)->on_hand_value,
-                    'qtyChange'    => $qtyChange,
-                    'valueChange'  => $valueChange,
-                    'unitCost'     => $unitCost,
-                    'qty_after'    => (optional($iq)->on_hand_qty ?? 0) + $qtyChange,
-                    'value_after'  => (optional($iq)->on_hand_value ?? 0) + $valueChange,
-                ]);
             }
 
-            // 3) Jurnal: pakai angka cache $lines
+            // 3️⃣ JURNAL HEADER
             $journal = \App\JournalEntry::create([
                 'source'  => 'sales_invoice',
                 'tanggal' => $request->invoice_date,
                 'comment' => "Sales Invoice #{$salesInvoice->invoice_number}",
             ]);
-            dump('📒 Journal Entry tersimpan:', $journal->toArray());
+            // dump('📒 Journal Entry tersimpan:', $journal->toArray());
 
             $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
 
@@ -253,14 +274,15 @@ class SalesInvoiceController extends Controller
                         'debits'           => 0,
                         'credits'          => $ln['revenue_amt'],
                         'comment'          => $ln['desc'],
+                        'status' => 2
                     ]);
-                    dump('💰 Journal Revenue:', $rev->toArray());
+                    // dump('💰 Journal Revenue:', $rev->toArray());
                 }
 
-                // COGS (Debit) & Inventory (Credit) — pakai angka cache
+                // COGS (Debit) & Inventory (Credit)
                 if ($ln['cogs_amount'] > 0) {
-                    $cogsAcctId   = \App\ItemAccount::where('item_id', $ln['item_id'])->value('cogs_account_id');
-                    $assetAcctId  = \App\ItemAccount::where('item_id', $ln['item_id'])->value('asset_account_id');
+                    $cogsAcctId  = \App\ItemAccount::where('item_id', $ln['item_id'])->value('cogs_account_id');
+                    $assetAcctId = \App\ItemAccount::where('item_id', $ln['item_id'])->value('asset_account_id');
 
                     $cogs = \App\JournalEntryDetail::create([
                         'journal_entry_id' => $journal->id,
@@ -268,8 +290,9 @@ class SalesInvoiceController extends Controller
                         'debits'           => $ln['cogs_amount'],
                         'credits'          => 0,
                         'comment'          => 'COGS ' . $ln['desc'],
+                        'status' => 2
                     ]);
-                    dump('📊 Journal COGS:', $cogs->toArray());
+                    // dump('📊 Journal COGS:', $cogs->toArray());
 
                     $inv = \App\JournalEntryDetail::create([
                         'journal_entry_id' => $journal->id,
@@ -277,54 +300,23 @@ class SalesInvoiceController extends Controller
                         'debits'           => 0,
                         'credits'          => $ln['cogs_amount'],
                         'comment'          => 'Inventory Out ' . $ln['desc'],
+                        'status' => 2
                     ]);
-                    dump('📦 Journal Inventory Out:', $inv->toArray());
+                    // dump('📦 Journal Inventory Out:', $inv->toArray());
                 }
 
-                // PPN Keluaran (Credit) — konsisten pakai tax_value/tax_amount
-                if ($ln['tax_amount'] > 0 && !empty($ln['tax_id'])) {
-                    $tax = \App\SalesTaxes::whereKey($ln['tax_id'])->first();
-
-                    if ($tax) {
-                        dump('🚚 Tax record:', $tax->toArray()); // 👉 memastikan tipe pajak & akun benar
-                        $taxAccountCode = $coaCode($tax->sales_account_id);
-
-                        switch ($tax->type) {
-                            case 'withholding_tax':
-                                $journalTax = \App\JournalEntryDetail::create([
-                                    'journal_entry_id' => $journal->id,
-                                    'kode_akun'        => $taxAccountCode,
-                                    'debits'           => $ln['tax_amount'],
-                                    'credits'          => 0,
-                                    'comment'          => 'PPh Dipotong oleh pelanggan',
-                                ]);
-                                dump('📘 Journal Withholding Tax:', $journalTax->toArray());
-                                break;
-
-                            case 'input_tax':
-                                if ($journal->source === 'sales_invoice') {
-                                    $journalTax = \App\JournalEntryDetail::create([
-                                        'journal_entry_id' => $journal->id,
-                                        'kode_akun'        => $taxAccountCode,
-                                        'debits'           => 0,
-                                        'credits'          => $ln['tax_amount'],
-                                        'comment'          => 'PPN Keluaran',
-                                    ]);
-                                    dump('📗 Journal Output VAT (Sales):', $journalTax->toArray());
-                                } else {
-                                    $journalTax = \App\JournalEntryDetail::create([
-                                        'journal_entry_id' => $journal->id,
-                                        'kode_akun'        => $taxAccountCode,
-                                        'debits'           => $ln['tax_amount'],
-                                        'credits'          => 0,
-                                        'comment'          => 'PPN Masukan',
-                                    ]);
-                                    dump('📙 Journal Input VAT (Purchase):', $journalTax->toArray());
-                                }
-                                break;
-                        }
-                    } else {
-                        dump('⚠️ Tax record not found for tax_id:', $ln['tax_id']);
+                // PPN Keluaran (Credit)
+                if ($ln['tax_amount'] > 0 && $ln['tax_id']) {
+                    $tax = \App\SalesTaxes::find($ln['tax_id']);
+                    if ($tax && $tax->type === 'input_tax') {
+                        \App\JournalEntryDetail::create([
+                            'journal_entry_id' => $journal->id,
+                            'kode_akun'        => $coaCode($tax->sales_account_id),
+                            'debits'           => 0,
+                            'credits'          => $ln['tax_amount'],
+                            'comment'          => 'PPN Keluaran',
+                            'status' => 2
+                        ]);
                     }
                 }
             }
@@ -338,33 +330,30 @@ class SalesInvoiceController extends Controller
                     'debits'           => 0,
                     'credits'          => (float) $salesInvoice->freight,
                     'comment'          => 'Freight Revenue',
+                    'status' => 2
                 ]);
-                dump('🚚 Journal Freight:', $freight->toArray());
+                // dump('🚚 Journal Freight:', $freight->toArray());
             }
 
-            // 🧮 Hitung total payment dengan memperhatikan jenis pajak (PPN tambah, PPh kurang)
-            $grandTotal = 0;
-            foreach ($lines as $ln) {
-                $amount = $ln['revenue_amt'];
-                $tax = $ln['tax_id'] ? \App\SalesTaxes::find($ln['tax_id']) : null;
-
-                if ($tax) {
-                    if ($tax->type === 'withholding_tax') {
-                        // PPh ditahan pelanggan → kurangi total yang diterima
-                        $amount -= $ln['tax_amount'];
-                    } else {
-                        // PPN atau pajak lain yang menambah nilai tagihan
-                        $amount += $ln['tax_amount'];
-                    }
-                }
-
-                $grandTotal += $amount;
+            // Withholding (Debit)
+            if ($salesInvoice->withholding_value > 0) {
+                $withholdingLinked = \App\SalesTaxes::where('id', $request->withholding_tax)->first();
+                $withholding =  \App\JournalEntryDetail::create([
+                    'journal_entry_id' => $journal->id,
+                    'kode_akun'        => $coaCode(optional($withholdingLinked)->sales_account_id),
+                    'debits'           => $salesInvoice->withholding_value,
+                    'credits'          => 0,
+                    'comment'          => 'PPh Dipotong pelanggan',
+                    'status' => 2
+                ]);
+                // dump('📘 Journal Withholding:', $withholding->toArray());
             }
 
-            // Tambahkan freight (selalu menambah tagihan)
-            $grandTotal += (float) $salesInvoice->freight;
+            // 🧮 Grand Total Payment (Debit)
+            $totalItemRevenue = collect($lines)->sum('revenue_amt');
+            $totalTax = collect($lines)->sum('tax_amount');
+            $grandTotal = $totalItemRevenue + $totalTax + $salesInvoice->freight - $salesInvoice->withholding_value;
 
-            // 🏦 Buat jurnal Payment (Debit)
             if ($grandTotal > 0) {
                 $pmDetail = \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)
                     ->where('is_default', 1)->first()
@@ -375,27 +364,26 @@ class SalesInvoiceController extends Controller
                     'kode_akun'        => $coaCode(optional($pmDetail)->account_id),
                     'debits'           => $grandTotal,
                     'credits'          => 0,
-                    'comment'          => 'Payment / Debit (after withholding tax adjustment)',
+                    'comment'          => 'Payment',
+                    'status' => 2
                 ]);
-                dump('🏦 Journal Payment (adjusted):', $payment->toArray());
+                // dump('🏦 Journal Payment (adjusted):', $payment->toArray());
             }
 
-            // ⚖️ Debug: cek keseimbangan jurnal
+            // ⚖️ Balance Check
             $totalDebit = \App\JournalEntryDetail::where('journal_entry_id', $journal->id)->sum('debits');
             $totalCredit = \App\JournalEntryDetail::where('journal_entry_id', $journal->id)->sum('credits');
             $diff = round($totalDebit - $totalCredit, 2);
+            // dump("⚖️ Journal Balance Check => Debit: {$totalDebit} | Credit: {$totalCredit} | Selisih: {$diff}");
 
-            dump("⚖️ Journal Balance Check => Debit: {$totalDebit} | Credit: {$totalCredit} | Selisih: {$diff}");
-
-            // ✅ Selesai
             DB::commit();
-            dump('✅ Semua proses selesai tanpa error dan jurnal seimbang.');
             return redirect()->route('sales_invoice.index')->with('success', 'Sales invoice berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
-            dd('❌ Error:', $e->getMessage(), $e->getTraceAsString());
+            // dd('❌ Error:', $e->getMessage(), $e->getTraceAsString());
         }
     }
+
 
     protected function adjustItemQuantity($itemId, $locationId, $qtyChange, $valueChange, $isSale = false)
     {
@@ -429,6 +417,7 @@ class SalesInvoiceController extends Controller
         $salesInvoice = SalesInvoice::with([
             'customer',
             'salesPerson',
+            'withholding',
             'lokasi_inventory',
             'jenisPembayaran',
             'details.item',
@@ -448,10 +437,11 @@ class SalesInvoiceController extends Controller
         $project = \App\Project::all();
         $location_inventory = \App\LocationInventory::all();
         $items = \App\Item::all(); // semua item yang bisa dipilih
-        $sales_taxes = \App\SalesTaxes::all();
+        $sales_taxes = \App\SalesTaxes::where('type', 'input_tax')->get();
         $freightAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Freight Revenue')
             ->first();
+        $withholding = SalesTaxes::where('type', 'withholding_tax')->get();
 
         $locationId = $salesInvoice->location_id;
 
@@ -498,7 +488,8 @@ class SalesInvoiceController extends Controller
             'project',
             'location_inventory',
             'sales_taxes',
-            'freightAccount'
+            'freightAccount',
+            'withholding'
         ));
     }
 
@@ -520,6 +511,8 @@ class SalesInvoiceController extends Controller
                 'sales_order_id'           => $request->sales_order_id ?? null,
                 'location_id'              => $request->location_id,
                 'payment_method_account_id' => $request->payment_method_account_id,
+                'withholding_tax'          => $request->withholding_tax,
+                'withholding_value'        => (float) str_replace(',', '', $request->withholding_value),
                 'jenis_pembayaran_id'      => $request->jenis_pembayaran_id,
                 'shipping_address'         => $request->shipping_address,
                 'freight'                  => (float) str_replace(',', '', $request->freight),
@@ -602,18 +595,52 @@ class SalesInvoiceController extends Controller
 
                 // dump("🆕 Detail dibuat:", $detail->toArray());
 
-                // HPP dari stok aktual
-                $unitCost = $this->getUnitCost($row['item_id'], $locationId);
-                $cogsAmount = $qty * $unitCost;
+                // ====================================================
+                // 🔹 Revisi Tambahan: Konversi satuan jual ke stok
+                // ====================================================
+                $itemUnit = \App\ItemUnit::where('item_id', $row['item_id'])->first();
+                $unit = $row['unit'] ?? null;
+                $qtyChange = $qty;
 
+                if ($itemUnit) {
+                    if ($unit === $itemUnit->unit_of_measure) {
+                        $qtyChange = $qty;
+                    } elseif ($unit === $itemUnit->selling_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->selling_relationship);
+                    } elseif ($unit === $itemUnit->buying_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->buying_relationship);
+                    }
+                }
+
+                // 🔻 Karena penjualan → stok berkurang
+                $qtyChange = -$qtyChange;
+
+                // 🔹 Ambil unit cost & hitung COGS berdasar stok unit
+                $unitCost = $this->getUnitCost($row['item_id'], $locationId);
+                $cogsAmount = abs($qtyChange) * $unitCost;
+                $valueChange = -$cogsAmount;
+
+                // dump("🔹 Konversi Unit:", [
+                //     'item_id'          => $row['item_id'],
+                //     'unit'             => $unit,
+                //     'selling_unit'     => optional($itemUnit)->selling_unit,
+                //     'relationship'     => optional($itemUnit)->selling_relationship,
+                //     'qty_as_stock'     => $qtyChange,
+                //     'unitCost'         => $unitCost,
+                //     'cogsAmount'       => $cogsAmount,
+                //     'valueChange'      => $valueChange,
+                // ]);
+
+                // 🔹 Update stok berdasar hasil konversi
                 // dump("📦 Update Inventory untuk Item #{$row['item_id']}", [
-                //     'qtyChange'    => -$qty,
-                //     'valueChange'  => -$cogsAmount,
+                //     'qtyChange'    => $qtyChange,
+                //     'valueChange'  => $valueChange,
                 //     'unitCost'     => $unitCost,
                 // ]);
 
-                $this->adjustItemQuantity($row['item_id'], $locationId, -$qty, -$cogsAmount, true);
+                $this->adjustItemQuantity($row['item_id'], $locationId, $qtyChange, $valueChange, true);
 
+                // 🔹 Simpan cache untuk jurnal
                 $lines[] = [
                     'item_id'      => $row['item_id'],
                     'desc'         => $row['description'],
@@ -648,6 +675,8 @@ class SalesInvoiceController extends Controller
                         'debits'           => 0,
                         'credits'          => $ln['revenue_amt'],
                         'comment'          => $ln['desc'],
+                        'status' => 2
+
                     ]);
                     // dump("💰 Revenue:", $rev->toArray());
                 }
@@ -663,6 +692,8 @@ class SalesInvoiceController extends Controller
                         'debits'           => $ln['cogs_amount'],
                         'credits'          => 0,
                         'comment'          => 'COGS ' . $ln['desc'],
+                        'status' => 2
+
                     ]);
 
                     $inv = \App\JournalEntryDetail::create([
@@ -671,6 +702,8 @@ class SalesInvoiceController extends Controller
                         'debits'           => 0,
                         'credits'          => $ln['cogs_amount'],
                         'comment'          => 'Inventory Out ' . $ln['desc'],
+                        'status' => 2
+
                     ]);
 
                     // dump("🏭 HPP & Persediaan:", ['COGS' => $cogs->toArray(), 'Inventory' => $inv->toArray()]);
@@ -691,6 +724,8 @@ class SalesInvoiceController extends Controller
                             'debits'           => $debit,
                             'credits'          => $credit,
                             'comment'          => $isWithholding ? 'PPh Dipotong' : 'PPN Keluaran',
+                            'status' => 2
+
                         ]);
                         // dump("💸 Pajak ({$tax->type}):", $taxRow->toArray());
                     }
@@ -706,15 +741,32 @@ class SalesInvoiceController extends Controller
                     'debits'           => 0,
                     'credits'          => (float) $salesInvoice->freight,
                     'comment'          => 'Freight Revenue',
+                    'status' => 2
+
                 ]);
                 // dump("🚚 Freight:", $freight->toArray());
+            }
+
+            // Withholding (Debit)
+            if ($salesInvoice->withholding_value > 0) {
+                $withholdingLinked = \App\SalesTaxes::where('id', $request->withholding_tax)->first();
+                $withholding =  \App\JournalEntryDetail::create([
+                    'journal_entry_id' => $journal->id,
+                    'kode_akun'        => $coaCode(optional($withholdingLinked)->sales_account_id),
+                    'debits'           => $salesInvoice->withholding_value,
+                    'credits'          => 0,
+                    'comment'          => 'PPh Dipotong pelanggan',
+                    'status'           => 2
+                ]);
+                // dump('📘 Journal Withholding:', $withholding->toArray());
             }
 
             // ===================================
             // 🔹 PAYMENT (dengan fallback aman)
             // ===================================
             $grandTotal = collect($lines)->sum(fn($ln) => $ln['revenue_amt'] + $ln['tax_amount'])
-                + (float) $salesInvoice->freight;
+                + (float) $salesInvoice->freight
+                - (float) $salesInvoice->withholding_value;
 
             $payAcct = null;
 
@@ -740,6 +792,7 @@ class SalesInvoiceController extends Controller
                 'debits'           => $grandTotal,
                 'credits'          => 0,
                 'comment'          => 'Customer Payment',
+                'status' => 2
             ]);
             // dump("💳 Payment:", $payment->toArray());
 
@@ -759,6 +812,7 @@ class SalesInvoiceController extends Controller
         }
     }
 
+
     protected function getUnitCost($itemId, $locationId)
     {
         $iq = \App\ItemQuantities::where('item_id', $itemId)
@@ -772,8 +826,6 @@ class SalesInvoiceController extends Controller
         return 0;
     }
 
-
-
     public function destroy($id)
     {
         DB::beginTransaction();
@@ -781,18 +833,52 @@ class SalesInvoiceController extends Controller
         try {
             $invoice = \App\SalesInvoice::with('details')->findOrFail($id);
 
-            // 🔹 Rollback stok dulu
+            // 🔹 Rollback stok dulu (berdasarkan selling unit & relationship)
             foreach ($invoice->details as $detail) {
                 $qty   = (float) str_replace(',', '', $detail->quantity);
+                $unit  = $detail->unit ?? null;
                 $price = (float) str_replace(',', '', $detail->price);
-                $value = $qty * $price;
 
-                $this->adjustItemQuantity($detail->item_id, $invoice->location_id, $qty, $value);
-                // dump("Rollback stok item_id={$detail->item_id}", [
-                //     'qty_dikembalikan'   => $qty,
-                //     'value_dikembalikan' => $value,
+                // Ambil relasi konversi satuan
+                $itemUnit = \App\ItemUnit::where('item_id', $detail->item_id)->first();
+
+                if ($itemUnit) {
+                    if ($unit === $itemUnit->unit_of_measure) {
+                        $qtyChange = $qty;
+                    } elseif ($unit === $itemUnit->selling_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->selling_relationship);
+                    } elseif ($unit === $itemUnit->buying_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->buying_relationship);
+                    } else {
+                        $qtyChange = $qty;
+                    }
+                } else {
+                    $qtyChange = $qty;
+                }
+
+                // Value berdasarkan cost bukan price (price bisa inflated)
+                $unitCost = $this->getUnitCost($detail->item_id, $invoice->location_id);
+                $valueChange = $unitCost * $qtyChange;
+
+                // dump("🔁 Rollback stok item_id={$detail->item_id}", [
+                //     'qty_jual'        => $qty,
+                //     'unit'            => $unit,
+                //     'selling_unit'    => optional($itemUnit)->selling_unit,
+                //     'relationship'    => optional($itemUnit)->selling_relationship,
+                //     'qty_dikembalikan' => $qtyChange,
+                //     'unitCost'        => $unitCost,
+                //     'value_dikembalikan' => $valueChange,
                 // ]);
+
+                // Tambahkan kembali stok
+                $this->adjustItemQuantity($detail->item_id, $invoice->location_id, $qtyChange, $valueChange, true);
             }
+
+            if (!empty($invoice->sales_order_id)) {
+                \App\SalesOrder::whereKey($invoice->sales_order_id)
+                    ->update(['status' => 0]);
+            }
+
 
             // 🔹 Hapus Journal Entry
             $journal = \App\JournalEntry::where('source', 'sales_invoice')
@@ -802,16 +888,19 @@ class SalesInvoiceController extends Controller
             if ($journal) {
                 \App\JournalEntryDetail::where('journal_entry_id', $journal->id)->delete();
                 $journal->delete();
-                // dump('Journal dihapus:', $journal->id);
+                // dump('🧾 Journal dihapus:', $journal->id);
             }
 
             // 🔹 Hapus detail
             \App\SalesInvoiceDetail::where('sales_invoice_id', $invoice->id)->delete();
+            // dump('🗑️ Detail dihapus untuk invoice', $invoice->id);
 
             // 🔹 Hapus header
             $invoice->delete();
+            // dump('🧾 Header SalesInvoice dihapus:', $id);
 
             DB::commit();
+
             return redirect()->route('sales_invoice.index')
                 ->with('success', 'Sales Invoice berhasil dihapus beserta jurnal & rollback stok.');
         } catch (\Throwable $e) {
@@ -819,6 +908,7 @@ class SalesInvoiceController extends Controller
             return back()->withErrors('Gagal menghapus invoice: ' . $e->getMessage());
         }
     }
+
 
     public function exportPdf($id)
     {

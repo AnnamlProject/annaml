@@ -13,6 +13,8 @@ class SalesInvoice extends Model
         'sales_order_id',
         'customers_id',
         'jenis_pembayaran_id',
+        'withholding_tax',
+        'withholding_value',
         'shipping_address',
         'shipping_date',
         'sales_person_id',
@@ -25,6 +27,10 @@ class SalesInvoice extends Model
     public function jenisPembayaran()
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+    public function withholding()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'withholding_tax');
     }
     public function customer()
     {

@@ -210,11 +210,11 @@
                                                 <th class="px-2 py-1 border">Discount</th>
                                                 <th class="px-2 py-1 border">Price</th>
                                                 <th class="px-2 py-1 border">Amount</th>
-                                                <th class="px-2 py-1 border">Tax</th>
-                                                <th class="px-2 py-1 border">Tax Value</th>
-                                                <th class="px-2 py-1 border">Final</th>
+                                                <th class="px-2 py-1 border">Vat</th>
+                                                <th class="px-2 py-1 border">Vat Value</th>
+                                                <th class="px-2 py-1 border">Subtotal</th>
                                                 <th class="px-2 py-1 border">Account</th>
-                                                <th class="px-2 py-1 border">Project</th>
+                                                <th class="px-2 py-1 border">Specpose</th>
                                                 <th class="px-2 py-1 border">Aksi</th>
                                             </tr>
                                         </thead>
@@ -229,18 +229,41 @@
                                                     <input type="text" id="subtotal"
                                                         class="w-full border rounded text-right bg-gray-100" readonly>
                                                 </td>
-                                                <td colspan="3" class="border px-2 py-1"></td>
+                                                <td colspan="4" class="border px-2 py-1"></td>
                                             </tr>
                                             <tr>
-                                                <td colspan="9" class="text-right font-bold border px-2 py-1">Total
-                                                    Pajak
+                                                <td colspan="9" class="text-right font-bold border px-2 py-1">
+                                                    Tax</td>
+                                                <td colspan="2" class="border px-2 py-1">
+                                                    <select name="withholding_tax" id="global-tax"
+                                                        class="w-full border rounded text-right">
+                                                        <option value="">--Pilih--</option>
+                                                        @foreach ($withholding as $item)
+                                                            <option value="{{ $item->id }}"
+                                                                data-rate="{{ $item->rate }}"
+                                                                data-account-code="{{ $item->salesAccount->kode_akun ?? '' }}"
+                                                                data-account-name="{{ $item->salesAccount->nama_akun ?? '' }}">
+                                                                ({{ $item->rate }}%)
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+
+                                                </td>
+
+                                                <td colspan="4" class="border px-2 py-1"></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="9" class="text-right font-bold border px-2 py-1">Tax Value
                                                 </td>
                                                 <td colspan="2" class="border px-2 py-1">
-                                                    <input type="text" id="total-tax"
-                                                        class="w-full border rounded text-right bg-gray-100" readonly>
+                                                    <input type="text" id="global-tax-value" name="withholding_value"
+                                                        class="w-full border rounded text-right bg-gray-100 mt-1" readonly>
                                                 </td>
-                                                <td colspan="3" class="border px-2 py-1"></td>
+                                                <td colspan="4" class="border px-2 py-1"></td>
+
                                             </tr>
+
+
                                             <!-- Freight row -->
                                             <tr>
                                                 <td colspan="9" class="text-right font-bold border px-2 py-1">Freight
@@ -249,7 +272,7 @@
                                                     <input type="text" id="freight" name="freight"
                                                         class="w-full border rounded text-right" value="0">
                                                 </td>
-                                                <td colspan="3" class="border px-2 py-1"></td>
+                                                <td colspan="4" class="border px-2 py-1"></td>
                                             </tr>
                                             <tr>
                                                 <td colspan="9" class="text-right font-bold border px-2 py-1">Grand
@@ -260,7 +283,7 @@
                                                         class="w-full border rounded text-right bg-gray-100 font-bold"
                                                         readonly>
                                                 </td>
-                                                <td colspan="3" class="border px-2 py-1"></td>
+                                                <td colspan="4" class="border px-2 py-1"></td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -455,6 +478,9 @@
             const totalTaxInput = document.getElementById('total-tax');
             const freightInput = document.getElementById('freight');
             const grandTotalInput = document.getElementById('grand-total');
+            const withholdingSelect = document.getElementById('withholding');
+            const withholdingInput = document.getElementById('withholding-value');
+
             const journalBody = document.querySelector('.journal-body');
 
             const $pmSelect = $('#jenis_pembayaran_id');
@@ -540,6 +566,15 @@
                 // ⬇️ baca tipe pajak
                 const taxType = (taxSelect?.selectedOptions[0]?.dataset.type) || 'input_tax';
 
+                // console.log(`calculateAmount(${index}) called`, {
+                //     qty,
+                //     basePrice,
+                //     discount,
+                //     taxPercent,
+                //     taxType
+                // });
+
+
                 // ✅ batasi qty tidak boleh melebihi order saat mode PO
                 if (useOrderCheckbox.checked && qty > order) {
                     alert('Qty tidak boleh melebihi Order.');
@@ -578,29 +613,49 @@
 
             function calculateTotals() {
                 let subtotal = 0;
-                let totalTax = 0;
+                let totalInputTax = 0;
 
+                // 🔹 Loop semua item
                 document.querySelectorAll('#items-body .item-row').forEach(row => {
                     const idx = row.dataset.index;
                     const amount = parseNumber(document.querySelector(`.amount-${idx}`).value);
+                    const finalVal = parseNumber(document.querySelector(`.final-${idx}`).value);
                     const taxVal = parseNumber(document.querySelector(`.taxval-${idx}`).value);
                     const taxType = document.querySelector(`.tax-${idx}`)?.selectedOptions[0]?.dataset
                         .type || 'input_tax';
 
-                    subtotal += amount;
-                    if (taxType === 'input_tax') totalTax += taxVal;
-                    else if (taxType === 'withholding_tax') totalTax -= taxVal;
+                    subtotal += finalVal;
+                    if (taxType === 'input_tax') totalInputTax += taxVal;
                 });
 
                 subtotalInput.value = formatNumber(subtotal);
-                totalTaxInput.value = formatNumber(totalTax);
 
+                // 🔹 Global withholding (per invoice)
+                const globalTaxSelect = document.getElementById('global-tax');
+                const globalTaxRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValueInput = document.getElementById('global-tax-value');
+
+                const withholdingValue = subtotal * (globalTaxRate / 100);
+                withholdingValueInput.value = formatNumber(withholdingValue);
+
+                // 🔹 Freight
                 const freight = parseNumber(freightInput.value);
-                const grandTotal = subtotal + totalTax + freight;
+
+                // 🔹 Grand total = subtotal + input tax + freight - withholding
+                const grandTotal = subtotal - withholdingValue + freight;
                 grandTotalInput.value = formatNumber(grandTotal);
 
-                generateJournalPreview(); // ✅ update journal setiap kali hitung
+                generateJournalPreview();
             }
+
+            // 🧩 Event listeners
+            document.getElementById('global-tax').addEventListener('change', calculateTotals);
+            document.getElementById('freight').addEventListener('input', calculateTotals);
+
+            // 🔹 Optional: hitung ulang saat item berubah
+            document.querySelectorAll('#items-body').forEach(el => {
+                el.addEventListener('input', () => calculateTotals());
+            });
 
             function generateJournalPreview() {
                 journalBody.innerHTML = '';
@@ -608,15 +663,25 @@
                 let totalDebit = 0,
                     totalCredit = 0;
 
+                // ========================
+                // 1️⃣ Hitung akun per item (pendapatan & PPN keluaran)
+                // ========================
                 document.querySelectorAll('#items-body .item-row').forEach(row => {
                     const idx = row.dataset.index;
-                    const accountName = document.querySelector(`.account-name-${idx}`)?.value || 'Item';
-                    const accountCode = document.querySelector(`.account-code-${idx}`)?.value || 'Item';
+                    const accountName = document.querySelector(`.account-name-${idx}`)?.value ||
+                        'Pendapatan';
+                    const accountCode = document.querySelector(`.account-code-${idx}`)?.value || '';
                     const amount = parseNumber(document.querySelector(`.amount-${idx}`)?.value);
                     const taxAmount = parseNumber(document.querySelector(`.taxval-${idx}`)?.value);
+                    const taxSelect = document.querySelector(`.tax-${idx}`);
+                    const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
+                    const taxAccountName = taxSelect?.selectedOptions[0]?.dataset.accountName || 'Tax';
+                    const taxAccountCode = taxSelect?.selectedOptions[0]?.dataset.accountCode || 'Tax';
 
 
-                    // Payment → Debit (ambil teks dari option)
+                    // ========================
+                    // 4️⃣ Kas / Bank diterima (DEBIT)
+                    // ========================
                     const paymentAccountName = document.querySelector('#pm-account-id option:checked')
                         ?.text || '';
                     const grandTotal = parseNumber(grandTotalInput.value);
@@ -628,44 +693,27 @@
                         });
                         totalDebit += grandTotal;
                     }
-                    // Pajak → tergantung type
-                    if (taxAmount > 0) {
-                        const taxSelect = document.querySelector(`.tax-${idx}`);
-                        const taxAccountName = taxSelect?.selectedOptions[0]?.dataset.accountName || 'Tax';
-                        const taxAccountCode = taxSelect?.selectedOptions[0]?.dataset.accountCode || 'Tax';
-                        const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
-
-                        if (taxType === 'withholding_tax') {
-                            // PPh ditahan pelanggan → Debit akun PPh Dipotong (aset/contra AR)
-                            journalRows.push({
-                                account: `${taxAccountCode}-${taxAccountName}`,
-                                debit: taxAmount,
-                                credit: 0
-                            });
-                            totalDebit += taxAmount;
-                        } else {
-                            // PPN Keluaran → Credit kewajiban
-                            journalRows.push({
-                                account: `${taxAccountCode}-${taxAccountName}`,
-                                debit: 0,
-                                credit: taxAmount
-                            });
-                            totalCredit += taxAmount;
-                        }
-                    }
-                    // Freight → Credit
-                    const freight = parseNumber(freightInput.value);
-                    if (freight > 0) {
+                    // Pendapatan (Credit)
+                    if (amount > 0) {
                         journalRows.push({
-                            account: `${freightAccount.kode} - ${freightAccount.name}`,
+                            account: `${accountCode} - ${accountName}`,
                             debit: 0,
-                            credit: freight
+                            credit: amount
                         });
-                        totalCredit += freight;
+                        totalCredit += amount;
                     }
 
+                    // Pajak keluaran (Credit)
+                    if (taxAmount > 0 && taxType === 'input_tax') {
+                        journalRows.push({
+                            account: `${taxAccountCode} - ${taxAccountName}`,
+                            debit: 0,
+                            credit: taxAmount
+                        });
+                        totalCredit += taxAmount;
+                    }
 
-                    // HPP untuk Inventory (kalau memang kamu butuh; dibiarkan sesuai script awal)
+                    // HPP (COGS) untuk barang inventory
                     const type = row.dataset.type;
                     const qty = parseNumber(document.querySelector(`.qty-${idx}`)?.value);
                     const unitCost = parseNumber(row.dataset.unitCost);
@@ -678,50 +726,78 @@
                         const hpp = qty * unitCost;
                         // Debit COGS
                         journalRows.push({
-                            account: `${cogsCode}-${cogsAccount}`,
+                            account: `${cogsCode} - ${cogsAccount}`,
                             debit: hpp,
                             credit: 0
                         });
                         totalDebit += hpp;
                         // Credit Inventory
                         journalRows.push({
-                            account: `${assetCode}-${assetAccount}`,
+                            account: `${assetCode} - ${assetAccount}`,
                             debit: 0,
                             credit: hpp
                         });
                         totalCredit += hpp;
                     }
-
-                    // Pendapatan → Credit
-                    if (amount > 0) {
-                        journalRows.push({
-                            account: accountName,
-                            debit: 0,
-                            credit: amount
-                        });
-                        totalCredit += amount;
-                    }
                 });
 
-                // Render jurnal
+                // ========================
+                // 2 Freight GLOBAL → CREDIT
+                // ========================
+                const freight = parseNumber(freightInput.value);
+                if (freight > 0) {
+                    journalRows.push({
+                        account: `${freightAccount.kode} - ${freightAccount.name}`,
+                        debit: 0,
+                        credit: freight
+                    });
+                    totalCredit += freight;
+                }
+
+                // ========================
+                // 3 Pajak withholding (PPh) GLOBAL → DEBIT
+                // ========================
+                const globalTaxSelect = document.getElementById('global-tax');
+                const withholdingRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValue = parseNumber(document.getElementById('global-tax-value')?.value);
+                if (withholdingValue > 0) {
+                    const withholdingAccountName = globalTaxSelect?.selectedOptions[0]?.dataset.accountName ||
+                        'PPh Dipotong';
+                    const withholdingAccountCode = globalTaxSelect?.selectedOptions[0]?.dataset.accountCode ||
+                        'PPH';
+
+                    journalRows.push({
+                        account: `${withholdingAccountCode} - ${withholdingAccountName}`,
+                        debit: withholdingValue,
+                        credit: 0
+                    });
+                    totalDebit += withholdingValue;
+                }
+
+
+
+                // ========================
+                // 5️⃣ Render hasil
+                // ========================
                 if (journalRows.length === 0) {
                     journalBody.innerHTML =
                         `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal</td></tr>`;
                 } else {
                     journalRows.forEach(row => {
                         journalBody.insertAdjacentHTML('beforeend', `
-                        <tr>
-                            <td class="border px-2 py-1">${row.account}</td>
-                            <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
-                            <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
-                        </tr>
-                    `);
+                <tr>
+                    <td class="border px-2 py-1">${row.account}</td>
+                    <td class="border px-2 py-1 text-right">${formatNumber(row.debit)}</td>
+                    <td class="border px-2 py-1 text-right">${formatNumber(row.credit)}</td>
+                </tr>
+            `);
                     });
                 }
 
                 document.querySelector('.total-debit').textContent = formatNumber(totalDebit);
                 document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
             }
+
 
             function attachInputListeners(index) {
                 ['qty', 'order', 'disc', 'purchase'].forEach(cls => {
@@ -807,7 +883,7 @@
                     <td><input type="text" class="w-full border bg-gray-100  account-name-${index}" readonly><input type="hidden" name="items[${index}][account_id]" class="account-id-${index}"></td>
                     <td>
                         <select name="items[${index}][project_id]" class="w-full border rounded ">
-                            <option value="">-- Pilih Project --</option>
+                            <option value="">-- Pilih Specpose --</option>
                             @foreach ($project as $prj)
                                 <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                             @endforeach
@@ -909,7 +985,7 @@
 
                 <td class="border px-2 py-1">
                     <select name="items[${index}][project_id]" class="w-full border rounded px-2 py-1">
-                        <option value="">-- Pilih Project --</option>
+                        <option value="">-- Pilih Specpose --</option>
                         @foreach ($project as $prj)
                             <option value="{{ $prj->id }}">{{ $prj->nama_project }}</option>
                         @endforeach

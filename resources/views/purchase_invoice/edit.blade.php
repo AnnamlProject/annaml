@@ -125,20 +125,20 @@
                                     <thead
                                         class="bg-gradient-to-r bg-[{{ $themeColor }}]  to-blue-600 text-white text-sm font-semibold">
                                         <tr>
-                                            <th class="p-2">Item</th>
-                                            <th>Qty</th>
-                                            <th>Order</th>
-                                            {{-- <th>Back Order</th> --}}
-                                            <th>Unit</th>
-                                            <th>Description</th>
-                                            <th>Price</th>
-                                            <th>Discount</th>
-                                            <th>Tax</th>
-                                            <th>Tax Amount</th>
-                                            <th>Amount</th>
-                                            <th>Account</th>
-                                            <th>Project</th>
-                                            <th></th>
+                                            <th class=" border px-4 py-2 p-2">Item</th>
+                                            <th class="border px-4 py-2">Qty</th>
+                                            <th class="border px-4 py-2">Order</th>
+                                            {{-- <th class="border px-4 py-2">Back Order</th> --}}
+                                            <th class="border px-4 py-2">Unit</th>
+                                            <th class="border px-4 py-2">Description</th>
+                                            <th class="border px-4 py-2">Price</th>
+                                            <th class="border px-4 py-2">Discount</th>
+                                            <th class="border px-4 py-2">Tax</th>
+                                            <th class="border px-4 py-2">Tax Amount</th>
+                                            <th class="border px-4 py-2">Amount</th>
+                                            <th class="border px-4 py-2">Account</th>
+                                            <th class="border px-4 py-2">Specpose</th>
+                                            <th class="border px-4 py-2"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="item-table-body">
@@ -254,11 +254,11 @@
                                                         value="{{ $detail->account_id }}">
                                                 </td>
 
-                                                <!-- Project -->
+                                                <!-- Specpose -->
                                                 <td>
                                                     <select name="items[{{ $i }}][project_id]"
                                                         class="w-full border rounded project-{{ $i }}">
-                                                        <option value="">-- Pilih Project --</option>
+                                                        <option value="">-- Pilih Specpose --</option>
                                                         @foreach ($project as $pro)
                                                             <option value="{{ $pro->id }}"
                                                                 {{ $detail->project_id == $pro->id ? 'selected' : '' }}>
@@ -269,10 +269,10 @@
                                                 </td>
 
                                                 <!-- Remove -->
-                                                <td class="text-center">
+                                                {{-- <td class="text-center">
                                                     <button type="button" class="remove-row text-red-500 font-bold"
                                                         data-index="{{ $i }}">×</button>
-                                                </td>
+                                                </td> --}}
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -282,13 +282,40 @@
                                             <td colspan="8"></td>
                                             <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                             <td><input type="text" id="subtotal" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="8"></td>
-                                            <td class="pr-3 text-right font-semibold">Total Tax :</td>
-                                            <td><input type="text" id="grand-tax" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                            <td class="pr-3 text-right font-semibold">Tax :</td>
+                                            <td class="border px-2 py-1">
+                                                <select name="withholding_tax" id="global-tax"
+                                                    class="w-full border rounded text-right">
+                                                    <option value="">--
+                                                        Pilih Pajak --</option>
+                                                    @foreach ($withholding as $tax)
+                                                        <option value="{{ $tax->id }}"
+                                                            data-rate="{{ $tax->rate }}"
+                                                            data-type="{{ $tax->type }}"
+                                                            data-account="{{ $tax->purchase_account_id }}"
+                                                            data-account-code="{{ $tax->purchaseAccount->kode_akun ?? '' }}"
+                                                            data-account-name="{{ $tax->purchaseAccount->nama_akun ?? '' }}"
+                                                            {{ $purchaseInvoice->withholding_tax == $tax->id ? 'selected' : '' }}>
+                                                            ({{ $tax->rate }}%)
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <!-- tax value-->
+                                        <tr>
+                                            <td colspan="8"></td>
+                                            <td class="pr-3 text-right font-semibold">Tax Value :</td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" id="global-tax-value" name="withholding_value"
+                                                    class="w-full border rounded text-right bg-gray-100 mt-1"
+                                                    value="{{ old('withholding_value', $purchaseInvoice->withholding_value ?? '') }}"
+                                                    readonly>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td colspan="8"></td>
@@ -297,7 +324,7 @@
                                                 <input type="hidden" id="freight" name="freight"
                                                     value="{{ $purchaseInvoice->freight ?? 0 }}">
                                                 <input type="text" id="freight-display"
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100"
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100"
                                                     value="{{ number_format($purchaseInvoice->freight ?? 0, 0, '.', ',') }}">
                                             </td>
                                         </tr>
@@ -305,7 +332,7 @@
                                             <td colspan="8"></td>
                                             <td class="pr-3 text-right font-semibold">Grand Total :</td>
                                             <td><input type="text" id="grand-total" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100 font-bold">
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100 font-bold">
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -524,40 +551,57 @@
                 $(`.amount-hidden[name="items[${index}][amount]"]`).val(baseAmount);
                 $(`.tax_amount-hidden[name="items[${index}][tax_amount]"]`).val(taxAmount);
 
+
+                let $finalHidden = $(`.final-hidden-${index}`);
+                if ($finalHidden.length === 0) {
+                    // kalau belum ada hidden final, tambahkan dinamis
+                    $(`.amount-hidden[name="items[${index}][amount]"]`).after(
+                        `<input type="hidden" class="final-hidden-${index} final-hidden" value="${finalValue}">`
+                    );
+                } else {
+                    $finalHidden.val(finalValue);
+                }
+
                 calculateTotals();
                 generateJournalPreview();
             }
 
+            function parseNumber(val) {
+                return parseFloat(String(val).replace(/,/g, '')) || 0;
+            }
+
             function calculateTotals() {
-                let subtotal = 0,
-                    totalTax = 0;
+                let subtotal = 0;
+                let totalTax = 0;
 
-                $('.amount-hidden').each(function() {
-                    subtotal += parseFloat($(this).val()) || 0;
+                // Hitung subtotal dari final (bukan dari amount)
+                $('.final-hidden').each(function() {
+                    subtotal += parseNumber($(this).val());
                 });
 
-                // Baca ulang setiap pajak dengan tipe-nya
+                // Hitung total pajak (opsional)
                 $('.tax_amount-hidden').each(function(index) {
-                    const taxAmount = parseFloat($(this).val()) || 0;
-                    const taxSelect = document.querySelector(`.tax-${index}`);
-                    const taxType = taxSelect?.selectedOptions[0]?.dataset.type || 'input_tax';
-
-                    if (taxType === 'input_tax') {
-                        totalTax += taxAmount;
-                    } else if (taxType === 'withholding_tax') {
-                        totalTax -= taxAmount;
-                    }
+                    totalTax += parseNumber($(this).val());
                 });
 
-                const freight = parseFloat($('#freight').val()) || 0;
-                const grandTotal = subtotal + totalTax + freight;
+                // Ambil withholding global
+                const globalTaxSelect = document.getElementById('global-tax');
+                const globalTaxRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValue = subtotal * (globalTaxRate / 100);
+                $('#global-tax-value').val(formatNumber(withholdingValue));
 
+                // Freight
+                const freight = parseNumber($('#freight').val());
+
+                // Grand total
+                const grandTotal = subtotal - withholdingValue + freight;
+
+                // Update tampilan
                 $('#subtotal').val(formatNumber(subtotal));
-                $('#grand-tax').val(formatNumber(totalTax));
                 $('#grand-total').val(formatNumber(grandTotal));
                 $('#freight-display').val(formatNumber(freight));
             }
-
+            document.getElementById('global-tax').addEventListener('change', calculateTotals);
 
             function generateJournalPreview() {
                 const $journalBody = $('.journal-body');
@@ -623,6 +667,26 @@
                         account_id: freightAccount.id
                     });
                     totalDebit += freight;
+                }
+
+                const globalTaxSelect = document.getElementById('global-tax');
+                const withholdingRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValue = parseNumber(document.getElementById('global-tax-value')
+                    ?.value);
+                if (withholdingValue > 0) {
+                    const withholdingAccountName = globalTaxSelect?.selectedOptions[0]?.dataset
+                        .accountName ||
+                        'PPh Dipotong';
+                    const withholdingAccountCode = globalTaxSelect?.selectedOptions[0]?.dataset
+                        .accountCode ||
+                        'PPH';
+
+                    rows.push({
+                        account: `${withholdingAccountCode} - ${withholdingAccountName}`,
+                        debit: 0,
+                        credit: withholdingValue
+                    });
+                    totalCredit += withholdingValue;
                 }
 
                 // Payment Method Account

@@ -12,6 +12,8 @@ class PurchaseInvoice extends Model
         'date_invoice',
         'purchase_order_id',
         'jenis_pembayaran_id',
+        'withholding_tax',
+        'withholding_value',
         'shipping_date',
         'shipping_address',
         'freight',
@@ -27,6 +29,10 @@ class PurchaseInvoice extends Model
     public function jenisPembayaran()
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+    public function withholding()
+    {
+        return $this->belongsTo(SalesTaxes::class, 'withholding_tax');
     }
     public function paymentmethodDetail()
     {

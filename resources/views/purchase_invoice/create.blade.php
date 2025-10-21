@@ -185,11 +185,11 @@
                                             <th class="border px-2 py-1 text-center w-38">Description</th>
                                             <th class="border px-2 py-1 text-center">Price</th>
                                             <th class="border px-2 py-1 text-center">Discount</th>
-                                            <th class="border px-2 py-1 text-center">Tax</th>
-                                            <th class="border px-2 py-1 text-center">Tax Amount</th>
+                                            <th class="border px-2 py-1 text-center">Vat</th>
+                                            <th class="border px-2 py-1 text-center">Vat Value</th>
                                             <th class="border px-2 py-1 text-center">Amount</th>
                                             <th class="border px-2 py-1 text-center">Account</th>
-                                            <th class="border px-2 py-1 text-center">Project</th>
+                                            <th class="border px-2 py-1 text-center">Specpose</th>
                                             <th class="border px-2 py-1">#</th>
                                         </tr>
                                     </thead>
@@ -201,14 +201,38 @@
                                             <td colspan="9"></td>
                                             <td class="pr-3 text-right font-semibold">Subtotal :</td>
                                             <td><input type="text" id="subtotal" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="9"></td>
 
-                                            <td class="pr-3 text-right font-semibold">Total Tax :</td>
-                                            <td><input type="text" id="grand-tax" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100"></td>
+                                            <td class="pr-3 text-right font-semibold">Tax :</td>
+                                            <td>
+                                                <select name="withholding_tax" id="global-tax"
+                                                    class="w-full border rounded text-right">
+                                                    <option value="">-- Pilih Pajak --</option>
+                                                    @foreach ($withholding as $item)
+                                                        <option value="{{ $item->id }}"
+                                                            data-rate="{{ $item->rate }}"
+                                                            data-type="{{ $item->type }}"
+                                                            data-account="{{ $item->purchase_account_id }}"
+                                                            data-account-code="{{ $item->purchaseAccount->kode_akun ?? '' }}"
+                                                            data-account-name="{{ $item->purchaseAccount->nama_akun ?? '' }}">
+                                                            ({{ $item->rate }}%)
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="9"></td>
+
+                                            <td class="pr-3 text-right font-semibold">Tax Value
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <input type="text" id="global-tax-value" name="withholding_value"
+                                                    class="w-full border rounded text-right" readonly>
+                                            </td>
                                         </tr>
                                         <tr>
                                             <td colspan="9"></td>
@@ -219,7 +243,7 @@
 
                                                 <!-- input tampilan -->
                                                 <input type="text" id="freight-display"
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100">
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100">
                                             </td>
                                         </tr>
 
@@ -227,7 +251,7 @@
                                             <td colspan="9"></td>
                                             <td class="pr-3 text-right font-semibold">Total :</td>
                                             <td><input type="text" id="grand-total" readonly
-                                                    class="w-32 border rounded text-right px-2 py-1 bg-gray-100 font-bold">
+                                                    class="w-full border rounded text-right px-2 py-1 bg-gray-100 font-bold">
                                             </td>
                                         </tr>
                                     </tfoot>
@@ -546,7 +570,7 @@
                     </td>
                     <td class="border px-4 py-2">
                         <select name="items[${index}][project_id]" class="w-full border rounded">
-                            <option value="">-- Pilih Project --</option>
+                            <option value="">-- Pilih Specpose --</option>
                             @foreach ($project as $item)
                                 <option value="{{ $item->id }}">{{ $item->nama_project }}</option>
                             @endforeach
@@ -604,7 +628,7 @@
 
                 <td class="border px-4 py-2">
                     <select name="items[${index}][project_id]" class="w-full border rounded">
-                        <option value="">-- Pilih Project --</option>
+                        <option value="">-- Pilih Specpose --</option>
                         @foreach ($project as $item)
                             <option value="{{ $item->id }}">{{ $item->nama_project }}</option>
                         @endforeach
@@ -703,6 +727,12 @@
                 generateJournalPreview();
             }
 
+
+            function parseNumber(val) {
+                return parseFloat(String(val).replace(/,/g, '')) || 0;
+            }
+
+
             function calculateTotals() {
                 let subtotal = 0;
                 let totalTax = 0;
@@ -712,17 +742,30 @@
                     const base = parseFloat($(`.amount_raw-${index}`).val()) || 0;
                     const tax = parseFloat($(`.tax_amount_raw-${index}`).val()) || 0;
 
-                    subtotal += base;
+                    final = base + tax;
+                    subtotal += final;
                     totalTax += tax; // withholding sudah negatif
                 });
 
+
+                const globalTaxSelect = document.getElementById('global-tax');
+                const globalTaxRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValueInput = document.getElementById('global-tax-value');
+
+                const withholdingValue = subtotal * (globalTaxRate / 100);
+                withholdingValueInput.value = formatNumber(withholdingValue);
+
                 const freight = parseFloat($('#freight').val()) || 0;
-                const grandTotal = subtotal + totalTax + freight;
+                const grandTotal = subtotal - withholdingValue + freight;
 
                 $('#subtotal').val(formatNumber(subtotal));
-                $('#grand-tax').val(formatNumber(totalTax));
                 $('#grand-total').val(formatNumber(grandTotal));
+
+                generateJournalPreview();
+
             }
+
+            document.getElementById('global-tax').addEventListener('change', calculateTotals);
 
 
             function generateJournalPreview() {
@@ -787,6 +830,24 @@
                     });
                     totalDebit += freight;
                 }
+
+                const globalTaxSelect = document.getElementById('global-tax');
+                const withholdingRate = parseNumber(globalTaxSelect?.selectedOptions[0]?.dataset.rate);
+                const withholdingValue = parseNumber(document.getElementById('global-tax-value')?.value);
+                if (withholdingValue > 0) {
+                    const withholdingAccountName = globalTaxSelect?.selectedOptions[0]?.dataset.accountName ||
+                        'PPh Dipotong';
+                    const withholdingAccountCode = globalTaxSelect?.selectedOptions[0]?.dataset.accountCode ||
+                        'PPH';
+
+                    journalRows.push({
+                        account: `${withholdingAccountCode} - ${withholdingAccountName}`,
+                        debit: 0,
+                        credit: withholdingValue
+                    });
+                    totalCredit += withholdingValue;
+                }
+
 
                 // --- Payment / Kas ---
                 const paymentAccountName = $('#pm-account-id option:selected').text();

@@ -79,8 +79,8 @@
                                         <th class="border px-3 py-2">Description</th>
                                         <th class="border px-3 py-2">Price</th>
                                         <th class="border px-3 py-2">Discount</th>
-                                        <th class="border px-3 py-2">Tax</th>
-                                        <th class="border px-3 py-2">Tax Amount</th>
+                                        <th class="border px-3 py-2">Vat</th>
+                                        <th class="border px-3 py-2">Vat Value</th>
                                         <th class="border px-3 py-2">Amount</th>
                                         <th class="border px-3 py-2">Account</th>
                                         <th class="border px-3 py-2">Project</th>
@@ -97,8 +97,11 @@
                                         @php
                                             $amount = ($item->price - $item->discount) * $item->quantity;
                                             $total_tax += $item->tax_amount;
-                                            $subtotal += $amount;
-                                            $total = $subtotal + $total_tax + $purchaseInvoice->freight;
+                                            $final = $amount + $total_tax;
+                                            $subtotal += $final;
+                                            $withholding_tax = optional($purchaseInvoice->withholding)->rate ?? 0;
+                                            $withholding_value = $subtotal * ($withholding_tax / 100);
+                                            $total = $subtotal - $withholding_value + $purchaseInvoice->freight;
                                         @endphp
                                         <tr>
                                             <td class="border px-3 py-2">{{ $item->item->item_description ?? '-' }}</td>
@@ -132,9 +135,16 @@
                                     </tr>
                                     <tr>
                                         <td colspan="9"></td>
-                                        <td class="pr-3 text-right font-semibold">Total Tax :</td>
+                                        <td class="pr-3 text-right font-semibold">Tax :</td>
                                         <td class="w-32 border rounded text-right px-2 py-1">
-                                            {{ number_format($total_tax, 2) }}
+                                            {{ $withholding_tax }}%
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9"></td>
+                                        <td class="pr-3 text-right font-semibold">Tax Value :</td>
+                                        <td class="w-32 border rounded text-right px-2 py-1">
+                                            {{ number_format($withholding_value, 2) }}
                                         </td>
                                     </tr>
                                     <tr>

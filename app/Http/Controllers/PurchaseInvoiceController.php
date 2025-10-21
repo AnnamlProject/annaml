@@ -37,12 +37,13 @@ class PurchaseInvoiceController extends Controller
         $purchase_order = PurchaseOrder::where('status_purchase', 0)->get();
         $project = Project::all();
         $vendor = Vendors::all();
-        $sales_taxes = SalesTaxes::all();
+        $sales_taxes = SalesTaxes::where('type', 'input_tax')->get();
         $freightAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Freight Expense')
             ->first();
         $lokasi_inventory = LocationInventory::all();
-        return view('purchase_invoice.create', compact('jenis_pembayaran',  'items', 'accounts', 'purchase_order', 'project', 'vendor', 'sales_taxes', 'freightAccount', 'lokasi_inventory'));
+        $withholding = SalesTaxes::where('type', 'withholding_tax')->get();
+        return view('purchase_invoice.create', compact('jenis_pembayaran',  'items', 'accounts', 'purchase_order', 'project', 'vendor', 'sales_taxes', 'freightAccount', 'lokasi_inventory', 'withholding'));
     }
 
     public function getItemsFromPurchaseOrder($purchaseOrderId)
@@ -115,6 +116,10 @@ class PurchaseInvoiceController extends Controller
             ? floatval(str_replace(',', '', $payload['freight']))
             : 0;
 
+        $payload['withholding_value'] = isset($payload['withholding_value'])
+            ? floatval(str_replace(',', '', $payload['withholding_value']))
+            : 0;
+
         $payload['items'] = collect($payload['items'] ?? [])->map(function ($row) {
             foreach (['price', 'tax', 'tax_amount', 'amount', 'quantity', 'order', 'back_order'] as $f) {
                 if (isset($row[$f])) {
@@ -145,8 +150,10 @@ class PurchaseInvoiceController extends Controller
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
             'location_id'         => 'nullable|exists:location_inventories,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
+            'withholding_tax' => 'nullable|exists:sales_taxes,id',
+            'withholding_value' => 'nullable|numeric|min:0',
             'shipping_address'    => 'required|string',
-            'freight'             => 'required|numeric|min:0',
+            'freight'             => 'nullable|numeric|min:0',
             'items'               => 'nullable|array|min:1',
             'items.*.item_id'     => 'nullable|exists:items,id',
             'items.*.account_id'  => 'nullable|integer|exists:chart_of_accounts,id',
@@ -164,6 +171,8 @@ class PurchaseInvoiceController extends Controller
                 'shipping_date'       => $request->shipping_date,
                 'vendor_id'           => $request->vendor_id,
                 'payment_method_account_id'          => $request->header_account_id,
+                'withholding_tax'          => $request->withholding_tax,
+                'withholding_value' => $request->withholding_value,
                 'purchase_order_id'   => $request->purchase_order_id,
                 'location_id'         => $request->location_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
@@ -272,6 +281,7 @@ class PurchaseInvoiceController extends Controller
                         'debits'           => $row['amount'],
                         'credits'          => 0,
                         'comment'          => $row['item_description'] ?? null,
+                        'status' => 2
                     ]);
                     // dump('💰 Journal Debit Item:', $jd->toArray());
                     $totalDebit += $row['amount'];
@@ -302,6 +312,8 @@ class PurchaseInvoiceController extends Controller
                                 'debits'           => $nilaiTax,
                                 'credits'          => 0,
                                 'comment'          => "PPN ({$tax->rate}%)",
+                                'status' => 2
+
                             ]);
                             // dump('🧾 Journal Debit Pajak Masukan (PPN):', $jp->toArray());
                             $totalDebit += $nilaiTax;
@@ -312,6 +324,8 @@ class PurchaseInvoiceController extends Controller
                                 'debits'           => 0,
                                 'credits'          => $nilaiTax,
                                 'comment'          => "PPh Potongan ({$tax->rate}%)",
+                                'status' => 2
+
                             ]);
                             // dump('💸 Journal Credit Pajak Potongan (PPh):', $jp->toArray());
                             $totalCredit += $nilaiTax;
@@ -333,6 +347,8 @@ class PurchaseInvoiceController extends Controller
                     'debits'           => $request->freight,
                     'credits'          => 0,
                     'comment'          => 'Freight Expense',
+                    'status' => 2
+
                 ]);
                 // dump('🚚 Journal Debit Freight Expense:', $jf->toArray());
                 $totalDebit += $request->freight;
@@ -342,6 +358,20 @@ class PurchaseInvoiceController extends Controller
             // 8️⃣ Kredit (Kas / Hutang)
             // ==============================================================
             $netPayable = $totalDebit - $totalCredit;
+
+            // Withholding (Debit)
+            if ($purchaseInvoice->withholding_value > 0) {
+                $withholdingLinked = \App\SalesTaxes::where('id', $request->withholding_tax)->first();
+                $withholding =  \App\JournalEntryDetail::create([
+                    'journal_entry_id' => $journal->id,
+                    'kode_akun'        => $coaCode(optional($withholdingLinked)->purchase_account_id),
+                    'debits'           => 0,
+                    'credits'          => $purchaseInvoice->withholding_value,
+                    'comment'          => 'PPh Dipotong pelanggan',
+                    'status' => 2
+                ]);
+                // dump('📘 Journal Withholding:', $withholding->toArray());
+            }
 
             if ($netPayable > 0) {
                 $pmDetail = \App\PaymentMethodDetail::where('payment_method_id', $request->jenis_pembayaran_id)
@@ -356,6 +386,7 @@ class PurchaseInvoiceController extends Controller
                     'debits'           => 0,
                     'credits'          => $netPayable,
                     'comment'          => 'Payment / Credit',
+                    'status' => 2
                 ]);
                 // dump('🏦 Journal Credit Payment:', $jc->toArray());
                 $totalCredit += $netPayable;
@@ -423,7 +454,8 @@ class PurchaseInvoiceController extends Controller
         $jenis_pembayaran = PaymentMethod::all();
         $vendor = Vendors::all();
         $items = Item::all(); // semua item yang bisa dipilih
-        $sales_taxes = SalesTaxes::all();
+        $sales_taxes = SalesTaxes::where('type', 'input_tax')->get();
+        $withholding = SalesTaxes::where('type', 'withholding_tax')->get();
         $project = Project::all();
         $freightAccount = \App\linkedAccounts::with('akun')
             ->where('kode', 'Freight Expense')
@@ -431,7 +463,7 @@ class PurchaseInvoiceController extends Controller
         $locationInventory = LocationInventory::all();
 
 
-        return view('purchase_invoice.edit', compact('purchaseInvoice', 'vendor', 'jenis_pembayaran', 'items', 'sales_taxes', 'project', 'freightAccount', 'locationInventory'));
+        return view('purchase_invoice.edit', compact('purchaseInvoice', 'vendor', 'jenis_pembayaran', 'items', 'sales_taxes', 'project', 'freightAccount', 'locationInventory', 'withholding'));
     }
     public function update(Request $request, $id)
     {
@@ -439,6 +471,9 @@ class PurchaseInvoiceController extends Controller
         $payload = $request->all();
         $payload['freight'] = isset($payload['freight'])
             ? floatval(str_replace(',', '', $payload['freight']))
+            : 0;
+        $payload['withholding_value'] = isset($payload['withholding_value'])
+            ? floatval(str_replace(',', '', $payload['withholding_value']))
             : 0;
 
         $payload['items'] = collect($payload['items'] ?? [])->map(function ($row) {
@@ -458,11 +493,13 @@ class PurchaseInvoiceController extends Controller
             'shipping_date'       => 'required|date',
             'vendor_id'           => 'required|exists:vendors,id',
             'payment_method_account_id'   => 'required|exists:payment_method_details,id',
+            'withholding_tax'   => 'required|exists:sales_taxes,id',
             'location_id'         => 'required|exists:location_inventories,id',
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'shipping_address'    => 'required|string',
             'freight'             => 'required|numeric|min:0',
+            'withholding_value'             => 'required|numeric|min:0',
             'discount'             => 'nullable|numeric|min:0',
 
             'items'                  => 'nullable|array|min:1',
@@ -489,13 +526,18 @@ class PurchaseInvoiceController extends Controller
                 'vendor_id'           => $request->vendor_id,
                 'location_id'         => $request->location_id,
                 'payment_method_account_id'          => $request->payment_method_account_id,
+                'withholding_tax'          => $request->withholding_tax,
                 'purchase_order_id'   => $request->purchase_order_id,
                 'jenis_pembayaran_id' => $request->jenis_pembayaran_id,
                 'shipping_address'    => $request->shipping_address,
                 'freight'             => $request->freight,
+                'withholding_value'             => $request->withholding_value,
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages'            => $request->messages,
             ]);
+
+            // dump("Header diupdate:", $purchaseInvoice->toArray());
+
 
             // 5) Update status PO
             if ($request->purchase_order_id) {
@@ -603,6 +645,8 @@ class PurchaseInvoiceController extends Controller
                     'comment' => "Purchase Invoice #{$purchaseInvoice->invoice_number}",
                 ]);
             }
+            // dump('🪵 Journal Entry header dibuat:', $journal->toArray());
+
 
             // Helper ambil kode akun
             $coaCode = fn($id) => $id ? \App\ChartOfAccount::whereKey($id)->value('kode_akun') : null;
@@ -621,6 +665,7 @@ class PurchaseInvoiceController extends Controller
                         'debits'           => $row['amount'],
                         'credits'          => 0,
                         'comment'          => $row['item_description'] ?? null,
+                        'status' => 2
                     ]);
                 }
 
@@ -640,6 +685,7 @@ class PurchaseInvoiceController extends Controller
                                 'debits'           => $nilaiTax,
                                 'credits'          => 0,
                                 'comment'          => "PPN ({$salesTax->rate}%)",
+                                'status' => 2
                             ]);
                             $taxTotal += $nilaiTax;
                         } elseif ($taxType === 'withholding_tax') {
@@ -649,6 +695,7 @@ class PurchaseInvoiceController extends Controller
                                 'debits'           => 0,
                                 'credits'          => $nilaiTax,
                                 'comment'          => "PPh Potongan ({$salesTax->rate}%)",
+                                'status' => 2
                             ]);
                             $taxTotal -= $nilaiTax; // potongan
                         }
@@ -666,11 +713,26 @@ class PurchaseInvoiceController extends Controller
                     'debits'           => $freight,
                     'credits'          => 0,
                     'comment'          => 'Freight Expense',
+                    'status' => 2
                 ]);
             }
 
+
+            // Withholding (Debit)
+            if ($purchaseInvoice->withholding_value > 0) {
+                $withholdingLinked = \App\SalesTaxes::where('id', $request->withholding_tax)->first();
+                $withholding =  \App\JournalEntryDetail::create([
+                    'journal_entry_id' => $journal->id,
+                    'kode_akun'        => $coaCode(optional($withholdingLinked)->purchase_account_id),
+                    'debits'           => 0,
+                    'credits'          => $purchaseInvoice->withholding_value,
+                    'comment'          => 'PPh Dipotong pelanggan',
+                    'status'           => 2
+                ]);
+                // dump('📘 Journal Withholding:', $withholding->toArray());
+            }
             // 11) Credit lawan (kas / hutang usaha)
-            $grandTotal = $subtotal + $taxTotal + $freight;
+            $grandTotal = $subtotal + $taxTotal - $purchaseInvoice->withholding_value + $freight;
 
             if ($grandTotal > 0) {
                 // 🔹 Gunakan payment_method_detail_id dari request
@@ -698,6 +760,7 @@ class PurchaseInvoiceController extends Controller
                     'debits'           => 0,
                     'credits'          => $grandTotal,
                     'comment'          => 'Payment / Credit',
+                    'status' => 2
                 ]);
 
                 // (Opsional) Jika Anda ingin menyimpan untuk tracking:
@@ -706,6 +769,33 @@ class PurchaseInvoiceController extends Controller
                 ]);
             }
 
+            $totalDebit = \App\JournalEntryDetail::where('journal_entry_id', $journal->id)->sum('debits');
+            $totalCredit = \App\JournalEntryDetail::where('journal_entry_id', $journal->id)->sum('credits');
+
+            $selisih = round($totalDebit - $totalCredit, 2);
+
+            // dump('📘 JOURNAL SUMMARY', [
+            //     'journal_id' => $journal->id,
+            //     'invoice_number' => $purchaseInvoice->invoice_number,
+            //     'total_debit' => number_format($totalDebit, 2),
+            //     'total_credit' => number_format($totalCredit, 2),
+            //     'selisih' => number_format($selisih, 2),
+            // ]);
+
+            // // 🔍 Tampilkan semua detail jurnal untuk analisis
+            // $details = \App\JournalEntryDetail::where('journal_entry_id', $journal->id)
+            //     ->select('kode_akun', 'debits', 'credits', 'comment')
+            //     ->get()
+            //     ->toArray();
+
+            // dump('📑 DETAIL JURNAL:', $details);
+
+            // // ✅ Jika selisih ≠ 0, beri tanda warning
+            // if ($selisih !== 0) {
+            //     dump("⚠️ WARNING: Journal tidak seimbang! Selisih = {$selisih}");
+            // } else {
+            //     dump("✅ Journal seimbang (Debit = Credit).");
+            // }
             DB::commit();
             return redirect()->route('purchase_invoice.index')
                 ->with('success', 'Purchase Invoice berhasil diupdate beserta Journal (pajak diperhitungkan).');
@@ -723,12 +813,44 @@ class PurchaseInvoiceController extends Controller
 
             // 1) Rollback stok dari semua detail SEBELUM dihapus
             foreach ($invoice->details as $detail) {
-                $qty   = $detail->quantity ?? 0;
-                $value = ($detail->quantity ?? 0) * ($detail->price ?? 0);
+                $qty   = (float) str_replace(',', '', $detail->quantity);
+                $unit  = $detail->unit ?? null;
+                $price = (float) str_replace(',', '', $detail->price);
 
-                $this->adjustItemQuantity($detail->item_id, $invoice->location_id, -$qty, -$value);
+                // Ambil relasi konversi satuan
+                $itemUnit = \App\ItemUnit::where('item_id', $detail->item_id)->first();
+
+                if ($itemUnit) {
+                    if ($unit === $itemUnit->unit_of_measure) {
+                        $qtyChange = $qty;
+                    } elseif ($unit === $itemUnit->selling_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->selling_relationship);
+                    } elseif ($unit === $itemUnit->buying_unit) {
+                        $qtyChange = $qty * max(1, (float)$itemUnit->buying_relationship);
+                    } else {
+                        $qtyChange = $qty;
+                    }
+                } else {
+                    $qtyChange = $qty;
+                }
+
+                // Value berdasarkan cost bukan price (price bisa inflated)
+                $unitCost = $this->getUnitCost($detail->item_id, $invoice->location_id);
+                $valueChange = $unitCost * $qtyChange;
+
+                // dump("🔁 Rollback stok item_id={$detail->item_id}", [
+                //     'qty_jual'        => $qty,
+                //     'unit'            => $unit,
+                //     'buying_unit'    => optional($itemUnit)->buying_unit,
+                //     'relationship'    => optional($itemUnit)->buying_relationship,
+                //     'qty_dikembalikan' => $qtyChange,
+                //     'unitCost'        => $unitCost,
+                //     'value_dikembalikan' => $valueChange,
+                // ]);
+
+                // Tambahkan kembali stok
+                $this->adjustItemQuantity($detail->item_id, $invoice->location_id, $qtyChange, $valueChange, true);
             }
-
             // 5) Update status PO
             if (!empty($invoice->purchase_order_id)) {
                 \App\PurchaseOrder::whereKey($invoice->purchase_order_id)
@@ -756,8 +878,21 @@ class PurchaseInvoiceController extends Controller
                 ->with('success', 'Purchase Invoice beserta jurnal & stok berhasil dihapus.');
         } catch (\Throwable $e) {
             DB::rollBack();
+            // dd("❌ ERROR DELETE INVOICE:", $e->getMessage(), $e->getTraceAsString());
             return back()->withErrors('Gagal menghapus invoice: ' . $e->getMessage());
         }
+    }
+    protected function getUnitCost($itemId, $locationId)
+    {
+        $iq = \App\ItemQuantities::where('item_id', $itemId)
+            ->where('location_id', $locationId)
+            ->first();
+
+        if ($iq && $iq->on_hand_qty > 0) {
+            return $iq->on_hand_value / $iq->on_hand_qty;
+        }
+
+        return 0;
     }
     public function print($id)
     {

@@ -30,9 +30,8 @@ class AddDepositAccountDiSalesDeposits extends Migration
     {
         //
         Schema::table('sales_deposits', function (Blueprint $table) {
-            $table->foreignId('account_deposit')
-                ->nullable()->after('account_id')
-                ->constrained('chart_of_accounts');
+            $table->dropForeign('account_deposit');
+            $table->dropColumn('account_deposit');
         });
     }
 }

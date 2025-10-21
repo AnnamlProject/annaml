@@ -216,6 +216,7 @@ class SalesDepositController extends Controller
                 'debits'    => $deposit->deposit_amount,
                 'credits'   => 0,
                 'comment'   => "Deposit {$deposit->id}",
+                'status' => 2
             ]);
 
             // Journal Credit Kas/Bank
@@ -226,6 +227,7 @@ class SalesDepositController extends Controller
                 'debits'    => 0,
                 'credits'   => $deposit->deposit_amount,
                 'comment'   => "Pembayaran Deposit {$deposit->id}",
+                'status' => 2
             ]);
 
             DB::commit();

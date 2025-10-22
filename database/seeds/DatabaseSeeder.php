@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionFiscal::class);
         $this->call(PermissionBudgeting::class);
         $this->call(PermissionMaintenance::class);
+        $this->call(PermissionPayroll::class);
+        $this->call(PermissionPayrollRca::class);
         // cekcek
     }
 }

@@ -26,7 +26,7 @@ class Payment extends Model
     }
     public function details()
     {
-        return $this->hasMany(PaymentDetail::class);
+        return $this->hasMany(PaymentDetail::class, 'payment_id');
     }
     public function PaymentMethodAccount()
     {

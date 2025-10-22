@@ -41,6 +41,9 @@
                                         #</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Payment Date</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Payment Method</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -51,15 +54,11 @@
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Vendor</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Payment Date</th>
+
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Comment</th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type</th>
+
                                     <th
                                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Aksi</th>
@@ -69,13 +68,15 @@
                                 @forelse ($data as $item)
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                        <td class="px-6 py-4">{{ $item->jenis_pembayaran_id }}</td>
-                                        <td class="px-6 py-4">{{ $item->from_account }}</td>
-                                        <td class="px-6 py-4">{{ $item->source }}</td>
-                                        <td class="px-6 py-4">{{ $item->vendor_id }}</td>
                                         <td class="px-6 py-4">{{ $item->payment_date }}</td>
+                                        <td class="px-6 py-4">{{ $item->jenis_pembayaran->nama_jenis }}</td>
+                                        <td class="px-6 py-4">{{ $item->PaymentMethodAccount->chartOfAccount->kode_akun }} -
+                                            {{ $item->PaymentMethodAccount->chartOfAccount->nama_akun }}
+                                        </td>
+                                        <td class="px-6 py-4">{{ $item->source }}</td>
+                                        <td class="px-6 py-4">{{ $item->vendor->nama_vendors }}</td>
+
                                         <td class="px-6 py-4">{{ $item->comment }}</td>
-                                        <td class="px-6 py-4">{{ $item->type }}</td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex justify-end space-x-3">
                                                 @can('payment_purchase.view')

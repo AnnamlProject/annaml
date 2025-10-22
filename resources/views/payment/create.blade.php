@@ -299,18 +299,22 @@
                     // PREPAYMENTS
                     response.prepayments.forEach(p => {
                         rows += `
-                <tr class="text-right bg-yellow-50">
-                    <td class="border px-2 py-1 text-center">${p.tanggal_prepayment ?? ''}</td>
-                    <td class="border px-2 py-1 text-center">Prepayment</td>
-                    <td class="border px-2 py-1 text-left">${p.reference ?? ''}</td>
-                    <td class="border px-2 py-1">${Number(p.amount ?? 0).toLocaleString()}</td>
-                    <td class="border px-2 py-1">0.00</td>
-                    <td class="border px-2 py-1">
-                        <input type="number" step="0.01" name="prepayment_allocations[${p.id}]"
-                            class="w-full border text-right px-2 py-1">
-                    </td>
-                </tr>`;
+                        <tr class="text-right bg-yellow-50 prepayment-row"
+                            data-prepayment-account-id="${p.account_prepayment_id}"
+                            data-prepayment-account-code="${p.account_prepayment_code}"
+                            data-prepayment-account-name="${p.account_prepayment_name}">
+                            <td class="border px-2 py-1 text-center">${p.tanggal_prepayment ?? ''}</td>
+                            <td class="border px-2 py-1 text-center">Prepayment</td>
+                            <td class="border px-2 py-1 text-left">${p.reference ?? ''}</td>
+                            <td class="border px-2 py-1">${Number(p.amount ?? 0).toLocaleString()}</td>
+                            <td class="border px-2 py-1">0.00</td>
+                            <td class="border px-2 py-1">
+                                <input type="number" step="0.01" name="prepayment_allocations[${p.id}]"
+                                    class="w-full border text-right px-2 py-1">
+                            </td>
+                        </tr>`;
                     });
+
 
                     $('#invoice-body').html(rows ||
                         '<tr><td colspan="6" class="text-center py-2 text-gray-500">Tidak ada invoice atau prepayment untuk vendor ini</td></tr>'
@@ -385,11 +389,6 @@
             }).format(num);
         }
 
-        // function logDebug(label, value) {
-        //     console.log(`%c[DEBUG] ${label}:`, 'color: #16a34a; font-weight: bold;', value);
-        // }
-
-        // Tampilkan pesan debugging di halaman
         function displayDebugMessage(msg) {
             let debugBox = document.getElementById('debug-box');
             if (!debugBox) {
@@ -399,11 +398,10 @@
                 document.querySelector('#journal_report').appendChild(container);
                 debugBox = container;
             }
-            // debugBox.innerHTML = `<strong>🧩 Debug Info:</strong><br>${msg}`;
+            debugBox.innerHTML = `<strong>🧩 Debug Info:</strong><br>${msg}`;
         }
 
         function generateJournalPreview() {
-            // logDebug('generateJournalPreview', 'Dipanggil!');
             const journalBody = document.querySelector('.journal-body');
             journalBody.innerHTML = '';
 
@@ -411,103 +409,91 @@
             let totalDebit = 0,
                 totalCredit = 0;
 
-            // 1️⃣ Ambil akun payment (Credit)
+            // Akun Credit: Payment Method Account
             const pmAccountName = $('#pm-account-id option:selected').text();
             const pmAccountCode = $('#pm-account-id option:selected').data('kode') || '';
-            // logDebug('pmAccountName', pmAccountName);
-            // logDebug('pmAccountCode', pmAccountCode);
 
-            // 2️⃣ Cari invoice yang diisi jumlah pembayaran
-            let selectedInvoice = null;
-            let amount = 0;
+            let debugMessages = [];
 
-            $('.payment-input').each(function() {
+            // Ambil semua baris invoice & prepayment yang punya nilai > 0
+            $('.payment-input, input[name^="prepayment_allocations"]').each(function() {
                 const val = parseFloat($(this).val()) || 0;
-                if (val > 0) {
-                    selectedInvoice = $(this).closest('.invoice-row');
-                    amount = val;
+                if (val <= 0) return;
+
+                const row = $(this).closest('tr');
+                const isPrepayment = row.hasClass('prepayment-row') || row.hasClass('bg-yellow-50');
+                let debitAccountCode = '',
+                    debitAccountName = '';
+
+                if (isPrepayment) {
+                    // Prepayment row
+                    debitAccountCode = row.data('prepayment-account-code');
+                    debitAccountName = row.data('prepayment-account-name');
+                    debugMessages.push(`Prepayment → ${debitAccountCode} - ${debitAccountName}, Amount: ${val}`);
+                } else {
+                    // Invoice row
+                    debitAccountCode = row.data('header-account-code');
+                    debitAccountName = row.data('header-account-name');
+                    debugMessages.push(`Invoice → ${debitAccountCode} - ${debitAccountName}, Amount: ${val}`);
                 }
+
+                // Baris debit
+                rows.push({
+                    accountCode: debitAccountCode,
+                    account: debitAccountName,
+                    debit: val,
+                    credit: 0
+                });
+                totalDebit += val;
+
+                // Baris kredit
+                rows.push({
+                    accountCode: pmAccountCode,
+                    account: pmAccountName,
+                    debit: 0,
+                    credit: val
+                });
+                totalCredit += val;
             });
 
-            // logDebug('selectedInvoice', selectedInvoice ? selectedInvoice.data() : null);
-            // logDebug('amount', amount);
-
-            // 3️⃣ Jika belum ada invoice / amount, tampilkan pesan
-            if (!selectedInvoice || amount <= 0) {
+            // Render hasil
+            if (rows.length === 0) {
                 journalBody.innerHTML =
-                    `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal (belum isi payment amount)</td></tr>`;
-                displayDebugMessage('Belum ada invoice dengan payment amount > 0.');
+                    `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal (belum isi payment/prepayment)</td></tr>`;
+                displayDebugMessage('⚠️ Tidak ada data invoice/prepayment dengan nilai > 0.');
                 return;
             }
 
-            // 4️⃣ Ambil akun header dari data atribut invoice
-            const headerAccountName = selectedInvoice.data('header-account-name');
-            const headerAccountCode = selectedInvoice.data('header-account-code');
-
-            // logDebug('headerAccountName', headerAccountName);
-            // logDebug('headerAccountCode', headerAccountCode);
-
-            // if (!headerAccountCode || !headerAccountName) {
-            //     displayDebugMessage(
-            //         '⚠️ Data header_account belum tersedia dari invoice (pastikan API vendor mengembalikannya).');
-            //     return;
-            // }
-
-            // 5️⃣ Buat baris journal
-            rows.push({
-                accountCode: headerAccountCode,
-                account: headerAccountName,
-                debit: amount,
-                credit: 0
+            rows.forEach(r => {
+                journalBody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="border px-2 py-1">${r.accountCode || ''} - ${r.account || ''}</td>
+                <td class="border px-2 py-1 text-right">${formatNumber(r.debit)}</td>
+                <td class="border px-2 py-1 text-right">${formatNumber(r.credit)}</td>
+            </tr>
+        `);
             });
-            totalDebit += amount;
 
-            rows.push({
-                account: pmAccountName,
-                debit: 0,
-                credit: amount
-            });
-            totalCredit += amount;
-
-            // logDebug('rows', rows);
-
-            // 6️⃣ Render ke tabel
-            if (rows.length === 0) {
-                journalBody.innerHTML =
-                    `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal</td></tr>`;
-            } else {
-                rows.forEach(r => {
-                    journalBody.insertAdjacentHTML('beforeend', `
-                <tr>
-                    <td class="border px-2 py-1">${r.accountCode || ''} - ${r.account || ''}</td>
-                    <td class="border px-2 py-1 text-right">${formatNumber(r.debit)}</td>
-                    <td class="border px-2 py-1 text-right">${formatNumber(r.credit)}</td>
-                </tr>
-            `);
-                });
-            }
-
-            // 7️⃣ Total
             document.querySelector('.total-debit').textContent = formatNumber(totalDebit);
             document.querySelector('.total-credit').textContent = formatNumber(totalCredit);
 
-            //         displayDebugMessage(`
-        //     ✅ generateJournalPreview() berhasil dijalankan.<br>
-        //     <b>PM Account:</b> ${pmAccountCode || '-'} - ${pmAccountName || '-'}<br>
-        //     <b>Header Account:</b> ${headerAccountCode || '-'} - ${headerAccountName || '-'}<br>
-        //     <b>Amount:</b> ${amount.toLocaleString('id-ID')}
-        // `);
+            displayDebugMessage(`
+        ✅ Journal berhasil dibuat.<br>
+        <b>Payment Account:</b> ${pmAccountCode || '-'} - ${pmAccountName || '-'}<br>
+        <b>Total Debit:</b> ${formatNumber(totalDebit)}<br>
+        <b>Total Credit:</b> ${formatNumber(totalCredit)}<br>
+        <hr><b>Detail:</b><br>${debugMessages.join('<br>')}
+    `);
         }
 
-        // 🔁 Trigger otomatis
+        // Jalankan otomatis saat ada perubahan input
         document.addEventListener('DOMContentLoaded', function() {
-            // Pakai event delegation biar tetap nyala walau invoice-body di-refresh
-            $(document).on('input change', '#pm-account-id, .payment-input', generateJournalPreview);
-
-            // Jalankan awal
+            $(document).on('input change', '#pm-account-id, .payment-input, input[name^="prepayment_allocations"]',
+                generateJournalPreview);
             generateJournalPreview();
         });
     </script>
+
 
 
     <!-- SELECT2 VENDOR -->

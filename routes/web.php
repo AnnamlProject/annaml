@@ -415,6 +415,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/wahana-by-unit/{id}', [TargetWahanaController::class, 'getWahanaByUnit']);
     Route::post('/import/TargetWahana', [ImportController::class, 'importTargetWahana'])->name('import.TargetWahana');
 
+    // closing harian 
+    Route::resource('closing_harian', 'ClosingHarianController')->middleware('permission:closing_harian.access');
+
+
     // target unit
     Route::resource('target_unit', 'TargetUnitController')->middleware('permission:target_unit.access');
     Route::get('/komponen-by-level/{id}', [TargetUnitController::class, 'getKomponenByLevel']);

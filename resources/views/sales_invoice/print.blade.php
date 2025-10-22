@@ -215,8 +215,8 @@
 
             <div>
                 <h1>{{ $title }}</h1>
-                <p>{{ $companyProfile->jalan }}</p>
-                <p>Telp: {{ $companyProfile->phone_number }} | Email: {{ $companyProfile->email }}</p>
+                <p>{{ $companyProfile->jalan ?? '-' }}</p>
+                <p>Telp: {{ $companyProfile->phone_number ?? '-' }} | Email: {{ $companyProfile->email ?? '-' }}</p>
             </div>
         </div>
         <div class="doc-info">

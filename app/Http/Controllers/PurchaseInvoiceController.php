@@ -26,7 +26,7 @@ class PurchaseInvoiceController extends Controller
     //
     public function index()
     {
-        $data = PurchaseInvoice::with(['jenisPembayaran', 'vendor'])->paginate(10);
+        $data = PurchaseInvoice::with(['jenisPembayaran', 'vendor'])->orderBy('date_invoice', 'asc')->orderBy('status_purchase', 'asc')->paginate(10);
         return view('purchase_invoice.index', compact('data'));
     }
     public function create()
@@ -141,10 +141,11 @@ class PurchaseInvoiceController extends Controller
 
         $request->replace($payload);
 
+
         // 2️⃣ Validasi
         $request->validate([
             'date_invoice'        => 'required|date',
-            'shipping_date'       => 'required|date',
+            'shipping_date'       => 'nullable|date',
             'vendor_id'           => 'required|exists:vendors,id',
             'header_account_id'   => 'required|exists:payment_method_details,id',
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
@@ -152,7 +153,7 @@ class PurchaseInvoiceController extends Controller
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'withholding_tax' => 'nullable|exists:sales_taxes,id',
             'withholding_value' => 'nullable|numeric|min:0',
-            'shipping_address'    => 'required|string',
+            'shipping_address'    => 'nullable|string',
             'freight'             => 'nullable|numeric|min:0',
             'items'               => 'nullable|array|min:1',
             'items.*.item_id'     => 'nullable|exists:items,id',
@@ -162,6 +163,18 @@ class PurchaseInvoiceController extends Controller
 
         DB::beginTransaction();
         try {
+
+            $paymentStatus = \App\PaymentMethod::where('id', $request->jenis_pembayaran_id)
+                ->value('status_payment');
+
+            if ($paymentStatus != 1) {
+                $statusPurchase = 3;
+            } elseif ($request->purchase_order_id) {
+                $statusPurchase = 1;
+            } else {
+                $statusPurchase = 0;
+            }
+
             // ==============================================================
             // 3️⃣ Simpan Header Purchase Invoice
             // ==============================================================
@@ -180,14 +193,14 @@ class PurchaseInvoiceController extends Controller
                 'freight'             => $request->freight,
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages'            => $request->messages,
-                'status_purchase' => 0
+                'status_purchase' => $statusPurchase
             ]);
             // dump('📘 Purchase Invoice tersimpan:', $purchaseInvoice->toArray());
 
             // 3b️⃣ Update status PO
             if ($request->purchase_order_id) {
                 \App\PurchaseOrder::whereKey($request->purchase_order_id)
-                    ->update(['status_purchase' => 1]);
+                    ->update(['status_purchase' => $statusPurchase]);
                 // dump('📦 Purchase Order diupdate:', $request->purchase_order_id);
             }
 
@@ -490,16 +503,16 @@ class PurchaseInvoiceController extends Controller
         // 2) Validasi
         $request->validate([
             'date_invoice'        => 'required|date',
-            'shipping_date'       => 'required|date',
+            'shipping_date'       => 'nullable|date',
             'vendor_id'           => 'required|exists:vendors,id',
             'payment_method_account_id'   => 'required|exists:payment_method_details,id',
-            'withholding_tax'   => 'required|exists:sales_taxes,id',
+            'withholding_tax'   => 'nullable|exists:sales_taxes,id',
             'location_id'         => 'required|exists:location_inventories,id',
             'purchase_order_id'   => 'nullable|exists:purchase_orders,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
-            'shipping_address'    => 'required|string',
-            'freight'             => 'required|numeric|min:0',
-            'withholding_value'             => 'required|numeric|min:0',
+            'shipping_address'    => 'nullable|string',
+            'freight'             => 'nullable|numeric|min:0',
+            'withholding_value'             => 'nullable|numeric|min:0',
             'discount'             => 'nullable|numeric|min:0',
 
             'items'                  => 'nullable|array|min:1',
@@ -519,6 +532,17 @@ class PurchaseInvoiceController extends Controller
             // 3) Ambil invoice lama
             $purchaseInvoice = \App\PurchaseInvoice::findOrFail($id);
 
+            $paymentStatus = \App\PaymentMethod::where('id', $request->jenis_pembayaran_id)
+                ->value('status_payment');
+
+            if ($paymentStatus != 1) {
+                $statusPurchase = 3;
+            } elseif ($request->purchase_order_id) {
+                $statusPurchase = 1;
+            } else {
+                $statusPurchase = 0;
+            }
+
             // 4) Update header
             $purchaseInvoice->update([
                 'date_invoice'        => $request->date_invoice,
@@ -534,6 +558,7 @@ class PurchaseInvoiceController extends Controller
                 'withholding_value'             => $request->withholding_value,
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages'            => $request->messages,
+                'status_purchase' => $statusPurchase
             ]);
 
             // dump("Header diupdate:", $purchaseInvoice->toArray());
@@ -542,7 +567,7 @@ class PurchaseInvoiceController extends Controller
             // 5) Update status PO
             if ($request->purchase_order_id) {
                 \App\PurchaseOrder::whereKey($request->purchase_order_id)
-                    ->update(['status_purchase' => 1]);
+                    ->update(['status_purchase' => $statusPurchase]);
             }
 
             // 6) Rollback detail lama dari stok

@@ -63,7 +63,8 @@
                         <div id="pm-account-panel"
                             class="{{ old('jenis_pembayaran_id', $purchase_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
                             <label class="block font-medium mb-1">Account<span class="text-red-500">*</span></label>
-                            <select id="pm-account-id" name="account_id" class="w-full border rounded px-2 py-1 text-sm">
+                            <select id="pm-account-id" name="account_id" class="w-full border rounded px-2 py-1 text-sm"
+                                required>
                                 <option value="">-- Pilih Account --</option>
                             </select>
                         </div>
@@ -117,8 +118,8 @@
                         <!-- Shipping Date -->
                         <div>
                             <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping
-                                Date<span class="text-red-500">*</span></label>
-                            <input type="date" name="shipping_date" required
+                                Date<span class="text-red-500"></span></label>
+                            <input type="date" name="shipping_date"
                                 value="{{ old('shipping_date', $purchase_order->shipping_date ?? now()->toDateString()) }}"
                                 class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">
 
@@ -126,8 +127,8 @@
                         <!-- Shipping Address -->
                         <div class="col-span-2">
                             <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                Address <span class="text-red-500">*</span></label>
-                            <textarea id="shipping_address" name="shipping_address" rows="2" placeholder="Masukkan shipping date" required
+                                Address <span class="text-red-500"></span></label>
+                            <textarea id="shipping_address" name="shipping_address" rows="2" placeholder="Masukkan shipping date"
                                 class="w-full border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500">{{ old('shipping_address', $purchase_order->shipping_address ?? '') }}</textarea>
                             @error('shipping_address')
                                 <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

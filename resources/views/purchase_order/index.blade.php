@@ -41,10 +41,10 @@
                                         #</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Order Number</th>
+                                        Date Order</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date Order</th>
+                                        Order Number</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Shipping Date</th>
@@ -78,8 +78,8 @@
                                 @forelse ($data as $item)
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                        <td class="px-6 py-4">{{ $item->order_number }}</td>
                                         <td class="px-6 py-4">{{ $item->date_order }}</td>
+                                        <td class="px-6 py-4">{{ $item->order_number }}</td>
                                         <td class="px-6 py-4">{{ $item->shipping_date }}</td>
                                         <td class="px-6 py-4">{{ $item->locationInventory->kode_lokasi ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ $item->vendor->nama_vendors ?? '-' }}</td>
@@ -89,14 +89,17 @@
                                         <td class="px-6 py-4">
                                             @if ($item->status_purchase == 0)
                                                 <span
-                                                    class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
+                                                    class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
                                             @elseif ($item->status_purchase == 1)
-                                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">Tahap
+                                                <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm">
                                                     Invoice</span>
                                             @elseif ($item->status_purchase == 2)
                                                 <span
-                                                    class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">Sudah
+                                                    class="px-4 py-2 bg-orange-100 text-green-700 rounded-full text-sm">Sudah
                                                     Pembayaran</span>
+                                            @elseif ($item->status_purchase == 3)
+                                                <span
+                                                    class="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm">Selesai</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4">{{ $item->messages }}</td>
@@ -137,7 +140,7 @@
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     @endcan
-                                                @elseif ($item->status_purchase == 1 || $item->status_purchase == 2)
+                                                @elseif ($item->status_purchase == 1 || $item->status_purchase == 2 || $item->status_purchase == 3)
                                                     {{-- tombol edit dan hapus dinonaktifkan --}}
                                                     <button
                                                         class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"

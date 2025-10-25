@@ -91,7 +91,7 @@
                             <div id="pm-account-panel"
                                 class="{{ old('jenis_pembayaran_id', $purchase_invoice->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
                                 <label class="block font-medium mb-1">Account</label>
-                                <select id="pm-account-id" name="header_account_id"
+                                <select id="pm-account-id" name="header_account_id" required
                                     class="w-full border rounded px-2 py-1 text-sm">
                                     <option value="">-- Pilih Account --</option>
                                 </select>
@@ -101,8 +101,7 @@
                                     <span class="text-red-600">*</span>
                                 </label>
                                 <select name="location_id" id="location_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required>
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Location Inventory--</option>
                                     @foreach ($lokasi_inventory as $level)
                                         <option value="{{ $level->id }}"
@@ -147,9 +146,9 @@
                             </div>
                             <div>
                                 <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date <span
-                                        class="text-red-600">*</span>
+                                        class="text-red-600"></span>
                                 </label>
-                                <input type="date" id="name" name="shipping_date" required
+                                <input type="date" id="name" name="shipping_date"
                                     value="{{ old('shipping_date', $purchase_invoice->shipping_date ?? now()->toDateString()) }}"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @error('shipping_date')
@@ -159,8 +158,9 @@
                             <!-- deskripsi purchase_invoice_asset -->
                             <div class="mb-4 md:col-span-2">
                                 <label for="shipping_address" class="block text-gray-700 font-medium mb-1">Shipping
-                                    Address <span class="text-red-600">*</span></label>
+                                    Address <span class="text-red-600"></span></label>
                                 <textarea id="shipping_address" name="shipping_address" rows="3"
+                                    placeholder="Masukkan Shipping Address(Opsional)"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ old('shipping_address', $purchase_invoice->shipping_address ?? '') }}</textarea>
                                 @error('shipping_address')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>

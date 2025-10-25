@@ -42,10 +42,10 @@
                                         #</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Invoice Number</th>
+                                        Invoice Order</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Invoice Order</th>
+                                        Invoice Number</th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Shipping Date</th>
@@ -76,8 +76,8 @@
                                 @forelse ($data as $item)
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                        <td class="px-6 py-4">{{ $item->invoice_number }}</td>
                                         <td class="px-6 py-4">{{ $item->date_invoice }}</td>
+                                        <td class="px-6 py-4">{{ $item->invoice_number }}</td>
                                         <td class="px-6 py-4">{{ $item->shipping_date }}</td>
                                         <td class="px-6 py-4">{{ $item->vendor->nama_vendors ?? '-' }}</td>
                                         <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
@@ -89,7 +89,11 @@
                                                     class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
                                             @elseif ($item->status_purchase == 1)
                                                 <span
-                                                    class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">Pembayaran
+                                                    class="px-2 py-1 bg-orange-100 text-blue-700 rounded-full text-sm">Pembayaran
+                                                </span>
+                                            @elseif ($item->status_purchase == 3)
+                                                <span
+                                                    class="px-4 py-2 bg-green-100 text-blue-700 rounded-full text-sm">Selesai
                                                 </span>
                                             @endif
                                         </td>
@@ -131,7 +135,7 @@
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     @endcan
-                                                @elseif ($item->status_purchase == 1)
+                                                @elseif ($item->status_purchase == 1 || $item->status_purchase == 3)
                                                     {{-- tombol edit dan hapus dinonaktifkan --}}
                                                     <button
                                                         class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"

@@ -28,7 +28,7 @@
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Payment Method</label>
                             <select id="jenis_pembayaran_id" name="jenis_pembayaran_id" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2">
                                 <option value="">-- Pilih --</option>
                                 @foreach ($jenis_pembayaran as $jenis)
                                     <option value="{{ $jenis->id }}"
@@ -42,15 +42,14 @@
                         <div id="account-wrapper" class="hidden">
                             <label class="font-medium text-gray-700 block mb-1">Account</label>
                             <select id="account_id" name="account_id"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2">
                                 <option value="">-- Pilih Account --</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Location Inventory</label>
-                            <select name="location_id" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                            <select name="location_id" required class="w-full border border-gray-300 rounded-lg px-4 py-2">
                                 @foreach ($locationInventory as $loc)
                                     <option value="{{ $loc->id }}"
                                         {{ $purchaseOrder->location_id == $loc->id ? 'selected' : '' }}>
@@ -62,7 +61,7 @@
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Vendor</label>
                             <select name="vendor_id" id="vendor_id" required
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2">
                                 @foreach ($vendors as $vendor)
                                     <option value="{{ $vendor->id }}"
                                         {{ $purchaseOrder->vendor_id == $vendor->id ? 'selected' : '' }}>
@@ -84,19 +83,19 @@
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Date Order</label>
                             <input type="date" name="date_order"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-100" readonly
                                 value="{{ $purchaseOrder->date_order }}" required>
                         </div>
 
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Shipping Date</label>
                             <input type="date" name="shipping_date"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50"
-                                value="{{ $purchaseOrder->shipping_date }}" required>
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2"
+                                value="{{ $purchaseOrder->shipping_date }}">
                         </div>
                         <div class="md:col-span-2">
                             <label class="font-medium text-gray-700 block mb-1">Shipping Address</label>
-                            <textarea name="shipping_address" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">{{ $purchaseOrder->shipping_address }}</textarea>
+                            <textarea name="shipping_address" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2 ">{{ $purchaseOrder->shipping_address }}</textarea>
                         </div>
                     </div>
 
@@ -145,7 +144,8 @@
 
                                             <td>
                                                 <input type="text" name="items[{{ $i }}][unit]"
-                                                    class="w-full border rounded" value="{{ $detail->unit }}" readonly>
+                                                    class="w-full border rounded bg-gray-100" value="{{ $detail->unit }}"
+                                                    readonly>
                                             </td>
 
                                             <td>
@@ -234,7 +234,7 @@
                                             <input type="hidden" id="freight" name="freight"
                                                 value="{{ $purchaseOrder->freight ?? 0 }}">
                                             <input type="text" id="freight-display"
-                                                class="w-32 border rounded text-right px-2 py-1 bg-gray-100"
+                                                class="w-32 border rounded text-right px-2 py-1"
                                                 value="{{ number_format($purchaseOrder->freight ?? 0, 2, '.', ',') }}">
                                         </td>
                                     </tr>

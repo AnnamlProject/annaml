@@ -50,6 +50,7 @@ class PaymentMethodController extends Controller
             $pm = PaymentMethod::create([
                 'kode_jenis' => $request->kode_jenis,
                 'nama_jenis' => $request->nama_jenis,
+                'status_payment' => 0,
                 'status'     => (int) $request->status, // pastikan boolean/int
             ]);
 
@@ -128,6 +129,7 @@ class PaymentMethodController extends Controller
             $pm->update([
                 'kode_jenis' => $request->kode_jenis,
                 'nama_jenis' => $request->nama_jenis,
+                'status_payment' => 0,
                 'status'     => (int) $request->status,
             ]);
 

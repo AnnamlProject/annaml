@@ -236,10 +236,12 @@
 
                     <!-- Tombol Kembali -->
                     <div class="px-6 py-4 border-t bg-gray-50 flex justify-between">
-                        <a href="{{ route('purchase_invoice.edit', $purchaseInvoice->id) }}"
-                            class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
-                            <i class="fas fa-edit mr-2"></i>Edit
-                        </a>
+                        @if ($purchaseInvoice->status_purchase == 0)
+                            <a href="{{ route('purchase_invoice.edit', $purchaseInvoice->id) }}"
+                                class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                                <i class="fas fa-edit mr-2"></i>Edit
+                            </a>
+                        @endif
                         <a href="{{ route('purchase_invoice.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
                             <i class="fas fa-arrow-left mr-2"></i>Kembali

@@ -65,7 +65,7 @@ class AbsensiController extends Controller
         $jamSekarang = strtotime($jam);
         $jamMasuk    = strtotime($jamKerja->jam_masuk);
         $jamPulang   = strtotime($jamKerja->jam_keluar);
-        $toleransi   = 3600; // 1 jam
+        $toleransi   = 0; // 1 jam
 
         // Tentukan status absensi
         if (count($statuses) == 0) {

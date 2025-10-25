@@ -30,20 +30,22 @@
                         Scheduling Personnel Create
                     </h4>
                     <div class="grid grid-cols-4 gap-4 text-sm">
+
+                        <div class="mb-2">
+                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
+                            </label>
+                            <input type="date" name="tanggal" id="tanggal"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                        </div>
+
                         <div class="mb-2">
                             <label for="employee_id" class="block text-sm font-medium text-gray-700 mb-1">Employee</label>
                             <select name="employee_id" id="employee_id"
                                 class="select2 w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Employee --</option>
-                                @foreach ($karyawan as $g)
-                                    <option value="{{ $g->id }}"
-                                        {{ isset($shift_karyawan) && $shift_karyawan->employee_id == $g->id ? 'selected' : '' }}>
-                                        {{ $g->nama_panggilan }}
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
-
                         <div class="mb-2">
                             <label for="unit_kerja_id" class="block text-sm font-medium text-gray-700 mb-1">Unit
                                 Kerja</label>
@@ -64,14 +66,6 @@
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Wahana --</option>
                             </select>
-                        </div>
-
-                        <div class="mb-2">
-                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
-                            </label>
-                            <input type="date" name="tanggal"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required>
                         </div>
 
                         <div class="mb-2">
@@ -186,6 +180,75 @@
         });
     });
 </script>
+<script>
+    $(document).ready(function() {
+
+        // 🔒 Awal: disable dropdown sebelum tanggal dipilih
+        $('#employee_id').prop('disabled', true);
+
+        // 🧭 Inisialisasi Select2 dengan AJAX search
+        $('#employee_id').select2({
+            placeholder: '-- Pilih Employee --',
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: "{{ route('karyawan.available') }}", // route ke controller
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        tanggal: $('#tanggal').val(), // ambil tanggal yang dipilih
+                        search: params.term // keyword dari pencarian user
+                    };
+                },
+                processResults: function(data) {
+                    // ubah data JSON dari controller jadi format yang dipahami Select2
+                    return {
+                        results: data.map(function(item) {
+                            return {
+                                id: item.id,
+                                text: item.nama_panggilan
+                            };
+                        })
+                    };
+                },
+                cache: true
+            },
+            language: {
+                inputTooShort: function() {
+                    return 'Ketik minimal 1 huruf untuk mencari karyawan';
+                },
+                searching: function() {
+                    return 'Mencari...';
+                },
+                noResults: function() {
+                    return 'Tidak ada karyawan tersedia';
+                }
+            }
+        });
+
+        // 📅 Ketika tanggal berubah
+        $('#tanggal').on('change', function() {
+            const tanggal = $(this).val();
+
+            if (tanggal) {
+                // Aktifkan dropdown
+                $('#employee_id').prop('disabled', false);
+
+                // Reset isi dropdown tiap kali tanggal berubah
+                $('#employee_id').empty().append('<option value="">-- Pilih Employee --</option>');
+
+                // Reset tampilan Select2
+                $('#employee_id').val(null).trigger('change');
+            } else {
+                // Jika tanggal dikosongkan, disable lagi dropdown-nya
+                $('#employee_id').prop('disabled', true);
+                $('#employee_id').val(null).trigger('change');
+            }
+        });
+
+    });
+</script>
 
 <script>
     $(document).ready(function() {
@@ -227,17 +290,17 @@
         );
 
         // ✅ Employees
-        initSelect2(
-            '#employee_id',
-            '{{ route('employee.search') }}',
-            function(employee) {
-                return {
-                    id: employee.id,
-                    text: employee.nama_karyawan
-                };
-            },
-            "-- Employees --"
-        );
+        // initSelect2(
+        //     '#employee_id',
+        //     '{{ route('employee.search') }}',
+        //     function(employee) {
+        //         return {
+        //             id: employee.id,
+        //             text: employee.nama_karyawan
+        //         };
+        //     },
+        //     "-- Employees --"
+        // );
     });
 </script>
 <script>

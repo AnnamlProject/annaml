@@ -95,11 +95,32 @@ class ShiftKaryawanWahanaController extends Controller
     }
     public function create()
     {
-        $karyawan = Employee::select('nama_panggilan', 'id')->orderBy('nama_panggilan')->get();
+        $karyawan = collect(); // kosong dulu
         $unitKerja = UnitKerja::all();
         $crew = CrewShiftKaryawan::orderBy('nama')->get();
         return view('shift_karyawan.create', compact('karyawan', 'unitKerja', 'crew'));
     }
+    public function getKaryawanAvailable(Request $request)
+    {
+        $tanggal = $request->input('tanggal');
+        $search = $request->input('search');
+
+        $sudahShift = ShiftKaryawanWahana::whereDate('tanggal', $tanggal)
+            ->pluck('employee_id')
+            ->toArray();
+
+        $query = Employee::select('id', 'nama_panggilan')
+            ->whereNotIn('id', $sudahShift);
+
+        if ($search) {
+            $query->where('nama_panggilan', 'like', "%{$search}%");
+        }
+
+        $karyawan = $query->orderBy('nama_panggilan')->limit(20)->get();
+
+        return response()->json($karyawan);
+    }
+
     public function getJenisHari($unit_kerja_id)
     {
         $jenisHari = JenisHari::where('unit_kerja_id', $unit_kerja_id)->get(['id', 'nama']);

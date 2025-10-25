@@ -431,6 +431,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/TransaksiWahana', [ImportController::class, 'importTransaksiWahana'])->name('import.TransaksiWahana');
 
     // shift karyawan wahana
+    Route::get('/get-karyawan-available', [ShiftKaryawanWahanaController::class, 'getKaryawanAvailable'])
+        ->name('karyawan.available');
+
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
     Route::get('/get-jenis-hari/{unit_kerja_id}', [ShiftKaryawanWahanaController::class, 'getJenisHari']);
 

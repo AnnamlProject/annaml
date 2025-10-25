@@ -71,7 +71,7 @@ class VendorsController extends Controller
         $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
         $validated = $request->validate([
             'kd_vendors' => 'nullable|string|max:255',
-            'nama_vendors' => 'nullable|string|max:20',
+            'nama_vendors' => 'nullable|string|max:75',
             'contact_person' => 'nullable|string|max:255',
             'alamat' => 'nullable|string',
             'telepon' => 'nullable|string|max:20',
@@ -119,6 +119,13 @@ class VendorsController extends Controller
     public function getInvoicesAndPrepayments($vendorId)
     {
         $vendor = Vendors::with([
+            'invoices' => function ($q) {
+                $q->where('status_purchase', 0)
+                    ->with([
+                        'details',
+                        'paymentmethodDetail.chartOfAccount',
+                    ]);
+            },
             'invoices.details',                 // relasi detail invoice
             'invoices.paymentmethodDetail.chartOfAccount', // relasi akun invoice
             'prepayments.accountPrepayment',

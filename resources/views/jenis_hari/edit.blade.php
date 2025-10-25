@@ -23,7 +23,7 @@
                                 <option value="">-- Pilih --</option>
                                 @foreach ($unitKerja as $g)
                                     <option value="{{ $g->id }}"
-                                        {{ isset($jenis_hari) && $jenis_hari->unit_kerja_id == $g->id ? 'selected' : '' }}>
+                                        {{ isset($data) && $data->unit_kerja_id == $g->id ? 'selected' : '' }}>
                                         {{ $g->nama_unit }}
                                     </option>
                                 @endforeach
@@ -56,6 +56,26 @@
                             <input type="time" id="jam_selesai" name="jam_selesai"
                                 value="{{ $data->jam_selesai ? \Carbon\Carbon::parse($data->jam_selesai)->format('H:i') : '' }}"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="jumlah_pengunjung_min" class="block font-medium">Jumlah Pengunjung Minimal</label>
+                            <input type="number" name="jumlah_pengunjung_min" id="jumlah_pengunjung_min"
+                                value="{{ old('jumlah_pengunjung_min', $data->jumlah_pengunjung_min) }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                          @error('jumlah_pengunjung_min') border-red-500 @enderror">
+                            @error('jumlah_pengunjung_min')
+                                <p class="text-red-500 text-sm">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div>
+                            <label for="jumlah_pengunjung_max" class="block font-medium">Jumlah Pengunjung Maksimal</label>
+                            <input type="number" name="jumlah_pengunjung_max" id="jumlah_pengunjung_max"
+                                value="{{ old('jumlah_pengunjung_max', $data->jumlah_pengunjung_max) }}"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                          @error('jumlah_pengunjung_max') border-red-500 @enderror">
+                            @error('jumlah_pengunjung_max')
+                                <p class="text-red-500 text-sm">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label for="deskripsi" class="block font-medium">Deskripsi</label>

@@ -10,7 +10,9 @@ class PaymentMethod extends Model
     protected $fillable = [
         'kode_jenis',
         'nama_jenis',
-        'status'
+        'status',
+        // untuk membedakan tahapan dalam invoice, entah itu sales atau purchase
+        'status_payment',
     ];
     public function details()
     {

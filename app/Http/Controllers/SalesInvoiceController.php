@@ -26,8 +26,9 @@ class SalesInvoiceController extends Controller
     public function index()
     {
         $data = SalesInvoice::with(['customer', 'jenisPembayaran', 'salesOrder', 'salesPerson'])
+            ->orderBy('invoice_date', 'asc')
+            ->orderBy('status', 'asc')
             ->orderBy('invoice_number', 'asc')
-            ->orderBy('shipping_date', 'asc')
             ->paginate(10);
         return view('sales_invoice.index', compact('data'));
     }
@@ -38,7 +39,7 @@ class SalesInvoiceController extends Controller
         $employee = Employee::all();
         $items = Item::all(); // semua item yang bisa dipilih
         $accounts = chartOfAccount::all();
-        $sales_order = SalesOrder::all();
+        $sales_order = SalesOrder::where('status_sales', 0)->get();
         $project = Project::all();
         $sales_taxes = SalesTaxes::where('type', 'input_tax')->get();
         $withholding = SalesTaxes::where('type', 'withholding_tax')->get();
@@ -58,7 +59,9 @@ class SalesInvoiceController extends Controller
             'details.item.accounts.assetAccount',
             'details.account',
             'details.sales_taxes.salesAccount'
-        ])->findOrFail($salesOrderId);
+
+        ])
+            ->findOrFail($salesOrderId);
 
         $locationId = $salesOrder->location_id; // 🔹 ambil lokasi dari SO header
 
@@ -135,6 +138,15 @@ class SalesInvoiceController extends Controller
         DB::beginTransaction();
 
         try {
+            $paymentStatus = PaymentMethod::where('id', $request->jenis_pembayaran_id)->value('status_payment');
+
+            if ($paymentStatus != 1) {
+                $statusSales = 3;
+            } elseif ($request->sales_order_id) {
+                $statusSales = 1;
+            } else {
+                $statusSales = 0;
+            }
             // 1️⃣ HEADER
             $salesInvoice = \App\SalesInvoice::create([
                 'invoice_number'      => $this->generateKodeOrder($request->invoice_date),
@@ -152,14 +164,14 @@ class SalesInvoiceController extends Controller
                 'freight'             => (float) str_replace(',', '', $request->freight),
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages'            => $request->messages,
-                'status_sales_invoice' => 1,
+                'status' => $statusSales,
             ]);
             // dump('📌 SalesInvoice tersimpan:', $salesInvoice->toArray());
 
             // 3b) Update status SO
             if ($request->sales_order_id) {
                 \App\SalesOrder::whereKey($request->sales_order_id)
-                    ->update(['status_sales' => 1]);
+                    ->update(['status_sales' => $statusSales]);
             }
 
             // 2️⃣ DETAIL ITEM + perhitungan stok
@@ -500,6 +512,15 @@ class SalesInvoiceController extends Controller
         try {
             // dump("🟢 MULAI UPDATE SALES INVOICE ID:", $id);
 
+            $paymentStatus = PaymentMethod::where('id', $request->jenis_pembayaran_id)->value('status_payment');
+
+            if ($paymentStatus !== 1) {
+                $salesStatus = 3;
+            } elseif ($request->sales_order_id) {
+                $salesStatus = 1;
+            } else {
+                $salesStatus = 0;
+            }
             // 🔹 Ambil invoice beserta detail & stok
             $salesInvoice = \App\SalesInvoice::with('details.item.quantities')->findOrFail($id);
 
@@ -508,6 +529,7 @@ class SalesInvoiceController extends Controller
                 'invoice_date'             => $request->invoice_date,
                 'shipping_date'            => $request->shipping_date,
                 'customers_id'             => $request->customers_id,
+                'sales_person_id'           => $request->sales_person_id ?? null,
                 'sales_order_id'           => $request->sales_order_id ?? null,
                 'location_id'              => $request->location_id,
                 'payment_method_account_id' => $request->payment_method_account_id,
@@ -518,6 +540,7 @@ class SalesInvoiceController extends Controller
                 'freight'                  => (float) str_replace(',', '', $request->freight),
                 'early_payment_terms'      => $request->early_payment_terms,
                 'messages'                 => $request->messages,
+                'status' => $salesStatus
             ]);
 
             // dump("Header diupdate:", $salesInvoice->toArray());

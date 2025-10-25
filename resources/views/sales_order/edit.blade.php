@@ -35,7 +35,7 @@
 
                         <div id="account-wrapper" class="hidden">
                             <label class="font-medium text-gray-700 block mb-1">Account</label>
-                            <select id="account_id" name="payment_method_account_id"
+                            <select id="account_id" name="payment_method_account_id" required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
                                 <option value="">-- Pilih Account --</option>
                             </select>
@@ -81,7 +81,7 @@
                             <label class="font-medium text-gray-700 block mb-1">Shipping Date</label>
                             <input type="date" name="shipping_date"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value="{{ $salesOrder->shipping_date }}" required>
+                                value="{{ $salesOrder->shipping_date }}">
                         </div>
                         <div>
                             <label class="font-medium text-gray-700 block mb-1">Sales Person</label>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Perusahaan;
+use App\PurchaseInvoice;
 use App\Vendors;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -71,7 +72,7 @@ class VendorsController extends Controller
         $vendors = Vendors::where('kd_vendor', $kd_vendor)->firstOrFail();
         $validated = $request->validate([
             'kd_vendors' => 'nullable|string|max:255',
-            'nama_vendors' => 'nullable|string|max:20',
+            'nama_vendors' => 'nullable|string|max:75',
             'contact_person' => 'nullable|string|max:255',
             'alamat' => 'nullable|string',
             'telepon' => 'nullable|string|max:20',
@@ -119,9 +120,17 @@ class VendorsController extends Controller
     public function getInvoicesAndPrepayments($vendorId)
     {
         $vendor = Vendors::with([
+            'invoices' => function ($q) {
+                $q->where('status_purchase', '<=', 1)
+                    ->with([
+                        'details',
+                        'paymentmethodDetail.chartOfAccount',
+                    ]);
+            },
             'invoices.details',                 // relasi detail invoice
             'invoices.paymentmethodDetail.chartOfAccount', // relasi akun invoice
             'prepayments.accountPrepayment',
+            'payment'
         ])->findOrFail($vendorId);
 
         // Hitung total untuk setiap invoice
@@ -131,12 +140,30 @@ class VendorsController extends Controller
 
             foreach ($invoice->details as $item) {
                 $amount = ($item->price - $item->discount) * $item->quantity;
-                $subtotal += $amount;
                 $total_tax += $item->tax_amount;
+                $final = $amount + $total_tax;
+                $subtotal += $final;
+                $withholding_tax = optional($invoice->withholding)->rate ?? 0;
+                $withholding_value = $subtotal * ($withholding_tax / 100);
             }
 
-            $invoice->original_amount = $subtotal + $total_tax + ($invoice->freight ?? 0);
-            $invoice->amount_owing = $invoice->original_amount;
+            $invoice->original_amount = $subtotal - $withholding_value + ($invoice->freight ?? 0);
+            // Hitung total pembayaran (jika ada relasi ke payment detail)
+            $totalPayment = \App\PaymentDetail::where('invoice_number_id', $invoice->id)->sum('payment_amount');
+
+            // Hitung juga alokasi dari prepayment jika kamu mau
+            $totalPrepaymentAllocated = \App\PrepaymentAllocation::where('purchase_invoice_id', $invoice->id)->sum('allocated_amount');
+
+            // Total yang sudah dibayar = payment biasa + prepayment
+            $invoice->total_paid = $totalPayment + $totalPrepaymentAllocated;
+
+            // Hitung sisa tagihan (amount owing)
+            $invoice->amount_owing = $invoice->original_amount - $invoice->total_paid;
+
+            // Kalau sisa < 0 (overpayment), buat jadi 0
+            if ($invoice->amount_owing < 0) {
+                $invoice->amount_owing = 0;
+            }
 
             $invoice->invoice_number_id = $invoice->id;
 
@@ -145,20 +172,49 @@ class VendorsController extends Controller
             $invoice->header_account_code = $invoice->paymentmethodDetail->chartOfAccount->kode_akun ?? null;
             $invoice->header_account_name = $invoice->paymentmethodDetail->chartOfAccount->nama_akun ?? null;
 
+
             return $invoice;
         });
 
-        // Tambahkan informasi akun untuk prepayment
+
         $prepayments = $vendor->prepayments->map(function ($p) {
+            // Ambil total alokasi yang sudah digunakan dari tabel prepayment_allocations
+            $totalAllocated = \App\PrepaymentAllocation::where('prepayment_id', $p->id)->sum('allocated_amount');
+
+            // Hitung sisa amount
+            $remainingAmount = ($p->amount ?? 0) - $totalAllocated;
+            if ($remainingAmount < 0) {
+                $remainingAmount = 0; // keamanan, jangan sampai minus
+            }
+
+            // Tambahkan field tambahan
+            $p->remaining_amount = $remainingAmount;
+            $p->allocated_total = $totalAllocated;
+
+            // Ganti field amount supaya frontend langsung pakai sisa saldo
+            $p->amount = $remainingAmount;
+
+            // Tambahkan informasi akun
             $p->account_prepayment_id = $p->account_prepayment;
             $p->account_prepayment_code = $p->accountPrepayment->kode_akun ?? null;
             $p->account_prepayment_name = $p->accountPrepayment->nama_akun ?? null;
+
             return $p;
         });
+
 
         return response()->json([
             'invoices' => $invoices,
             'prepayments' => $prepayments,
         ]);
+    }
+
+    public function getInvoices($id)
+    {
+        $invoices = PurchaseInvoice::where('vendor_id', $id)
+            ->where('status_purchase', '<=', 1)
+            ->get(['id', 'invoice_number', 'date_invoice']);
+
+        return response()->json(['invoices' => $invoices]);
     }
 }

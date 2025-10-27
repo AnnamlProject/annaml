@@ -14,6 +14,8 @@ class JenisHari extends Model
         'deskripsi',
         'jam_mulai',
         'jam_selesai',
+        'jumlah_pengunjung_min',
+        'jumlah_pengunjung_max'
     ];
 
     public function unitKerja()

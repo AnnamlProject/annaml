@@ -41,10 +41,10 @@
                             <span class="font-medium">Vendor:</span>
                             <span class="ml-2">{{ $data->vendor->nama_vendors ?? '-' }}</span>
                         </div>
-                        <div>
+                        {{-- <div>
                             <span class="font-medium">Payment Amount</span>
                             <span class="ml-2">{{ number_format($data->details->sum('payment_amount')) }}</span>
-                        </div>
+                        </div> --}}
                         <div>
                             <span class="font-medium">Comment:</span>
                             <span class="ml-2">{{ $data->comment }}</span>

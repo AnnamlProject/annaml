@@ -67,11 +67,7 @@
                             <label for="comment" class="font-medium text-gray-700 block mb-1">Comment</label>
                             <textarea name="comment" class="w-full border border-gray-300 rounded-lg px-4 py-2">{{ $data->comment ?? '' }}</textarea>
                         </div>
-
                     </div>
-
-
-
                     <div class="overflow-x-auto border rounded-lg shadow-sm mt-6">
                         <table class="w-full border-collapse border text-sm whitespace-nowrap">
                             @php
@@ -84,10 +80,12 @@
                                 <th class="border px-4 py-2">Original Amount</th>
                                 <th class="border px-4 py-2">Amount Owing</th>
                                 <th class="border px-4 py-2">Payment Amount</th>
+                                <th class="border px-4 py-2">Prepayment</th>
                             </thead>
 
                             <tbody>
-                                @foreach ($data->details as $i => $detail)
+                                {{-- 🔹 Baris pembayaran langsung --}}
+                                @foreach ($data->details as $detail)
                                     <tr>
                                         <td class="border px-4 py-2">
                                             <input type="date" name="date_invoice"
@@ -99,31 +97,62 @@
                                                 class="w-full border border-gray-600 rounded bg-gray-50" readonly
                                                 value="{{ $detail->invoice->invoice_number ?? '' }}">
                                         </td>
-                                        <td class="border px-4 py-2">
+                                        <td class="border px-4 py-2 text-right">
                                             <input type="text" name="original_amount"
-                                                class="w-full border border-gray-600 rounded bg-gray-50" readonly
+                                                class="w-full border border-gray-600 rounded bg-gray-50 text-right" readonly
                                                 value="{{ number_format($detail->original_amount ?? 0, 2, '.', ',') }}">
                                         </td>
-                                        <td class="border px-4 py-2">
+                                        <td class="border px-4 py-2 text-right">
                                             <input type="text" name="amount_owing"
-                                                class="w-full border border-gray-600 rounded bg-gray-50" readonly
+                                                class="w-full border border-gray-600 rounded bg-gray-50 text-right" readonly
                                                 value="{{ number_format($detail->amount_owing ?? 0, 2, '.', ',') }}">
                                         </td>
-
-                                        <td class="border px-4 py-2">
+                                        <td class="border px-4 py-2 text-right">
                                             <input type="text" name="payment_amount"
-                                                class="w-full border border-gray-600 rounded"
+                                                class="w-full border border-gray-600 rounded text-right"
                                                 value="{{ number_format($detail->payment_amount ?? 0, 2, '.', ',') }}">
+                                        </td>
+                                        <td class="border px-4 py-2 text-center text-gray-400">—</td>
+                                    </tr>
+                                @endforeach
+
+                                {{-- 🟡 Baris prepayment allocations --}}
+                                @foreach ($prepaymentAllocations as $alloc)
+                                    <tr class="bg-yellow-50">
+                                        <td class="border px-4 py-2">
+                                            <input type="date" name="tanggal_prepayment"
+                                                class="w-full border border-gray-600 rounded bg-gray-50" readonly
+                                                value="{{ $alloc->tanggal }}">
+                                        </td>
+                                        <td class="border px-4 py-2">
+                                            <input type="text" name="reference"
+                                                class="w-full border border-gray-600 rounded bg-gray-50" readonly
+                                                value="{{ $alloc->reference }}">
+                                        </td>
+                                        <td class="border px-4 py-2 text-right">
+                                            <input type="text" name="original_amount_prepayment"
+                                                class="w-full border border-gray-600 rounded bg-gray-50 text-right" readonly
+                                                value="{{ number_format($alloc->original_amount ?? 0, 2, '.', ',') }}">
+                                        </td>
+                                        <td class="border px-4 py-2 text-center text-gray-400"><input type="text"
+                                                class="w-full border border-gray-600 rounded text-right"
+                                                value="{{ number_format($alloc->amount_owing ?? 0, 2, '.', ',') }}"></td>
+                                        <td class="border px-4 py-2 text-center text-gray-400">—</td>
+                                        <td class="border px-4 py-2 text-right">
+                                            <input type="text" name="allocated_amount"
+                                                class="w-full border border-gray-600 rounded text-right"
+                                                value="{{ number_format($alloc->allocated_amount ?? 0, 2, '.', ',') }}">
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
 
+
                         </table>
                     </div>
 
                     <div class="mt-6 flex justify-end space-x-4">
-                        <a href="{{ route('unit_kerja.index') }}"
+                        <a href="{{ route('payment.index') }}"
                             class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition">
                             <i class="fas fa-arrow-left mr-1"></i> Cancel
                         </a>

@@ -296,6 +296,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vendors/search', [VendorsController::class, 'search'])->name('vendors.search');
     Route::resource('vendors', 'VendorsController')->middleware('permission:vendor.access');
     Route::get('/vendor/{vendor}/invoices-prepayments', [VendorsController::class, 'getInvoicesAndPrepayments']);
+    Route::get('/vendor/{id}/invoices', [VendorsController::class, 'getInvoices']);
+
 
 
     // export dan import items
@@ -431,6 +433,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/TransaksiWahana', [ImportController::class, 'importTransaksiWahana'])->name('import.TransaksiWahana');
 
     // shift karyawan wahana
+    Route::get('/get-karyawan-available', [ShiftKaryawanWahanaController::class, 'getKaryawanAvailable'])
+        ->name('karyawan.available');
+
     Route::resource('shift_karyawan', 'ShiftKaryawanWahanaController')->middleware('permission:shift_karyawan.access');
     Route::get('/get-jenis-hari/{unit_kerja_id}', [ShiftKaryawanWahanaController::class, 'getJenisHari']);
 

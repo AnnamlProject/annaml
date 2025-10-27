@@ -28,6 +28,8 @@ class JenisHariController extends Controller
             'unit_kerja_id.*' => 'required|exists:unit_kerjas,id',
             'nama.*'          => 'required|string|max:255',
             'deskripsi.*'     => 'nullable|string',
+            'jumlah_pengunjung_min.*' => 'required|numeric',
+            'jumlah_pengunjung_max.*' => 'nullable|numeric',
             'jam_mulai.*'     => 'required|date_format:H:i',
             'jam_selesai.*'   => 'required|date_format:H:i',
         ]);
@@ -53,6 +55,8 @@ class JenisHariController extends Controller
                 'jam_mulai'     => $request->jam_mulai[$i],
                 'jam_selesai'   => $request->jam_selesai[$i],
                 'deskripsi'     => $request->deskripsi[$i] ?? null,
+                'jumlah_pengunjung_min' => $request->jumlah_pengunjung_min[$i] ?? 0,
+                'jumlah_pengunjung_max' => $request->jumlah_pengunjung_max[$i] ?? 0,
                 'created_at'    => now(),
                 'updated_at'    => now()
             ];
@@ -84,6 +88,8 @@ class JenisHariController extends Controller
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'nama' => 'string|max:255',
             'deskripsi' => 'nullable|string',
+            'jumlah_pengunjung_min' => 'nullable|numeric',
+            'jumlah_pengunjung_max' => 'nullable|numeric',
             'jam_mulai'     => 'required|date_format:H:i',
             'jam_selesai'   => 'required|date_format:H:i|after:jam_mulai',
 

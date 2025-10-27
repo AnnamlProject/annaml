@@ -22,7 +22,8 @@ class SalesInvoice extends Model
         'freight',
         'early_payment_terms',
         'messages',
-        'payment_method_account_id'
+        'payment_method_account_id',
+        'status'
     ];
     public function jenisPembayaran()
     {

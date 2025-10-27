@@ -78,7 +78,7 @@
                             <div id="pm-account-panel"
                                 class="{{ old('jenis_pembayaran_id', $sales_order->jenis_pembayaran_id ?? '') ? '' : 'hidden' }}">
                                 <label class="block font-medium mb-1">Account</label>
-                                <select id="pm-account-id" name="payment_method_account_id"
+                                <select id="pm-account-id" name="payment_method_account_id" required
                                     class="w-full border rounded px-2 py-1 text-sm">
                                     <option value="">-- Pilih Account --</option>
                                 </select>
@@ -132,7 +132,7 @@
                             <label class="block font-medium mb-1">Shipping Date</label>
                             <input type="date" name="shipping_date"
                                 value="{{ old('shipping_date', $sales_order->shipping_date ?? now()->toDateString()) }}"
-                                class="w-full border rounded px-2 py-1 text-sm" required>
+                                class="w-full border rounded px-2 py-1 text-sm">
                         </div>
 
                         <!-- Shipping Address -->

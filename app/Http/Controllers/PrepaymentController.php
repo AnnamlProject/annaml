@@ -17,7 +17,7 @@ class PrepaymentController extends Controller
     public function index()
     {
 
-        $data = Prepayment::with(['vendor', 'account'])->orderBy('tanggal_prepayment', 'asc')->paginate(20);
+        $data = Prepayment::with(['vendor', 'account', 'prepaymentAllocation'])->orderBy('tanggal_prepayment', 'asc')->paginate(20);
         return view('prepayment.index', compact('data'));
     }
 

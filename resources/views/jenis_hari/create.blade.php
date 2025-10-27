@@ -40,6 +40,8 @@
                                     <th style="padding: 12px; border: 1px solid #ddd;">Jeni Hari</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Jam Mulai</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Jam Selesai</th>
+                                    <th style="padding 12px; border: 1px solid #ddd;">Jumlah Pengunjung Minimal</th>
+                                    <th style="padding 12px; border: 1px solid #ddd;">Jumlah Pengunjung Maksimal</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Deskripsi</th>
                                     <th style="padding: 12px; border: 1px solid #ddd; width: 70px;">Aksi</th>
                                 </tr>
@@ -72,6 +74,16 @@
                                         <input type="time" name="jam_selesai[]"
                                             value="{{ optional($jenis_hari)->jam_selesai ? \Carbon\Carbon::parse(optional($jenis_hari)->jam_selesai)->format('H:i') : '' }}"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <input type="number" name="jumlah_pengunjung_min[]"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Masukkan Jumlah Pengunjung Minimal">
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <input type="number" name="jumlah_pengunjung_max[]"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Masukkan Jumlah Pengunjung Maksimal">
                                     </td>
                                     <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="text" name="deskripsi[]"

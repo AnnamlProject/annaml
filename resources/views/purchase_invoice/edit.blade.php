@@ -42,7 +42,7 @@
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Payment Method</label>
                                 <select id="jenis_pembayaran_id" name="jenis_pembayaran_id" required
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 ">
                                     <option value="">-- Pilih --</option>
                                     @foreach ($jenis_pembayaran as $jenis)
                                         <option value="{{ $jenis->id }}"
@@ -55,15 +55,15 @@
 
                             <div id="account-wrapper" class="hidden">
                                 <label class="font-medium text-gray-700 block mb-1">Account</label>
-                                <select id="account_id" name="payment_method_account_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
+                                <select id="account_id" name="payment_method_account_id" required
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 ">
                                     <option value="">-- Pilih Account --</option>
                                 </select>
                             </div>
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">location Inventory</label>
                                 <select name="location_id" id="location_id" required
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s">
                                     @foreach ($locationInventory as $loc)
                                         <option value="{{ $loc->id }}"
                                             {{ $purchaseInvoice->location_id == $loc->id ? 'selected' : '' }}>
@@ -75,7 +75,7 @@
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Vendor</label>
                                 <select name="vendor_id" id="vendor_id" required
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s">
                                     @foreach ($vendor as $ven)
                                         <option value="{{ $ven->id }}"
                                             {{ $purchaseInvoice->vendor_id == $ven->id ? 'selected' : '' }}>
@@ -88,7 +88,7 @@
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Order Number</label>
                                 <input type="hidden" name="purchase_order_id"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s"
                                     value="{{ $purchaseInvoice->purchase_order_id }}" required>
                                 <input type="text"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s"
@@ -97,19 +97,19 @@
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Invoice Date</label>
                                 <input type="date" name="date_invoice"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s"
                                     value="{{ $purchaseInvoice->date_invoice }}" required>
                             </div>
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Shipping Date</label>
                                 <input type="date" name="shipping_date"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s"
-                                    value="{{ $purchaseInvoice->shipping_date }}" required>
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s"
+                                    value="{{ $purchaseInvoice->shipping_date }}">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="font-medium text-gray-700 block mb-1">Shipping Address</label>
                                 <textarea name="shipping_address" rows="2"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">{{ $purchaseInvoice->shipping_address }}</textarea>
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500s">{{ $purchaseInvoice->shipping_address }}</textarea>
                             </div>
 
                         </div>
@@ -346,13 +346,13 @@
                             <div>
                                 <label class="font-medium text-gray-700 block mb-1">Early Payment Terms</label>
                                 <input type="text" name="early_payment_terms"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500s"
                                     value="{{ $purchaseInvoice->early_payment_terms }}">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="font-medium text-gray-700 block mb-1">Messages</label>
                                 <textarea name="messages" rows="3"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500s">{{ $purchaseInvoice->messages }}</textarea>
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500s">{{ $purchaseInvoice->messages }}</textarea>
                             </div>
                         </div>
 

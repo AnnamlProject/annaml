@@ -32,8 +32,6 @@ class PaymentController extends Controller
     }
     public function store(Request $request)
     {
-
-        // dd($request->all());
         $validated = $request->validate([
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'payment_method_account_id' => 'required|exists:payment_method_details,id',
@@ -41,41 +39,48 @@ class PaymentController extends Controller
             'vendor_id' => 'required|exists:vendors,id',
             'payment_date' => 'required|date',
             'comment' => 'nullable|string',
-            // optional: payment_amounts dan prepayment_allocations diverifikasi di bawah
         ]);
 
         DB::beginTransaction();
 
         try {
-            // 1️⃣ Simpan ke tabel payments
+            // 1️⃣ Simpan ke tabel payments (header)
             $payment = Payment::create([
                 'jenis_pembayaran_id' => $validated['jenis_pembayaran_id'],
-                'payment_method_account_id' => $request->input('payment_method_account_id'),
+                'payment_method_account_id' => $validated['payment_method_account_id'],
                 'source' => $validated['source'] ?? null,
                 'vendor_id' => $validated['vendor_id'],
                 'payment_date' => $validated['payment_date'],
                 'comment' => $validated['comment'] ?? null,
-                'type' => 'invoice', // default, bisa diganti kalau nanti ada "other"
+                'type' => 'invoice', // bisa nanti diganti 'other' jika dibutuhkan
             ]);
 
-            // 2️⃣ Simpan detail pembayaran untuk setiap invoice
+            // dump('✅ Payment created:', $payment->toArray());
+            // 2️⃣ Simpan detail pembayaran (PaymentDetail)
             if ($request->has('payment_amount')) {
                 foreach ($request->payment_amount as $invoiceId => $amount) {
                     if ($amount > 0) {
-                        $invoice = \App\PurchaseInvoice::find($invoiceId);
+                        $invoice = PurchaseInvoice::with('details')->find($invoiceId);
 
                         PaymentDetail::create([
                             'payment_id' => $payment->id,
-                            'invoice_number_id' => $invoice->id ?? null,
+                            'invoice_number_id' => $invoice->id,
                             'due_date' => $invoice->due_date ?? null,
-                            'original_amount' => $invoice->original_amount ?? 0,
+                            'original_amount' => $invoice->original_amount, // computed accessor
                             'amount_owing' => $invoice->amount_owing ?? 0,
                             'discount_available' => $invoice->discount_available ?? 0,
                             'discount_taken' => 0,
                             'payment_amount' => $amount,
                         ]);
+
+                        // 🔹 Update status invoice setelah pembayaran
+                        $invoice->updatePaymentStatus();
+                        // dump('🔄 Status invoice setelah update:', [
+                        //     'invoice_id' => $invoice->id,
+                        //     'status_purchase' => $invoice->status_purchase,
+
+                        // ]);
                     }
-                    // dd($invoice);
                 }
             }
 
@@ -83,31 +88,43 @@ class PaymentController extends Controller
             if ($request->has('prepayment_allocations')) {
                 foreach ($request->prepayment_allocations as $prepaymentId => $amount) {
                     if ($amount > 0) {
-                        $relatedInvoice = collect($request->payment_amount ?? [])->keys()->first();
-                        PrepaymentAllocation::create([
-                            'prepayment_id' => $prepaymentId,
-                            'purchase_invoice_id' => $relatedInvoice,
-                            'allocated_amount' => $amount,
-                        ]);
+                        $relatedInvoiceId = $request->invoice_for_prepayment[$prepaymentId] ?? null;
+                        if ($relatedInvoiceId) {
+                            PrepaymentAllocation::create([
+                                'payment_id'         => $payment->id,
+                                'prepayment_id'        => $prepaymentId,
+                                'purchase_invoice_id'  => $relatedInvoiceId,
+                                'allocated_amount'     => $amount,
+                            ]);
+
+                            // 🔹 Update status invoice juga
+                            $invoice = PurchaseInvoice::find($relatedInvoiceId);
+                            if ($invoice) {
+                                $invoice->updatePaymentStatus();
+                                // dump('🔄 Status invoice (dari prepayment):', [
+                                //     'invoice_id' => $invoice->id,
+                                //     'status_purchase' => $invoice->status_purchase,
+                                // ]);
+                            }
+                        }
                     }
-                    // dd($relatedInvoice);
                 }
             }
-            // 4️⃣ Buat Journal Entry
+
+            // 4️⃣ Buat Journal Entry (header)
             $journal = JournalEntry::create([
                 'source'  => 'Payment#' . $payment->id,
                 'tanggal' => $validated['payment_date'],
                 'comment' => $validated['comment'] ?? null,
             ]);
 
-            // 4A️⃣ Credit: Kas/Bank (dari Payment Method Detail)
+            // 4A️⃣ Akun Kas/Bank (Credit)
             $pmDetail = PaymentMethodDetail::with('chartOfAccount')->find($validated['payment_method_account_id']);
             $coaPayment = optional($pmDetail->chartOfAccount);
 
             $totalDebit = 0;
-            $totalCredit = 0;
 
-            // 4B️⃣ Debit: untuk setiap invoice yang dibayar
+            // 4B️⃣ Debit untuk setiap invoice
             if ($request->has('payment_amount')) {
                 foreach ($request->payment_amount as $invoiceId => $amount) {
                     if ($amount > 0) {
@@ -118,6 +135,7 @@ class PaymentController extends Controller
                             'kode_akun' => $coaDebit->kode_akun ?? null,
                             'debits' => $amount,
                             'credits' => 0,
+                            'status' => 2,
                             'comment' => 'Pembayaran invoice ' . ($invoice->invoice_number ?? $invoiceId),
                         ]);
 
@@ -126,7 +144,7 @@ class PaymentController extends Controller
                 }
             }
 
-            // 4C️⃣ Debit: untuk setiap prepayment yang dialokasikan
+            // 4C️⃣ Debit untuk setiap prepayment
             if ($request->has('prepayment_allocations')) {
                 foreach ($request->prepayment_allocations as $prepaymentId => $amount) {
                     if ($amount > 0) {
@@ -138,6 +156,7 @@ class PaymentController extends Controller
                             'debits' => $amount,
                             'credits' => 0,
                             'comment' => 'Alokasi prepayment ' . ($prepayment->reference ?? $prepaymentId),
+                            'status' => 2
                         ]);
 
                         $totalDebit += $amount;
@@ -145,13 +164,15 @@ class PaymentController extends Controller
                 }
             }
 
-            // 4D️⃣ Credit total kas/bank
+            // 4D️⃣ Credit total Kas/Bank
             $journal->details()->create([
                 'kode_akun' => $coaPayment->kode_akun ?? null,
                 'debits' => 0,
                 'credits' => $totalDebit,
                 'comment' => 'Pembayaran melalui ' . ($coaPayment->nama_akun ?? 'Kas/Bank'),
+                'status' => 2
             ]);
+
             DB::commit();
 
             return redirect()
@@ -163,6 +184,7 @@ class PaymentController extends Controller
             return back()->withErrors(['error' => 'Gagal menyimpan payment: ' . $e->getMessage()]);
         }
     }
+
     public function show($id)
     {
         $data = Payment::with(['vendor', 'jenis_pembayaran', 'PaymentMethodAccount', 'details'])->findOrFail($id);
@@ -181,34 +203,33 @@ class PaymentController extends Controller
     }
     public function edit($id)
     {
-        // 1️⃣ Load relasi lengkap, termasuk nested details
         $data = Payment::with([
             'vendor',
             'jenis_pembayaran',
             'PaymentMethodAccount',
-            'details.invoice.details' // sampai ke purchase_invoice_details
+            'details.invoice.details',
+            'prepaymentAllocations.prepayment',
+            'prepaymentAllocations.purchaseInvoice',
         ])->findOrFail($id);
 
         $vendor = Vendors::all();
         $jenis_pembayaran = PaymentMethod::all();
 
-        // 2️⃣ Hitung original_amount di controller
+        // 🧮 Hitung ulang amount untuk setiap detail invoice
         foreach ($data->details as $detail) {
             $totalAmount = 0;
             $amount = 0;
             $tax_amount = 0;
 
-            // pastikan invoice dan invoice->details tersedia
             if ($detail->invoice && $detail->invoice->details) {
                 foreach ($detail->invoice->details as $invDetail) {
                     $price = $invDetail->price ?? 0;
                     $discount = $invDetail->discount ?? 0;
                     $qty = $invDetail->quantity ?? 0;
+                    $tax_amount = $invDetail->tax_amount ?? 0;
+                    $freight = $detail->invoice->freight ?? 0;
 
-                    $freight = $detail->invoice->freight;
-                    $tax_amount = $invDetail->tax_amount;
                     $amount += ($price - $discount) * $qty;
-
                     $totalAmount = $amount + $freight + $tax_amount;
                 }
             }
@@ -216,12 +237,84 @@ class PaymentController extends Controller
             $totalPaid = PaymentDetail::where('invoice_number_id', $detail->invoice_number_id)
                 ->sum('payment_amount');
 
-
-            // tambahkan properti baru agar bisa langsung dipakai di Blade
             $detail->original_amount = $totalAmount;
+
             $detail->amount_owing = $totalAmount - $totalPaid;
         }
 
-        return view('payment.edit', compact('data', 'vendor', 'jenis_pembayaran'));
+
+        $prepaymentAllocations = $data->prepaymentAllocations->map(function ($alloc) {
+            $invoice = $alloc->purchaseInvoice;
+            $prepayment = $alloc->prepayment;
+
+            $totalAllocated = \App\PrepaymentAllocation::where('prepayment_id', $prepayment->id)
+                ->sum('allocated_amount');
+
+            $amountOwing = ($prepayment->amount ?? 0) - $totalAllocated;
+            return (object) [
+                'is_prepayment' => true,
+                'tanggal' => $alloc->prepayment->tanggal_prepayment ?? null,
+                'reference' => $alloc->prepayment->reference ?? null,
+                'original_amount' => $alloc->prepayment->amount ?? 0,
+                'allocated_amount' => $alloc->allocated_amount ?? 0,
+                'invoice_number' => $invoice->invoice_number ?? '-',
+                'date_invoice' => $invoice->date_invoice ?? null,
+                'amount_owing' => $amountOwing,
+            ];
+        });
+
+        return view('payment.edit', compact('data', 'vendor', 'jenis_pembayaran', 'prepaymentAllocations'));
+    }
+
+
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $payment = \App\Payment::with(['details.invoice', 'prepaymentAllocations'])->findOrFail($id);
+
+            $affectedInvoices = collect();
+
+            foreach ($payment->details as $detail) {
+                if ($detail->invoice) {
+                    $affectedInvoices->push($detail->invoice->id);
+                }
+            }
+
+            foreach ($payment->prepaymentAllocations as $alloc) {
+                if ($alloc->purchase_invoice_id) {
+                    $affectedInvoices->push($alloc->purchase_invoice_id);
+                }
+            }
+
+            $payment->prepaymentAllocations()->delete();
+
+            if ($journal = JournalEntry::where('source', 'Payment#' . $payment->id)->first()) {
+                $journal->details()->delete();
+                $journal->delete();
+            }
+
+            $payment->details()->delete();
+
+            $payment->delete();
+
+            foreach ($affectedInvoices->unique() as $invoiceId) {
+                $invoice = \App\PurchaseInvoice::find($invoiceId);
+                if ($invoice) {
+                    $invoice->updatePaymentStatus(); // 
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('payment.index')
+                ->with('success', 'Payment berhasil dihapus dan status invoice diperbarui.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return back()->withErrors('Gagal menghapus payment: ' . $e->getMessage());
+        }
     }
 }

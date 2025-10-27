@@ -32,4 +32,8 @@ class Payment extends Model
     {
         return $this->belongsTo(PaymentMethodDetail::class);
     }
+    public function prepaymentAllocations()
+    {
+        return $this->hasMany(PrepaymentAllocation::class);
+    }
 }

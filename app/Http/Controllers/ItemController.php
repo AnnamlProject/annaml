@@ -254,7 +254,7 @@ class ItemController extends Controller
                 'tax_rate'           => $item->taxes->first()->rate ?? 0,
                 'account_id'         => $accountId,
                 'account_name'       => $accountName,
-                'account_code' => $accountKode ?? '-',
+                'account_code' => $accountKode,
                 'type'               => $item->type,
                 'unit_cost'          => $unitCost,
                 'cogs_account_name'  => optional($item->accounts->cogsAccount)->nama_akun ?? 'COGS',

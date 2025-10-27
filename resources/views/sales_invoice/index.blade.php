@@ -31,9 +31,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 #</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Invoice Number</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Invoice Order</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Invoice Number</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Shipping Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -58,8 +58,8 @@
                         @forelse ($data as $item)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4">{{ $item->invoice_number }}</td>
                                 <td class="px-6 py-4">{{ $item->invoice_date }}</td>
+                                <td class="px-6 py-4">{{ $item->invoice_number }}</td>
                                 <td class="px-6 py-4">{{ $item->shipping_date }}</td>
                                 <td class="px-6 py-4">{{ $item->customer->nama_customers ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->jenisPembayaran->nama_jenis }}</td>
@@ -67,12 +67,15 @@
                                 <td class="px-6 py-4">{{ $item->salesPerson->nama_karyawan ?? '-' }}</td>
                                 <td class="px-6 py-4">{{ $item->early_payment_terms }}</td>
                                 <td class="px-6 py-4">
-                                    @if ($item->status == 1)
+                                    @if ($item->status == 0)
                                         <span
-                                            class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
-                                    @elseif ($item->status == 2)
-                                        <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-sm">Sudah
+                                            class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-full text-sm">Menunggu</span>
+                                    @elseif ($item->status == 1)
+                                        <span class="px-4 py-2 bg-orange-100 text-green-700 rounded-full text-sm">
                                             Pembayaran</span>
+                                    @elseif ($item->status == 3)
+                                        <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm">
+                                            Selesai</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">{{ $item->messages }}</td>
@@ -91,7 +94,7 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                         @endcan
-                                        @if ($item->status == 1)
+                                        @if ($item->status == 0)
                                             {{-- tombol edit dan hapus aktif --}}
                                             @can('sales_invoice.update')
                                                 <a href="{{ route('sales_invoice.edit', $item->id) }}"
@@ -114,7 +117,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             @endcan
-                                        @elseif ($item->status == 2)
+                                        @elseif ($item->status == 1 || $item->status == 2 || $item->status == 3)
                                             {{-- tombol edit dan hapus dinonaktifkan --}}
                                             <button class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"
                                                 title="Edit Disabled" disabled>

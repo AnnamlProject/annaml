@@ -24,7 +24,7 @@ class SalesOrderController extends Controller
     //
     public function index()
     {
-        $data = SalesOrder::with(['customer', 'jenisPembayaran', 'salesPerson', 'locationInventory'])->orderBy('order_number', 'asc')->paginate(5);
+        $data = SalesOrder::with(['customer', 'jenisPembayaran', 'salesPerson', 'locationInventory'])->orderBy('date_order', 'asc')->orderBy('status_sales', 'asc')->paginate(5);
 
         return view('sales_order.index', compact('data'));
     }
@@ -35,7 +35,7 @@ class SalesOrderController extends Controller
         $employee = Employee::all();
         $items = Item::all(); // semua item yang bisa dipilih
         $accounts = chartOfAccount::all(); // akun-akun untuk entri jurnal
-        $sales_taxes = SalesTaxes::all();
+        $sales_taxes = SalesTaxes::where('type', 'input_tax')->get();
         $lokasi_inventory = LocationInventory::all();
         return view('sales_order.create', compact('customer', 'jenis_pembayaran', 'employee', 'items', 'accounts', 'sales_taxes', 'lokasi_inventory'));
     }
@@ -73,22 +73,21 @@ class SalesOrderController extends Controller
             ]);
             $order_number = $request->order_number;
         }
-
         $request->merge([
-            'freight' => $this->normalizeNumber($request->freight ?? 0),
+            'freight' => str_replace('.', '', $request->freight),
         ]);
 
 
         // ✅ VALIDASI FORM INPUT
         $request->validate([
             'date_order'           => 'required|date',
-            'shipping_date'        => 'required|date',
+            'shipping_date'        => 'nullable|date',
             'customer_id'          => 'required|exists:customers,id',
             'location_id'          => 'required|exists:location_inventories,id',
             'sales_person_id'          => 'nullable|exists:employees,id',
             'jenis_pembayaran_id'  => 'required|exists:payment_methods,id',
             'payment_method_account_id'  => 'required|exists:payment_method_details,id',
-            'shipping_address'     => 'required|string',
+            'shipping_address'     => 'nullable|string',
             'freight'              => 'nullable|numeric|min:0',
             'early_payment_terms'  => 'nullable|string',
             'messages'             => 'nullable|string',
@@ -127,8 +126,10 @@ class SalesOrderController extends Controller
                 'early_payment_terms'  => $request->early_payment_terms,
                 'messages'             => $request->messages,
                 'payment_method_account_id' => $request->payment_method_account_id,
-                'status_sales' => 1
+                'status_sales' => 0
             ]);
+
+            // dump("input sales order:", $salesOrder->toArray());
 
             // ✅ Simpan setiap item ke tabel sales_order_details
             foreach ($request->items as $item) {
@@ -207,13 +208,13 @@ class SalesOrderController extends Controller
         $request->validate([
             'order_number' => 'required|string',
             'date_order' => 'required|date',
-            'shipping_date' => 'required|date',
+            'shipping_date' => 'nullable|date',
             'customer_id' => 'required|exists:customers,id',
             'sales_person_id' => 'nullable|exists:employees,id',
             'location_id' => 'required|exists:location_inventories,id',
             'jenis_pembayaran_id' => 'required|exists:payment_methods,id',
             'payment_method_account_id' => 'required|exists:payment_method_details,id',
-            'shipping_address' => 'required|string',
+            'shipping_address' => 'nullable|string',
             'freight' => 'nullable|numeric',
             'early_payment_terms' => 'nullable|string',
             'items' => 'required|array',
@@ -249,7 +250,7 @@ class SalesOrderController extends Controller
                 'early_payment_terms' => $request->early_payment_terms,
                 'messages' => $request->messages,
                 'payment_method_account_id' => $request->payment_method_account_id,
-                'status_sales' => 1,
+                'status_sales' => 0,
             ]);
 
             // Hapus detail lama dan simpan ulang

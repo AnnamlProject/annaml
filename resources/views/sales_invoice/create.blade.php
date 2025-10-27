@@ -150,7 +150,7 @@
                             <div>
                                 <label for="shipping_date" class="block text-gray-700 font-medium mb-1">Shipping Date
                                 </label>
-                                <input type="date" id="name" name="shipping_date" required
+                                <input type="date" id="name" name="shipping_date"
                                     value="{{ old('shipping_date', $sales_invoice->shipping_date ?? now()->toDateString()) }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 @error('shipping_date')
@@ -670,7 +670,7 @@
                     const idx = row.dataset.index;
                     const accountName = document.querySelector(`.account-name-${idx}`)?.value ||
                         'Pendapatan';
-                    const accountCode = document.querySelector(`.account-code-${idx}`)?.value || '';
+                    const accountCode = $(`.account-name-${idx}`).data('kode') || '';
                     const amount = parseNumber(document.querySelector(`.amount-${idx}`)?.value);
                     const taxAmount = parseNumber(document.querySelector(`.taxval-${idx}`)?.value);
                     const taxSelect = document.querySelector(`.tax-${idx}`);
@@ -696,7 +696,7 @@
                     // Pendapatan (Credit)
                     if (amount > 0) {
                         journalRows.push({
-                            account: `${accountCode} - ${accountName}`,
+                            account: `${accountName}`,
                             debit: 0,
                             credit: amount
                         });

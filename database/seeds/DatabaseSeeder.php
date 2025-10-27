@@ -41,6 +41,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionPayroll::class);
         $this->call(PermissionPayrollRca::class);
         $this->call(PermissionClosingHarian::class);
+        $this->call(PaymentMethodPaylaterSeeder::class);
         // cekcek
     }
 }

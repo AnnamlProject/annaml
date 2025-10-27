@@ -103,6 +103,7 @@
 
         unitSelect.addEventListener('change', function() {
             let unitId = this.value;
+            let unitName = unitSelect.options[unitSelect.selectedIndex].text;
             komponenTable.innerHTML = '';
             komponenContainer.classList.add('hidden');
 
@@ -136,13 +137,11 @@
                                             <th rowspan="2" class="bg-green-600 text-black border-black border-2 p-2">Kekurangan<br>Cash untuk Setor Tunai ke Merchandise</th>
                                             </tr>
                                             <tr>
-                        
-
                                             <th class="border-black border-2 bg-green-600 text-black p-1">QRIS</th>
                                             <th class="border-black border-2 bg-green-600 text-black p-1">CASH</th>
                                             <th class="border-black border-2 bg-green-600 text-black p-1">Merchandise</th>
                                             <th class="border-black border-2 bg-green-600 text-black p-1">RCA</th>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">ODS</th>
+                                            <th class="border-black border-2 bg-green-600 text-black p-1">${unitName}</th>
                                             </tr>
                                         </thead>
                                     <tbody>

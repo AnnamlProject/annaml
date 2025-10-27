@@ -35,6 +35,8 @@
                                 Group Unit
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Kode</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Nama</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Deksripsi</th>
@@ -47,6 +49,7 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
                                 <td class="px-4 oy-2">{{ $item->groupUnit->nama ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $item->kode_unit }}</td>
                                 <td class="px-4 py-2">{{ $item->nama_unit }}</td>
                                 <td class="px-4 py-2">{{ $item->deskripsi ?? '-' }}</td>
                                 <td class="px-4 py-2 text-right">

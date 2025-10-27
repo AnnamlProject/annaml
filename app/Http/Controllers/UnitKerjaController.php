@@ -26,9 +26,11 @@ class UnitKerjaController extends Controller
         // 1️⃣ Validasi array
         $validated = $request->validate([
             'group_unit_id.*' => 'required|exists:group_units,id',
+            'kode_unit.*'          => 'required|string|max:255',
             'nama_unit.*'          => 'required|string|max:255',
             'deskripsi.*'     => 'nullable|string',
             'urutan.*'     => 'required|integer',
+            'format_closing.*'     => 'required|integer',
         ]);
 
         // 3️⃣ Siapkan data untuk insert batch
@@ -38,8 +40,10 @@ class UnitKerjaController extends Controller
 
             $data[] = [
                 'group_unit_id' => $request->group_unit_id[$i],
+                'kode_unit'          => $request->kode_unit[$i],
                 'nama_unit'          => $request->nama_unit[$i],
                 'urutan'     => $request->urutan[$i],
+                'format_closing' => $request->format_closing[$i],
                 'deskripsi'     => $request->deskripsi[$i] ?? null,
                 'created_at'    => now(),
                 'updated_at'    => now()
@@ -70,10 +74,14 @@ class UnitKerjaController extends Controller
     }
     public function update(Request $request, $id)
     {
+
+        // dd($request->all());
         $request->validate([
             'group_unit_id' => 'required|exists:group_units,id',
+            'kode_unit' => 'required|string',
             'nama_unit' => 'required|string',
             'urutan' => 'required|integer',
+            'format_closing' => 'required|integer',
             'deskripsi' => 'nullable|string',
         ]);
 

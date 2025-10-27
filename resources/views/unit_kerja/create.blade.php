@@ -37,9 +37,11 @@
                                 <tr style="background-color: #f5f5f5; font-weight: bold;">
                                     <th style="padding: 12px; border: 1px solid #ddd; width: 50px;">No.</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Group Unit</th>
+                                    <th style="padding: 12px; border: 1px solid #ddd;">Kode Unit</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Nama Unit</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Deskripsi</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Urutan</th>
+                                    <th style="padding: 12px; border: 1px solid #ddd;">Format Closing</th>
                                     <th style="padding: 12px; border: 1px solid #ddd; width: 70px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -59,6 +61,10 @@
                                         </select>
                                     </td>
                                     <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <input type="text" name="kode_unit[]" placeholder="Masukkan kode"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="text" name="nama_unit[]" placeholder="Masukkan nama"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </td>
@@ -70,6 +76,16 @@
                                     <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="text" name="urutan[]" placeholder="Masukkan urutan untuk tampilan"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                    <td style="padding:12px; border:1px solid #ddd;">
+                                        <select name="format_closing[]"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            id="">
+                                            <option value="1">Format DUNIA FANTASI</option>
+                                            <option value="2">Format OCEAN DREAM SAMUDRA</option>
+                                            <option value="3">Format ATLANTIS</option>
+                                            <option value="4">Format JAKARTA BIRD LAND</option>
+                                        </select>
                                     </td>
                                     <td style="text-align: center; border: 1px solid #ddd;">
                                         <button type="button" onclick="hapusBaris(this)"
@@ -125,6 +141,9 @@
             </td>
 
                   <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <input type="text" name="kode_unit[]" placeholder="Masukkan kode"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="text" name="nama_unit[]" placeholder="Masukkan nama"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </td>
@@ -136,6 +155,16 @@
                                     <td style="padding: 12px; border: 1px solid #ddd;">
                                         <input type="text" name="urutan[]" placeholder="Masukkan urutan untuk tampilan"
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </td>
+                                       <td style="padding:12px; border:1px solid #ddd;">
+                                        <select name="format_closing[]"
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            id="">
+                                            <option value="1">Format DUNIA FANTASI</option>
+                                            <option value="2">Format OCEAN DREAM SAMUDRA</option>
+                                            <option value="3">Format ATLANTIS</option>
+                                            <option value="4">Format JAKARTA BIRD LAND</option>
+                                        </select>
                                     </td>
 
             <td style="text-align: center; border: 1px solid #ddd;">

@@ -10,9 +10,11 @@ class UnitKerja extends Model
 
     protected $fillable = [
         'group_unit_id',
+        'kode_unit',
         'nama_unit',
         'deskripsi',
         'urutan',
+        'format_closing',
     ];
 
     public function groupUnit()

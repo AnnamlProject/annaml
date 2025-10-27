@@ -26,8 +26,38 @@ class PurchaseInvoiceController extends Controller
     //
     public function index()
     {
-        $data = PurchaseInvoice::with(['jenisPembayaran', 'vendor'])->orderBy('date_invoice', 'asc')->orderBy('status_purchase', 'asc')->paginate(10);
-        return view('purchase_invoice.index', compact('data'));
+
+        $query = PurchaseInvoice::with(['jenisPembayaran', 'vendor', 'locationInventories']);
+        // dd($query->get());
+
+        if ($location_inventory = request('filter_location')) {
+            $query->whereHas('locationInventories', function ($q) use ($location_inventory) {
+                $q->where('kode_lokasi', $location_inventory);
+            });
+            // dd($query->toSql(), $query->getBindings());
+        }
+        if (request()->filled('filter_status')) {
+            $query->where('status_purchase', request('filter_status'));
+        }
+
+        $searchable = ['invoice_number', 'date_invoice',];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+                $q->orWhereHas('jenisPembayaran', function ($q1) use ($search) {
+                    $q1->where('nama_jenis', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('vendor', function ($q2) use ($search) {
+                    $q2->where('nama_vendors', 'like', "%{$search}%");
+                });
+            });
+        }
+        $data = $query->orderBy('date_invoice', 'asc')->orderBy('status_purchase', 'asc')->paginate(10);
+        $location = LocationInventory::pluck('kode_lokasi', 'id')->filter()->unique()->values();
+        return view('purchase_invoice.index', compact('data', 'location'));
     }
     public function create()
     {
@@ -169,8 +199,6 @@ class PurchaseInvoiceController extends Controller
 
             if ($paymentStatus != 1) {
                 $statusPurchase = 3;
-            } elseif ($request->purchase_order_id) {
-                $statusPurchase = 1;
             } else {
                 $statusPurchase = 0;
             }
@@ -199,9 +227,9 @@ class PurchaseInvoiceController extends Controller
 
             // 3b️⃣ Update status PO
             if ($request->purchase_order_id) {
-                \App\PurchaseOrder::whereKey($request->purchase_order_id)
-                    ->update(['status_purchase' => $statusPurchase]);
-                // dump('📦 Purchase Order diupdate:', $request->purchase_order_id);
+                $status_purchase_order =    \App\PurchaseOrder::whereKey($request->purchase_order_id)
+                    ->update(['status_purchase' => 1]);
+                // dump('📦 Purchase Order diupdate:', $status_purchase_order->toArray());
             }
 
             // ==============================================================
@@ -537,8 +565,6 @@ class PurchaseInvoiceController extends Controller
 
             if ($paymentStatus != 1) {
                 $statusPurchase = 3;
-            } elseif ($request->purchase_order_id) {
-                $statusPurchase = 1;
             } else {
                 $statusPurchase = 0;
             }
@@ -567,7 +593,7 @@ class PurchaseInvoiceController extends Controller
             // 5) Update status PO
             if ($request->purchase_order_id) {
                 \App\PurchaseOrder::whereKey($request->purchase_order_id)
-                    ->update(['status_purchase' => $statusPurchase]);
+                    ->update(['status_purchase' => 1]);
             }
 
             // 6) Rollback detail lama dari stok

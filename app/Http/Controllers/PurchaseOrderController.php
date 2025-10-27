@@ -23,8 +23,35 @@ class PurchaseOrderController extends Controller
 
     public function index()
     {
-        $data = PurchaseOrder::with(['jenisPembayaran', 'vendor', 'locationInventory'])->orderBy('date_order', 'asc')->orderBy('status_purchase', 'asc')->paginate(10);
-        return view('purchase_order.index', compact('data'));
+        $query = PurchaseOrder::with(['jenisPembayaran', 'vendor', 'locationInventory']);
+        if ($location_inventory = request('filter_location')) {
+            $query->whereHas('locationInventory', function ($q) use ($location_inventory) {
+                $q->where('kode_lokasi', $location_inventory);
+            });
+        }
+
+        if (request()->filled('filter_status')) {
+            $query->where('status_purchase', request('filter_status'));
+        }
+
+        $searchable = ['order_number', 'date_order',];
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search, $searchable) {
+                foreach ($searchable as $col) {
+                    $q->orWhere($col, 'like', "%{$search}%");
+                }
+                $q->orWhereHas('jenisPembayaran', function ($q1) use ($search) {
+                    $q1->where('nama_jenis', 'like', "%{$search}%");
+                });
+                $q->orWhereHas('vendor', function ($q2) use ($search) {
+                    $q2->where('nama_vendors', 'like', "%{$search}%");
+                });
+            });
+        }
+        $data = $query->orderBy('date_order', 'asc')->orderBy('status_purchase', 'asc')->paginate(10);
+        $location = LocationInventory::pluck('kode_lokasi')->filter()->unique()->values();
+        return view('purchase_order.index', compact('data', 'location'));
     }
     public function create()
     {

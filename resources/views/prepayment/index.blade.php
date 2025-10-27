@@ -55,8 +55,13 @@
                                     Vendor</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Amount</th>
-
+                                    Total Prepayment</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Telah Dialokasikan</th>
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Sisa Prepayment</th>
                                 <th
                                     class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Comment</th>
@@ -73,6 +78,10 @@
                                     <td class="px-2 py-1 text-center">{{ $item->account->nama_akun ?? '-' }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->vendor->nama_vendors ?? '-' }}</td>
                                     <td class="px-2 py-1 text-center">{{ number_format($item->amount) }}</td>
+                                    <td class="px-2 py-1 text-center">
+                                        {{ number_format($item->prepaymentAllocation->sum('allocated_amount')) }}</td>
+                                    <td class="px-2 py-1 text-center">
+                                        {{ number_format($item->sisa_prepayment) }}</td>
                                     <td class="px-2 py-1 text-center">{{ $item->commet ?? 'Tidak Ada' }}</td>
                                     <td class="px-2 py-1 text-right">
                                         <div class="flex justify-end space-x-3">

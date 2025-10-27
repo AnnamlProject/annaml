@@ -230,6 +230,35 @@
             </div>
         </div>
     </div>
+    <!-- Modal Apply Prepayment -->
+    <div id="applyPrepaymentModal"
+        class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
+            <h3 class="text-lg font-semibold mb-3">Apply Prepayment to Invoice</h3>
+            <table class="w-full border text-sm mb-4">
+                <thead>
+                    <tr class="bg-gray-100 text-center">
+                        <th class="border px-2 py-1">Select</th>
+                        <th class="border px-2 py-1">Invoice No</th>
+                        <th class="border px-2 py-1">Date</th>
+                    </tr>
+                </thead>
+                <tbody id="apply-invoice-list">
+                    <tr>
+                        <td colspan="4" class="text-center py-2 text-gray-500">Loading invoices...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="flex justify-end space-x-3">
+                <button id="cancelApply" class="px-4 py-1 bg-gray-400 text-white rounded">Cancel</button>
+                <button id="confirmApply" class="px-4 py-1 bg-green-600 text-white rounded">Apply</button>
+            </div>
+
+            <button class="absolute top-2 right-3 text-gray-500 hover:text-gray-700" id="closeModal">&times;</button>
+        </div>
+    </div>
+
     <!-- JQUERY & SELECT2 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -237,16 +266,38 @@
 
     <!-- FORMAT ANGKA -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const inputs = document.querySelectorAll('.number-format');
-            inputs.forEach(input => {
-                input.addEventListener('input', function(e) {
-                    let value = this.value.replace(/\D/g, '');
-                    this.value = new Intl.NumberFormat('id-ID').format(value);
-                });
+        document.addEventListener('input', function(e) {
+            // 🔹 Format angka realtime
+            if (e.target.classList.contains('number-format')) {
+                let value = e.target.value.replace(/\D/g, '');
+                e.target.value = new Intl.NumberFormat('id-ID').format(value);
+            }
+
+            // 🔹 Cek batas maksimal untuk payment-input
+            if (e.target.classList.contains('payment-input')) {
+                let raw = e.target.value.replace(/\./g, '');
+                let entered = parseFloat(raw || 0);
+                let max = parseFloat(e.target.dataset.max || 0);
+
+                if (entered > max) {
+                    e.target.classList.add('border-red-500', 'text-red-600');
+                    e.target.value = new Intl.NumberFormat('id-ID').format(max);
+                    alert(' Jumlah pembayaran tidak boleh lebih dari sisa tagihan!');
+                } else {
+                    e.target.classList.remove('border-red-500', 'text-red-600');
+                }
+            }
+        });
+
+        // 🔹 Bersihkan format sebelum submit form (agar backend dapat angka bersih)
+        document.addEventListener('submit', function() {
+            document.querySelectorAll('.number-format').forEach(input => {
+                input.value = input.value.replace(/\./g, '');
             });
         });
     </script>
+
+
 
     <!-- TAB SWITCHING -->
     <script>
@@ -290,9 +341,11 @@
                     <td class="border px-2 py-1">${Number(i.original_amount ?? 0).toLocaleString()}</td>
                     <td class="border px-2 py-1">${Number(i.amount_owing ?? 0).toLocaleString()}</td>
                     <td class="border px-2 py-1">
-                        <input type="number" step="0.01" name="payment_amount[${i.id}]"
-                            class="w-full border text-right px-2 py-1 payment-input">
-                    </td>
+            <input type="text" step="0.01"
+                name="payment_amount[${i.id}]"
+                class="w-full number-format border text-right px-2 py-1 payment-input"
+                data-max="${i.amount_owing ?? 0}">
+        </td>
                 </tr>`;
                     });
 
@@ -300,6 +353,7 @@
                     response.prepayments.forEach(p => {
                         rows += `
                         <tr class="text-right bg-yellow-50 prepayment-row"
+                            data-prepayment-id="${p.id}"
                             data-prepayment-account-id="${p.account_prepayment_id}"
                             data-prepayment-account-code="${p.account_prepayment_code}"
                             data-prepayment-account-name="${p.account_prepayment_name}">
@@ -309,11 +363,20 @@
                             <td class="border px-2 py-1">${Number(p.amount ?? 0).toLocaleString()}</td>
                             <td class="border px-2 py-1">0.00</td>
                             <td class="border px-2 py-1">
-                                <input type="number" step="0.01" name="prepayment_allocations[${p.id}]"
-                                    class="w-full border text-right px-2 py-1">
+                                <div class="flex items-center space-x-1">
+                                    <input type="text" step="0.01" name="prepayment_allocations[${p.id}]"
+                                        class="w-full border text-right px-2 py-1 prepayment-input">
+                                    <button type="button"
+                                        class="bg-blue-500 text-white text-xs px-2 py-1 rounded apply-prepayment-btn"
+                                        data-prepayment-id="${p.id}">
+                                        Apply
+                                    </button>
+                                    <input type="hidden" name="invoice_for_prepayment[${p.id}]" class="invoice-for-prepayment">
+                                </div>
                             </td>
                         </tr>`;
                     });
+
 
 
                     $('#invoice-body').html(rows ||
@@ -328,6 +391,64 @@
         });
     </script>
 
+
+    <script>
+        $(document).on('click', '.apply-prepayment-btn', function() {
+            const prepaymentId = $(this).data('prepayment-id');
+            const vendorId = $('#vendor_id').val();
+            if (!vendorId) {
+                alert('Pilih vendor terlebih dahulu.');
+                return;
+            }
+
+            // Simpan prepaymentId ke modal (supaya tahu nanti apply-nya untuk siapa)
+            $('#applyPrepaymentModal').data('prepayment-id', prepaymentId).removeClass('hidden flex').addClass(
+                'flex');
+
+            // Load daftar invoice vendor
+            $('#apply-invoice-list').html('<tr><td colspan="4" class="text-center py-2">Loading...</td></tr>');
+            $.get(`/vendor/${vendorId}/invoices`, function(res) {
+                let rows = '';
+                if (!res.invoices || res.invoices.length === 0) {
+                    rows =
+                        `<tr><td colspan="4" class="text-center py-2 text-gray-500">No open invoices.</td></tr>`;
+                } else {
+                    res.invoices.forEach(inv => {
+                        rows += `
+                    <tr class="text-center">
+                        <td class="border px-2 py-1">
+                            <input type="radio" name="selected_invoice" value="${inv.id}">
+                        </td>
+                        <td class="border px-2 py-1">${inv.invoice_number}</td>
+                        <td class="border px-2 py-1">${inv.date_invoice ?? ''}</td>
+                    </tr>`;
+                    });
+                }
+                $('#apply-invoice-list').html(rows);
+            });
+        });
+
+        // Close modal
+        $('#cancelApply, #closeModal').on('click', function() {
+            $('#applyPrepaymentModal').addClass('hidden').removeClass('flex');
+        });
+
+        // Confirm apply
+        $('#confirmApply').on('click', function() {
+            const selectedInvoiceId = $('input[name="selected_invoice"]:checked').val();
+            const prepaymentId = $('#applyPrepaymentModal').data('prepayment-id');
+            if (!selectedInvoiceId) {
+                alert('Pilih invoice terlebih dahulu.');
+                return;
+            }
+
+            // Set hidden input pada baris prepayment
+            $(`tr[data-prepayment-id="${prepaymentId}"] .invoice-for-prepayment`).val(selectedInvoiceId);
+
+            // Tutup modal
+            $('#applyPrepaymentModal').addClass('hidden').removeClass('flex');
+        });
+    </script>
     <!-- PAYMENT METHOD => ACCOUNT -->
     <script>
         (function() {
@@ -448,7 +569,6 @@
 
                 // Baris kredit
                 rows.push({
-                    accountCode: pmAccountCode,
                     account: pmAccountName,
                     debit: 0,
                     credit: val
@@ -457,12 +577,12 @@
             });
 
             // Render hasil
-            if (rows.length === 0) {
-                journalBody.innerHTML =
-                    `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal (belum isi payment/prepayment)</td></tr>`;
-                displayDebugMessage('⚠️ Tidak ada data invoice/prepayment dengan nilai > 0.');
-                return;
-            }
+            // if (rows.length === 0) {
+            //     journalBody.innerHTML =
+            //         `<tr><td colspan="3" class="text-center py-2 text-gray-500">Tidak ada journal (belum isi payment/prepayment)</td></tr>`;
+            //     displayDebugMessage('⚠️ Tidak ada data invoice/prepayment dengan nilai > 0.');
+            //     return;
+            // }
 
             rows.forEach(r => {
                 journalBody.insertAdjacentHTML('beforeend', `

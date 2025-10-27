@@ -58,28 +58,42 @@
                                                 </a>
                                             @endcan
 
-                                            @can('payment_method.update')
-                                                <a href="{{ route('PaymentMethod.edit', $item->id) }}"
-                                                    class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
-                                                    title="Edit">
+                                            @if ($item->status_payment === 1)
+                                                <button
+                                                    class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"
+                                                    title="Edit Disabled" disabled>
                                                     <i class="fas fa-edit"></i>
-                                                </a>
-                                            @endcan
-
-                                            @can('payment_method.delete')
-                                                <form id="delete-form-{{ $item->id }}"
-                                                    action="{{ route('PaymentMethod.destroy', $item->id) }}" method="POST"
-                                                    style="display: none;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-
-                                                <button type="button" onclick="confirmDelete({{ $item->id }})"
-                                                    class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
-                                                    title="Delete">
+                                                </button>
+                                                <button
+                                                    class="text-gray-400 cursor-not-allowed p-2 rounded-full bg-gray-100"
+                                                    title="Delete Disabled" disabled>
                                                     <i class="fas fa-trash"></i>
                                                 </button>
-                                            @endcan
+                                            @else
+                                                @can('payment_method.update')
+                                                    <a href="{{ route('PaymentMethod.edit', $item->id) }}"
+                                                        class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
+                                                        title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                @endcan
+
+                                                @can('payment_method.delete')
+                                                    <form id="delete-form-{{ $item->id }}"
+                                                        action="{{ route('PaymentMethod.destroy', $item->id) }}" method="POST"
+                                                        style="display: none;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+
+                                                    <button type="button" onclick="confirmDelete({{ $item->id }})"
+                                                        class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                                                        title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                @endcan
+                                            @endif
+
                                         </div>
                                     </td>
                                 </tr>

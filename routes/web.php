@@ -296,6 +296,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vendors/search', [VendorsController::class, 'search'])->name('vendors.search');
     Route::resource('vendors', 'VendorsController')->middleware('permission:vendor.access');
     Route::get('/vendor/{vendor}/invoices-prepayments', [VendorsController::class, 'getInvoicesAndPrepayments']);
+    Route::get('/vendor/{id}/invoices', [VendorsController::class, 'getInvoices']);
+
 
 
     // export dan import items

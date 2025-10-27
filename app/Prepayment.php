@@ -34,4 +34,13 @@ class Prepayment extends Model
     {
         return $this->belongsTo(chartOfAccount::class, 'account_prepayment');
     }
+    public function prepaymentAllocation()
+    {
+        return $this->hasMany(PrepaymentAllocation::class, 'prepayment_id');
+    }
+    public function getSisaPrepaymentAttribute()
+    {
+        $allocated = $this->prepaymentAllocation->sum('allocated_amount');
+        return $this->amount - $allocated;
+    }
 }

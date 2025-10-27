@@ -65,8 +65,8 @@ class ChartOfAccountController extends Controller
             'allow_project_allocation' => 'nullable|in:on,1,0',
             'catatan' => 'nullable|string',
             'catatan_pajak' => 'nullable|string',
-            'fiscal_account_id' => 'required|exists:fiscal_accounts,id',
-            'klasifikasi_id' => 'required|exists:klasifikasi_akuns,id',
+            'fiscal_account_id' => 'nullable|exists:fiscal_accounts,id',
+            'klasifikasi_id' => 'nullable|exists:klasifikasi_akuns,id',
             'is_income_tax' => 'nullable|in:on,1,0',
         ]);
 

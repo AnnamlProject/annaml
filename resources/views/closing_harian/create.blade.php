@@ -4,15 +4,22 @@
 
     <div class="py-10">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            <div id="tabs" class="type-section">
+                <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600" role="tablist">
+                    <li><a href="#select_item" class="tab-link active">Proces Closing Harian</a></li>
+                    <li><a href="#journal_report" class="tab-link">Journal report</a></li>
+                </ul>
+            </div>
             @php
                 $themeColor = \App\Setting::get('theme_color', '#4F46E5');
             @endphp
+
             <div class="bg-white shadow-lg rounded-xl p-6 border-t-4" style="border-color:{{ $themeColor }}">
                 <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
                     Closing Harian Create
                 </h4>
                 <form method="POST" enctype="multipart/form-data"
-                    action="{{ isset($data) ? route('komponen_penghasilan.update', $data->id) : route('komposisi_gaji.store') }}">
+                    action="{{ isset($data) ? route('closing_harian.update', $data->id) : route('closing_harian.store') }}">
 
                     @csrf
                     @if (isset($data))
@@ -37,34 +44,69 @@
                     @endif
 
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                            <input type="date" class="w-full px-4 py-2 border">
+                    <div id="select_item" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                <input type="date" name="tanggal" class="w-full px-4 py-2 border">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
+                                <select id="unit_kerja_id" name="unit_kerja_id"
+                                    class="w-full rounded-md bg-blue-200 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    required>
+                                    <option value="">-- Pilih Unit Kerja --</option>
+                                    @foreach ($unitKerja as $level)
+                                        <option value="{{ $level->id }}"
+                                            {{ old('unit_kerja_id', $data->unit_kerja_id ?? '') == $level->id ? 'selected' : '' }}>
+                                            {{ $level->nama_unit }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="jumlah_pengunjung" class="block text-sm font-medium text-gray-700 mb-1">Jumlah
+                                    Pengunjung</label>
+                                <input type="number" name="jumlah_pengunjung" class="w-full px-4 py-2 border"
+                                    placeholder="Masukkan Jumlah Pengunjung">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Unit Kerja</label>
-                            <select id="unit_kerja_id" name="unit_kerja_id"
-                                class="w-full rounded-md bg-blue-200 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                required>
-                                <option value="">-- Pilih Unit Kerja --</option>
-                                @foreach ($unitKerja as $level)
-                                    <option value="{{ $level->id }}"
-                                        {{ old('unit_kerja_id', $data->unit_kerja_id ?? '') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->nama_unit }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <!-- Tabel Komponen Penghasilan Berdasarkan Level -->
+                        <div id="komponenContainer" class="mt-8 hidden">
+                            <h3 class="text-lg font-semibold mb-4">Closing Harian</h3>
+                            <div id="komponenTable"></div>
                         </div>
                     </div>
 
-                    <!-- Tabel Komponen Penghasilan Berdasarkan Level -->
-                    <div id="komponenContainer" class="mt-8 hidden">
-                        <h3 class="text-lg font-semibold mb-4">Closing Harian</h3>
-                        <div id="komponenTable"></div>
+
+                    <div id="journal_report" class="tab-content hidden">
+                        <h2 class="text-lg font-semibold mb-4">Journal Report</h2>
+                        <table class="w-full border border-gray-300 text-sm">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="border text-left px-2 py-1">Account</th>
+                                    <th class="border text-right px-2 py-1">Debit</th>
+                                    <th class="border text-right px-2 py-1">Credit</th>
+                                    <th class="border text-left px-2 py-1">Comment</th>
+                                </tr>
+                            </thead>
+                            <tbody class="journal-body">
+                                <tr>
+                                    <td colspan="3" class="border text-center py-2 text-gray-500">
+                                        Tidak ada journal
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-50 font-semibold">
+                                <tr>
+                                    <td class="border px-2 py-1 text-right">Total</td>
+                                    <td class="border px-2 py-1 text-right total-debit">0.00</td>
+                                    <td class="border px-2 py-1 text-right total-credit">0.00</td>
+                                    <td class="border px-2 py-1 text-right total-credit"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
-
-
                     <!-- Buttons -->
                     <div class="mt-6 justify-end  flex space-x-4">
                         <a href="{{ route('komposisi_gaji.index') }}"
@@ -81,163 +123,1068 @@
         </div>
     </div>
 
-@endsection
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const unitSelect = document.getElementById('unit_kerja_id');
-        const komponenContainer = document.getElementById('komponenContainer');
-        const komponenTable = document.getElementById('komponenTable');
-
-        // Fungsi format angka Indonesia
-        function formatNumber(number) {
-            return new Intl.NumberFormat('id-ID', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(number);
+    <style>
+        table,
+        th,
+        td {
+            border: 2px solid black !important;
+            border-collapse: collapse;
         }
+    </style>
 
-        // Fungsi konversi string format ID ke angka float
-        function parseFormattedNumber(str) {
-            return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
-        }
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
 
-        unitSelect.addEventListener('change', function() {
-            let unitId = this.value;
-            let unitName = unitSelect.options[unitSelect.selectedIndex].text;
-            komponenTable.innerHTML = '';
-            komponenContainer.classList.add('hidden');
+                // Reset semua tab
+                document.querySelectorAll('.tab-link').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
 
-            if (unitId) {
-                fetch('/wahana-by-unit/' + unitId)
+                // Aktifkan tab yang diklik
+                this.classList.add('active');
+                const target = document.querySelector(this.getAttribute('href'));
+                target.classList.remove('hidden');
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let unitName = '';
+            const unitSelect = document.getElementById('unit_kerja_id');
+            const komponenContainer = document.getElementById('komponenContainer');
+            const komponenTable = document.getElementById('komponenTable');
+
+            unitSelect.addEventListener('change', function() {
+                const unitId = this.value;
+                unitName = unitSelect.options[unitSelect.selectedIndex].text;
+
+                komponenTable.innerHTML = '';
+                komponenContainer.classList.add('hidden');
+
+                if (!unitId) return;
+
+                fetch(`/get-linked-account-by-unit/${unitId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        // console.log('🔍 Data linked accounts dari server:',
+                        //     data); // <– tampilkan seluruh hasil JSON
+
+                        linkedAccountsMap = {};
+                        data.linkedAccounts.forEach(acc => {
+                            linkedAccountsMap[acc.kode] = {
+                                id: acc.id,
+                                kode: acc.akun.split(' - ')[0] || '-',
+                                name: acc.akun.split(' - ')[1] || '-',
+                                departemen: acc.departemen
+                            };
+                            generateJournalPreviewFormat2();
+                        });
+
+                        // console.log('🧭 Hasil mapping ke linkedAccountsMap:',
+                        //     linkedAccountsMap); // <– tampilkan hasil akhir mapping
+                    })
+                    .catch(error => {
+                        // console.error('❌ Error saat fetch linked account:', error);
+                    });
+
+
+                fetch(`/get-wahana-by-unit/${unitId}`)
                     .then(response => response.json())
                     .then(data => {
-                        if (data.length > 0) {
-                            let tableHTML = `
-                              <table class="border-collapse border border-black text-center text-sm w-full">
-                                        <thead>
-                                            <tr>
-                                            <th class="bg-yellow-200 border-black border-2 text-black p-2">Harga</th>
-                                            <th class="bg-yellow-200 border-black border-2 text-black p-2"> 70.000 
-                                            </th>
-                                            <th class="bg-yellow-200 border-black border-2 text-black p-2">50.000</th>
-                                            <th class="bg-yellow-200 border-black border-2 text-black p-2">100.000</th>
-                                            <th class="bg-yellow-200 border-black border-2 text-black p-2">100.000</th>
-                                            <th colspan="8" class="bg-green-600 text-white p-2"></th>
-                                            </tr>
-                                            <tr>
-                                            <th rowspan="4" class="bg-green-600 text-black border-black border-2 p-2">Wahana</th>
-                                            <th rowspan="4"  class="border-black border-2 bg-green-600 text-black p-1">4R</th>
-                                            <th rowspan="4" class="border-black border-2 bg-green-600 text-black p-1">4R SD</th>
-                                            <th rowspan="4"  class="border-black border-2 bg-green-600 text-black p-1">6R</th>
-                                            <th rowspan="4"  class="border-black border-2 bg-green-600 text-black p-1">6R KEDUA</th>
-                                            <th rowspan="2" class="bg-green-600 text-black border-black border-2 p-2">Total Omset</th>
-                                            <th colspan="2" class="bg-green-600 text-black border-black border-2 p-2">Payment Type<br>(Type Pembayaran Diterima)</th>
-                                            <th colspan="2" class="bg-green-600 text-black border-black border-2 p-2">PEMBAGIAN<br>(SHARING OMSET)</th>
-                                            <th colspan="1" class="bg-green-600 text-black border-black border-2 p-2">TITIPAN OMSET<br>(Disetor Tunai)</th>
-                                            <th rowspan="2" class="bg-green-600 text-black border-black border-2 p-2">Kekurangan<br>Cash untuk Setor Tunai ke Merchandise</th>
-                                            </tr>
-                                            <tr>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">QRIS</th>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">CASH</th>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">Merchandise</th>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">RCA</th>
-                                            <th class="border-black border-2 bg-green-600 text-black p-1">${unitName}</th>
-                                            </tr>
-                                        </thead>
-                                    <tbody>
-                            `;
+                        if (!data || !data.wahana || data.wahana.length === 0) return;
 
-                            data.forEach((item, index) => {
-                                tableHTML += `
-                                    <tr class="border-2 border-black">
-                                        <td class="px-2 py-1 border-black border-2">${item.nama_wahana}</td>
-                                        <input type="hidden" name="komponen[${index}][kode_komponen]" value="${item.id}">
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                        <td class="px-2 py-1 border-black border-2"></td>
-                                       
-                                    </tr>
-                                `;
-                            });
+                        const format = parseInt(data.format_closing);
+                        let html = '';
 
-                            tableHTML += `
-                                            </tbody>
-                                            <tfoot>
-                                            <tr class="bg-green-600 border-black border-2 font-semibold">
-                                                <td  class="px-4 py-2 border-black border-2 text-right">Total Keseluruhan:</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                                <td class="px-4 py-2 border-black border-2 text-right" id="grandTotal">0,00</td>
-                                            </tr>
-                                            </tfoot>
-                                        </table>
-                                        `;
-                            komponenTable.innerHTML = tableHTML;
-                            komponenContainer.classList.remove('hidden');
-
-                            // Fungsi perhitungan ulang total
-                            function calculate(index) {
-                                const nilai = parseFormattedNumber(document.querySelector(
-                                    `input[name="komponen[${index}][nilai]"]`).value);
-                                const jumlahHari = parseFloat(document.querySelector(
-                                    `input[name="komponen[${index}][jumlah_hari]"]`).value) || 0;
-                                const potongan = parseFormattedNumber(document.querySelector(
-                                    `input[name="komponen[${index}][potongan]"]`).value);
-
-                                const totalNilai = nilai * jumlahHari;
-                                const totalPotongan = potongan * jumlahHari;
-                                const totalKeseluruhan = totalNilai - totalPotongan;
-
-                                document.querySelector(`input[name="komponen[${index}][total]"]`)
-                                    .value = formatNumber(totalKeseluruhan);
-                            }
-
-                            function updateGrandTotal() {
-                                let sum = 0;
-                                komponenTable.querySelectorAll('.total').forEach(input => {
-                                    sum += parseFormattedNumber(input.value);
-                                });
-                                document.getElementById('grandTotal').textContent = formatNumber(
-                                    sum);
-                            }
-
-
-                            // Event handler untuk semua input
-                            komponenTable.querySelectorAll('.nilai, .jumlah-hari, .potongan')
-                                .forEach(input => {
-                                    input.addEventListener('input', function() {
-                                        const index = this.dataset.index;
-                                        calculate(index);
-                                        updateGrandTotal();
-                                    });
-                                });
-
-                            // Format nilai dan potongan saat blur
-                            komponenTable.querySelectorAll('.nilai, .potongan').forEach(input => {
-                                input.addEventListener('blur', function() {
-                                    const raw = parseFormattedNumber(this.value);
-                                    this.value = formatNumber(raw);
-                                });
-                            });
+                        if (format === 1 || format === 3) {
+                            html = generateFormat1(data.wahana, unitName);
+                        } else if (format === 2 || format === 4) {
+                            html = generateFormat2(data.wahana, unitName);
+                        } else {
+                            html =
+                                `<p class="text-red-600 font-semibold mt-2">Format closing tidak di ada.</p>`;
                         }
+
+                        komponenTable.innerHTML = html;
+                        komponenContainer.classList.remove('hidden');
+
+                        // ⬇️ Tambahan baru — pasang listener setelah tabel dirender
+                        if (format === 1 || format === 3) {
+                            attachListeners(data.wahana);
+                        } else if (format === 2 || format === 4)
+                            attachListeners2(data.wahana);
                     });
+            });
+
+            // ============================================================
+            // FORMAT 1: Sederhana (dibersihkan, tanpa event listener)
+            // ============================================================
+            function generateFormat1(wahanaList, unitName = '') {
+                if (!Array.isArray(wahanaList) || wahanaList.length === 0) {
+                    return `
+                <div class="p-4 text-center text-gray-600 bg-gray-100 rounded-lg border border-gray-300">
+                    <p>Tidak ada data wahana untuk unit <strong>${unitName || '-'}</strong>.</p>
+                </div>`;
+                }
+
+                const getItems = w => w.wahanaItem || w.wahana_item || [];
+
+                const fmt = num => {
+                    if (num === null || num === '' || isNaN(num)) return '';
+                    return new Intl.NumberFormat('id-ID').format(num);
+                };
+
+                const allItemNames = [...new Set(
+                    wahanaList.flatMap(w => getItems(w).map(i => i.nama_item))
+                )];
+
+
+
+                if (allItemNames.length === 0) {
+                    return `
+                <div class="p-4 text-center text-gray-600 bg-gray-100 rounded-lg border border-gray-300">
+                    <p>Tidak ada item aktif pada wahana di unit <strong>${unitName || '-'}</strong>.</p>
+                </div>`;
+                }
+
+                let html = `
+                <div style="overflow-x: auto; width: 100%;">
+                <table class="table-fixed border-collapse  w-full text-center text-sm min-w-[3000px]">
+                <thead class="bg-blue-300 text-black">
+            <tr>
+                <th rowspan="2" class="p-2 w-[150px]  bg-blue-200">Wahana</th>`;
+
+                allItemNames.forEach(item => {
+                    html += `<th colspan="3" class="p-2 ">${item}</th>`;
+                });
+
+                html += `
+        <th rowspan="2" class="p-2  bg-green-200">TOTAL OMSET</th>
+        <th colspan="2" class="p-2  bg-yellow-200">PAYMENT TYPE <br>DARI PENGUNJUNG</th>
+        <th colspan="2" class="p-2  bg-gray-200">PEMBAGIAN <br>SHARING OMSET</th>
+        <th rowspan="2" class="p-2  bg-pink-200">LEBIH (KURANG) <br>DANA CASH <br>SETOR TUNAI KE<br>MERCHANDISE</th>
+        </tr><tr>`;
+
+                allItemNames.forEach(() => {
+                    html += `
+            <th class="p-2  w-[100px]">QTY</th>
+            <th class="p-2  w-[120px]">HARGA</th>
+            <th class="p-2  w-[150px]">JUMLAH</th>`;
+                });
+
+                html += `
+        <th class="p-2  w-[150px]">QRIS</th>
+        <th class="p-2  w-[150px]">CASH</th>
+        <th class="p-2  w-[150px]">MERCHANDISE</th>
+        <th class="p-2  w-[150px]">RCA</th>
+        </tr></thead><tbody>`;
+
+                wahanaList.forEach((wahana, idx) => {
+                    const items = getItems(wahana);
+                    html +=
+                        `<tr><td class=" font-semibold bg-blue-50">${wahana.nama_wahana || '-'}</td>`;
+
+                    allItemNames.forEach((itemName, iidx) => {
+                        const item = items.find(i => i.nama_item === itemName);
+                        const harga = item?.harga ?? '';
+                        const accId = item?.account?.id ?? '';
+                        const accKode = item?.account?.kode_akun ?? '';
+                        const accNama = item?.account?.nama_akun ?? '';
+                        const departemenNama = item?.departemen?.deskripsi ?? '';
+                        const itemId = item?.id ?? '';
+
+
+
+                        html += `
+                                <td class="">
+                    <input type="hidden" name="details[${idx}][items][${iidx}][item_id]" value="${itemId}">
+                    <input type="number" name="details[${idx}][items][${iidx}][qty]" class="qty-${idx}-${iidx} w-full text-center" 
+                            min="0"
+                             />
+                    </td>
+
+                <td class="">
+                    <input type="text" name="details[${idx}][items][${iidx}][harga]" class="harga-${idx}-${iidx} w-full text-right" value="${fmt(harga)}" />
+                </td>
+                <td class="">
+                    <input type="text" name="details[${idx}][items][${iidx}][jumlah]" class="jumlah-${idx}-${iidx} w-full text-right bg-pink-100 font-bold"
+                    data-account-id="${accId}" 
+                            data-account-kode="${accKode}" 
+                            data-item-name="${itemName}"
+                            data-account-nama="${accNama}"
+                            data-departemen-nama="${departemenNama}"
+                             readonly />
+                </td>`;
+                    });
+
+                    html += `
+            <td class=" bg-green-100">
+                <input type="text" name="details[${idx}][omset_total]" class="total-${idx} w-full bg-green-200 text-right font-bold" readonly />
+            </td>
+            <td class=" bg-yellow-100">
+                <input type="text" name="details[${idx}][qris]" class="qris-${idx} w-full bg-amber-400 text-right" />
+            </td>
+            <td class=" bg-yellow-100">
+                <input type="text" name="details[${idx}][cash]" class="cash-${idx} w-full bg-amber-200 text-right" readonly />
+            </td>
+            <td class=" bg-gray-100">
+                <input type="text" name="details[${idx}][merch]" class="merch-${idx} w-full text-right" readonly />
+            </td>
+            <td class=" bg-gray-100">
+                <input type="text" name="details[${idx}][rca]" class="rca-${idx} w-full text-right" readonly />
+            </td>
+            <td class=" bg-pink-100">
+                <input type="text" name="details[${idx}][lebih_kurang]" class="lebih-${idx} w-full text-right" readonly />
+            </td>
+        </tr>`;
+                });
+
+                html += `</tbody>
+                <tfoot class="bg-blue-100 font-bold">
+        <tr>
+            <td class=" text-right p-2">TOTAL</td>`;
+                allItemNames.forEach(() => {
+                    html += `<td colspan="3"></td>`;
+                });
+                html += `
+        <td><input type="text" id="grand-total" class="w-full text-right  font-bold" readonly /></td>
+        <td><input type="text" id="grand-qris" class="w-full text-right  font-bold" readonly /></td>
+        <td><input type="text" id="grand-cash" class="w-full text-right  font-bold" readonly /></td>
+        <td><input type="text" id="grand-merch" class="w-full text-right  font-bold" readonly /></td>
+        <td><input type="text" id="grand-rca" class="w-full text-right  font-bold" readonly /></td>
+        <td><input type="text" id="grand-lebih" class="w-full text-right  font-bold" readonly /></td>
+        </tr>
+     </tfoot></table></div>`;
+                return html;
+                generateJournalPreview();
             }
+
+            // ============================================================
+            // FUNGSI TAMBAHAN: attachListeners untuk hitung otomatis
+            // ============================================================
+            function attachListeners(wahanaList) {
+                const getItems = w => w.wahanaItem || w.wahana_item || [];
+                const fmt = num => new Intl.NumberFormat('id-ID').format(num);
+                const toNum = val => parseFloat((val || '').toString().replace(/\./g, '').replace(',', '.')) || 0;
+
+                const allItemNames = [...new Set(
+                    wahanaList.flatMap(w => getItems(w).map(i => i.nama_item))
+                )];
+
+                // Fungsi untuk menghitung total keseluruhan di tfoot
+                const updateGrandTotal = () => {
+                    let gTotal = 0,
+                        gQris = 0,
+                        gCash = 0,
+                        gMerch = 0,
+                        gRca = 0,
+                        gLebih = 0;
+                    wahanaList.forEach((_, idx) => {
+                        gTotal += toNum(document.querySelector(`.total-${idx}`)?.value);
+                        gQris += toNum(document.querySelector(`.qris-${idx}`)?.value);
+                        gCash += toNum(document.querySelector(`.cash-${idx}`)?.value);
+                        gMerch += toNum(document.querySelector(`.merch-${idx}`)?.value);
+                        gRca += toNum(document.querySelector(`.rca-${idx}`)?.value);
+                        gLebih += toNum(document.querySelector(`.lebih-${idx}`)?.value);
+                    });
+                    document.getElementById('grand-total').value = fmt(gTotal);
+                    document.getElementById('grand-qris').value = fmt(gQris);
+                    document.getElementById('grand-cash').value = fmt(gCash);
+                    document.getElementById('grand-merch').value = fmt(gMerch);
+                    document.getElementById('grand-rca').value = fmt(gRca);
+                    document.getElementById('grand-lebih').value = fmt(gLebih);
+                };
+
+                wahanaList.forEach((wahana, idx) => {
+                    const qrisField = document.querySelector(`.qris-${idx}`);
+                    const cashField = document.querySelector(`.cash-${idx}`);
+                    const merchField = document.querySelector(`.merch-${idx}`);
+                    const rcaField = document.querySelector(`.rca-${idx}`);
+                    const lebihField = document.querySelector(`.lebih-${idx}`);
+                    const totalField = document.querySelector(`.total-${idx}`);
+
+                    const updateTotal = () => {
+                        let total = 0;
+                        allItemNames.forEach((__, ii) => {
+                            const jml = document.querySelector(`.jumlah-${idx}-${ii}`);
+                            total += toNum(jml?.value);
+                        });
+
+                        if (totalField) totalField.value = fmt(total);
+
+                        const qris = toNum(qrisField?.value);
+                        const cash = Math.max(0, total - qris);
+                        if (cashField) cashField.value = fmt(cash);
+
+                        const merch = total * 0.45;
+                        if (merchField) merchField.value = fmt(merch);
+
+                        const rca = total * 0.55;
+                        if (rcaField) rcaField.value = fmt(rca);
+
+                        const lebihKurang = cash - merch;
+                        if (lebihField) lebihField.value = fmt(lebihKurang);
+
+                        // update tfoot total
+                        updateGrandTotal();
+                        generateJournalPreview();
+
+                    };
+
+                    allItemNames.forEach((_, iidx) => {
+                        const qtyInput = document.querySelector(`.qty-${idx}-${iidx}`);
+                        const hargaInput = document.querySelector(`.harga-${idx}-${iidx}`);
+                        const jumlahInput = document.querySelector(`.jumlah-${idx}-${iidx}`);
+                        if (!qtyInput || !hargaInput) return;
+
+                        const recalc = () => {
+                            const qty = toNum(qtyInput.value);
+                            const harga = toNum(hargaInput.value);
+                            const jumlah = qty * harga;
+                            jumlahInput.value = fmt(jumlah);
+                            updateTotal();
+                        };
+
+                        qtyInput.addEventListener('input', recalc);
+                        hargaInput.addEventListener('input', recalc);
+                        hargaInput.addEventListener('blur', () => {
+                            hargaInput.value = fmt(toNum(hargaInput.value));
+                        });
+                    });
+
+                    if (qrisField) {
+                        qrisField.addEventListener('focus', () => {
+                            qrisField.value = toNum(qrisField.value);
+                        });
+                        qrisField.addEventListener('input', updateTotal);
+                        qrisField.addEventListener('blur', () => {
+                            qrisField.value = fmt(toNum(qrisField.value));
+                            updateTotal();
+                        });
+                    }
+
+                    updateTotal();
+                    generateJournalPreview();
+
+                });
+            }
+
+            // ============================================================
+            // FORMAT 2 (original dari kamu, tidak diubah)
+            // ============================================================
+            function generateFormat2(wahanaList, unitName = '') {
+                if (!Array.isArray(wahanaList) || wahanaList.length === 0) {
+                    return `
+                <div class="p-4 text-center text-gray-600 bg-gray-100 rounded-lg border border-gray-300">
+                    <p>Tidak ada data wahana untuk unit <strong>${unitName || '-'}</strong>.</p>
+                </div>`;
+                }
+
+                const getItems = w => w.wahanaItem || w.wahana_item || [];
+
+                const fmt = num => {
+                    if (num === null || num === '' || isNaN(num)) return '';
+                    return new Intl.NumberFormat('id-ID').format(num);
+                };
+
+                const allItemNames = [...new Set(
+                    wahanaList.flatMap(w => getItems(w).map(i => i.nama_item))
+                )];
+
+                if (allItemNames.length === 0) {
+                    return `
+                <div class="p-4 text-center text-gray-600 bg-gray-100 rounded-lg border border-gray-300">
+                    <p>Tidak ada item aktif pada wahana di unit <strong>${unitName || '-'}</strong>.</p>
+                </div>`;
+                }
+
+                let html = `
+                <div style="overflow-x: auto; width: 100%;">
+                <table class="table-fixed border-collapse  w-full text-center text-sm min-w-[3000px]">
+                <thead class="bg-blue-300 text-black">
+            <tr>
+                <th rowspan="2" class="px-4 py-2 w-[150px]  bg-blue-200">Wahana</th>`;
+
+                allItemNames.forEach(item => {
+                    html += `<th colspan="3" class="px-4 py-2">${item}</th>`;
+                });
+
+                html += `
+        <th rowspan="2" class="px-4 py-2 bg-green-200">TOTAL OMSET</th>
+        <th colspan="2" class="px-4 py-2 bg-yellow-200">PAYMENT TYPE <br>DARI PENGUNJUNG</th>
+        <th colspan="2" class="px-4 py-2 bg-gray-200">PEMBAGIAN <br>SHARING OMSET</th>
+        <th rowpsan="2" class="px-4 py-2 bg-gray-200">TITIPAN <br>OMSET</th>
+        <th rowspan="2" class="px-4 py-2 bg-pink-200">LEBIH (KURANG) <br>DANA CASH <br>SETOR TUNAI KE<br>MERCHANDISE</th>
+        </tr><tr>`;
+
+                allItemNames.forEach(() => {
+                    html += `
+            <th class="px-4 py-2  w-[100px]">QTY</th>
+            <th class="px-4 py-2  w-[120px]">HARGA</th>
+            <th class="px-4 py-2  w-[150px]">JUMLAH</th>`;
+                });
+
+                html += `
+        <th class="px-4 py-2 w-[150px]">QRIS</th>
+        <th class="px-4 py-2 w-[150px]">CASH</th>
+        <th class="px-4 py-2 w-[150px]">MERCHANDISE</th>
+        <th class="px-4 py-2 w-[150px]">RCA</th>
+        <th class="px-4 py-2 w-[150px]">${unitName}<br>(SETOR TUNAI)</th>
+        </tr></thead><tbody>`;
+
+                wahanaList.forEach((wahana, idx) => {
+                    const items = getItems(wahana);
+                    html +=
+                        `<tr><td class=" font-semibold text-left bg-blue-50">${wahana.nama_wahana || '-'}</td>`;
+
+                    allItemNames.forEach((itemName, iidx) => {
+                        const item = items.find(i => i.nama_item === itemName);
+                        const harga = item?.harga ?? '';
+                        const accId = item?.account?.id ?? '';
+                        const accKode = item?.account?.kode_akun ?? '';
+                        const accNama = item?.account?.nama_akun ?? '';
+                        const itemId = item?.id ?? '';
+                        const departemenNama = item?.departemen?.deskripsi ?? '';
+
+                        html += `
+                <td class="">
+                     <input type="hidden" name="details[${idx}][items][${iidx}][item_id]" value="${itemId}">
+                    <input type="number" name="details[${idx}][items][${iidx}][qty]" class="qty-${idx}-${iidx} w-full text-center" min="0"           
+                    />
+                </td>
+                <td class="">
+                    <input type="text" name="details[${idx}][items][${iidx}][harga]" class="harga-${idx}-${iidx} w-full text-right" value="${fmt(harga)}" />
+                </td>
+                <td class="">
+                    <input type="text" name="details[${idx}][items][${iidx}][jumlah]" class="jumlah-${idx}-${iidx} w-full text-right bg-pink-100 font-bold"
+                      data-account-id="${accId}" 
+                    data-account-kode="${accKode}" 
+                     data-item-name="${itemName}" 
+                    data-account-nama="${accNama}"
+                    data-departemen-nama="${departemenNama}" readonly />
+                </td>`;
+                    });
+
+                    html += `
+         <td class=" bg-green-100">
+                <input type="text"name="details[${idx}][omset_total]" class="total-${idx} w-full px-2 py-1 bg-green-200 text-right font-bold" readonly />
+            </td>
+            <td class=" bg-yellow-100">
+                <input type="text" name="details[${idx}][qris]" class="qris-${idx} w-full px-2 py-1 bg-amber-400 text-right" />
+            </td>
+            <td class=" bg-yellow-100">
+                <input type="text" name="details[${idx}][cash]" class="cash-${idx} w-full px-2 py-1 bg-amber-200 text-right" readonly />
+            </td>
+            <td class=" bg-gray-100">
+                <input type="text" name="details[${idx}][merch]" class="merch-${idx} w-full px-2 py-1 text-right" readonly />
+            </td>
+            <td class=" bg-gray-100">
+                <input type="text" name="details[${idx}][rca]" class="rca-${idx} w-full px-2 py-1 text-right" readonly />
+            </td>
+            <td class=" bg-pink-100">
+                <input type="text" name="details[${idx}][titipan]" class="titipan-${idx} w-full px-2 py-1 text-right" />
+            </td>
+            <td class=" bg-pink-100">
+                <input type="text" name="details[${idx}][lebih_kurang]" class="lebih-${idx} w-full px-2 py-1 text-right" readonly />
+            </td>
+        </tr>`;
+                });
+                html += `</tbody>
+                <tfoot class="bg-blue-100 font-bold">
+
+  <!-- SUBTOTAL (agregat semua wahana) -->
+  <tr class="bg-gray-200 font-semibold">
+    <td class="text-left bg-gray-300">SUBTOTAL</td>
+    ${allItemNames.map((_, iidx) => `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-qty-${iidx} w-full text-center font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-harga-${iidx} w-full text-right  font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-jumlah-${iidx} w-full text-right font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+    <td><input type="text" id="subtotal-total"    class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-qris"     class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-cash"     class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-merch"    class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-rca"      class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-titipan"  class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+    <td><input type="text" id="subtotal-lebih"    class="w-full text-right bg-gray-200 font-bold" readonly /></td>
+  </tr>
+
+  <!-- DIKURANGI (placeholder baris kebijakan pengurang lain jika ada) -->
+  <tr class="bg-gray-100 font-semibold">
+    <td class="text-left">DIKURANGI:</td>
+    ${allItemNames.map(() => `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+    <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
+    <td class="bg-gray-100"></td> <!-- QRIS -->
+    <td class="bg-gray-100"></td> <!-- CASH -->
+    <td class="bg-gray-100"></td> <!-- MERCH -->
+    <td class="bg-gray-100"></td> <!-- RCA -->
+    <td class="bg-gray-100"></td> <!-- TITIPAN -->
+    <td class="bg-gray-100"></td> <!-- LEBIH -->
+  </tr>
+
+  <!-- MDR 0,7% (dihitung dari TITIPAN agregat) -->
+  <tr class="bg-gray-100 font-semibold">
+    <td class="text-left">MDR 0,7%</td>
+    ${allItemNames.map(() => `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+    <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
+    <td class="bg-gray-100"></td> <!-- QRIS -->
+    <td class="bg-gray-100"></td> <!-- CASH -->
+    <td class="bg-gray-100"></td> <!-- MERCH -->
+    <td class="bg-gray-100"></td> <!-- RCA -->
+    <td class="bg-gray-100"><input type="text" id="mdr-grand" class="w-full text-right bg-gray-100 font-bold" readonly /></td> <!-- TITIPAN -->
+    <td class="bg-gray-100"></td> <!-- LEBIH -->
+  </tr>
+
+  <!-- SUBTOTAL SETELAH MDR (titipan - mdr) -->
+  <tr class="bg-gray-100 font-bold">
+    <td class="text-left">SUB TOTAL MDR</td>
+    ${allItemNames.map(() => `
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+    <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
+    <td class="bg-gray-100"></td> <!-- QRIS -->
+    <td class="bg-gray-100"></td> <!-- CASH -->
+    <td class="bg-gray-100"></td> <!-- MERCH -->
+    <td class="bg-gray-100"></td> <!-- RCA -->
+    <td class="bg-gray-100"><input type="text" id="subtotal-mdr" class="w-full text-right bg-gray-100 font-bold" readonly /></td> <!-- TITIPAN -->
+    <td class="bg-gray-100"></td> <!-- LEBIH -->
+  </tr>
+
+  <!-- GRAND TOTAL (sudah ada sebelumnya, dipertahankan) -->
+  <tr>
+    <td class="text-left font-bold">TOTAL</td>
+    ${allItemNames.map(() => `<td colspan="3"></td>`).join('')}
+    <td><input type="text" id="grand-total"class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-qris" class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-cash"class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-merch"class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-rca" class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-titipan"class="w-full text-right font-bold" readonly /></td>
+    <td><input type="text" id="grand-lebih"  class="w-full text-right font-bold" readonly /></td>
+  </tr>
+
+</tfoot></table></div>`;
+                return html;
+
+                generateJournalPreviewFormat2();
+            }
+
+
+            function attachListeners2(wahanaList) {
+                const getItems = w => w.wahanaItem || w.wahana_item || [];
+                const fmt = num => new Intl.NumberFormat('id-ID').format(num);
+                const toNum = val => parseFloat((val || '').toString().replace(/\./g, '').replace(',', '.')) || 0;
+
+                const allItemNames = [...new Set(
+                    wahanaList.flatMap(w => getItems(w).map(i => i.nama_item))
+                )];
+                const updateMdrGrand = () => {
+                    let sTitipan = 0; // deklarasi yang benar
+                    wahanaList.forEach((_, idx) => {
+                        sTitipan += toNum(document.querySelector(`.titipan-${idx}`)?.value);
+                    });
+                    const totalMdr = sTitipan * 0.007; // 0.7%
+                    const mdrField = document.getElementById('mdr-grand');
+                    if (mdrField) mdrField.value = fmt(totalMdr); // karena mdr-grand adalah <input>
+                };
+
+                const updateSubtotal = () => {
+                    allItemNames.forEach((__, iidx) => {
+                        let totalQty = 0,
+                            totalHarga = 0,
+                            totalJumlah = 0,
+                            sTotal = 0,
+                            sQris = 0,
+                            sCash = 0,
+                            sMerch = 0,
+                            sRca = 0,
+                            sLebih = 0;
+                        sTitipan = 0;
+
+                        wahanaList.forEach((_, idx) => {
+                            const qty = toNum(document.querySelector(`.qty-${idx}-${iidx}`)
+                                ?.value);
+                            const harga = toNum(document.querySelector(`.harga-${idx}-${iidx}`)
+                                ?.value);
+                            const jumlah = toNum(document.querySelector(
+                                `.jumlah-${idx}-${iidx}`)?.value);
+                            sTotal += toNum(document.querySelector(`.total-${idx}`)?.value);
+                            sQris += toNum(document.querySelector(`.qris-${idx}`)?.value);
+                            sCash += toNum(document.querySelector(`.cash-${idx}`)?.value);
+                            sMerch += toNum(document.querySelector(`.merch-${idx}`)?.value);
+                            sRca += toNum(document.querySelector(`.rca-${idx}`)?.value);
+                            sLebih += toNum(document.querySelector(`.lebih-${idx}`)?.value);
+                            sTitipan += toNum(document.querySelector(`.titipan-${idx}`)?.value);
+
+                            totalQty += qty;
+                            totalHarga += harga;
+                            totalJumlah += jumlah;
+
+                        });
+
+                        document.querySelector(`.subtotal-qty-${iidx}`).value = fmt(totalQty);
+                        document.querySelector(`.subtotal-harga-${iidx}`).value = fmt(totalHarga);
+                        document.querySelector(`.subtotal-jumlah-${iidx}`).value = fmt(totalJumlah);
+                        document.getElementById('subtotal-total').value = fmt(sTotal);
+                        document.getElementById('subtotal-qris').value = fmt(sQris);
+                        document.getElementById('subtotal-cash').value = fmt(sCash);
+                        document.getElementById('subtotal-merch').value = fmt(sMerch);
+                        document.getElementById('subtotal-rca').value = fmt(sRca);
+                        document.getElementById('subtotal-titipan').value = fmt(sTitipan);
+                        document.getElementById('subtotal-lebih').value = fmt(sLebih);
+
+                        updateMdrGrand();
+                        generateJournalPreviewFormat2();
+
+                    });
+                };
+
+
+                // Fungsi untuk menghitung total keseluruhan di tfoot
+                const updateGrandTotal = () => {
+                    let gTotal = 0,
+                        gQris = 0,
+                        gCash = 0,
+                        gMerch = 0,
+                        gRca = 0,
+                        gLebih = 0;
+                    gTitipan = 0;
+                    wahanaList.forEach((_, idx) => {
+                        gTotal += toNum(document.querySelector(`.total-${idx}`)?.value);
+                        gQris += toNum(document.querySelector(`.qris-${idx}`)?.value);
+                        gCash += toNum(document.querySelector(`.cash-${idx}`)?.value);
+                        gMerch += toNum(document.querySelector(`.merch-${idx}`)?.value);
+                        gRca += toNum(document.querySelector(`.rca-${idx}`)?.value);
+                        gLebih += toNum(document.querySelector(`.lebih-${idx}`)?.value);
+                        gTitipan += toNum(document.querySelector(`.titipan-${idx}`)?.value);
+                    });
+                    const subTitipan = toNum(document.getElementById('subtotal-titipan')?.value);
+                    const mdrGrand = toNum(document.getElementById('mdr-grand')?.value);
+
+                    const grandTitipan = subTitipan - mdrGrand;
+                    document.getElementById('grand-total').value = fmt(gTotal);
+                    document.getElementById('grand-qris').value = fmt(gQris);
+                    document.getElementById('grand-cash').value = fmt(gCash);
+                    document.getElementById('grand-merch').value = fmt(gMerch);
+                    document.getElementById('grand-rca').value = fmt(gRca);
+                    document.getElementById('grand-lebih').value = fmt(gLebih);
+                    document.getElementById('grand-titipan').value = fmt(grandTitipan);
+
+
+                    generateJournalPreviewFormat2();
+
+                };
+
+                wahanaList.forEach((wahana, idx) => {
+                    const qrisField = document.querySelector(`.qris-${idx}`);
+                    const titipanField = document.querySelector(`.titipan-${idx}`);
+                    const cashField = document.querySelector(`.cash-${idx}`);
+                    const merchField = document.querySelector(`.merch-${idx}`);
+                    const rcaField = document.querySelector(`.rca-${idx}`);
+                    const lebihField = document.querySelector(`.lebih-${idx}`);
+                    const totalField = document.querySelector(`.total-${idx}`);
+
+                    const updateTotal = () => {
+                        let total = 0;
+                        allItemNames.forEach((__, ii) => {
+                            const jml = document.querySelector(`.jumlah-${idx}-${ii}`);
+                            total += toNum(jml?.value);
+                        });
+
+                        if (totalField) totalField.value = fmt(total);
+
+                        const qris = toNum(qrisField?.value);
+                        const cash = Math.max(0, total - qris);
+                        if (cashField) cashField.value = fmt(cash);
+
+                        const merch = total * 0.45;
+                        if (merchField) merchField.value = fmt(merch);
+
+                        const rca = total * 0.55;
+                        if (rcaField) rcaField.value = fmt(rca);
+
+                        const titipan = toNum(titipanField?.value);
+                        const lebihKurang = cash - merch - titipan;
+                        if (lebihField) lebihField.value = fmt(lebihKurang);
+
+                        // update tfoot total
+                        updateSubtotal();
+                        updateGrandTotal();
+                        generateJournalPreviewFormat2();
+
+
+                    };
+
+                    allItemNames.forEach((_, iidx) => {
+                        const qtyInput = document.querySelector(`.qty-${idx}-${iidx}`);
+                        const hargaInput = document.querySelector(`.harga-${idx}-${iidx}`);
+                        const jumlahInput = document.querySelector(`.jumlah-${idx}-${iidx}`);
+                        if (!qtyInput || !hargaInput) return;
+
+                        const recalc = () => {
+                            const qty = toNum(qtyInput.value);
+                            const harga = toNum(hargaInput.value);
+                            const jumlah = qty * harga;
+                            jumlahInput.value = fmt(jumlah);
+                            updateTotal();
+                        };
+
+                        qtyInput.addEventListener('input', recalc);
+                        hargaInput.addEventListener('input', recalc);
+                        hargaInput.addEventListener('blur', () => {
+                            hargaInput.value = fmt(toNum(hargaInput.value));
+                        });
+                    });
+                    if (titipanField) {
+                        titipanField.addEventListener('focus', () => {
+                            titipanField.value = toNum(titipanField.value);
+                        });
+                        titipanField.addEventListener('input', updateTotal);
+                        titipanField.addEventListener('blur', () => {
+                            titipanField.value = fmt(toNum(titipanField.value));
+                            updateTotal();
+                        });
+                    }
+
+                    if (qrisField) {
+                        qrisField.addEventListener('focus', () => {
+                            qrisField.value = toNum(qrisField.value);
+                        });
+                        qrisField.addEventListener('input', updateTotal);
+                        qrisField.addEventListener('blur', () => {
+                            qrisField.value = fmt(toNum(qrisField.value));
+                            updateTotal();
+                        });
+                    }
+
+                    updateTotal();
+                    generateJournalPreviewFormat2();
+
+                });
+            }
+            let linkedAccountsMap = {};
+
+            function generateJournalPreview() {
+                const journalBody = document.querySelector('.journal-body');
+                journalBody.innerHTML = '';
+
+                // --- helper lokal (selaras dengan attachListeners)
+                const fmt = num => new Intl.NumberFormat('id-ID').format(num);
+                const toNum = val => parseFloat((val || '').toString().replace(/\./g, '').replace(',', '.')) || 0;
+
+                let journalRows = [];
+                let totalDebit = 0;
+                let totalCredit = 0;
+
+
+                const piutangQrisAccount = linkedAccountsMap['Piutang Qris'] || {};
+                const kasOmsetAccount = linkedAccountsMap['Kas Omset'] || {};
+                const titipanOmset = linkedAccountsMap['Titipan Omset Merchandise'] || {};
+                const bebanSewa = linkedAccountsMap['Beban Bagi Hasil(Sewa)'] || {};
+                const pendapatanOpAccount = linkedAccountsMap['Pendapatan Non Operasional'] || {};
+
+                // --- Debit Piutang QRIS
+                const piutang = toNum($('#grand-qris').val());
+                if (piutang > 0) {
+                    journalRows.push({
+                        accountCode: piutangQrisAccount.kode,
+                        account: piutangQrisAccount.name,
+                        departemen: piutangQrisAccount.departemen,
+                        debit: piutang,
+                        credit: 0,
+                        comment: `Penjualan ${unitName || ' - '} Dibayarkan via QRIS`
+
+                    });
+                    totalDebit += piutang;
+                }
+
+                // --- Debit Kas Omset
+                const kas = toNum($('#grand-cash').val());
+                if (kas > 0) {
+                    journalRows.push({
+                        accountCode: kasOmsetAccount.kode,
+                        account: kasOmsetAccount.name,
+                        departemen: kasOmsetAccount.departemen,
+                        debit: kas,
+                        credit: 0,
+                        comment: `Penjualan ${unitName || ' - '} Diterima Cash`
+
+                    });
+                    totalDebit += kas;
+                }
+
+                // --- Kredit per item (penjualan tiap wahana)
+                document.querySelectorAll('[class^="jumlah-"]').forEach(input => {
+                    const val = toNum(input.value);
+                    if (val > 0) {
+                        const accKode = input.dataset.accountKode || '';
+                        const accNama = input.dataset.accountNama || '';
+                        const itemName = input.dataset.itemName || '';
+                        const departemenNama = input.dataset.departemenNama || '';
+
+                        journalRows.push({
+                            accountCode: accKode,
+                            account: accNama,
+                            departemen: departemenNama,
+                            debit: 0,
+                            credit: val,
+                            comment: `Penjualan ${itemName}-${unitName}`
+
+                        });
+                        totalCredit += val;
+                    }
+                });
+
+                // debit beban bagi hasil sewa
+                const beban = toNum($('#grand-merch').val());
+                if (beban > 0) {
+                    journalRows.push({
+                        accountCode: bebanSewa.kode,
+                        account: bebanSewa.name,
+                        departemen: bebanSewa.departemen,
+                        debit: beban,
+                        credit: 0,
+                        comment: `Setor Bagi Hasil Omset ${unitName || ' - '} ke Ancol `
+
+                    });
+                    totalDebit += beban;
+
+                    journalRows.push({
+                        accountCode: kasOmsetAccount.kode,
+                        account: kasOmsetAccount.name,
+                        departemen: kasOmsetAccount.departemen,
+                        debit: 0,
+                        credit: beban,
+                        comment: `Setor Bagi Hasil Omset ${unitName || ' - '} ke Ancol `
+
+                    });
+                    totalCredit += beban;
+                }
+
+                // --- Render ke tabel jurnal
+                journalRows.forEach(row => {
+                    const displayAccount = row.accountCode ?
+                        `${row.accountCode} - ${row.account}${row.departemen ? ' (' + row.departemen + ')' : ''}` :
+                        `${row.account}${row.departemen ? ' (' + row.departemen + ')' : ''}`;
+                    journalBody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="border px-2 py-1">${displayAccount}</td>
+                <td class="border px-2 py-1 text-right">${fmt(row.debit)}</td>
+                <td class="border px-2 py-1 text-right">${fmt(row.credit)}</td>
+                <td class="border px-2 py-1 text-left">${row.comment}</td>
+            </tr>
+        `);
+                });
+
+                // --- Update total debit/credit bawah tabel
+                document.querySelector('.total-debit').textContent = fmt(totalDebit);
+                document.querySelector('.total-credit').textContent = fmt(totalCredit);
+            }
+
+            function generateJournalPreviewFormat2() {
+                const journalBody = document.querySelector('.journal-body');
+                journalBody.innerHTML = '';
+
+                // --- helper lokal (selaras dengan attachListeners)
+                const fmt = num => new Intl.NumberFormat('id-ID').format(num);
+                const toNum = val => parseFloat((val || '').toString().replace(/\./g, '').replace(',', '.')) || 0;
+
+                let journalRows = [];
+                let totalDebit = 0;
+                let totalCredit = 0;
+
+                const piutangQrisAccount = linkedAccountsMap['Piutang Qris'] || {};
+                const kasOmsetAccount = linkedAccountsMap['Kas Omset'] || {};
+                const titipanOmset = linkedAccountsMap['Titipan Omset Merchandise'] || {};
+                const bebanSewa = linkedAccountsMap['Beban Bagi Hasil(Sewa)'] || {};
+                const pendapatanOpAccount = linkedAccountsMap['Pendapatan Non Operasional'] || {};
+
+                // --- Debit Piutang QRIS
+                const piutang = toNum($('#grand-qris').val());
+                if (piutang > 0) {
+                    journalRows.push({
+                        accountCode: piutangQrisAccount.kode,
+                        account: piutangQrisAccount.name,
+                        departemen: piutangQrisAccount.departemen,
+                        debit: piutang,
+                        credit: 0,
+                        comment: `Penjualan ${unitName || ' - '} Dibayarkan via QRIS`
+                    });
+                    totalDebit += piutang;
+                }
+
+                // --- Debit Kas Omset
+                const kas = toNum($('#grand-cash').val());
+                if (kas > 0) {
+                    journalRows.push({
+                        accountCode: kasOmsetAccount.kode,
+                        account: kasOmsetAccount.name,
+                        departemen: kasOmsetAccount.departemen,
+                        debit: kas,
+                        credit: 0,
+                        comment: `Penjualan ${unitName || ' - '} Diterima Cash`
+
+                    });
+                    totalDebit += kas;
+                }
+                // credit titipan omset
+                const titipanOmsetCredit = toNum($('#subtotal-titipan').val());
+                if (titipanOmsetCredit > 0) {
+                    journalRows.push({
+                        accountCode: titipanOmset.kode,
+                        account: titipanOmset.name,
+                        departemen: titipanOmset.departemen,
+                        debit: 0,
+                        credit: titipanOmsetCredit,
+                        comment: `Titipan Penjualan Merchandise ${unitName || ' - '} `
+
+                    });
+                    totalCredit += titipanOmsetCredit;
+
+                }
+
+                // --- Kredit per item (penjualan tiap wahana)
+                document.querySelectorAll('[class^="jumlah-"]').forEach(input => {
+                    const val = toNum(input.value);
+                    if (val > 0) {
+                        const accKode = input.dataset.accountKode || '';
+                        const accNama = input.dataset.accountNama || '';
+                        const itemName = input.dataset.itemName || '';
+                        const departemenNama = input.dataset.departemenNama || '';
+
+                        journalRows.push({
+                            accountCode: accKode,
+                            account: accNama,
+                            departemen: departemenNama,
+                            debit: 0,
+                            credit: val,
+                            comment: `Penjualan ${itemName}-${unitName}`
+
+                        });
+                        totalCredit += val;
+                    }
+                });
+
+                // debit beban bagi hasil sewa
+                const beban = toNum($('#grand-merch').val());
+                if (beban > 0) {
+                    journalRows.push({
+                        accountCode: bebanSewa.kode,
+                        account: bebanSewa.name,
+                        departemen: bebanSewa.departemen,
+                        debit: beban,
+                        credit: 0,
+                        comment: `Setor Bagi Hasil Omset ${unitName || ' - '} ke Ancol `
+
+                    });
+                    totalDebit += beban;
+                }
+                // setor titipan omset debit
+                const SetortitipanOmsetAccount = toNum($('#subtotal-titipan').val());
+                if (SetortitipanOmsetAccount > 0) {
+                    journalRows.push({
+                        accountCode: titipanOmset.kode,
+                        account: titipanOmset.name,
+                        departemen: titipanOmset.departemen,
+                        debit: SetortitipanOmsetAccount,
+                        credit: 0,
+                        comment: `Setor Titipan Penjualan Merchandise ${unitName || ' - '} `
+
+                    });
+                    totalDebit += SetortitipanOmsetAccount;
+
+                }
+
+
+                const pendapatanOp = toNum($('#mdr-grand').val());
+                if (pendapatanOp > 0) {
+                    journalRows.push({
+                        accountCode: pendapatanOpAccount.kode,
+                        account: pendapatanOpAccount.name,
+                        departemen: pendapatanOpAccount.departemen,
+                        debit: 0,
+                        credit: pendapatanOp,
+                        comment: `MDR 0,7 % Setor Titipan Penjualan Merchandise ${unitName || ' - '} `
+
+                    });
+                    totalCredit += pendapatanOp;
+                }
+
+                const grandTitipan = toNum($('#grand-titipan').val());
+                if (grandTitipan > 0) {
+                    journalRows.push({
+                        accountCode: kasOmsetAccount.kode,
+                        account: kasOmsetAccount.name,
+                        departemen: kasOmsetAccount.departemen,
+                        debit: 0,
+                        credit: grandTitipan,
+                        comment: `Setor Titipan Penjualan Merchandise ${unitName || ' - '} Dikurangi MDR `
+
+                    });
+                    totalCredit += grandTitipan;
+                }
+
+                const setorBagiHasil = toNum($('#grand-merch').val());
+                if (setorBagiHasil > 0) {
+                    journalRows.push({
+                        accountCode: kasOmsetAccount.kode,
+                        account: kasOmsetAccount.name,
+                        departemen: kasOmsetAccount.departemen,
+                        debit: 0,
+                        credit: setorBagiHasil,
+                        comment: `Setor Bagi Hasil Omset ${unitName || ' - '} Ke Ancol `
+
+                    });
+                    totalCredit += setorBagiHasil;
+                }
+
+
+
+                // --- Render ke tabel jurnal
+                journalRows.forEach(row => {
+                    const displayAccount = row.accountCode ?
+                        `${row.accountCode} - ${row.account}${row.departemen ? ' (' + row.departemen + ')' : ''}` :
+                        `${row.account}${row.departemen ? ' (' + row.departemen + ')' : ''}`;
+                    journalBody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="border px-2 py-1">${displayAccount}</td>
+                <td class="border px-2 py-1 text-right">${fmt(row.debit)}</td>
+                <td class="border px-2 py-1 text-right">${fmt(row.credit)}</td>
+                <td class="border px-2 py-1 text-left">${row.comment}</td>
+            </tr>
+        `);
+                });
+
+                // --- Update total debit/credit bawah tabel
+                document.querySelector('.total-debit').textContent = fmt(totalDebit);
+                document.querySelector('.total-credit').textContent = fmt(totalCredit);
+            }
+
+            function formatNumber(value) {
+                return parseFloat(value).toLocaleString('en-US');
+            }
+
+            function cleanNumber(value) {
+                if (!value) return 0;
+                return value.replace(/,/g, '').replace(/[^0-9.-]/g, '');
+            }
+
         });
-    });
-</script>
+    </script>
+
+
+
+@endsection

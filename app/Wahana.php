@@ -21,4 +21,8 @@ class Wahana extends Model
     {
         return $this->belongsTo(UnitKerja::class);
     }
+    public function wahanaItem()
+    {
+        return $this->hasMany(WahanaItem::class, 'wahana_id');
+    }
 }

@@ -23,7 +23,7 @@
                             <i class="fas fa-file-export text-blue-500 mr-2"></i> File
                         </button> --}}
                         @can('closing_harian.create')
-                            <a href="{{ route('fiscal_account.create') }}"
+                            <a href="{{ route('closing_harian.create') }}"
                                 class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
                                 <i class="fas fa-plus mr-2"></i> Add Closing Harian
                             </a>
@@ -38,7 +38,7 @@
                         <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
                     </h3>
                     <div class="space-y-3 text-sm text-gray-700">
-                        <a href="{{ asset('template/template_import_fiscal_account.xlsx') }}" download
+                        <a href="{{ asset('template/template_import_closing_harian.xlsx') }}" download
                             class="block hover:bg-gray-50 p-2 rounded-lg">
                             <i class="fas fa-file-excel mr-2 text-green-600"></i> Download Template Excel
                         </a>
@@ -75,10 +75,6 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Unit Kerja</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Wahana</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total Omset</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi</th>
                         </tr>
@@ -89,21 +85,24 @@
                                 <td class="px-4 py-2 text-sm text-gray-500">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-2">{{ $item->tanggal }}</td>
                                 <td class="px-4 py-2">{{ $item->unitKerja->nama_unit ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $item->wahana->nama_wahana ?? '-' }}</td>
-                                <td class="px-4 py-2">{{ $item->total_omset ?? '-' }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
-                                        @can('fiscal_account.update')
-                                            <a href="{{ route('fiscal_account.edit', $item->id) }}"
+                                        <a href="{{ route('closing_harian.show', $item->id) }}"
+                                            class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                                            title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @can('closing_harian.update')
+                                            <a href="{{ route('closing_harian.edit', $item->id) }}"
                                                 class="text-yellow-500 hover:text-yellow-700 p-2 rounded-full hover:bg-yellow-50 transition-colors"
                                                 title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         @endcan
 
-                                        @can('fiscal_account.delete')
+                                        @can('closing_harian.delete')
                                             <form id="delete-form-{{ $item->id }}"
-                                                action="{{ route('fiscal_account.destroy', $item->id) }}" method="POST"
+                                                action="{{ route('closing_harian.destroy', $item->id) }}" method="POST"
                                                 style="display: none;">
                                                 @csrf
                                                 @method('DELETE')
@@ -125,7 +124,7 @@
                                     <div class="flex flex-col items-center text-gray-400">
                                         <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
                                         <p class="text-lg font-medium">Belum ada fiscal account</p>
-                                        <a href="{{ route('fiscal_account.create') }}"
+                                        <a href="{{ route('closing_harian.create') }}"
                                             class="mt-4 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                                             <i class="fas fa-plus mr-2"></i> Tambah
                                         </a>

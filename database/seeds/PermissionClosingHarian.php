@@ -14,6 +14,11 @@ class PermissionClosingHarian extends Seeder
     {
         //
         $permissions = [
+            'linked_account_closing.access',
+            'linked_account_closing.create',
+            'linked_account_closing.update',
+            'linked_account_closing.delete',
+
             'closing_harian.access',
             'closing_harian.create',
             'closing_harian.update',

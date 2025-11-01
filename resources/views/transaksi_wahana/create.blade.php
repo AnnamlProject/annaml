@@ -60,18 +60,12 @@
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                         </div>
-                        <div class="mb-5">
+                        <div class="mb-2">
                             <label for="jenis_hari_id" class="block text-sm font-medium text-gray-700 mb-1">Jenis
                                 Hari</label>
                             <select name="jenis_hari_id" id="jenis_hari_id"
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">-- Pilih Jenis Hari --</option>
-                                @foreach ($jenis_hari as $g)
-                                    <option value="{{ $g->id }}"
-                                        {{ isset($target_unit) && $target_unit->jenis_hari_id == $g->id ? 'selected' : '' }}>
-                                        {{ $g->nama }}
-                                    </option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-5">
@@ -139,7 +133,29 @@
     document.addEventListener('DOMContentLoaded', function() {
         const unitSelect = document.getElementById('unit_kerja_id');
         const wahanaSelect = document.getElementById('wahana_id');
+        const jenisSelect = document.getElementById('jenis_hari_id');
 
+
+        unitSelect.addEventListener('change', function() {
+            const unitId = this.value;
+
+            // Kosongkan dropdown jenis hari
+            jenisSelect.innerHTML = '<option value="">-- Pilih Jenis Hari --</option>';
+
+            if (!unitId) return;
+
+            fetch(`/get-jenis-hari/${unitId}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.id;
+                        opt.textContent = item.nama;
+                        jenisSelect.appendChild(opt);
+                    });
+                })
+                .catch(err => console.error('Gagal load jenis hari:', err));
+        });
         if (unitSelect && wahanaSelect) {
             unitSelect.addEventListener('change', function() {
                 let unitId = this.value;

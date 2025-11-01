@@ -22,6 +22,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\KomposisiGajiController;
+use App\Http\Controllers\LinkedAccountClosingController;
 use App\Http\Controllers\NeracaController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
@@ -50,6 +51,7 @@ use App\Http\Controllers\ShiftKaryawanWahanaController;
 use App\Http\Controllers\SlipGajiController;
 use App\Http\Controllers\TargetUnitController;
 use App\Http\Controllers\TargetWahanaController;
+use App\Http\Controllers\UnitKerjaController;
 use App\Http\Controllers\VendorsController;
 use App\Http\Controllers\WahanaController;
 use App\SalesInvoiceDocument;
@@ -121,6 +123,11 @@ Route::middleware(['auth'])->group(function () {
 
     // crud linked Accounts
     Route::resource('linkedAccount', 'linkedAccountController')->middleware('permission:linked_account_setup.access');
+
+
+    Route::resource('linkedAccount_closing', 'LinkedAccountClosingController')->middleware('permission:linked_account_closing.access');
+    Route::get('/get-linked-account-by-unit/{unitId}', [LinkedAccountClosingController::class, 'getLinkedAccountByUnit']);
+
 
     Route::get('/admin/setting_departement', [SettingDepartementController::class, 'edit'])->name('setting_departement.edit');
     Route::put('/admin/setting_departement', [SettingDepartementController::class, 'update'])->name('setting_departement.update');
@@ -414,6 +421,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/import/Wahana', [ImportController::class, 'importWahana'])->name('import.Wahana');
     // target wahana
     Route::resource('target_wahana', 'TargetWahanaController')->middleware('permission:target_wahana.access');
+    Route::get('/get-wahana-by-unit/{id}', [UnitKerjaController::class, 'getWahanaByUnit']);
     Route::get('/wahana-by-unit/{id}', [TargetWahanaController::class, 'getWahanaByUnit']);
     Route::post('/import/TargetWahana', [ImportController::class, 'importTargetWahana'])->name('import.TargetWahana');
 

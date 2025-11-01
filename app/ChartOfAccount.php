@@ -70,4 +70,8 @@ class chartOfAccount extends Model
     {
         return $this->belongsTo(FiscalAccount::class, 'fiscal_account_id');
     }
+    public function wahanaItem()
+    {
+        return $this->hasMany(WahanaItem::class);
+    }
 }

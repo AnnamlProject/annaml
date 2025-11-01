@@ -83,7 +83,7 @@
                                 Format OCEAN DREAM SAMUDRA</option>
                             <option value="3"
                                 {{ old('format_closing', $unit_kerja->format_closing) == '3' ? 'selected' : '' }}>
-                                Format ATLANTIS</option>
+                                Format AWA</option>
                             <option value="4" {{ old('format_closing', $unit_kerja->tipe) == '4' ? 'selected' : '' }}>
                                 Format JAKARTA BIRD LAND</option>
 

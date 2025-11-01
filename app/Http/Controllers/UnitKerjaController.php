@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GroupUnit;
 use App\UnitKerja;
+use App\Wahana;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -116,5 +117,31 @@ class UnitKerjaController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('unit_kerja.index')->with('error', $e->getMessage());
         }
+    }
+    public function getWahanaByUnit($id)
+    {
+        $unit = UnitKerja::find($id);
+
+        if (!$unit) {
+            return response()->json([]);
+        }
+
+        $wahanaList = Wahana::with([
+            'wahanaItem' => function ($q) {
+                $q->where('status', 1)
+                    ->orderBy('nama_item')
+                    ->with([
+                        'account:id,kode_akun,nama_akun',
+                        'departemen:id,deskripsi'
+                    ]); // 🔹 tambahkan relasi account
+            }
+        ])
+            ->where('unit_kerja_id', $id)
+            ->get();
+
+        return response()->json([
+            'format_closing' => $unit->format_closing,
+            'wahana' => $wahanaList
+        ]);
     }
 }

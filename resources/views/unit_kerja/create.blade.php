@@ -83,7 +83,7 @@
                                             id="">
                                             <option value="1">Format DUNIA FANTASI</option>
                                             <option value="2">Format OCEAN DREAM SAMUDRA</option>
-                                            <option value="3">Format ATLANTIS</option>
+                                            <option value="3">Format AWA</option>
                                             <option value="4">Format JAKARTA BIRD LAND</option>
                                         </select>
                                     </td>
@@ -162,7 +162,7 @@
                                             id="">
                                             <option value="1">Format DUNIA FANTASI</option>
                                             <option value="2">Format OCEAN DREAM SAMUDRA</option>
-                                            <option value="3">Format ATLANTIS</option>
+                                            <option value="3">Format AWA</option>
                                             <option value="4">Format JAKARTA BIRD LAND</option>
                                         </select>
                                     </td>

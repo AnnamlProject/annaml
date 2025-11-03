@@ -16,6 +16,13 @@
                         <i class="fas fa-list mr-3 text-white text-xl"></i>
                         Jam Kerja
                     </h3>
+
+                    <div class="flex">
+                        <a href="{{ route('jam_kerja.create') }}"
+                            class="inline-flex items-center px-5 py-2.5 bg-white text-indigo-600 font-semibold rounded-lg shadow hover:bg-gray-100 transition-all">
+                            <i class="fas fa-plus mr-2"></i>Add Jam kerja</a>
+
+                    </div>
                 </div>
             </div>
 
@@ -28,6 +35,10 @@
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 #
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unit Kerja
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -48,6 +59,10 @@
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                     {{ $loop->iteration }}
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">{{ $item->unitKerja->nama_unit ?? '' }}
+                                    </div>
                                 </td>
                                 <td class="px-4 py-2 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">{{ $item->jam_masuk }}</div>

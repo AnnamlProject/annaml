@@ -12,6 +12,16 @@
                     @csrf
                     @method('PUT')
 
+                    @if ($errors->any())
+                        <div class="mb-4 text-red-600 bg-red-100 p-4 rounded-md">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
 
                     <h4 class="font-semibold text-lg text-gray-800 mt-8 mb-4 border-l-4 border-blue-500 pl-2">
                         Wahana Edit
@@ -97,6 +107,168 @@
                             </select>
                         </div>
                     </div>
+                    {{-- Akun Terkait --}}
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-800">Wahana Item</h3>
+                            <button type="button" id="add-row" class="btn btn-secondary">+ Tambah Item</button>
+                        </div>
+
+                        <table class="w-full border-collapse border text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="border px-2 py-1 text-left w-[10%]">Kode Item</th>
+                                    <th class="border px-2 py-1 text-left w-[25%]">Nama Item</th>
+                                    <th class="border px-2 py-1 text-left w-[10%]">Harga</th>
+                                    <th class="border px-2 py-1 text-left w-[10%]">Status</th>
+                                    <th class="border px-2 py-1 text-left w-[10%]">Dasar Perhitungan <br>Titipan</th>
+                                    <th class="border px-2 py-1 text-left w-[25%]">Account</th>
+                                    <th class="border px-2 py-1 text-left w-[5%]">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows-body">
+                                @forelse ($wahana->wahanaItem as $d)
+                                    <tr class="border-b row-item">
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="kode_item[]" value="{{ $d->kode_item ?? '' }}"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="nama_item[]" value="{{ $d->nama_item ?? '' }}"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="harga[]"
+                                                value="{{ number_format($d->harga) ?? '' }}"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <select name="status_item[]" id="status" required
+                                                class="w-full border border-gray-300 rounded-lg px-2 py-1  focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">-- Pilih --</option>
+                                                <option value="1"
+                                                    {{ old('status', $d->status) == '1' ? 'selected' : '' }}>
+                                                    Aktif</option>
+                                                <option value="0"
+                                                    {{ old('status', $d->status) == '0' ? 'selected' : '' }}>
+                                                    Non Aktif</option>
+                                            </select>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <select name="dasar_perhitungan_titipan[]" required
+                                                class="dasar-select w-full border border-gray-300 rounded-lg px-2 py-1  focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">-- Pilih --</option>
+                                                <option value="1"
+                                                    {{ old('dasar_perhitungan_titipan', $d->dasar_perhitungan_titipan) == '1' ? 'selected' : '' }}>
+                                                    Ya</option>
+                                                <option value="0"
+                                                    {{ old('dasar_perhitungan_titipan', $d->dasar_perhitungan_titipan) == '0' ? 'selected' : '' }}>
+                                                    Tidak</option>
+                                            </select>
+                                            <div class="harga-container mt-2" style="display:none;">
+                                                <input type="text" name="harga_perhitungan_titipan[]"
+                                                    placeholder="Masukkan harga titipan omset"
+                                                    oninput="formatRibuan(this)"
+                                                    value="{{ number_format($d->harga_perhitungan_titipan) ?? '' }}"
+                                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <select style="width: 100%" name="account_id[]"
+                                                class="select2 w-full border rounded">
+                                                <option value="">-- Pilih Akun --</option>
+                                                @php
+                                                    $selectedValue = $d->account_id . '|' . ($d->departemen_id ?? 0);
+                                                @endphp
+
+                                                @foreach ($account as $acc)
+                                                    @if ($acc->departemenAkun->count() > 0)
+                                                        @foreach ($acc->departemenAkun as $depAkun)
+                                                            @php $optionValue = $acc->id . '|' . $depAkun->departemen->id; @endphp
+                                                            <option value="{{ $optionValue }}"
+                                                                {{ $optionValue == $selectedValue ? 'selected' : '' }}>
+                                                                {{ $acc->kode_akun }} - {{ $acc->nama_akun }} -
+                                                                {{ $depAkun->departemen->deskripsi ?? '-' }}
+                                                            </option>
+                                                        @endforeach
+                                                    @else
+                                                        @php $optionValue = $acc->id . '|0'; @endphp
+                                                        <option value="{{ $optionValue }}"
+                                                            {{ $optionValue == $selectedValue ? 'selected' : '' }}>
+                                                            {{ $acc->kode_akun }} - {{ $acc->nama_akun }}
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <button type="button" class="btn btn-danger remove-row">Hapus</button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    {{-- fallback minimal 1 baris --}}
+                                    <tr class="border-b row-item">
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="kode_item[]"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="nama_item[]"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <input type="text" name="harga[]" oninput="formatRibuan(this)"
+                                                class="w-full border rounded px-2 py-1">
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <select name="status_item[]" class="w-full border rounded px-2 py-1">
+                                                <option value="1">Aktif</option>
+                                                <option value="0">Non Aktif</option>
+                                            </select>
+                                        </td>
+                                        <td style="padding: 12px; border: 1px solid #ddd;">
+                                            <select name="dasar_perhitungan_titipan[]"
+                                                class="dasar-select w-full border border-gray-300 rounded-lg px-4 py-2">
+                                                <option>--Pilih--</option>
+                                                <option value="1">Ya</option>
+                                                <option value="0">Tidak</option>
+                                            </select>
+                                            <div class="harga-container mt-2" style="display:none;">
+                                                <input type="text" name="harga_perhitungan_titipan[]"
+                                                    placeholder="Masukkan harga titipan omset"
+                                                    oninput="formatRibuan(this)"
+                                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <select name="account_id[]" style="width: 100%;"
+                                                class="select2 w-full border rounded">
+                                                <option value="">-- Pilih Akun --</option>
+                                                @foreach ($account as $acc)
+                                                    @if ($acc->departemenAkun->count() > 0)
+                                                        @foreach ($acc->departemenAkun as $depAkun)
+                                                            <option
+                                                                value="{{ $acc->id }}|{{ $depAkun->departemen->id }}">
+                                                                {{ $acc->kode_akun }} - {{ $acc->nama_akun }} -
+                                                                {{ $depAkun->departemen->deskripsi ?? '-' }}
+                                                            </option>
+                                                        @endforeach
+                                                    @else
+                                                        <option value="{{ $acc->id }}|0">
+                                                            {{ $acc->kode_akun }} - {{ $acc->nama_akun }}
+                                                        </option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td class="border px-2 py-1">
+                                            <button type="button" class="btn btn-danger remove-row">Hapus</button>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                     <div class="mt-6 flex justify-end gap-2">
                         <a href="{{ route('wahana.index') }}"
                             class="inline-flex items-center px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
@@ -111,4 +283,118 @@
             </div>
         </div>
     </div>
+    {{-- Select2 CSS --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+    {{-- jQuery & Select2 JS --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.dasar-select').forEach(function(select) {
+                const hargaContainer = select.parentElement.querySelector('.harga-container');
+                hargaContainer.style.display = (select.value === '1') ? 'block' : 'none';
+            });
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('dasar-select')) {
+                const hargaContainer = e.target.parentElement.querySelector('.harga-container');
+                hargaContainer.style.display = (e.target.value === '1') ? 'block' : 'none';
+            }
+        });
+
+        function initSelect2(scope) {
+            $(scope).find('.select2').select2();
+        }
+
+        $(document).ready(function() {
+            initSelect2(document);
+
+            const rowTemplate = `
+    <tr class="border-b row-item">
+        <td class="border px-2 py-1">
+            <input type="text" name="kode_item[]" class="w-full border rounded px-2 py-1">
+        </td>
+        <td class="border px-2 py-1">
+            <input type="text" name="nama_item[]" class="w-full border rounded px-2 py-1">
+        </td>
+        <td class="border px-2 py-1">
+            <input type="text" name="harga[]" oninput="formatRibuan(this)" class="w-full border rounded px-2 py-1">
+        </td>
+        <td class="border px-2 py-1">
+            <select name="status_item[]" class="w-full border rounded px-2 py-1">
+                <option value="1">Aktif</option>
+                <option value="0">Non Aktif</option>
+            </select>
+        </td>
+        <td style="padding: 12px; border: 1px solid #ddd;">
+            <select name="dasar_perhitungan_titipan[]"
+                class="dasar-select w-full border border-gray-300 rounded-lg px-4 py-2">
+                <option>--Pilih--</option>
+                <option value="1">Ya</option>
+                <option value="0">Tidak</option>
+            </select>
+            <div class="harga-container mt-2" style="display:none;">
+                <input type="text" name="harga_perhitungan_titipan[]" placeholder="Masukkan harga titipan omset"
+                    oninput="formatRibuan(this)"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+            </div>
+        </td>
+        <td class="border px-2 py-1">
+            <select style="width:100%;" name="account_id[]" class="select2 w-full border rounded">
+                <option value="">-- Pilih Akun --</option>
+                @foreach ($account as $acc)
+                    @if ($acc->departemenAkun->count() > 0)
+                        @foreach ($acc->departemenAkun as $depAkun)
+                            <option value="{{ $acc->id }}|{{ $depAkun->departemen->id }}">
+                                {{ $acc->kode_akun }} - {{ $acc->nama_akun }} -
+                                {{ $depAkun->departemen->deskripsi ?? '-' }}
+                            </option>
+                        @endforeach
+                    @else
+                        <option value="{{ $acc->id }}|0">
+                            {{ $acc->kode_akun }} - {{ $acc->nama_akun }}
+                        </option>
+                    @endif
+                @endforeach
+            </select>
+        </td>
+        <td class="border px-2 py-1">
+            <button type="button" class="btn btn-danger remove-row">Hapus</button>
+        </td>
+    </tr>`;
+
+            $('#add-row').on('click', function() {
+                const $row = $(rowTemplate);
+                $('#rows-body').append($row);
+                initSelect2($row);
+            });
+
+            $(document).on('click', '.remove-row', function() {
+                const total = $('#rows-body .row-item').length;
+                if (total > 1) {
+                    $(this).closest('tr').remove();
+                } else {
+                    // jika tinggal 1, kosongkan saja
+                    const $tr = $(this).closest('tr');
+                    $tr.find('input[name="detail_id[]"]').val('');
+                    $tr.find('select[name="account_id[]"]').val('').trigger('change');
+                    $tr.find('input[name="deskripsi[]"]').val('');
+                }
+            });
+        });
+    </script>
+    <script>
+        function formatRibuan(input) {
+            let value = input.value;
+            // Hilangkan semua karakter selain angka
+            value = value.replace(/[^\d]/g, "");
+            // Format angka jadi ribuan
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            input.value = value;
+        }
+    </script>
 @endsection

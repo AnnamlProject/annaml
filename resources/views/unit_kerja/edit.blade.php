@@ -30,6 +30,15 @@
                             </select>
                         </div>
                         <div>
+                            <label for="kode_unit" class="block text-sm font-medium text-gray-700">Kode</label>
+                            <input type="text" name="kode_unit" id="kode_unit"
+                                value="{{ old('kode_unit', $unit_kerja->kode_unit) }}"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('kode_unit')
+                                <span class="text-sm text-red-600">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        <div>
                             <label for="nama_unit" class="block text-sm font-medium text-gray-700">Nama</label>
                             <input type="text" name="nama_unit" id="nama_unit"
                                 value="{{ old('nama_unit', $unit_kerja->nama_unit) }}"
@@ -52,11 +61,33 @@
 
                     <div>
                         <label for="urutan" class="block text-sm font-medium text-gray-700">Urutan</label>
-                        <input type="number" name="urutan" id="urutan" value="{{ old('urutan', $unit_kerja->urutan) }}"
+                        <input type="number" name="urutan" id="urutan"
+                            value="{{ old('urutan', $unit_kerja->urutan) }}"
                             class="w-1/3 border border-gray-300 rounded-lg px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500">
                         @error('urutan')
                             <span class="text-sm text-red-600">{{ $message }}</span>
                         @enderror
+                    </div>
+                    <div>
+                        <label for="format_closing">Format Closing</label>
+                        <select name="format_closing"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            id="format_closing" required>
+                            <option value="1"
+                                {{ old('format_closing', $unit_kerja->format_closing) == '1' ? 'selected' : '' }}>Format
+                                DUNIA
+                                FANTASI
+                            </option>
+                            <option value="2"
+                                {{ old('format_closing', $unit_kerja->format_closing) == '2' ? 'selected' : '' }}>
+                                Format OCEAN DREAM SAMUDRA</option>
+                            <option value="3"
+                                {{ old('format_closing', $unit_kerja->format_closing) == '3' ? 'selected' : '' }}>
+                                Format AWA</option>
+                            <option value="4" {{ old('format_closing', $unit_kerja->tipe) == '4' ? 'selected' : '' }}>
+                                Format JAKARTA BIRD LAND</option>
+
+                        </select>
                     </div>
 
                     <div class="mt-6 flex justify-end space-x-4">

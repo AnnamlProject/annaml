@@ -55,6 +55,7 @@ class BukuBesarController extends Controller
                 $q->whereIn('journal_entry_details.kode_akun', $selectedAccountCodes);
             })
             ->orderBy('journal_entry_details.kode_akun', 'asc')
+            ->orderBy('journal_entries.tanggal', 'asc')
             ->get();
 
         // 2. Hitung saldo awal

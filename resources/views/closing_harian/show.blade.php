@@ -139,7 +139,7 @@
 
                                     {{-- Total omset semua item --}}
                                     @php
-                                        $totalOmset = 0;
+                                        $subtotalOmset = 0;
                                         $subtotalCash = 0;
                                         $subtotalQris = 0;
                                         $subtotalMerch = 0;
@@ -147,18 +147,20 @@
                                         $subtotalTitipan = 0;
                                         $subtotalLebihKurang = 0;
 
-                                        $omset = $detail->omset_total;
-                                        $totalOmset += $omset;
-                                        $subtotalCash += $detail->cash;
-                                        $subtotalQris += $detail->qris;
-                                        $subtotalMerch += $detail->merch;
-                                        $subtotalRca += $detail->rca;
-                                        $subtotalTitipan += $detail->titipan;
-                                        $subtotalLebihKurang += $detail->lebih_kurang;
-
+                                        foreach ($data->details->groupBy('wahanaItem.wahana_id') as $group) {
+                                            $detail = $group->first();
+                                            $subtotalOmset += $detail->omset_total ?? 0;
+                                            $subtotalCash += $detail->cash ?? 0;
+                                            $subtotalQris += $detail->qris ?? 0;
+                                            $subtotalMerch += $detail->merch ?? 0;
+                                            $subtotalRca += $detail->rca ?? 0;
+                                            $subtotalTitipan += $detail->titipan ?? 0;
+                                            $subtotalLebihKurang += $detail->lebih_kurang ?? 0;
+                                        }
                                     @endphp
+
                                     <td class="text-right px-2 py-1 bg-green-100">
-                                        {{ number_format($totalOmset, 0, ',', '.') }}
+                                        {{ number_format($subtotalOmset, 0, ',', '.') }}
                                     </td>
                                     <td class="text-right px-2 py-1 bg-green-100">
                                         {{ number_format($subtotalQris, 0, ',', '.') }}
@@ -184,9 +186,13 @@
 
                                 {{-- MDR dan Subtotal setelah MDR --}}
                                 @php
+                                    $subtotalTitipan = 0;
+                                    foreach ($data->details->groupBy('wahanaItem.wahana_id') as $group) {
+                                        $detail = $group->first();
+                                        $subtotalTitipan += $detail->titipan ?? 0;
+                                    }
                                     $totalTitipan = 0;
-                                    $totalTitipan += $detail->titipan;
-                                    $mdrAmount = $totalTitipan * 0.007;
+                                    $mdrAmount = $subtotalTitipan * 0.007;
                                     $subtotalAfterMdr = $totalTitipan - $mdrAmount;
                                 @endphp
                                 @if ($data->unitKerja->format_closing === 2 || $data->unitKerja->format_closing === 4)
@@ -199,47 +205,42 @@
                                         <td class="text-right px-2 py-1 text-red-500">
                                             -{{ number_format($mdrAmount, 0, ',', '.') }}
                                         </td>
-                                        <td></td>
+                                        <td class="text-right px-2 py-1 text-red-500">
+                                            -{{ number_format($mdrAmount, 0, ',', '.') }}
+                                        </td>
+
                                     </tr>
                                 @endif
 
 
                                 {{-- GRAND TOTAL --}}
                                 @php
-                                    $totalOmset = 0;
-                                    $subtotalCash = 0;
-                                    $subtotalQris = 0;
-                                    $subtotalMerch = 0;
-                                    $subtotalRca = 0;
-                                    $subtotalTitipan = 0;
-                                    $subtotalLebihKurang = 0;
-
                                     $grandtotalOmset = 0;
                                     $grandCash = 0;
                                     $grandQris = 0;
                                     $grandMerch = 0;
                                     $grandRca = 0;
+                                    $grandTitipan = 0;
                                     $grandLebihKurang = 0;
 
-                                    $omset = $detail->omset_total;
-                                    $totalOmset += $omset;
-                                    $subtotalCash += $detail->cash;
-                                    $subtotalQris += $detail->qris;
-                                    $subtotalMerch += $detail->merch;
-                                    $subtotalRca += $detail->rca;
-                                    $subtotalTitipan += $detail->titipan;
-                                    $subtotalLebihKurang += $detail->lebih_kurang;
+                                    foreach ($data->details->groupBy('wahanaItem.wahana_id') as $group) {
+                                        $detail = $group->first();
+                                        $grandtotalOmset += $detail->omset_total ?? 0;
+                                        $grandCash += $detail->cash ?? 0;
+                                        $grandQris += $detail->qris ?? 0;
+                                        $grandMerch += $detail->merch ?? 0;
+                                        $grandRca += $detail->rca ?? 0;
+                                        $grandTitipan += $detail->titipan ?? 0;
+                                        $grandLebihKurang += $detail->lebih_kurang ?? 0;
+                                    }
 
-                                    $grandtotalOmset += $totalOmset;
-                                    $grandCash += $subtotalCash;
-                                    $grandQris += $subtotalQris;
-                                    $grandMerch += $subtotalMerch;
-                                    $grandRca += $subtotalRca;
-                                    $grandLebihKurang += $subtotalLebihKurang;
+                                    $mdrAmount = $grandTitipan * 0.007;
+                                    $grandAfterMdr = $grandTitipan - $mdrAmount;
+                                    $grandLebihKurangAfterMdr = $grandLebihKurang + $mdrAmount;
 
-                                    $mdrAmount = $subtotalTitipan * 0.007;
-                                    $grandTitipan = $subtotalTitipan - $mdrAmount;
                                 @endphp
+
+
                                 @if ($data->unitKerja->format_closing === 2 || $data->unitKerja->format_closing === 4)
                                     <tr class="bg-blue-200">
                                         <td class="text-left px-2 py-1 font-semibold">GRAND TOTAL</td>
@@ -262,10 +263,10 @@
                                             {{ number_format($grandRca, 0, ',', '.') }}
                                         </td>
                                         <td class="text-right px-2 py-1 bg-gray-300">
-                                            {{ number_format($grandTitipan, 0, ',', '.') }}
+                                            {{ number_format($grandAfterMdr, 0, ',', '.') }}
                                         </td>
                                         <td class="text-right px-2 py-1 bg-gray-300">
-                                            {{ number_format($grandLebihKurang, 0, ',', '.') }}
+                                            {{ number_format($grandLebihKurangAfterMdr, 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @endif

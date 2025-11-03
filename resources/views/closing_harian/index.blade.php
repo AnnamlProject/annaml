@@ -87,6 +87,11 @@
                                 <td class="px-4 py-2">{{ $item->unitKerja->nama_unit ?? '-' }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end space-x-3">
+                                        <button onclick="openFilePrint({{ $item->id }})"
+                                            class="text-green-500 hover:text-green-700 p-2 rounded-full hover:bg-green-50 transition-colors"
+                                            title="Print">
+                                            <i class="fas fa-print text-green-500 mr-2"></i>
+                                        </button>
                                         <a href="{{ route('closing_harian.show', $item->id) }}"
                                             class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-colors"
                                             title="View">
@@ -138,6 +143,25 @@
 
         </div>
     </div>
+    <div id="filePrint"
+        class="fixed inset-0 z-50 hidden bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
+            </h3>
+            <div class="space-y-3 text-sm text-gray-700">
+                <a id="printLink" href="#" target="_blank" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-green-500"></i> Print
+                </a>
+                <a id="pdfLink" href="#" target="_blank" class="block hover:bg-gray-50 p-2 rounded-lg">
+                    <i class="fas fa-file-download mr-2 text-red-500"></i> Download PDF
+                </a>
+            </div>
+            <div class="mt-4 text-right">
+                <button onclick="document.getElementById('filePrint').classList.add('hidden')"
+                    class="text-sm text-gray-500 hover:text-gray-700">Tutup</button>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -177,4 +201,27 @@
             transition: background-color 0.2s ease;
         }
     </style>
+    <script>
+        document.getElementById('menu-button').addEventListener('click', function() {
+            document.getElementById('dropdown-menu').classList.toggle('hidden');
+        });
+
+        window.addEventListener('click', function(e) {
+            const button = document.getElementById('menu-button');
+            const menu = document.getElementById('dropdown-menu');
+            if (!button.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+    <script>
+        function openFilePrint(id) {
+            // Tampilkan modal
+            document.getElementById('filePrint').classList.remove('hidden');
+
+            // Ubah link dinamis berdasarkan ID yang diklik
+            document.getElementById('printLink').href = `/closing_harian/${id}/print`;
+            document.getElementById('pdfLink').href = `/closing_harian/${id}/pdf`;
+        }
+    </script>
 @endsection

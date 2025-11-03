@@ -80,6 +80,10 @@ class WahanaController extends Controller
             'harga.*'       => 'nullable|string',
             'status_item'   => 'nullable|array',
             'status_item.*' => 'nullable|in:1,0',
+            'dasar_perhitungan_titipan'   => 'nullable|array',
+            'dasar_perhitungan_titipan.*' => 'nullable|in:1,0',
+            'harga_perhitungan_titipan'         => 'required|array|min:1',
+            'harga_perhitungan_titipan.*'       => 'nullable|string',
             'account_id'    => 'nullable|array',
             'account_id.*'  => 'nullable|string',
         ], [
@@ -94,6 +98,10 @@ class WahanaController extends Controller
             $validated['harga'] = array_map(function ($v) {
                 return (float) str_replace(',', '', $v);
             }, $validated['harga']);
+
+            $validated['harga_perhitungan_titipan'] = array_map(function ($v) {
+                return (float) str_replace(',', '', $v);
+            }, $validated['harga_perhitungan_titipan']);
             // 1️⃣ Ambil header lama
 
             // 1️⃣ Simpan header (tabel wahana)
@@ -136,6 +144,8 @@ class WahanaController extends Controller
                     'nama_item'  => $nama,
                     'harga'      => $validated['harga'][$i] ?? 0,
                     'status'     => isset($validated['status_item'][$i]) ? (int) $validated['status_item'][$i] : 1,
+                    'dasar_perhitungan_titipan'     => isset($validated['dasar_perhitungan_titipan'][$i]) ? (int) $validated['dasar_perhitungan_titipan'][$i] : 1,
+                    'harga_perhitungan_titipan'      => $validated['harga_perhitungan_titipan'][$i] ?? 0,
                     'account_id' => $akunId,
                     'departemen_id' => $departemenId,
                     'created_at' => now(),
@@ -189,8 +199,12 @@ class WahanaController extends Controller
             'nama_item.*'   => 'nullable|string|max:100',
             'harga'         => 'required|array|min:1',
             'harga.*'       => 'nullable|string', // masih string karena berisi "70,000"
+            'harga_perhitungan_titipan'         => 'required|array|min:1',
+            'harga_perhitungan_titipan.*'       => 'nullable|string', // masih string karena berisi "70,000"
             'status_item'   => 'nullable|array',
             'status_item.*' => 'nullable|in:1,0',
+            'dasar_perhitungan_titipan'   => 'nullable|array',
+            'dasar_perhitungan_titipan.*' => 'nullable|in:1,0',
             'account_id'    => 'nullable|array',
             'account_id.*'  => 'nullable|string',
         ]);
@@ -200,6 +214,9 @@ class WahanaController extends Controller
             $validated['harga'] = array_map(function ($v) {
                 return (float) str_replace(',', '', $v);
             }, $validated['harga']);
+            $validated['harga_perhitungan_titipan'] = array_map(function ($v) {
+                return (float) str_replace(',', '', $v);
+            }, $validated['harga_perhitungan_titipan']);
 
             $wahana = Wahana::findOrFail($id);
 
@@ -239,6 +256,8 @@ class WahanaController extends Controller
                     'nama_item'  => $nama,
                     'harga'      => $validated['harga'][$i] ?? 0,
                     'status'     => isset($validated['status_item'][$i]) ? (int) $validated['status_item'][$i] : 1,
+                    'dasar_perhitungan_titipan'     => isset($validated['dasar_perhitungan_titipan'][$i]) ? (int) $validated['dasar_perhitungan_titipan'][$i] : 1,
+                    'harga_perhitungan_titipan'      => $validated['harga_perhitungan_titipan'][$i] ?? 0,
                     'account_id'    => $akunId,
                     'departemen_id' => $departemenId,
                     'created_at' => now(),

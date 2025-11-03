@@ -109,7 +109,7 @@
                     </div>
                     <!-- Buttons -->
                     <div class="mt-6 justify-end  flex space-x-4">
-                        <a href="{{ route('komposisi_gaji.index') }}"
+                        <a href="{{ route('closing_harian.index') }}"
                             class="px-6 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400 transition">
                             Cancel
                         </a>
@@ -251,36 +251,35 @@
                 }
 
                 let html = `
-                <div style="overflow-x: auto; width: 100%;">
-                <table class="table-fixed border-collapse  w-full text-center text-sm min-w-[3000px]">
+                    <div class="overflow-x-auto">
+                  <table class="table-fixed border-collapse w-full text-center text-sm">
                 <thead class="bg-blue-300 text-black">
-            <tr>
-                <th rowspan="2" class="p-2 w-[150px]  bg-blue-200">Wahana</th>`;
+                  <tr>
+        <th rowspan="2" class="px-2 py-1 w-[120px] bg-blue-200">Wahana</th>
 
-                allItemNames.forEach(item => {
-                    html += `<th colspan="3" class="p-2 ">${item}</th>`;
-                });
+        <!-- kolom item -->
+        <!-- total lebar tiap 3 kolom item ≈ 200px -->
+        ${allItemNames.map(item => `
+                                      <th colspan="3" class="px-2 py-1 w-[200px]">${item}</th>
+                                    `).join('')}
 
-                html += `
-        <th rowspan="2" class="p-2  bg-green-200">TOTAL OMSET</th>
-        <th colspan="2" class="p-2  bg-yellow-200">PAYMENT TYPE <br>DARI PENGUNJUNG</th>
-        <th colspan="2" class="p-2  bg-gray-200">PEMBAGIAN <br>SHARING OMSET</th>
-        <th rowspan="2" class="p-2  bg-pink-200">LEBIH (KURANG) <br>DANA CASH <br>SETOR TUNAI KE<br>MERCHANDISE</th>
-        </tr><tr>`;
+        <th rowspan="2" class="px-2 py-1 text-xs w-[120px] bg-green-200">TOTAL OMSET</th>
+        <th colspan="2" class="px-2 py-1 text-xs bg-yellow-200 w-[180px]">PAYMENT TYPE<br>DARI PENGUNJUNG</th>
+        <th colspan="2" class="px-2 py-1 text-xs bg-gray-200 w-[180px]">PEMBAGIAN<br>SHARING OMSET</th>
+        <th rowspan="2" class="px-2 py-1 text-xs w-[150px] bg-pink-200">LEBIH (KURANG)<br>DANA CASH<br>SETOR TUNAI KE<br>MERCHANDISE</th>
+      </tr>
+      <tr>
+        ${allItemNames.map(() => `
+                                      <th class="px-2 py-1 text-xs w-[40px]">QTY</th>
+                                      <th class="px-2 py-1 text-xs w-[70px]">HARGA</th>
+                                      <th class="px-2 py-1 text-xs w-[80px]">JUMLAH</th>
+                                    `).join('')}
 
-                allItemNames.forEach(() => {
-                    html += `
-            <th class="p-2  w-[100px]">QTY</th>
-            <th class="p-2  w-[120px]">HARGA</th>
-            <th class="p-2  w-[150px]">JUMLAH</th>`;
-                });
-
-                html += `
-        <th class="p-2  w-[150px]">QRIS</th>
-        <th class="p-2  w-[150px]">CASH</th>
-        <th class="p-2  w-[150px]">MERCHANDISE</th>
-        <th class="p-2  w-[150px]">RCA</th>
-        </tr></thead><tbody>`;
+        <th class="px-2 py-1 text-xs w-[100px]">QRIS</th>
+        <th class="px-2 py-1 text-xs w-[100px]">CASH</th>
+        <th class="px-2 py-1 text-xs w-[100px]">MERCH</th>
+        <th class="px-2 py-1 text-xs w-[100px]">RCA</th>
+      </tr></thead><tbody>`;
 
                 wahanaList.forEach((wahana, idx) => {
                     const items = getItems(wahana);
@@ -502,38 +501,38 @@
                 }
 
                 let html = `
-                <div style="overflow-x: auto; width: 100%;">
-                <table class="table-fixed border-collapse  w-full text-center text-sm min-w-[3000px]">
-                <thead class="bg-blue-300 text-black">
-            <tr>
-                <th rowspan="2" class="px-4 py-2 w-[150px]  bg-blue-200">Wahana</th>`;
+                <div class="overflow-x-auto">
+                  <table class="table-fixed border-collapse w-full text-center text-sm">
+    <thead class="bg-blue-300 text-black">
+      <tr>
+        <th rowspan="2" class="px-2 py-1 w-[120px] bg-blue-200">Wahana</th>
 
-                allItemNames.forEach(item => {
-                    html += `<th colspan="3" class="px-4 py-2">${item}</th>`;
-                });
+        <!-- kolom item -->
+        <!-- total lebar tiap 3 kolom item ≈ 200px -->
+        ${allItemNames.map(item => `
+                                                      <th colspan="3" class="px-2 py-1 w-[200px]">${item}</th>
+                                                    `).join('')}
 
-                html += `
-        <th rowspan="2" class="px-4 py-2 bg-green-200">TOTAL OMSET</th>
-        <th colspan="2" class="px-4 py-2 bg-yellow-200">PAYMENT TYPE <br>DARI PENGUNJUNG</th>
-        <th colspan="2" class="px-4 py-2 bg-gray-200">PEMBAGIAN <br>SHARING OMSET</th>
-        <th rowpsan="2" class="px-4 py-2 bg-gray-200">TITIPAN <br>OMSET</th>
-        <th rowspan="2" class="px-4 py-2 bg-pink-200">LEBIH (KURANG) <br>DANA CASH <br>SETOR TUNAI KE<br>MERCHANDISE</th>
-        </tr><tr>`;
+        <th rowspan="2" class="px-2 py-1 text-xs w-[120px] bg-green-200">TOTAL OMSET</th>
+        <th colspan="2" class="px-2 py-1 text-xs bg-yellow-200 w-[180px]">PAYMENT TYPE<br>DARI PENGUNJUNG</th>
+        <th colspan="2" class="px-2 py-1 text-xs bg-gray-200 w-[180px]">PEMBAGIAN<br>SHARING OMSET</th>
+        <th rowspan="2" class="px-2 py-1 text-xs w-[120px] bg-gray-200">TITIPAN<br>OMSET</th>
+        <th rowspan="2" class="px-2 py-1 text-xs w-[150px] bg-pink-200">LEBIH (KURANG)<br>DANA CASH<br>SETOR TUNAI KE<br>MERCHANDISE</th>
+      </tr>
+      <tr>
+        ${allItemNames.map(() => `
+                                                      <th class="px-2 py-1 text-xs w-[40px]">QTY</th>
+                                                      <th class="px-2 py-1 text-xs w-[70px]">HARGA</th>
+                                                      <th class="px-2 py-1 text-xs w-[80px]">JUMLAH</th>
+                                                    `).join('')}
 
-                allItemNames.forEach(() => {
-                    html += `
-            <th class="px-4 py-2  w-[100px]">QTY</th>
-            <th class="px-4 py-2  w-[120px]">HARGA</th>
-            <th class="px-4 py-2  w-[150px]">JUMLAH</th>`;
-                });
-
-                html += `
-        <th class="px-4 py-2 w-[150px]">QRIS</th>
-        <th class="px-4 py-2 w-[150px]">CASH</th>
-        <th class="px-4 py-2 w-[150px]">MERCHANDISE</th>
-        <th class="px-4 py-2 w-[150px]">RCA</th>
-        <th class="px-4 py-2 w-[150px]">${unitName}<br>(SETOR TUNAI)</th>
-        </tr></thead><tbody>`;
+        <th class="px-2 py-1 text-xs w-[100px]">QRIS</th>
+        <th class="px-2 py-1 text-xs w-[100px]">CASH</th>
+        <th class="px-2 py-1 text-xs w-[100px]">MERCH</th>
+        <th class="px-2 py-1 text-xs w-[100px]">RCA</th>
+      </tr>
+    </thead>
+    <tbody>`;
 
                 wahanaList.forEach((wahana, idx) => {
                     const items = getItems(wahana);
@@ -543,6 +542,7 @@
                     allItemNames.forEach((itemName, iidx) => {
                         const item = items.find(i => i.nama_item === itemName);
                         const harga = item?.harga ?? '';
+                        const hargaTitipan = item?.harga_perhitungan_titipan ?? '';
                         const accId = item?.account?.id ?? '';
                         const accKode = item?.account?.kode_akun ?? '';
                         const accNama = item?.account?.nama_akun ?? '';
@@ -557,6 +557,7 @@
                 </td>
                 <td class="">
                     <input type="text" name="details[${idx}][items][${iidx}][harga]" class="harga-${idx}-${iidx} w-full text-right" value="${fmt(harga)}" />
+                    <input type="hidden"  class="hargaTitipan-${idx}-${iidx} w-full text-right" value="${fmt(hargaTitipan)}" />
                 </td>
                 <td class="">
                     <input type="text" name="details[${idx}][items][${iidx}][jumlah]" class="jumlah-${idx}-${iidx} w-full text-right bg-pink-100 font-bold"
@@ -599,10 +600,10 @@
   <tr class="bg-gray-200 font-semibold">
     <td class="text-left bg-gray-300">SUBTOTAL</td>
     ${allItemNames.map((_, iidx) => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-qty-${iidx} w-full text-center font-bold bg-gray-200" readonly /></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-harga-${iidx} w-full text-right  font-bold bg-gray-200" readonly /></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td><input type="text" class="subtotal-jumlah-${iidx} w-full text-right font-bold bg-gray-200" readonly /></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td><input type="text" class="subtotal-qty-${iidx} w-full text-center font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td><input type="text" class="subtotal-harga-${iidx} w-full text-right  font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td><input type="text" class="subtotal-jumlah-${iidx} w-full text-right font-bold bg-gray-200" readonly /></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `).join('')}
     <td><input type="text" id="subtotal-total"    class="w-full text-right bg-gray-200 font-bold" readonly /></td>
     <td><input type="text" id="subtotal-qris"     class="w-full text-right bg-gray-200 font-bold" readonly /></td>
     <td><input type="text" id="subtotal-cash"     class="w-full text-right bg-gray-200 font-bold" readonly /></td>
@@ -616,10 +617,10 @@
   <tr class="bg-gray-100 font-semibold">
     <td class="text-left">DIKURANGI:</td>
     ${allItemNames.map(() => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                                 `).join('')}
     <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
     <td class="bg-gray-100"></td> <!-- QRIS -->
     <td class="bg-gray-100"></td> <!-- CASH -->
@@ -632,28 +633,28 @@
   <!-- MDR 0,7% (dihitung dari TITIPAN agregat) -->
   <tr class="bg-gray-100 font-semibold">
     <td class="text-left">MDR 0,7%</td>
-    ${allItemNames.map(() => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+    ${allItemNames.map(() => ` 
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                                    <td class="bg-gray-100"></td>
+                                                                                                                                                                                               `).join('')}
     <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
     <td class="bg-gray-100"></td> <!-- QRIS -->
     <td class="bg-gray-100"></td> <!-- CASH -->
     <td class="bg-gray-100"></td> <!-- MERCH -->
     <td class="bg-gray-100"></td> <!-- RCA -->
     <td class="bg-gray-100"><input type="text" id="mdr-grand" class="w-full text-right bg-gray-100 font-bold" readonly /></td> <!-- TITIPAN -->
-    <td class="bg-gray-100"></td> <!-- LEBIH -->
+    <td class="bg-gray-100"><input type="text" id="mdr-grandLebih" class="w-full text-right bg-gray-100 font-bold" readonly /></td> <!-- TITIPAN -->
   </tr>
 
   <!-- SUBTOTAL SETELAH MDR (titipan - mdr) -->
   <tr class="bg-gray-100 font-bold">
     <td class="text-left">SUB TOTAL MDR</td>
     ${allItemNames.map(() => `
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <td class="bg-gray-100"></td>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            `).join('')}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <td class="bg-gray-100"></td>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    `).join('')}
     <td class="bg-gray-100"></td> <!-- TOTAL OMSET -->
     <td class="bg-gray-100"></td> <!-- QRIS -->
     <td class="bg-gray-100"></td> <!-- CASH -->
@@ -698,7 +699,13 @@
                     });
                     const totalMdr = sTitipan * 0.007; // 0.7%
                     const mdrField = document.getElementById('mdr-grand');
-                    if (mdrField) mdrField.value = fmt(totalMdr); // karena mdr-grand adalah <input>
+                    if (mdrField) mdrField.value = fmt(totalMdr);
+
+                    const totalMdrLebih = sTitipan * 0.007;
+                    const mdrLebihField = document.getElementById('mdr-grandLebih');
+                    if (mdrLebihField) mdrLebihField.value = fmt(
+                        totalMdrLebih);
+
                 };
 
                 const updateSubtotal = () => {
@@ -734,7 +741,6 @@
                             totalJumlah += jumlah;
 
                         });
-
                         document.querySelector(`.subtotal-qty-${iidx}`).value = fmt(totalQty);
                         document.querySelector(`.subtotal-harga-${iidx}`).value = fmt(totalHarga);
                         document.querySelector(`.subtotal-jumlah-${iidx}`).value = fmt(totalJumlah);
@@ -772,15 +778,18 @@
                         gTitipan += toNum(document.querySelector(`.titipan-${idx}`)?.value);
                     });
                     const subTitipan = toNum(document.getElementById('subtotal-titipan')?.value);
+                    const subLebih = toNum(document.getElementById('subtotal-lebih')?.value);
                     const mdrGrand = toNum(document.getElementById('mdr-grand')?.value);
 
                     const grandTitipan = subTitipan - mdrGrand;
+                    const grandLebih = subLebih + mdrGrand;
+
                     document.getElementById('grand-total').value = fmt(gTotal);
                     document.getElementById('grand-qris').value = fmt(gQris);
                     document.getElementById('grand-cash').value = fmt(gCash);
                     document.getElementById('grand-merch').value = fmt(gMerch);
                     document.getElementById('grand-rca').value = fmt(gRca);
-                    document.getElementById('grand-lebih').value = fmt(gLebih);
+                    document.getElementById('grand-lebih').value = fmt(grandLebih);
                     document.getElementById('grand-titipan').value = fmt(grandTitipan);
 
 
@@ -798,47 +807,76 @@
                     const totalField = document.querySelector(`.total-${idx}`);
 
                     const updateTotal = () => {
-                        let total = 0;
+                        let totalOmset = 0;
+                        let totalTitipan = 0;
+
+                        // 🔁 loop semua item di wahana ini
                         allItemNames.forEach((__, ii) => {
-                            const jml = document.querySelector(`.jumlah-${idx}-${ii}`);
-                            total += toNum(jml?.value);
+                            const qtyEl = document.querySelector(`.qty-${idx}-${ii}`);
+                            const hargaEl = document.querySelector(`.harga-${idx}-${ii}`);
+                            const hargaTitipanEl = document.querySelector(
+                                `.hargaTitipan-${idx}-${ii}`);
+
+                            const qty = toNum(qtyEl?.value);
+                            const harga = toNum(hargaEl?.value);
+
+                            // omset biasa
+                            totalOmset += qty * harga;
+
+                            // titipan per item (hanya kalau ada harga titipan)
+                            const hargaTitipan = toNum(hargaTitipanEl?.value);
+                            if (hargaTitipan > 0 && qty > 0) {
+                                totalTitipan += qty * hargaTitipan;
+                            }
+
+                            // kalau kamu mau, di sini juga bisa update jumlah per item:
+                            const jumlahInput = document.querySelector(`.jumlah-${idx}-${ii}`);
+                            if (jumlahInput) {
+                                jumlahInput.value = fmt(qty * harga);
+                            }
                         });
 
-                        if (totalField) totalField.value = fmt(total);
+                        // set total omset
+                        if (totalField) totalField.value = fmt(totalOmset);
 
+                        // QRIS
                         const qris = toNum(qrisField?.value);
-                        const cash = Math.max(0, total - qris);
+
+                        // cash = omset - qris (nggak boleh minus)
+                        const cash = Math.max(0, totalOmset - qris);
                         if (cashField) cashField.value = fmt(cash);
 
-                        const merch = total * 0.45;
+                        // merch & rca pakai rumus kamu
+                        const merch = totalOmset * 0.45;
                         if (merchField) merchField.value = fmt(merch);
 
-                        const rca = total * 0.55;
+                        const rca = totalOmset * 0.55;
                         if (rcaField) rcaField.value = fmt(rca);
 
-                        const titipan = toNum(titipanField?.value);
-                        const lebihKurang = cash - merch - titipan;
+                        // ✅ titipan otomatis dari item
+                        if (titipanField) {
+                            titipanField.value = totalTitipan > 0 ? fmt(totalTitipan) : '';
+                        }
+
+                        // lebih / kurang
+                        const lebihKurang = cash - merch - totalTitipan;
                         if (lebihField) lebihField.value = fmt(lebihKurang);
 
-                        // update tfoot total
+                        // fungsi global kamu
                         updateSubtotal();
                         updateGrandTotal();
                         generateJournalPreviewFormat2();
-
-
                     };
 
+                    // 🔁 event per item
                     allItemNames.forEach((_, iidx) => {
                         const qtyInput = document.querySelector(`.qty-${idx}-${iidx}`);
                         const hargaInput = document.querySelector(`.harga-${idx}-${iidx}`);
-                        const jumlahInput = document.querySelector(`.jumlah-${idx}-${iidx}`);
+
                         if (!qtyInput || !hargaInput) return;
 
                         const recalc = () => {
-                            const qty = toNum(qtyInput.value);
-                            const harga = toNum(hargaInput.value);
-                            const jumlah = qty * harga;
-                            jumlahInput.value = fmt(jumlah);
+                            // cuma ubah qty/harga ⇒ semua dihitung ulang
                             updateTotal();
                         };
 
@@ -848,17 +886,8 @@
                             hargaInput.value = fmt(toNum(hargaInput.value));
                         });
                     });
-                    if (titipanField) {
-                        titipanField.addEventListener('focus', () => {
-                            titipanField.value = toNum(titipanField.value);
-                        });
-                        titipanField.addEventListener('input', updateTotal);
-                        titipanField.addEventListener('blur', () => {
-                            titipanField.value = fmt(toNum(titipanField.value));
-                            updateTotal();
-                        });
-                    }
 
+                    // 🔁 kalau QRIS diubah, ya hitung ulang
                     if (qrisField) {
                         qrisField.addEventListener('focus', () => {
                             qrisField.value = toNum(qrisField.value);
@@ -870,10 +899,11 @@
                         });
                     }
 
+                    // inisialisasi awal
                     updateTotal();
                     generateJournalPreviewFormat2();
-
                 });
+
             }
             let linkedAccountsMap = {};
 

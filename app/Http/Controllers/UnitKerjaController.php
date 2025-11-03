@@ -137,6 +137,7 @@ class UnitKerjaController extends Controller
             }
         ])
             ->where('unit_kerja_id', $id)
+            ->orderBy('urutan')
             ->get();
 
         return response()->json([

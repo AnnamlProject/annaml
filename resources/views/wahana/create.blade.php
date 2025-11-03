@@ -94,6 +94,7 @@
                                     <th style="padding: 12px; border: 1px solid #ddd;">Nama Item</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Harga</th>
                                     <th style="padding: 12px; border: 1px solid #ddd;">Status</th>
+                                    <th style="padding: 12px; border:1px solid #ddd;">Dasar Perhitungan<br> Pajak</th>
                                     <th style="padding:12px; border:1px solid #ddd;">Account</th>
                                     <th style="padding: 12px; border: 1px solid #ddd; width: 70px;">Aksi</th>
                                 </tr>
@@ -120,6 +121,19 @@
                                             <option value="1">Aktif</option>
                                             <option value="0">Non Aktif</option>
                                         </select>
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <select name="dasar_perhitungan_titipan[]"
+                                            class="dasar-select w-full border border-gray-300 rounded-lg px-4 py-2">
+                                            <option>--Pilih--</option>
+                                            <option value="1">Ya</option>
+                                            <option value="0">Tidak</option>
+                                        </select>
+                                        <div class="harga-container mt-2" style="display:none;">
+                                            <input type="text" name="harga_perhitungan_titipan[]"
+                                                oninput="formatRibuan(this)" placeholder="Masukkan harga titipan omset"
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                                        </div>
                                     </td>
                                     <td style="padding: 12px; border: 1px solid #ddd">
                                         <select name="account_id[]" id="account_id" required
@@ -180,6 +194,13 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('dasar-select')) {
+                const hargaContainer = e.target.parentElement.querySelector('.harga-container');
+                hargaContainer.style.display = (e.target.value === '1') ? 'block' : 'none';
+            }
+        });
+
         function tambahBaris() {
             let tbody = document.getElementById('tbody-wahana');
             let rowCount = tbody.rows.length;
@@ -205,6 +226,19 @@
                 <option value="0">Non Aktif</option>
             </select>
         </td>
+                    <td style="padding: 12px; border: 1px solid #ddd;">
+                                        <select name="dasar_perhitungan_titipan[]"
+                                            class="dasar-select w-full border border-gray-300 rounded-lg px-4 py-2">
+                                            <option>--Pilih--</option>
+                                            <option value="1">Ya</option>
+                                            <option value="0">Tidak</option>
+                                        </select>
+                                        <div class="harga-container mt-2" style="display:none;">
+                                            <input type="text" name="harga_perhitungan_titipan[]"
+                                                placeholder="Masukkan harga titipan omset" oninput="formatRibuan(this)"
+                                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </td>
         <td style="padding: 12px; border: 1px solid #ddd;">
             <select name="account_id[]" required
                 class="form-select w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">

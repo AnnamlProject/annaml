@@ -9,7 +9,7 @@ class WahanaItem extends Model
     //
 
     protected $fillable =
-    ['wahana_id', 'kode_item', 'nama_item', 'harga', 'status', 'account_id', 'departemen_id'];
+    ['wahana_id', 'kode_item', 'nama_item', 'harga', 'status', 'account_id', 'departemen_id', 'dasar_perhitungan_titipan', 'harga_perhitungan_titipan'];
 
 
     public function wahana()

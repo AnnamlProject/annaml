@@ -8,6 +8,7 @@ use App\JournalEntryDetail;
 use App\linkedAccounts;
 use App\UnitKerja;
 use App\Wahana;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToArray;
@@ -649,5 +650,37 @@ class ClosingHarianController extends Controller
             // dd("❌ ERROR DELETE INVOICE:", $e->getMessage(), $e->getTraceAsString());
             return back()->withErrors('Gagal menghapus closing: ' . $e->getMessage());
         }
+    }
+    public function print($id)
+    {
+        $data = ClosingHarian::with([
+            'unitKerja',
+            'details',
+            'details.wahanaItem',
+            'details.wahanaItem.account',
+            'details.wahanaItem.departemen',
+            'details.wahanaItem.wahana',
+        ])->find($id);
+        $unitKerja = UnitKerja::all();
+
+        return view('closing_harian.print', compact('data', 'unitKerja'));
+    }
+    public function downloadPdf($id)
+    {
+        $data = ClosingHarian::with([
+            'unitKerja',
+            'details',
+            'details.wahanaItem',
+            'details.wahanaItem.account',
+            'details.wahanaItem.departemen',
+            'details.wahanaItem.wahana',
+        ])->find($id);
+        $isPdf = true;
+        $pdf = Pdf::loadView('closing_harian.print', compact(
+            'data',
+            'isPdf'
+        ))->setPaper('A4', 'landscape');
+
+        return $pdf->download("{$data->unitKerja->nama_unit}- {$data->tanggal}.pdf");
     }
 }

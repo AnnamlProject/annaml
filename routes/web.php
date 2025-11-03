@@ -6,6 +6,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AlamatController;
 use App\Http\Controllers\BonusKaryawanController;
 use App\Http\Controllers\BukuBesarController;
+use App\Http\Controllers\ClosingHarianController;
 use App\Http\Controllers\CoaSearchController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
@@ -427,6 +428,8 @@ Route::middleware(['auth'])->group(function () {
 
     // closing harian 
     Route::resource('closing_harian', 'ClosingHarianController')->middleware('permission:closing_harian.access');
+    Route::get('/closing_harian/{id}/print', [ClosingHarianController::class, 'print'])->name('closing_harian.print');
+    Route::get('/closing_harian/{id}/pdf', [ClosingHarianController::class, 'downloadPdf'])->name('closing_harian.pdf');
 
 
     // target unit

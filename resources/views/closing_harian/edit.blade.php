@@ -74,40 +74,49 @@
                             @php
                                 $items = $data->details->pluck('wahanaItem.nama_item')->unique();
                             @endphp
-                            <div style="overflow-x: auto; width: 100%;">
-                                <table class="table-fixed border-collapse w-full text-center text-sm min-w-[3000px]"
-                                    id="tabelOmset">
+                            <div style="overflow-x: auto;">
+                                <table class="table-fixed border-collapse w-full text-center text-sm" id="tabelOmset">
                                     <thead class="bg-blue-300 text-black">
                                         <tr>
-                                            <th rowspan="2" class="px-4 py-2 bg-green-200">Wahana</th>
+                                            <th rowspan="2" class="px-2 py-1 text-xs bg-green-200 w-[120px]">Wahana</th>
                                             @foreach ($items as $item)
-                                                <th colspan="3" class="px-4 py-2 bg-blue-100">{{ $item }}</th>
+                                                <th colspan="3" class="px-2 py-1 text-xs bg-blue-100 w-[200px]">
+                                                    {{ $item }}
+                                                </th>
                                             @endforeach
 
-                                            <th rowspan="2" class="px-4 py-2 bg-green-200">TOTAL OMSET</th>
-                                            <th colspan="2" class="px-4 py-2 bg-yellow-200">PAYMENT TYPE <br>DARI
+                                            <th rowspan="2" class="px-2 py-1 text-xs bg-green-200 w-[100px]">TOTAL OMSET
+                                            </th>
+                                            <th colspan="2" class="px-2 py-1 text-xs bg-yellow-200 w-[150px]">PAYMENT
+                                                TYPE <br>DARI
                                                 PENGUNJUNG</th>
-                                            <th colspan="2" class="px-4 py-2 bg-gray-200">PEMBAGIAN <br>SHARING OMSET
+                                            <th colspan="2" class="px-2 py-1 text-xs bg-gray-200 w-[150px]">PEMBAGIAN
+                                                <br>SHARING
+                                                OMSET
                                             </th>
                                             @if ($data->unitKerja->format_closing === 2 || $data->unitKerja->format_closing === 4)
-                                                <th rowpsan="2" class="px-4 py-2 bg-gray-200">TITIPAN <br>OMSET</th>
+                                                <th rowpsan="2" class="px-2 py-1 text-xs bg-gray-200 w-[120px]">TITIPAN
+                                                    <br>OMSET
+                                                </th>
                                             @endif
-                                            <th rowspan="2" class="px-4 py-2 bg-pink-200">LEBIH (KURANG) <br>DANA CASH
+                                            <th rowspan="2" class="px-2 py-1 text-xs bg-pink-200 w-[150px]">LEBIH
+                                                (KURANG) <br>DANA
+                                                CASH
                                                 <br>SETOR TUNAI KE<br>MERCHANDISE
                                             </th>
                                         </tr>
                                         <tr>
                                             @foreach ($items as $item)
-                                                <th class="px-4 py-2 w-[100px]">QTY</th>
-                                                <th class="px-4 py-2 w-[120px]">HARGA</th>
-                                                <th class="px-4 py-2 w-[150px]">JUMLAH</th>
+                                                <th class="px-2 py-1 text-xs w-[40px]">QTY</th>
+                                                <th class="px-2 py-1 text-xs w-[100px]">HARGA</th>
+                                                <th class="px-2 py-1 text-xs w-[120px]">JUMLAH</th>
                                             @endforeach
-                                            <th class="px-4 py-2 w-[150px]">QRIS</th>
-                                            <th class="px-4 py-2 w-[150px]">CASH</th>
-                                            <th class="px-4 py-2 w-[150px]">MERCHANDISE</th>
-                                            <th class="px-4 py-2 w-[150px]">RCA</th>
+                                            <th class="px-2 py-1 text-xs w-[100px]">QRIS</th>
+                                            <th class="px-2 py-1 text-xs w-[100px]">CASH</th>
+                                            <th class="px-2 py-1 text-xs w-[100px]">MERCH</th>
+                                            <th class="px-2 py-1 text-xs w-[100px]">RCA</th>
                                             @if ($data->unitKerja->format_closing === 2 || $data->unitKerja->format_closing === 4)
-                                                <th class="px-4 py-2 w-[150px]">{{ $data->unitKerja->nama_unit }}<br>(SETOR
+                                                <th class="px-2 py-1 w-[100px]">{{ $data->unitKerja->nama_unit }}<br>(SETOR
                                                     TUNAI)</th>
                                             @endif
                                         </tr>
@@ -116,7 +125,7 @@
                                     <tbody id="item-table-body">
                                         @foreach ($data->details->groupBy('wahanaItem.wahana_id') as $wahanaId => $group)
                                             <tr>
-                                                <td class="text-center font-semibold px-2 py-1">
+                                                <td class="text-left font-semibold px-2 py-1">
                                                     {{ $group->first()->wahanaItem->wahana->nama_wahana ?? '-' }}
                                                 </td>
 
@@ -137,6 +146,10 @@
                                                             name="details[{{ $wahanaId }}][items][{{ $itemIndex }}][harga]"
                                                             class="harga w-full px-2 py-1 text-right"
                                                             value="{{ number_format($detail->harga ?? 0, 0, ',', '.') }}"
+                                                            readonly>
+                                                        <input type="hidden"
+                                                            class="hargaTitipan w-full px-2 py-1 text-right"
+                                                            value="{{ number_format($detail->wahanaItem->harga_perhitungan_titipan ?? 0, 0, ',', '.') }}"
                                                             readonly>
                                                     </td>
                                                     <td class="text-right px-2 py-1">
@@ -277,7 +290,9 @@
                                                 <td class="mdr-amount text-right px-2 py-1 text-red-500">
                                                     -{{ number_format($mdrAmount, 0, ',', '.') }}
                                                 </td>
-                                                <td></td>
+                                                <td class="mdrLebih-amount text-right px-2 py-1 text-red-500">
+                                                    -{{ number_format($mdrAmount, 0, ',', '.') }}
+                                                </td>
                                             </tr>
                                         @endif
 
@@ -473,6 +488,7 @@
                 }
 
                 const formatNumber = (num) => num.toLocaleString('id-ID');
+
                 const parseNumber = (str) => parseFloat((str || '0').replace(/\./g, '').replace(',', '.')) || 0;
 
                 // =====================================================
@@ -481,6 +497,7 @@
                 const updateRow = (row) => {
                     const qtyInputs = row.querySelectorAll('.qty');
                     const hargaInputs = row.querySelectorAll('.harga');
+                    const hargaTitipanInputs = row.querySelectorAll('.hargaTitipan');
                     const jumlahInputs = row.querySelectorAll('.jumlah');
                     const qrisInput = row.querySelector('.qris');
                     const cashInput = row.querySelector('.cash');
@@ -490,50 +507,57 @@
                     const lebihKurangInput = row.querySelector('.lebih_kurang');
                     const omsetTotalInput = row.querySelector('.omset_total');
 
-                    let totalOmset = 0,
-                        totalQty = 0,
-                        totalJumlah = 0;
+                    let totalOmset = 0;
+                    let totalTitipan = 0;
 
                     qtyInputs.forEach((qtyInput, i) => {
                         const qty = parseNumber(qtyInput.value);
                         const harga = parseNumber(hargaInputs[i].value);
+                        const hargaTitipan = parseNumber(hargaTitipanInputs[i]?.value || 0);
+                        const titipanItem = qty * (hargaTitipan > 0 ? hargaTitipan : 0);
+
                         const jumlah = qty * harga;
                         jumlahInputs[i].value = formatNumber(jumlah);
-                        totalQty += qty;
-                        totalJumlah += jumlah;
+
                         totalOmset += jumlah;
+                        totalTitipan += titipanItem; // tambahkan ke total titipan
                     });
 
                     if (omsetTotalInput) omsetTotalInput.value = formatNumber(totalOmset);
 
                     const qris = parseNumber(qrisInput?.value);
-                    const titipan = parseNumber(titipanInput?.value);
                     const cash = Math.max(0, totalOmset - qris);
-
                     if (cashInput) cashInput.value = formatNumber(cash);
+
                     const merch = totalOmset * 0.45;
                     const rca = totalOmset * 0.55;
                     if (merchInput) merchInput.value = formatNumber(merch);
                     if (rcaInput) rcaInput.value = formatNumber(rca);
-                    const lebihKurang = cash - merch - titipan;
+
+                    // ✅ Titipan otomatis (bukan dari input manual)
+                    if (titipanInput) titipanInput.value = formatNumber(totalTitipan);
+
+                    const lebihKurang = cash - merch - totalTitipan;
                     if (lebihKurangInput) lebihKurangInput.value = formatNumber(lebihKurang);
 
                     return {
                         totalOmset,
+                        totalTitipan,
                         qris,
                         cash,
                         merch,
                         rca,
-                        titipan,
                         lebihKurang
                     };
                 };
+
 
                 // =====================================================
                 // HITUNG TOTAL
                 // =====================================================
                 const updateTotals = () => {
                     const rows = document.querySelectorAll('#tabelOmset tbody tr');
+
                     let sumOmset = 0,
                         sumQris = 0,
                         sumCash = 0,
@@ -542,27 +566,36 @@
                         sumTitipan = 0,
                         sumLebihKurang = 0;
 
-                    rows.forEach(row => {
+                    // Helper aman
+                    const safe = (n) => (isNaN(n) || n === undefined ? 0 : n);
+
+                    rows.forEach((row) => {
+                        // 🔍 Skip baris yang bukan item (tidak punya .qty dan bukan .omset_total)
+                        const isDataRow = row.querySelector('.qty') || row.querySelector('.omset_total');
+                        if (!isDataRow) return;
+
                         const r = updateRow(row);
-                        sumOmset += r.totalOmset;
-                        sumQris += r.qris;
-                        sumCash += r.cash;
-                        sumMerch += r.merch;
-                        sumRca += r.rca;
-                        sumTitipan += r.titipan;
-                        sumLebihKurang += r.lebihKurang;
+                        sumOmset += safe(r.totalOmset);
+                        sumQris += safe(r.qris);
+                        sumCash += safe(r.cash);
+                        sumMerch += safe(r.merch);
+                        sumRca += safe(r.rca);
+                        sumTitipan += safe(r.totalTitipan);
+                        sumLebihKurang += safe(r.lebihKurang);
                     });
 
-                    const mdr = sumTitipan * 0.007;
-                    const grandTitipan = sumTitipan - mdr;
+                    // 🧮 Hitung MDR (0,7% dari total titipan)
+                    const mdr = safe(sumTitipan) * 0.007;
+                    const grandTitipan = safe(sumTitipan) - mdr;
+                    const grandLebihKurang = safe(sumLebihKurang) + mdr;
 
-                    // --- Update elemen subtotal & grand total dengan pengecekan aman
+                    // Helper untuk update teks
                     const setText = (selector, value) => {
                         const el = document.querySelector(selector);
                         if (el) el.textContent = value;
                     };
 
-                    // Subtotal
+                    // --- Update Subtotal
                     setText('.subtotal-omset', formatNumber(sumOmset));
                     setText('.subtotal-qris', formatNumber(sumQris));
                     setText('.subtotal-cash', formatNumber(sumCash));
@@ -571,16 +604,20 @@
                     setText('.subtotal-titipan', formatNumber(sumTitipan));
                     setText('.subtotal-lebi_kurang', formatNumber(sumLebihKurang));
 
-                    // Grand total
+                    // --- Update Grand Total
                     setText('.grand-total', formatNumber(sumOmset));
                     setText('.grand-qris', formatNumber(sumQris));
                     setText('.grand-cash', formatNumber(sumCash));
                     setText('.grand-merch', formatNumber(sumMerch));
                     setText('.grand-rca', formatNumber(sumRca));
-                    setText('.grand-titipan', formatNumber(grandTitipan)); // aman walau tidak ada
-                    setText('.grand-lebi_kurang', formatNumber(sumLebihKurang));
+                    setText('.grand-titipan', formatNumber(grandTitipan));
+                    setText('.grand-lebi_kurang', formatNumber(grandLebihKurang));
+
+                    // --- Update MDR row (kalau ada)
                     setText('.mdr-amount', '-' + formatNumber(mdr));
+                    setText('.mdrLebih-amount', '-' + formatNumber(mdr));
                 };
+
 
                 // =====================================================
                 // GENERATE JOURNAL PREVIEW (versi sama seperti CREATE)

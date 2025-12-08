@@ -1,42 +1,42 @@
-@extends('layouts.app')
 
-@section('content')
-    {{-- Alpine.js --}}
+
+<?php $__env->startSection('content'); ?>
+    
     <script src="//unpkg.com/alpinejs" defer></script>
 
-    {{-- Notifikasi Sukses --}}
-    @if (session('success'))
+    
+    <?php if(session('success')): ?>
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
             <div
                 class="flex items-start bg-green-50 border-l-4 border-green-600 rounded-lg shadow-md p-4 space-x-3 animate-fade-in-down">
                 <i class="fas fa-check-circle text-green-600 text-xl mt-1"></i>
                 <div>
                     <p class="font-semibold text-green-800">Berhasil!</p>
-                    <p class="text-green-700 text-sm">{{ session('success') }}</p>
+                    <p class="text-green-700 text-sm"><?php echo e(session('success')); ?></p>
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
-    @if (session('not_found'))
+    <?php if(session('not_found')): ?>
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
             <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow">
                 <div class="flex items-center">
                     <i class="fas fa-info-circle mr-2 text-red-600"></i>
-                    <p class="text-sm">{{ session('not_found') }}</p>
+                    <p class="text-sm"><?php echo e(session('not_found')); ?></p>
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- Konten Utama --}}
+    
     <div class="py-8">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class="bg-white border border-gray-200 shadow-md rounded-xl p-6">
 
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Filter Transaksi</h2>
 
-                <form method="GET" action="{{ route('arus_kas.arus_kas_report') }}"
+                <form method="GET" action="<?php echo e(route('arus_kas.arus_kas_report')); ?>"
                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 
                     <div>
@@ -44,35 +44,36 @@
                         <select name="periode_buku" id="periode"
                             class="w-3/6 border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">---Pilih---</option>
-                            @foreach ($tahun_buku as $item)
-                                <option value="{{ $item->id }}" data-tahun="{{ trim($item->tahun) }}">
-                                    {{ $item->tahun }}
+                            <?php $__currentLoopData = $tahun_buku; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($item->id); ?>" data-tahun="<?php echo e(trim($item->tahun)); ?>">
+                                    <?php echo e($item->tahun); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
 
-                    {{-- Tanggal Awal --}}
+                    
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</label>
-                        <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}"
+                        <input type="date" id="start_date" name="start_date" value="<?php echo e(request('start_date')); ?>"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
                     </div>
 
-                    {{-- Tanggal Akhir --}}
+                    
                     <div>
                         <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
-                        <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                        <input type="date" id="end_date" name="end_date" value="<?php echo e(request('end_date')); ?>"
                             class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required>
                     </div>
 
-                    {{-- Select Account --}}
+                    
                     <div class="sm:col-span-3">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Select Account</label>
 
-                        {{-- Input hidden untuk kirim array akun terpilih --}}
+                        
                         <input type="hidden" name="selected_accounts" id="selected_accounts">
 
                         <!-- Search Input -->
@@ -91,25 +92,25 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($account as $akun)
-                                        <tr class="hover:bg-gray-50" data-level="{{ $akun->level_akun }}"
-                                            data-tipe="{{ strtolower($akun->tipe_akun) }}">
+                                    <?php $__currentLoopData = $account; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $akun): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr class="hover:bg-gray-50" data-level="<?php echo e($akun->level_akun); ?>"
+                                            data-tipe="<?php echo e(strtolower($akun->tipe_akun)); ?>">
                                             <td class="px-2 py-1">
                                                 <input type="checkbox" class="account-checkbox form-checkbox"
-                                                    value="{{ $akun->kode_akun }} - {{ $akun->nama_akun }}">
+                                                    value="<?php echo e($akun->kode_akun); ?> - <?php echo e($akun->nama_akun); ?>">
                                             </td>
                                             <td class="px-2 py-1">
-                                                {{ $akun->kode_akun }} - {{ $akun->nama_akun }}
-                                                {{-- <span class="text-xs text-gray-400">({{ $akun->level_akun }},
-                                                    {{ $akun->tipe_akun }})</span> --}}
+                                                <?php echo e($akun->kode_akun); ?> - <?php echo e($akun->nama_akun); ?>
+
+                                                
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    {{-- Display Mode Selection --}}
+                    
                     <div class="sm:col-span-3">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Tampilan Laporan</label>
                         <div class="flex flex-wrap gap-4">
@@ -131,7 +132,7 @@
                         </div>
                     </div>
 
-                    {{-- Tombol Filter --}}
+                    
                     <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                         <button type="submit"
                             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md shadow hover:bg-blue-700">
@@ -180,7 +181,7 @@
             });
         });
     </script>
-    {{-- Script --}}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectAll = document.getElementById('select-all');
@@ -234,4 +235,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\rca\resources\views/arus_kas/filter_arus_kas.blade.php ENDPATH**/ ?>

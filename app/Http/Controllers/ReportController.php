@@ -395,6 +395,7 @@ class ReportController extends Controller
     {
         $tanggalAwal = $request->start_date;
         $tanggalAkhir = $request->end_date;
+        $displayMode = $request->display_mode ?? 'source';
 
         // 1️⃣ Ambil akun kas/bank
         $selectedAccountsRaw = explode(',', $request->selected_accounts ?? '');
@@ -447,18 +448,20 @@ class ReportController extends Controller
                     $nilaiKasProporsional = $totalKas * $proporsi;
 
                     $rows[] = [
-                        'tanggal'    => $entry->tanggal,
-                        'source'     => $entry->source,
-                        'akun_kas'   => $kas->kode_akun . ' - ' . ($kas->chartOfAccount->nama_akun ?? ''),
-                        'lawan_akun' => $lawan->kode_akun . ' - ' . ($lawan->chartOfAccount->nama_akun ?? ''),
-                        'keterangan' => $entry->comment ?? $kas->comment,
-                        'cash_in'    => $isCashIn ? $nilaiKasProporsional : 0,
-                        'cash_out'   => !$isCashIn ? $nilaiKasProporsional : 0,
+                        'tanggal'      => $entry->tanggal,
+                        'source'       => $entry->source,
+                        'akun_kas'     => $kas->kode_akun . ' - ' . ($kas->chartOfAccount->nama_akun ?? ''),
+                        'kode_kas'     => $kas->kode_akun,
+                        'lawan_akun'   => $lawan->kode_akun . ' - ' . ($lawan->chartOfAccount->nama_akun ?? ''),
+                        'line_comment' => $lawan->comment ?? $kas->comment ?? '',
+                        'keterangan'   => $entry->comment ?? '',
+                        'cash_in'      => $isCashIn ? $nilaiKasProporsional : 0,
+                        'cash_out'     => !$isCashIn ? $nilaiKasProporsional : 0,
                     ];
                 }
             }
         }
 
-        return view('arus_kas.report_arus_kas', compact('rows', 'tanggalAwal', 'tanggalAkhir'));
+        return view('arus_kas.report_arus_kas', compact('rows', 'tanggalAwal', 'tanggalAkhir', 'displayMode'));
     }
 }

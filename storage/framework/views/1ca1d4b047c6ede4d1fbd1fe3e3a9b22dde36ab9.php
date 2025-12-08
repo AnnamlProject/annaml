@@ -1,13 +1,13 @@
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div class="py-4">
         <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-md p-4">
                 <div>
                     <ul class="flex border-b mb-3 space-x-4 text-[10px] font-medium text-gray-600">
                         <li>
-                            {{-- Export buttons commented out --}}
+                            
                         </li>
                         <li><a onclick="document.getElementById('fileModify').classList.toggle('hidden')"
                                 class="tab-link cursor-pointer">Modify</a></li>
@@ -20,7 +20,7 @@
                             <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
                         </h3>
                         <div class="space-y-3 text-sm text-gray-700">
-                            <form method="GET" action="{{ route('arus_kas.arus_kas_report') }}"
+                            <form method="GET" action="<?php echo e(route('arus_kas.arus_kas_report')); ?>"
                                 class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 <div>
                                     <label for="periode" class="block text-sm font-semibold text-gray-700 mb-1">Periode
@@ -31,36 +31,36 @@
                                     </select>
                                 </div>
 
-                                {{-- Tanggal Awal --}}
+                                
                                 <div>
                                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                         Awal</label>
                                     <input type="date" id="start_date" name="start_date"
-                                        value="{{ request('start_date', \Carbon\Carbon::parse($tanggalAwal)->format('Y-m-d')) }}"
+                                        value="<?php echo e(request('start_date', \Carbon\Carbon::parse($tanggalAwal)->format('Y-m-d'))); ?>"
                                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required>
                                 </div>
 
-                                {{-- Tanggal Akhir --}}
+                                
                                 <div>
                                     <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                         Akhir</label>
                                     <input type="date" id="end_date" name="end_date"
-                                        value="{{ request('end_date', \Carbon\Carbon::parse($tanggalAkhir)->format('Y-m-d')) }}"
+                                        value="<?php echo e(request('end_date', \Carbon\Carbon::parse($tanggalAkhir)->format('Y-m-d'))); ?>"
                                         class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required>
                                 </div>
 
-                                <input type="hidden" name="selected_accounts" value="{{ request('selected_accounts') }}">
-                                <input type="hidden" name="display_mode" value="{{ $displayMode }}">
+                                <input type="hidden" name="selected_accounts" value="<?php echo e(request('selected_accounts')); ?>">
+                                <input type="hidden" name="display_mode" value="<?php echo e($displayMode); ?>">
 
-                                {{-- Tombol Filter --}}
+                                
                                 <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                                     <button type="submit"
                                         class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md shadow hover:bg-blue-700">
                                         <i class="fas fa-filter mr-2"></i> Ok
                                     </button>
-                                    <a href="{{ route('arus_kas.filter_arus_kas') }}"
+                                    <a href="<?php echo e(route('arus_kas.filter_arus_kas')); ?>"
                                         class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 font-medium text-sm rounded-md hover:bg-gray-200">
                                         <i class="fas fa-undo mr-2"></i> Reset
                                     </a>
@@ -78,30 +78,31 @@
                 <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <p class="text-[10px]">
                         <span class="font-semibold">Periode:</span>
-                        {{ \Carbon\Carbon::parse($tanggalAwal)->format('d M Y') }} -
-                        {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
+                        <?php echo e(\Carbon\Carbon::parse($tanggalAwal)->format('d M Y')); ?> -
+                        <?php echo e(\Carbon\Carbon::parse($tanggalAkhir)->format('d M Y')); ?>
+
                     </p>
                     <div class="text-[10px]">
                         <span class="font-semibold">Mode:</span>
-                        @if($displayMode == 'source')
+                        <?php if($displayMode == 'source'): ?>
                             <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px]">Detail per Source</span>
-                        @elseif($displayMode == 'account')
+                        <?php elseif($displayMode == 'account'): ?>
                             <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px]">Per Account Kas/Bank</span>
-                        @else
+                        <?php else: ?>
                             <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px]">Universal</span>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                {{-- ========================================= --}}
-                {{-- MODE 1: DETAIL PER SOURCE (DEFAULT) --}}
-                {{-- ========================================= --}}
-                @if($displayMode == 'source')
-                    @php
+                
+                
+                
+                <?php if($displayMode == 'source'): ?>
+                    <?php
                         $grouped = collect($rows)->groupBy('source');
                         $grandCashIn = 0;
                         $grandCashOut = 0;
-                    @endphp
+                    ?>
 
                     <table class="min-w-full border-collapse border border-gray-300 text-[10px]">
                         <thead class="bg-gray-100">
@@ -116,73 +117,74 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($grouped as $source => $items)
-                                {{-- Header Source --}}
+                            <?php $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $source => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                
                                 <tr class="bg-gray-200 font-semibold">
                                     <td colspan="7" class="px-2 py-1 text-left">
-                                        Source: {{ $source }}
+                                        Source: <?php echo e($source); ?>
+
                                     </td>
                                 </tr>
 
-                                @php
+                                <?php
                                     $subtotalIn = 0;
                                     $subtotalOut = 0;
-                                @endphp
+                                ?>
 
-                                {{-- Baris Detail --}}
-                                @foreach ($items as $r)
+                                
+                                <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-gray-50">
-                                        <td class="border px-2 py-1">{{ \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y') }}</td>
-                                        <td class="border px-2 py-1">{{ $r['source'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['akun_kas'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['lawan_akun'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['keterangan'] }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_in'], 2) }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_out'], 2) }}</td>
+                                        <td class="border px-2 py-1"><?php echo e(\Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y')); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['source']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['akun_kas']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['lawan_akun']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['keterangan']); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_in'], 2)); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_out'], 2)); ?></td>
                                     </tr>
 
-                                    @php
+                                    <?php
                                         $subtotalIn += $r['cash_in'];
                                         $subtotalOut += $r['cash_out'];
-                                    @endphp
-                                @endforeach
+                                    ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                {{-- Subtotal per Source --}}
+                                
                                 <tr class="font-semibold bg-gray-100">
-                                    <td colspan="5" class="px-2 py-1 text-right">Subtotal ({{ $source }})</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalIn, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalOut, 2) }}</td>
+                                    <td colspan="5" class="px-2 py-1 text-right">Subtotal (<?php echo e($source); ?>)</td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalIn, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalOut, 2)); ?></td>
                                 </tr>
 
-                                @php
+                                <?php
                                     $grandCashIn += $subtotalIn;
                                     $grandCashOut += $subtotalOut;
-                                @endphp
-                            @endforeach
+                                ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
 
-                        {{-- Total Keseluruhan --}}
+                        
                         <tfoot>
                             <tr class="bg-gray-300 font-bold">
                                 <td colspan="5" class="px-2 py-1 text-right">TOTAL KESELURUHAN</td>
-                                <td class="border px-2 py-1 text-right">{{ number_format($grandCashIn, 2) }}</td>
-                                <td class="border px-2 py-1 text-right">{{ number_format($grandCashOut, 2) }}</td>
+                                <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashIn, 2)); ?></td>
+                                <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashOut, 2)); ?></td>
                             </tr>
                         </tfoot>
                     </table>
 
-                {{-- ========================================= --}}
-                {{-- MODE 2: PER ACCOUNT KAS/BANK --}}
-                {{-- ========================================= --}}
-                @elseif($displayMode == 'account')
-                    @php
+                
+                
+                
+                <?php elseif($displayMode == 'account'): ?>
+                    <?php
                         $grouped = collect($rows)->groupBy('akun_kas');
                         $grandCashIn = 0;
                         $grandCashOut = 0;
                         $accountIndex = 0;
-                    @endphp
+                    ?>
 
-                    {{-- Global Toggle Button --}}
+                    
                     <div class="mb-2 flex gap-2" x-data="{ allExpanded: false }">
                         <button type="button" 
                             @click="allExpanded = !allExpanded; document.querySelectorAll('[data-detail-rows]').forEach(el => el.style.display = allExpanded ? 'table-row' : 'none'); document.querySelectorAll('[data-toggle-icon]').forEach(el => el.classList.toggle('fa-chevron-right', !allExpanded)); document.querySelectorAll('[data-toggle-icon]').forEach(el => el.classList.toggle('fa-chevron-down', allExpanded))"
@@ -205,63 +207,67 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($grouped as $akunKas => $items)
-                                @php
+                            <?php $__currentLoopData = $grouped; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $akunKas => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $subtotalIn = $items->sum('cash_in');
                                     $subtotalOut = $items->sum('cash_out');
                                     $netCashFlow = $subtotalIn - $subtotalOut;
                                     $grandCashIn += $subtotalIn;
                                     $grandCashOut += $subtotalOut;
                                     $accountIndex++;
-                                @endphp
+                                ?>
 
-                                {{-- Header Account (Clickable) --}}
+                                
                                 <tr class="bg-blue-100 font-semibold cursor-pointer hover:bg-blue-200" 
-                                    onclick="toggleAccountRows({{ $accountIndex }})">
+                                    onclick="toggleAccountRows(<?php echo e($accountIndex); ?>)">
                                     <td colspan="4" class="px-2 py-1 text-left">
-                                        <i class="fas fa-chevron-right mr-1 text-blue-600 transition-transform" data-toggle-icon data-account="{{ $accountIndex }}"></i>
-                                        <i class="fas fa-wallet mr-1"></i>{{ $akunKas }}
+                                        <i class="fas fa-chevron-right mr-1 text-blue-600 transition-transform" data-toggle-icon data-account="<?php echo e($accountIndex); ?>"></i>
+                                        <i class="fas fa-wallet mr-1"></i><?php echo e($akunKas); ?>
+
                                     </td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalIn, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalOut, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right {{ $netCashFlow >= 0 ? 'text-green-700' : 'text-red-700' }}">
-                                        {{ number_format($netCashFlow, 2) }}
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalIn, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalOut, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right <?php echo e($netCashFlow >= 0 ? 'text-green-700' : 'text-red-700'); ?>">
+                                        <?php echo e(number_format($netCashFlow, 2)); ?>
+
                                     </td>
                                 </tr>
 
-                                {{-- Baris Detail (Hidden by default) --}}
-                                @foreach ($items as $r)
-                                    <tr class="hover:bg-gray-50" data-detail-rows data-account="{{ $accountIndex }}" style="display: none;">
-                                        <td class="border px-2 py-1">{{ \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y') }}</td>
-                                        <td class="border px-2 py-1">{{ $r['source'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['lawan_akun'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['line_comment'] }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_in'], 2) }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_out'], 2) }}</td>
+                                
+                                <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <tr class="hover:bg-gray-50" data-detail-rows data-account="<?php echo e($accountIndex); ?>" style="display: none;">
+                                        <td class="border px-2 py-1"><?php echo e(\Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y')); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['source']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['lawan_akun']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['line_comment']); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_in'], 2)); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_out'], 2)); ?></td>
                                         <td class="border px-2 py-1 text-right"></td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                                {{-- Subtotal per Account (Hidden by default) --}}
-                                <tr class="font-semibold bg-blue-50" data-detail-rows data-account="{{ $accountIndex }}" style="display: none;">
+                                
+                                <tr class="font-semibold bg-blue-50" data-detail-rows data-account="<?php echo e($accountIndex); ?>" style="display: none;">
                                     <td colspan="4" class="px-2 py-1 text-right">Subtotal</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalIn, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($subtotalOut, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right {{ $netCashFlow >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ number_format($netCashFlow, 2) }}
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalIn, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($subtotalOut, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right <?php echo e($netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                        <?php echo e(number_format($netCashFlow, 2)); ?>
+
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
 
-                        {{-- Total Keseluruhan --}}
+                        
                         <tfoot>
                             <tr class="bg-gray-300 font-bold">
                                 <td colspan="4" class="px-2 py-1 text-right">TOTAL KESELURUHAN</td>
-                                <td class="border px-2 py-1 text-right">{{ number_format($grandCashIn, 2) }}</td>
-                                <td class="border px-2 py-1 text-right">{{ number_format($grandCashOut, 2) }}</td>
-                                <td class="border px-2 py-1 text-right {{ ($grandCashIn - $grandCashOut) >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ number_format($grandCashIn - $grandCashOut, 2) }}
+                                <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashIn, 2)); ?></td>
+                                <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashOut, 2)); ?></td>
+                                <td class="border px-2 py-1 text-right <?php echo e(($grandCashIn - $grandCashOut) >= 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                    <?php echo e(number_format($grandCashIn - $grandCashOut, 2)); ?>
+
                                 </td>
                             </tr>
                         </tfoot>
@@ -279,14 +285,14 @@
                         }
                     </script>
 
-                {{-- ========================================= --}}
-                {{-- MODE 3: UNIVERSAL (TABEL LENGKAP) --}}
-                {{-- ========================================= --}}
-                @else
-                    @php
+                
+                
+                
+                <?php else: ?>
+                    <?php
                         $grandCashIn = collect($rows)->sum('cash_in');
                         $grandCashOut = collect($rows)->sum('cash_out');
-                    @endphp
+                    ?>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full border-collapse border border-gray-300 text-[10px]">
@@ -303,39 +309,42 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($rows as $r)
+                                <?php $__currentLoopData = $rows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-gray-50">
-                                        <td class="border px-2 py-1">{{ \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y') }}</td>
-                                        <td class="border px-2 py-1">{{ $r['source'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['akun_kas'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['lawan_akun'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['line_comment'] }}</td>
-                                        <td class="border px-2 py-1">{{ $r['keterangan'] }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_in'], 2) }}</td>
-                                        <td class="border px-2 py-1 text-right">{{ number_format($r['cash_out'], 2) }}</td>
+                                        <td class="border px-2 py-1"><?php echo e(\Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y')); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['source']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['akun_kas']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['lawan_akun']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['line_comment']); ?></td>
+                                        <td class="border px-2 py-1"><?php echo e($r['keterangan']); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_in'], 2)); ?></td>
+                                        <td class="border px-2 py-1 text-right"><?php echo e(number_format($r['cash_out'], 2)); ?></td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
 
-                            {{-- Total Keseluruhan --}}
+                            
                             <tfoot>
                                 <tr class="bg-gray-300 font-bold">
                                     <td colspan="6" class="px-2 py-1 text-right">TOTAL KESELURUHAN</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($grandCashIn, 2) }}</td>
-                                    <td class="border px-2 py-1 text-right">{{ number_format($grandCashOut, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashIn, 2)); ?></td>
+                                    <td class="border px-2 py-1 text-right"><?php echo e(number_format($grandCashOut, 2)); ?></td>
                                 </tr>
                                 <tr class="bg-gray-200 font-semibold">
                                     <td colspan="6" class="px-2 py-1 text-right">NET CASH FLOW</td>
-                                    <td colspan="2" class="border px-2 py-1 text-right {{ ($grandCashIn - $grandCashOut) >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ number_format($grandCashIn - $grandCashOut, 2) }}
+                                    <td colspan="2" class="border px-2 py-1 text-right <?php echo e(($grandCashIn - $grandCashOut) >= 0 ? 'text-green-600' : 'text-red-600'); ?>">
+                                        <?php echo e(number_format($grandCashIn - $grandCashOut, 2)); ?>
+
                                     </td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                @endif
+                <?php endif; ?>
 
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\rca\resources\views/arus_kas/report_arus_kas.blade.php ENDPATH**/ ?>

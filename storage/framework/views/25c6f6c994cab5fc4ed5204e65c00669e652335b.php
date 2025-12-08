@@ -1,16 +1,16 @@
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div class="container mx-auto px-4 py-6">
         <div>
             <ul class="flex border-b mb-4 space-x-4 text-sm font-medium text-gray-600">
                 <li><a
-                        href="{{ route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'excel']) }}">Export
+                        href="<?php echo e(route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'excel'])); ?>">Export
                         to Excel</a></li>
                 <li><a
-                        href="{{ route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'pdf']) }}">Export
+                        href="<?php echo e(route('income_statement.export', ['start_date' => $tanggalAwal, 'end_date' => $tanggalAkhir, 'format' => 'pdf'])); ?>">Export
                         to PDF</a></li>
-                {{-- <li><a href="#pricing" class="tab-link">Print</a></li> --}}
+                
                 <li><a onclick="document.getElementById('fileModify').classList.toggle('hidden')" class="tab-link">Modify</a>
                 </li>
                 <li><a href="#linked" class="tab-link"></a></li>
@@ -23,25 +23,25 @@
                     <i class="fas fa-file-alt mr-2 text-blue-400"></i> File Aksi
                 </h3>
                 <div class="space-y-3 text-sm text-gray-700">
-                    <form method="GET" action="{{ route('income_statement.income_statement_report') }}"
+                    <form method="GET" action="<?php echo e(route('income_statement.income_statement_report')); ?>"
                         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 
-                        {{-- tanggal awal --}}
+                        
                         <div>
                             <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                                 Awal</label>
-                            <input type="date" id="start_date" name="start_date" value="{{ request('start_date') }}"
+                            <input type="date" id="start_date" name="start_date" value="<?php echo e(request('start_date')); ?>"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500">
                         </div>
-                        {{-- Tanggal Akhir --}}
+                        
                         <div>
                             <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
-                            <input type="date" id="end_date" name="end_date" value="{{ request('end_date') }}"
+                            <input type="date" id="end_date" name="end_date" value="<?php echo e(request('end_date')); ?>"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500"
                                 required>
                         </div>
 
-                        {{-- Tombol Filter --}}
+                        
                         <div class="sm:col-span-3 flex items-center gap-2 mt-4">
                             <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold text-sm rounded-md shadow hover:bg-blue-700">
@@ -63,15 +63,17 @@
             </div>
         </div>
         <h1 class="text-2xl font-bold mb-2">
-            {{ $siteTitle }}
+            <?php echo e($siteTitle); ?>
+
         </h1>
         <h3 class="text-2xl font-bold mb-4">LAPORAN LABA RUGI</h3>
         <p class="text-gray-600 mb-6">
-            Periode: {{ \Carbon\Carbon::parse($tanggalAwal)->format('d M Y') }} -
-            {{ \Carbon\Carbon::parse($tanggalAkhir)->format('d M Y') }}
+            Periode: <?php echo e(\Carbon\Carbon::parse($tanggalAwal)->format('d M Y')); ?> -
+            <?php echo e(\Carbon\Carbon::parse($tanggalAkhir)->format('d M Y')); ?>
+
         </p>
 
-        {{-- Tabel Laporan Laba Rugi dengan Hierarki --}}
+        
         <div class="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
             <table class="w-full text-sm" id="incomeStatementTable">
                 <thead>
@@ -83,208 +85,210 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    {{-- =======================
-                         Bagian PENDAPATAN
-                    ======================== --}}
-                    @if (!empty($groupsPendapatan))
-                        {{-- Header PENDAPATAN --}}
+                    
+                    <?php if(!empty($groupsPendapatan)): ?>
+                        
                         <tr class="bg-emerald-600 text-white">
                             <td colspan="4" class="py-2.5 px-4 font-bold text-base tracking-wide">PENDAPATAN</td>
                         </tr>
-                        @foreach ($groupsPendapatan as $groupIndex => $group)
-                            {{-- GROUP ACCOUNT row - Clickable untuk expand/collapse --}}
+                        <?php $__currentLoopData = $groupsPendapatan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $groupIndex => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            
                             <tr class="bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer group-toggle border-l-4 border-emerald-400"
-                                 data-target="pendapatan-group-{{ $groupIndex }}">
+                                 data-target="pendapatan-group-<?php echo e($groupIndex); ?>">
                                 <td class="py-2.5 px-4">
                                     <span class="flex items-center font-semibold text-emerald-800">
                                         <span class="toggle-icon mr-2 text-emerald-600 w-5 h-5 flex items-center justify-center bg-emerald-200 rounded text-xs font-bold">+</span>
-                                        {{ $group['group'] }}
+                                        <?php echo e($group['group']); ?>
+
                                     </span>
                                 </td>
                                 <td class="py-2.5 px-4 text-right"></td>
                                 <td class="py-2.5 px-4 text-right"></td>
-                                <td class="py-2.5 px-4 text-right font-bold text-emerald-800">{{ number_format($group['saldo_group'], 2, ',', '.') }}</td>
+                                <td class="py-2.5 px-4 text-right font-bold text-emerald-800"><?php echo e(number_format($group['saldo_group'], 2, ',', '.')); ?></td>
                             </tr>
                             
-                            {{-- ACCOUNT level rows - Default HIDDEN (collapsed) --}}
-                            @foreach ($group['accounts'] as $accountIndex => $account)
-                                @php
+                            
+                            <?php $__currentLoopData = $group['accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $accountIndex => $account): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $hasSubAccounts = !empty($account['sub_accounts']);
                                     $accountId = "pendapatan-account-{$groupIndex}-{$accountIndex}";
-                                @endphp
+                                ?>
                                 
-                                @if ($hasSubAccounts)
-                                    {{-- ACCOUNT dengan SUB ACCOUNTS - bisa di-expand --}}
-                                    <tr class="hidden pendapatan-group-{{ $groupIndex }} bg-white hover:bg-gray-50 transition-colors cursor-pointer account-toggle border-l-4 border-emerald-200"
-                                         data-target="{{ $accountId }}">
+                                <?php if($hasSubAccounts): ?>
+                                    
+                                    <tr class="hidden pendapatan-group-<?php echo e($groupIndex); ?> bg-white hover:bg-gray-50 transition-colors cursor-pointer account-toggle border-l-4 border-emerald-200"
+                                         data-target="<?php echo e($accountId); ?>">
                                         <td class="py-2 px-4 pl-10">
                                             <span class="flex items-center text-gray-700">
                                                 <span class="toggle-icon mr-2 text-gray-400 w-4 h-4 flex items-center justify-center bg-gray-100 rounded text-xs">+</span>
-                                                {{ $account['nama_akun'] }}
+                                                <?php echo e($account['nama_akun']); ?>
+
                                             </span>
                                         </td>
                                         <td class="py-2 px-4 text-right"></td>
-                                        <td class="py-2 px-4 text-right font-medium text-gray-700">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                                        <td class="py-2 px-4 text-right font-medium text-gray-700"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                                         <td class="py-2 px-4 text-right"></td>
                                     </tr>
                                     
-                                    {{-- SUB ACCOUNTS rows - Default HIDDEN --}}
-                                    @foreach ($account['sub_accounts'] as $sub)
-                                        <tr class="hidden {{ $accountId }} bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-gray-200">
+                                    
+                                    <?php $__currentLoopData = $account['sub_accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr class="hidden <?php echo e($accountId); ?> bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-gray-200">
                                             <td class="py-1.5 px-4 pl-16">
-                                                <a href="{{ route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $sub['kode_akun']]) }}"
+                                                <a href="<?php echo e(route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $sub['kode_akun']])); ?>"
                                                    class="text-gray-600 hover:text-blue-600 hover:underline">
-                                                    {{ $sub['kode_akun'] }} - {{ $sub['nama_akun'] }}
+                                                    <?php echo e($sub['kode_akun']); ?> - <?php echo e($sub['nama_akun']); ?>
+
                                                 </a>
                                             </td>
-                                            <td class="py-1.5 px-4 text-right text-gray-600">{{ number_format($sub['saldo'], 2, ',', '.') }}</td>
+                                            <td class="py-1.5 px-4 text-right text-gray-600"><?php echo e(number_format($sub['saldo'], 2, ',', '.')); ?></td>
                                             <td class="py-1.5 px-4 text-right"></td>
                                             <td class="py-1.5 px-4 text-right"></td>
                                         </tr>
-                                    @endforeach
-                                @else
-                                    {{-- ACCOUNT tanpa SUB ACCOUNTS --}}
-                                    <tr class="hidden pendapatan-group-{{ $groupIndex }} bg-white hover:bg-gray-50 transition-colors border-l-4 border-emerald-200">
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
+                                    
+                                    <tr class="hidden pendapatan-group-<?php echo e($groupIndex); ?> bg-white hover:bg-gray-50 transition-colors border-l-4 border-emerald-200">
                                         <td class="py-2 px-4 pl-10">
-                                            <a href="{{ route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $account['kode_akun']]) }}"
+                                            <a href="<?php echo e(route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $account['kode_akun']])); ?>"
                                                class="text-gray-700 hover:text-blue-600 hover:underline">
-                                                {{ $account['kode_akun'] }} - {{ $account['nama_akun'] }}
+                                                <?php echo e($account['kode_akun']); ?> - <?php echo e($account['nama_akun']); ?>
+
                                             </a>
                                         </td>
                                         <td class="py-2 px-4 text-right"></td>
-                                        <td class="py-2 px-4 text-right font-medium text-gray-700">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                                        <td class="py-2 px-4 text-right font-medium text-gray-700"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                                         <td class="py-2 px-4 text-right"></td>
                                     </tr>
-                                @endif
-                            @endforeach
-                        @endforeach
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                        {{-- Total PENDAPATAN --}}
+                        
                         <tr class="bg-emerald-700 text-white">
                             <td class="py-3 px-4 font-bold">TOTAL PENDAPATAN</td>
                             <td class="py-3 px-4 text-right"></td>
                             <td class="py-3 px-4 text-right"></td>
-                            <td class="py-3 px-4 text-right font-bold text-lg">{{ number_format($totalPendapatan, 2, ',', '.') }}</td>
+                            <td class="py-3 px-4 text-right font-bold text-lg"><?php echo e(number_format($totalPendapatan, 2, ',', '.')); ?></td>
                         </tr>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Spacer row --}}
+                    
                     <tr class="h-4 bg-gray-100"><td colspan="4"></td></tr>
 
-                    {{-- ===================
-                         Bagian BEBAN
-                    ==================== --}}
-                    @if (!empty($groupsBeban))
-                        {{-- Header BEBAN --}}
+                    
+                    <?php if(!empty($groupsBeban)): ?>
+                        
                         <tr class="bg-rose-600 text-white">
                             <td colspan="4" class="py-2.5 px-4 font-bold text-base tracking-wide">BEBAN</td>
                         </tr>
-                        @foreach ($groupsBeban as $groupIndex => $group)
-                            {{-- GROUP ACCOUNT row - Clickable untuk expand/collapse --}}
+                        <?php $__currentLoopData = $groupsBeban; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $groupIndex => $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            
                             <tr class="bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer group-toggle border-l-4 border-rose-400"
-                                 data-target="beban-group-{{ $groupIndex }}">
+                                 data-target="beban-group-<?php echo e($groupIndex); ?>">
                                 <td class="py-2.5 px-4">
                                     <span class="flex items-center font-semibold text-rose-800">
                                         <span class="toggle-icon mr-2 text-rose-600 w-5 h-5 flex items-center justify-center bg-rose-200 rounded text-xs font-bold">+</span>
-                                        {{ $group['group'] }}
+                                        <?php echo e($group['group']); ?>
+
                                     </span>
                                 </td>
                                 <td class="py-2.5 px-4 text-right"></td>
                                 <td class="py-2.5 px-4 text-right"></td>
-                                <td class="py-2.5 px-4 text-right font-bold text-rose-800">{{ number_format($group['saldo_group'], 2, ',', '.') }}</td>
+                                <td class="py-2.5 px-4 text-right font-bold text-rose-800"><?php echo e(number_format($group['saldo_group'], 2, ',', '.')); ?></td>
                             </tr>
                             
-                            {{-- ACCOUNT level rows - Default HIDDEN (collapsed) --}}
-                            @foreach ($group['accounts'] as $accountIndex => $account)
-                                @php
+                            
+                            <?php $__currentLoopData = $group['accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $accountIndex => $account): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $hasSubAccounts = !empty($account['sub_accounts']);
                                     $accountId = "beban-account-{$groupIndex}-{$accountIndex}";
-                                @endphp
+                                ?>
                                 
-                                @if ($hasSubAccounts)
-                                    {{-- ACCOUNT dengan SUB ACCOUNTS - bisa di-expand --}}
-                                    <tr class="hidden beban-group-{{ $groupIndex }} bg-white hover:bg-gray-50 transition-colors cursor-pointer account-toggle border-l-4 border-rose-200"
-                                         data-target="{{ $accountId }}">
+                                <?php if($hasSubAccounts): ?>
+                                    
+                                    <tr class="hidden beban-group-<?php echo e($groupIndex); ?> bg-white hover:bg-gray-50 transition-colors cursor-pointer account-toggle border-l-4 border-rose-200"
+                                         data-target="<?php echo e($accountId); ?>">
                                         <td class="py-2 px-4 pl-10">
                                             <span class="flex items-center text-gray-700">
                                                 <span class="toggle-icon mr-2 text-gray-400 w-4 h-4 flex items-center justify-center bg-gray-100 rounded text-xs">+</span>
-                                                {{ $account['nama_akun'] }}
+                                                <?php echo e($account['nama_akun']); ?>
+
                                             </span>
                                         </td>
                                         <td class="py-2 px-4 text-right"></td>
-                                        <td class="py-2 px-4 text-right font-medium text-gray-700">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                                        <td class="py-2 px-4 text-right font-medium text-gray-700"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                                         <td class="py-2 px-4 text-right"></td>
                                     </tr>
                                     
-                                    {{-- SUB ACCOUNTS rows - Default HIDDEN --}}
-                                    @foreach ($account['sub_accounts'] as $sub)
-                                        <tr class="hidden {{ $accountId }} bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-gray-200">
+                                    
+                                    <?php $__currentLoopData = $account['sub_accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr class="hidden <?php echo e($accountId); ?> bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-gray-200">
                                             <td class="py-1.5 px-4 pl-16">
-                                                <a href="{{ route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $sub['kode_akun']]) }}"
+                                                <a href="<?php echo e(route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $sub['kode_akun']])); ?>"
                                                    class="text-gray-600 hover:text-blue-600 hover:underline">
-                                                    {{ $sub['kode_akun'] }} - {{ $sub['nama_akun'] }}
+                                                    <?php echo e($sub['kode_akun']); ?> - <?php echo e($sub['nama_akun']); ?>
+
                                                 </a>
                                             </td>
-                                            <td class="py-1.5 px-4 text-right text-gray-600">{{ number_format($sub['saldo'], 2, ',', '.') }}</td>
+                                            <td class="py-1.5 px-4 text-right text-gray-600"><?php echo e(number_format($sub['saldo'], 2, ',', '.')); ?></td>
                                             <td class="py-1.5 px-4 text-right"></td>
                                             <td class="py-1.5 px-4 text-right"></td>
                                         </tr>
-                                    @endforeach
-                                @else
-                                    {{-- ACCOUNT tanpa SUB ACCOUNTS --}}
-                                    <tr class="hidden beban-group-{{ $groupIndex }} bg-white hover:bg-gray-50 transition-colors border-l-4 border-rose-200">
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
+                                    
+                                    <tr class="hidden beban-group-<?php echo e($groupIndex); ?> bg-white hover:bg-gray-50 transition-colors border-l-4 border-rose-200">
                                         <td class="py-2 px-4 pl-10">
-                                            <a href="{{ route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $account['kode_akun']]) }}"
+                                            <a href="<?php echo e(route('buku_besar.buku_besar_report', ['start_date' => request('start_date'), 'end_date' => request('end_date'), 'selected_accounts' => $account['kode_akun']])); ?>"
                                                class="text-gray-700 hover:text-blue-600 hover:underline">
-                                                {{ $account['kode_akun'] }} - {{ $account['nama_akun'] }}
+                                                <?php echo e($account['kode_akun']); ?> - <?php echo e($account['nama_akun']); ?>
+
                                             </a>
                                         </td>
                                         <td class="py-2 px-4 text-right"></td>
-                                        <td class="py-2 px-4 text-right font-medium text-gray-700">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                                        <td class="py-2 px-4 text-right font-medium text-gray-700"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                                         <td class="py-2 px-4 text-right"></td>
                                     </tr>
-                                @endif
-                            @endforeach
-                        @endforeach
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                        {{-- Total BEBAN --}}
+                        
                         <tr class="bg-rose-700 text-white">
                             <td class="py-3 px-4 font-bold">TOTAL BEBAN</td>
                             <td class="py-3 px-4 text-right"></td>
                             <td class="py-3 px-4 text-right"></td>
-                            <td class="py-3 px-4 text-right font-bold text-lg">{{ number_format($totalBeban, 2, ',', '.') }}</td>
+                            <td class="py-3 px-4 text-right font-bold text-lg"><?php echo e(number_format($totalBeban, 2, ',', '.')); ?></td>
                         </tr>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Spacer row --}}
+                    
                     <tr class="h-4 bg-gray-100"><td colspan="4"></td></tr>
 
-                    {{-- ==========================
-                         RINGKASAN AKHIR
-                    =========================== --}}
+                    
                     <tr class="bg-slate-100 border-t-2 border-slate-300">
                         <td class="py-3 px-4 font-bold text-slate-700">LABA SEBELUM PAJAK PENGHASILAN</td>
                         <td class="py-3 px-4 text-right"></td>
                         <td class="py-3 px-4 text-right"></td>
-                        <td class="py-3 px-4 text-right font-bold text-slate-800 text-lg">{{ number_format($labaSebelumPajak, 2, ',', '.') }}</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-800 text-lg"><?php echo e(number_format($labaSebelumPajak, 2, ',', '.')); ?></td>
                     </tr>
                     <tr class="bg-amber-50 border-l-4 border-amber-400">
                         <td class="py-3 px-4 font-semibold text-amber-800">BEBAN PAJAK PENGHASILAN</td>
                         <td class="py-3 px-4 text-right"></td>
                         <td class="py-3 px-4 text-right"></td>
-                        <td class="py-3 px-4 text-right font-bold text-amber-800">{{ number_format($bebanPajak, 2, ',', '.') }}</td>
+                        <td class="py-3 px-4 text-right font-bold text-amber-800"><?php echo e(number_format($bebanPajak, 2, ',', '.')); ?></td>
                     </tr>
                     <tr class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white">
                         <td class="py-4 px-4 font-bold text-base">LABA BERSIH SETELAH PAJAK PENGHASILAN</td>
                         <td class="py-4 px-4 text-right"></td>
                         <td class="py-4 px-4 text-right"></td>
-                        <td class="py-4 px-4 text-right font-bold text-xl">{{ number_format($labaSetelahPajak, 2, ',', '.') }}</td>
+                        <td class="py-4 px-4 text-right font-bold text-xl"><?php echo e(number_format($labaSetelahPajak, 2, ',', '.')); ?></td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        {{-- Legend --}}
+        
         <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
             <span class="flex items-center"><span class="w-3 h-3 bg-emerald-200 rounded mr-1"></span> Pendapatan</span>
             <span class="flex items-center"><span class="w-3 h-3 bg-rose-200 rounded mr-1"></span> Beban</span>
@@ -292,7 +296,7 @@
         </div>
     </div>
 
-    {{-- JavaScript untuk Toggle Expand/Collapse --}}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Toggle GROUP ACCOUNT
@@ -349,4 +353,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\rca\resources\views/income_statement/income_statement_report.blade.php ENDPATH**/ ?>

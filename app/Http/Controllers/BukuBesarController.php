@@ -47,6 +47,8 @@ class BukuBesarController extends Controller
         )
             ->join('journal_entries', 'journal_entry_details.journal_entry_id', '=', 'journal_entries.id')
             ->with('chartOfAccount')
+            // Filter: jangan tampilkan jurnal penutup/transfer Start New Year
+            ->where('journal_entries.source', '!=', 'START NEW YEAR')
             ->when($request->filled('start_date') && $request->filled('end_date'), function ($q) use ($request) {
                 $q->whereDate('journal_entries.tanggal', '>=', $request->start_date)
                     ->whereDate('journal_entries.tanggal', '<=', $request->end_date);
@@ -68,6 +70,8 @@ class BukuBesarController extends Controller
             )
                 ->join('journal_entries', 'journal_entry_details.journal_entry_id', '=', 'journal_entries.id')
                 ->where('journal_entries.tanggal', '<', $request->start_date)
+                // Filter: jangan termasuk jurnal penutup Start New Year
+                ->where('journal_entries.source', '!=', 'START NEW YEAR')
                 ->when(!empty($selectedAccountCodes), function ($q) use ($selectedAccountCodes) {
                     $q->whereIn('journal_entry_details.kode_akun', $selectedAccountCodes);
                 })
@@ -80,9 +84,15 @@ class BukuBesarController extends Controller
                 if (!$akun) continue;
 
                 $tipe = strtolower($akun->tipe_akun);
-                if (in_array($tipe, ['kewajiban', 'ekuitas', 'pendapatan'])) {
+                
+                // Akun nominal (Pendapatan & Beban) saldo awalnya selalu 0
+                // karena di-reset setiap tahun oleh proses Start New Year
+                if (in_array($tipe, ['pendapatan', 'beban'])) {
+                    $saldoAwalPerAkun[$kodeAkun] = 0;
+                } elseif (in_array($tipe, ['kewajiban', 'ekuitas'])) {
                     $saldoAwalPerAkun[$kodeAkun] = ($saldo->total_kredit ?? 0) - ($saldo->total_debit ?? 0);
                 } else {
+                    // Aset dan lainnya
                     $saldoAwalPerAkun[$kodeAkun] = ($saldo->total_debit ?? 0) - ($saldo->total_kredit ?? 0);
                 }
             }
@@ -115,7 +125,7 @@ class BukuBesarController extends Controller
             'saldoAwalPerAkun' => $saldoAwalPerAkun,
             'totalByType'      => $totalByType,
             'tahun_buku' => $tahun_buku,
-            'showComment'      => $request->show_comment ?? 'transaction_comment', // ✅ tambahkan lagi
+            'showComment'      => $request->show_comment ?? 'line_comment', // Default: line comment
         ];
     }
 

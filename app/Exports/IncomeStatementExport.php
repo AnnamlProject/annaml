@@ -21,84 +21,153 @@ class IncomeStatementExport implements FromView
 
     public function view(): View
     {
-        // 🔹 Ambil data sekali saja
-        $entries = JournalEntryDetail::select(
-            'journal_entry_details.kode_akun',
-            DB::raw('SUM(journal_entry_details.debits) as total_debit'),
-            DB::raw('SUM(journal_entry_details.credits) as total_kredit')
-        )
-            ->join('journal_entries', 'journal_entry_details.journal_entry_id', '=', 'journal_entries.id')
-            ->whereBetween('journal_entries.tanggal', [$this->tanggalAwal, $this->tanggalAkhir])
-            ->groupBy('journal_entry_details.kode_akun')
+        // 🔹 Ambil mutasi per akun (EXCLUDE transaksi Start New Year)
+        $entries = DB::table('journal_entry_details as jed')
+            ->join('journal_entries as je', 'je.id', '=', 'jed.journal_entry_id')
+            ->select(
+                'jed.kode_akun',
+                DB::raw('SUM(jed.debits) as total_debit'),
+                DB::raw('SUM(jed.credits) as total_kredit')
+            )
+            ->whereBetween('je.tanggal', [$this->tanggalAwal, $this->tanggalAkhir])
+            ->where('je.source', '!=', 'START NEW YEAR')
+            ->groupBy('jed.kode_akun')
             ->get()
             ->keyBy('kode_akun');
 
-        // 🔹 Ambil akun pendapatan & beban (supaya tetap urut)
+        // 🔹 Ambil master akun (supaya rapi & konsisten)
         $accounts = ChartOfAccount::whereIn('tipe_akun', ['Pendapatan', 'Beban'])
             ->orderBy('kode_akun')
             ->get();
 
         $groups = [];
         $currentGroup = null;
+        $currentAccount = null;
 
         foreach ($accounts as $account) {
+            // Mulai grup baru kalau level GROUP ACCOUNT
             if ($account->level_akun === 'GROUP ACCOUNT') {
-                if ($currentGroup && !empty($currentGroup['akun'])) {
-                    $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
+                // Tutup account sebelumnya jika ada
+                if ($currentAccount) {
+                    if (!empty($currentAccount['sub_accounts'])) {
+                        $currentAccount['saldo_account'] = array_sum(array_column($currentAccount['sub_accounts'], 'saldo'));
+                    }
+                    if ($currentAccount['saldo_account'] != 0 && $currentGroup) {
+                        $currentGroup['accounts'][] = $currentAccount;
+                    }
+                }
+                $currentAccount = null;
+                
+                // Tutup group sebelumnya jika ada
+                if ($currentGroup && !empty($currentGroup['accounts'])) {
+                    $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['accounts'], 'saldo_account'));
                     $groups[] = $currentGroup;
                 }
 
                 $currentGroup = [
                     'group'       => $account->nama_akun,
                     'tipe'        => strtolower($account->tipe_akun),
-                    'akun'        => [],
+                    'accounts'    => [],
                     'saldo_group' => 0,
                 ];
                 continue;
             }
 
+            // Skip HEADER
             if ($account->level_akun === 'HEADER') {
                 continue;
             }
 
-            if (!$currentGroup) {
-                $currentGroup = [
-                    'group'       => '',
-                    'tipe'        => strtolower($account->tipe_akun),
-                    'akun'        => [],
-                    'saldo_group' => 0,
+            // ACCOUNT level - buat parent baru
+            if ($account->level_akun === 'ACCOUNT') {
+                // Tutup account sebelumnya jika ada
+                if ($currentAccount) {
+                    if (!empty($currentAccount['sub_accounts'])) {
+                        $currentAccount['saldo_account'] = array_sum(array_column($currentAccount['sub_accounts'], 'saldo'));
+                    }
+                    if ($currentAccount['saldo_account'] != 0 && $currentGroup) {
+                        $currentGroup['accounts'][] = $currentAccount;
+                    }
+                }
+
+                // Ambil saldo ACCOUNT dari mutasi - FIXED: menggunakan perhitungan NET
+                $entry = $entries->get($account->kode_akun);
+                $totalDebit  = $entry->total_debit ?? 0;
+                $totalKredit = $entry->total_kredit ?? 0;
+                $saldo = strtolower($account->tipe_akun) === 'pendapatan'
+                    ? ($totalKredit - $totalDebit)
+                    : ($totalDebit - $totalKredit);
+
+                $currentAccount = [
+                    'kode_akun'     => $account->kode_akun,
+                    'nama_akun'     => $account->nama_akun,
+                    'tipe_akun'     => $account->tipe_akun,
+                    'level_akun'    => $account->level_akun,
+                    'saldo_account' => $saldo,
+                    'sub_accounts'  => [],
                 ];
+                continue;
             }
 
-            // 🔹 Ambil saldo dari hasil query (bukan query ulang)
-            $entry = $entries->get($account->kode_akun);
-            $totalDebit  = $entry->total_debit ?? 0;
-            $totalKredit = $entry->total_kredit ?? 0;
+            // SUB ACCOUNT level - masukkan ke account parent
+            if ($account->level_akun === 'SUB ACCOUNT') {
+                if (!$currentGroup) {
+                    $currentGroup = [
+                        'group'       => '',
+                        'tipe'        => strtolower($account->tipe_akun),
+                        'accounts'    => [],
+                        'saldo_group' => 0,
+                    ];
+                }
 
-            $tipe  = strtolower($account->tipe_akun);
-            if (strtolower($account->tipe_akun) === 'pendapatan') {
-                $saldo = $totalKredit;   // pendapatan → total kredit
-            } else {
-                $saldo = $totalDebit;    // beban → total debit
-            }
+                // Ambil saldo SUB ACCOUNT dari mutasi - FIXED: menggunakan perhitungan NET
+                $entry = $entries->get($account->kode_akun);
+                $totalDebit  = $entry->total_debit ?? 0;
+                $totalKredit = $entry->total_kredit ?? 0;
+                $saldo = strtolower($account->tipe_akun) === 'pendapatan'
+                    ? ($totalKredit - $totalDebit)
+                    : ($totalDebit - $totalKredit);
 
-            if ($saldo != 0) {
-                $currentGroup['akun'][] = [
-                    'kode_akun'  => $account->kode_akun,
-                    'nama_akun'  => $account->nama_akun,
-                    'tipe_akun'  => $account->tipe_akun,
-                    'level_akun' => $account->level_akun,
-                    'saldo'      => $saldo,
-                ];
+                if ($saldo != 0) {
+                    if ($currentAccount) {
+                        $currentAccount['sub_accounts'][] = [
+                            'kode_akun'  => $account->kode_akun,
+                            'nama_akun'  => $account->nama_akun,
+                            'tipe_akun'  => $account->tipe_akun,
+                            'level_akun' => $account->level_akun,
+                            'saldo'      => $saldo,
+                        ];
+                    } else {
+                        $currentGroup['accounts'][] = [
+                            'kode_akun'     => $account->kode_akun,
+                            'nama_akun'     => $account->nama_akun,
+                            'tipe_akun'     => $account->tipe_akun,
+                            'level_akun'    => $account->level_akun,
+                            'saldo_account' => $saldo,
+                            'sub_accounts'  => [],
+                        ];
+                    }
+                }
             }
         }
 
-        if ($currentGroup && !empty($currentGroup['akun'])) {
-            $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['akun'], 'saldo'));
+        // Tutup account terakhir jika ada
+        if ($currentAccount) {
+            if (!empty($currentAccount['sub_accounts'])) {
+                $currentAccount['saldo_account'] = array_sum(array_column($currentAccount['sub_accounts'], 'saldo'));
+            }
+            if ($currentAccount['saldo_account'] != 0 && $currentGroup) {
+                $currentGroup['accounts'][] = $currentAccount;
+            }
+        }
+
+        // Tutup grup terakhir
+        if ($currentGroup && !empty($currentGroup['accounts'])) {
+            $currentGroup['saldo_group'] = array_sum(array_column($currentGroup['accounts'], 'saldo_account'));
             $groups[] = $currentGroup;
         }
 
-        // 🔹 Pisahkan pendapatan & beban
+        // 🔹 Pisahkan pendapatan vs beban
         $groupsPendapatan = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'pendapatan'));
         $groupsBeban      = array_values(array_filter($groups, fn($g) => $g['tipe'] === 'beban'));
 
@@ -107,7 +176,7 @@ class IncomeStatementExport implements FromView
 
         $labaSebelumPajak = $totalPendapatan - $totalBeban;
 
-        // 🔹 Pajak (opsional: flag is_income_tax di chart_of_accounts)
+        // 🔹 Pajak penghasilan
         $akunPajak  = ChartOfAccount::where('is_income_tax', 1)->first();
         $bebanPajak = 0;
 

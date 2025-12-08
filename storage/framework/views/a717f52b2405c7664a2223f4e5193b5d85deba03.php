@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>Laporan Laba Rugi</title>
     <style>
-        @page {
+        @page  {
             margin: 15mm 12mm 15mm 12mm;
         }
 
@@ -157,8 +157,10 @@
 <body>
     <h2>LAPORAN LABA RUGI</h2>
     <div class="subtitle">
-        Periode: {{ \Carbon\Carbon::parse($start_date)->translatedFormat('d M Y') }}
-        s/d {{ \Carbon\Carbon::parse($end_date)->translatedFormat('d M Y') }}
+        Periode: <?php echo e(\Carbon\Carbon::parse($start_date)->translatedFormat('d M Y')); ?>
+
+        s/d <?php echo e(\Carbon\Carbon::parse($end_date)->translatedFormat('d M Y')); ?>
+
     </div>
 
     <table>
@@ -171,140 +173,135 @@
             </tr>
         </thead>
         <tbody>
-            {{-- =======================
-                 Bagian PENDAPATAN
-            ======================== --}}
-            @if (!empty($groupsPendapatan))
+            
+            <?php if(!empty($groupsPendapatan)): ?>
                 <tr class="section-pendapatan">
                     <td colspan="4">PENDAPATAN</td>
                 </tr>
-                @foreach ($groupsPendapatan as $group)
-                    {{-- GROUP ACCOUNT --}}
+                <?php $__currentLoopData = $groupsPendapatan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    
                     <tr class="row-group-pendapatan">
-                        <td>{{ $group['group'] }}</td>
+                        <td><?php echo e($group['group']); ?></td>
                         <td></td>
                         <td></td>
-                        <td class="text-right">{{ number_format($group['saldo_group'], 2, ',', '.') }}</td>
+                        <td class="text-right"><?php echo e(number_format($group['saldo_group'], 2, ',', '.')); ?></td>
                     </tr>
-                    @foreach ($group['accounts'] as $account)
-                        @php
+                    <?php $__currentLoopData = $group['accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $account): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $hasSubAccounts = !empty($account['sub_accounts']);
-                        @endphp
+                        ?>
                         
-                        {{-- ACCOUNT --}}
+                        
                         <tr class="row-account">
-                            <td>{{ $account['nama_akun'] }}</td>
+                            <td><?php echo e($account['nama_akun']); ?></td>
                             <td></td>
-                            <td class="text-right">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                            <td class="text-right"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                             <td></td>
                         </tr>
                         
-                        @if ($hasSubAccounts)
-                            @foreach ($account['sub_accounts'] as $sub)
-                                {{-- SUB ACCOUNT --}}
+                        <?php if($hasSubAccounts): ?>
+                            <?php $__currentLoopData = $account['sub_accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                
                                 <tr class="row-subaccount">
-                                    <td>{{ $sub['kode_akun'] }} - {{ $sub['nama_akun'] }}</td>
-                                    <td class="text-right">{{ number_format($sub['saldo'], 2, ',', '.') }}</td>
+                                    <td><?php echo e($sub['kode_akun']); ?> - <?php echo e($sub['nama_akun']); ?></td>
+                                    <td class="text-right"><?php echo e(number_format($sub['saldo'], 2, ',', '.')); ?></td>
                                     <td></td>
                                     <td></td>
                                 </tr>
-                            @endforeach
-                        @endif
-                    @endforeach
-                @endforeach
-                {{-- Total Pendapatan --}}
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                
                 <tr class="total-pendapatan">
                     <td>TOTAL PENDAPATAN</td>
                     <td></td>
                     <td></td>
-                    <td class="text-right">{{ number_format($totalPendapatan, 2, ',', '.') }}</td>
+                    <td class="text-right"><?php echo e(number_format($totalPendapatan, 2, ',', '.')); ?></td>
                 </tr>
-            @endif
+            <?php endif; ?>
 
-            {{-- Spacer --}}
+            
             <tr class="spacer"><td colspan="4"></td></tr>
 
-            {{-- =======================
-                 Bagian BEBAN
-            ======================== --}}
-            @if (!empty($groupsBeban))
+            
+            <?php if(!empty($groupsBeban)): ?>
                 <tr class="section-beban">
                     <td colspan="4">BEBAN</td>
                 </tr>
-                @foreach ($groupsBeban as $group)
-                    {{-- GROUP ACCOUNT --}}
+                <?php $__currentLoopData = $groupsBeban; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    
                     <tr class="row-group-beban">
-                        <td>{{ $group['group'] }}</td>
+                        <td><?php echo e($group['group']); ?></td>
                         <td></td>
                         <td></td>
-                        <td class="text-right">{{ number_format($group['saldo_group'], 2, ',', '.') }}</td>
+                        <td class="text-right"><?php echo e(number_format($group['saldo_group'], 2, ',', '.')); ?></td>
                     </tr>
-                    @foreach ($group['accounts'] as $account)
-                        @php
+                    <?php $__currentLoopData = $group['accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $account): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $hasSubAccounts = !empty($account['sub_accounts']);
-                        @endphp
+                        ?>
                         
-                        {{-- ACCOUNT --}}
+                        
                         <tr class="row-account">
-                            <td>{{ $account['nama_akun'] }}</td>
+                            <td><?php echo e($account['nama_akun']); ?></td>
                             <td></td>
-                            <td class="text-right">{{ number_format($account['saldo_account'], 2, ',', '.') }}</td>
+                            <td class="text-right"><?php echo e(number_format($account['saldo_account'], 2, ',', '.')); ?></td>
                             <td></td>
                         </tr>
                         
-                        @if ($hasSubAccounts)
-                            @foreach ($account['sub_accounts'] as $sub)
-                                {{-- SUB ACCOUNT --}}
+                        <?php if($hasSubAccounts): ?>
+                            <?php $__currentLoopData = $account['sub_accounts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                
                                 <tr class="row-subaccount">
-                                    <td>{{ $sub['kode_akun'] }} - {{ $sub['nama_akun'] }}</td>
-                                    <td class="text-right">{{ number_format($sub['saldo'], 2, ',', '.') }}</td>
+                                    <td><?php echo e($sub['kode_akun']); ?> - <?php echo e($sub['nama_akun']); ?></td>
+                                    <td class="text-right"><?php echo e(number_format($sub['saldo'], 2, ',', '.')); ?></td>
                                     <td></td>
                                     <td></td>
                                 </tr>
-                            @endforeach
-                        @endif
-                    @endforeach
-                @endforeach
-                {{-- Total Beban --}}
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                
                 <tr class="total-beban">
                     <td>TOTAL BEBAN</td>
                     <td></td>
                     <td></td>
-                    <td class="text-right">{{ number_format($totalBeban, 2, ',', '.') }}</td>
+                    <td class="text-right"><?php echo e(number_format($totalBeban, 2, ',', '.')); ?></td>
                 </tr>
-            @endif
+            <?php endif; ?>
 
-            {{-- Spacer --}}
+            
             <tr class="spacer"><td colspan="4"></td></tr>
 
-            {{-- =======================
-                 RINGKASAN AKHIR
-            ======================== --}}
+            
             <tr class="row-summary">
                 <td>LABA SEBELUM PAJAK PENGHASILAN</td>
                 <td></td>
                 <td></td>
-                <td class="text-right">{{ number_format($labaSebelumPajak, 2, ',', '.') }}</td>
+                <td class="text-right"><?php echo e(number_format($labaSebelumPajak, 2, ',', '.')); ?></td>
             </tr>
             <tr class="row-pajak">
                 <td>BEBAN PAJAK PENGHASILAN</td>
                 <td></td>
                 <td></td>
-                <td class="text-right">{{ number_format($bebanPajak, 2, ',', '.') }}</td>
+                <td class="text-right"><?php echo e(number_format($bebanPajak, 2, ',', '.')); ?></td>
             </tr>
             <tr class="row-laba-bersih">
                 <td>LABA BERSIH SETELAH PAJAK PENGHASILAN</td>
                 <td></td>
                 <td></td>
-                <td class="text-right">{{ number_format($labaSetelahPajak, 2, ',', '.') }}</td>
+                <td class="text-right"><?php echo e(number_format($labaSetelahPajak, 2, ',', '.')); ?></td>
             </tr>
         </tbody>
     </table>
 
-    {{-- Footer halaman --}}
+    
     <div class="footer">
-        Dicetak: {{ now()->format('d/m/Y H:i') }} — Halaman <span class="pagenum"></span>
+        Dicetak: <?php echo e(now()->format('d/m/Y H:i')); ?> — Halaman <span class="pagenum"></span>
     </div>
 </body>
 
 </html>
+<?php /**PATH C:\laragon\www\rca\resources\views/income_statement/pdf.blade.php ENDPATH**/ ?>

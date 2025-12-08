@@ -1,23 +1,23 @@
-# FIX-10: Cash Flow Account Mode - Toggle & Net Cash Flow
+# FIX-10: Mode Account Cash Flow - Toggle & Net Cash Flow
 
-**Date:** 2025-12-08  
+**Tanggal:** 2025-12-08  
 **Commit:** b2695a1  
-**Files Modified:** 1 file
+**File Diubah:** 1 file
 
 ---
 
-## Summary
-Added collapsible row functionality and Net Cash Flow per account for the "Per Account Kas/Bank" display mode.
+## Ringkasan
+Menambahkan fungsi collapse/expand baris dan Net Cash Flow per akun untuk mode tampilan "Per Account Kas/Bank".
 
-## Changes
+## Perubahan
 
-### Report View Enhancement
+### Penyempurnaan View Laporan
 **File:** `resources/views/arus_kas/report_arus_kas.blade.php`
 
 ---
 
-### Feature 1: Global Toggle Button
-Added "Expand All / Collapse All" button above the table.
+### Fitur 1: Tombol Toggle Global
+Menambahkan tombol "Expand All / Collapse All" di atas tabel.
 
 ```blade
 <div class="mb-2 flex gap-2" x-data="{ allExpanded: false }">
@@ -33,13 +33,13 @@ Added "Expand All / Collapse All" button above the table.
 
 ---
 
-### Feature 2: Collapsible Account Rows
-- Default state: **Collapsed** (only header visible)
-- Click header row to expand/collapse detail rows
-- Icon changes: `fa-chevron-right` ↔ `fa-chevron-down`
+### Fitur 2: Baris Akun yang Dapat Di-collapse
+- Status default: **Tertutup** (hanya header yang terlihat)
+- Klik baris header untuk membuka/menutup baris detail
+- Ikon berubah: `fa-chevron-right` ↔ `fa-chevron-down`
 
 ```blade
-{{-- Header Account (Clickable) --}}
+{{-- Header Akun (Dapat Diklik) --}}
 <tr class="bg-blue-100 font-semibold cursor-pointer hover:bg-blue-200" 
     onclick="toggleAccountRows({{ $accountIndex }})">
     <td colspan="4" class="px-2 py-1 text-left">
@@ -51,7 +51,7 @@ Added "Expand All / Collapse All" button above the table.
     <td class="border px-2 py-1 text-right">{{ number_format($netCashFlow, 2) }}</td>
 </tr>
 
-{{-- Detail rows hidden by default --}}
+{{-- Baris detail tersembunyi secara default --}}
 <tr data-detail-rows data-account="{{ $accountIndex }}" style="display: none;">
     ...
 </tr>
@@ -59,20 +59,20 @@ Added "Expand All / Collapse All" button above the table.
 
 ---
 
-### Feature 3: Net Cash Flow Per Account
-Added "Net" column showing `Cash In - Cash Out` for each account.
+### Fitur 3: Net Cash Flow Per Akun
+Menambahkan kolom "Net" yang menampilkan `Cash In - Cash Out` untuk setiap akun.
 
 ```php
 $netCashFlow = $subtotalIn - $subtotalOut;
 ```
 
-Color coding:
-- **Green** for positive net
-- **Red** for negative net
+Pewarnaan:
+- **Hijau** untuk net positif
+- **Merah** untuk net negatif
 
 ---
 
-### JavaScript Toggle Function
+### Fungsi JavaScript Toggle
 ```javascript
 function toggleAccountRows(accountId) {
     const rows = document.querySelectorAll(`[data-detail-rows][data-account="${accountId}"]`);
@@ -87,16 +87,16 @@ function toggleAccountRows(accountId) {
 
 ---
 
-## Performance
-- Pure client-side toggle (no server requests)
-- O(1) complexity per click
-- No additional database queries
+## Performa
+- Toggle murni client-side (tidak ada request ke server)
+- Kompleksitas O(1) per klik
+- Tidak ada query database tambahan
 
 ---
 
-## Testing
-1. Navigate to Cash Flow report with "Per Account Kas/Bank" mode
-2. Verify default state is collapsed
-3. Click account header to expand
-4. Click "Expand All" to show all details
-5. Verify Net values are correct per account
+## Pengujian
+1. Buka laporan Cash Flow dengan mode "Per Account Kas/Bank"
+2. Verifikasi status default tertutup (collapsed)
+3. Klik header akun untuk membuka detail
+4. Klik "Expand All" untuk menampilkan semua detail
+5. Verifikasi nilai Net benar per akun

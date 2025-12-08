@@ -1,25 +1,25 @@
-# FIX-09: Cash Flow Report - 3 Display Modes Implementation
+# FIX-09: Laporan Cash Flow - Implementasi 3 Mode Tampilan
 
-**Date:** 2025-12-08  
+**Tanggal:** 2025-12-08  
 **Commit:** b2695a1  
-**Files Modified:** 3 files
+**File Diubah:** 3 file
 
 ---
 
-## Summary
-Implemented 3 display modes for Cash Flow report with user-selectable options in filter page.
+## Ringkasan
+Mengimplementasikan 3 mode tampilan untuk laporan Cash Flow dengan opsi yang dapat dipilih pengguna di halaman filter.
 
-## Changes
+## Perubahan
 
-### 1. Filter Page Enhancement
+### 1. Penyempurnaan Halaman Filter
 **File:** `resources/views/arus_kas/filter_arus_kas.blade.php`
 
-**What Changed:**
-- Added radio button group for "Tampilan Laporan" (Display Mode)
-- 3 options: Detail per Source, Per Account Kas/Bank, Universal
+**Yang Diubah:**
+- Menambahkan grup radio button untuk "Tampilan Laporan"
+- 3 opsi: Detail per Source, Per Account Kas/Bank, Universal
 
 ```blade
-{{-- Display Mode Selection --}}
+{{-- Pilihan Mode Tampilan --}}
 <div class="sm:col-span-3">
     <label class="block text-sm font-semibold text-gray-700 mb-2">Tampilan Laporan</label>
     <div class="flex flex-wrap gap-4">
@@ -41,13 +41,13 @@ Implemented 3 display modes for Cash Flow report with user-selectable options in
 
 ---
 
-### 2. Controller Update
+### 2. Update Controller
 **File:** `app/Http/Controllers/ReportController.php`
 
-**What Changed:**
-- Added `display_mode` parameter handling
-- Added `line_comment` and `kode_kas` to data rows
-- Pass `displayMode` to view
+**Yang Diubah:**
+- Menambahkan penanganan parameter `display_mode`
+- Menambahkan `line_comment` dan `kode_kas` ke data rows
+- Mengirim `displayMode` ke view
 
 ```php
 $displayMode = $request->display_mode ?? 'source';
@@ -69,23 +69,23 @@ return view('arus_kas.report_arus_kas', compact('rows', 'tanggalAwal', 'tanggalA
 
 ---
 
-### 3. Report View - 3 Display Modes
+### 3. View Laporan - 3 Mode Tampilan
 **File:** `resources/views/arus_kas/report_arus_kas.blade.php`
 
-**What Changed:**
-- Complete rewrite with conditional rendering for 3 modes
-- Compact font size (`text-[10px]`) and padding (`px-2 py-1`)
+**Yang Diubah:**
+- Penulisan ulang total dengan conditional rendering untuk 3 mode
+- Ukuran font kompak (`text-[10px]`) dan padding (`px-2 py-1`)
 
-| Mode | Grouping | Columns |
-|------|----------|---------|
+| Mode | Pengelompokan | Kolom |
+|------|---------------|-------|
 | `source` | Per Source Jurnal | Tanggal, Source, Akun Kas, Lawan Akun, Keterangan |
 | `account` | Per Akun Kas/Bank | Tanggal, Source, Lawan Akun, Line Comment + Toggle + Net |
-| `universal` | No grouping | All columns flat |
+| `universal` | Tanpa pengelompokan | Semua kolom dalam satu tabel |
 
 ---
 
-## Testing
-1. Navigate to Report > Arus Kas
-2. Select period and accounts
-3. Choose display mode
-4. Verify correct table format appears
+## Pengujian
+1. Buka menu Report > Arus Kas
+2. Pilih periode dan akun
+3. Pilih mode tampilan yang diinginkan
+4. Verifikasi format tabel yang tampil sesuai mode

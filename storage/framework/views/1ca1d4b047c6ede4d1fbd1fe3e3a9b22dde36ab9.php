@@ -7,7 +7,28 @@
                 <div>
                     <ul class="flex border-b mb-3 space-x-4 text-[10px] font-medium text-gray-600">
                         <li>
-                            
+                            <a href="<?php echo e(route('arus_kas.export', [
+                                    'start_date' => $tanggalAwal,
+                                    'end_date' => $tanggalAkhir,
+                                    'selected_accounts' => request('selected_accounts'),
+                                    'display_mode' => $displayMode,
+                                    'format' => 'excel',
+                                ])); ?>"
+                                class="tab-link text-green-600 hover:text-green-800">
+                                <i class="fas fa-file-excel mr-1"></i> Export Excel
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo e(route('arus_kas.export', [
+                                    'start_date' => $tanggalAwal,
+                                    'end_date' => $tanggalAkhir,
+                                    'selected_accounts' => request('selected_accounts'),
+                                    'display_mode' => $displayMode,
+                                    'format' => 'pdf',
+                                ])); ?>"
+                                class="tab-link text-red-600 hover:text-red-800">
+                                <i class="fas fa-file-pdf mr-1"></i> Export PDF
+                            </a>
                         </li>
                         <li><a onclick="document.getElementById('fileModify').classList.toggle('hidden')"
                                 class="tab-link cursor-pointer">Modify</a></li>
@@ -88,6 +109,8 @@
                             <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px]">Detail per Source</span>
                         <?php elseif($displayMode == 'account'): ?>
                             <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px]">Per Account Kas/Bank</span>
+                        <?php elseif($displayMode == 'direct'): ?>
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px]">Metode Langsung</span>
                         <?php else: ?>
                             <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px]">Universal</span>
                         <?php endif; ?>
@@ -288,7 +311,7 @@
                 
                 
                 
-                <?php else: ?>
+                <?php elseif($displayMode == 'universal'): ?>
                     <?php
                         $grandCashIn = collect($rows)->sum('cash_in');
                         $grandCashOut = collect($rows)->sum('cash_out');
@@ -339,6 +362,179 @@
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+                <?php endif; ?>
+
+                
+                <?php if($displayMode === 'direct'): ?>
+                    <?php
+                        $grandCashIn = collect($rows)->sum('cash_in');
+                        $grandCashOut = collect($rows)->sum('cash_out');
+                        $netCashFlow = $grandCashIn - $grandCashOut;
+                        
+                        // Group rows by aktivitas and klasifikasi for detail view
+                        $rowsByKlasifikasi = collect($rows)->groupBy('klasifikasi_akun');
+                    ?>
+
+                    <div class="overflow-x-auto" x-data="{ expandedItems: {} }">
+                        
+                        <div class="mb-2 flex gap-2">
+                            <button type="button" 
+                                @click="Object.keys(expandedItems).length > 0 ? expandedItems = {} : expandedItems = Object.fromEntries([...document.querySelectorAll('[data-klasifikasi-id]')].map(el => [el.dataset.klasifikasiId, true]))"
+                                class="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                                <i class="fas fa-expand-alt mr-1"></i> Toggle Semua Detail
+                            </button>
+                        </div>
+                        
+                        <table class="min-w-full border-collapse text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="text-left px-4 py-2 font-bold text-lg text-gray-800 bg-gray-100" colspan="4">
+                                        LAPORAN ARUS KAS - METODE LANGSUNG
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th class="text-left px-4 py-1 text-gray-600 text-xs" colspan="4">
+                                        Periode: <?php echo e(\Carbon\Carbon::parse($tanggalAwal)->format('d M Y')); ?> - <?php echo e(\Carbon\Carbon::parse($tanggalAkhir)->format('d M Y')); ?>
+
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $runningTotal = 0; $klasifikasiIndex = 0; ?>
+                                
+                                <?php $__currentLoopData = $aktivitasData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $aktKey => $akt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $aktNetFlow = $akt['cash_in'] - $akt['cash_out'];
+                                        $runningTotal += $aktNetFlow;
+                                    ?>
+                                    
+                                    
+                                    <tr class="bg-blue-50">
+                                        <td colspan="4" class="px-4 py-3 font-bold text-blue-800 border-t-2 border-blue-200">
+                                            <i class="fas fa-folder-open mr-2"></i><?php echo e($akt['label']); ?>
+
+                                        </td>
+                                    </tr>
+                                    
+                                    
+                                    <?php $__currentLoopData = $akt['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $klasifikasiKey => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
+                                            $itemNet = $item['cash_in'] - $item['cash_out'];
+                                            $klasifikasiId = 'klas_' . $klasifikasiIndex;
+                                            $klasifikasiIndex++;
+                                            $detailRows = $rowsByKlasifikasi->get($klasifikasiKey, collect());
+                                        ?>
+                                        
+                                        
+                                        <tr class="hover:bg-gray-50 cursor-pointer" 
+                                            @click="expandedItems['<?php echo e($klasifikasiId); ?>'] = !expandedItems['<?php echo e($klasifikasiId); ?>']"
+                                            data-klasifikasi-id="<?php echo e($klasifikasiId); ?>">
+                                            <td class="px-6 py-2 text-gray-700">
+                                                <i class="fas mr-2 text-gray-400" 
+                                                   :class="expandedItems['<?php echo e($klasifikasiId); ?>'] ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                                <span class="font-medium"><?php echo e($item['label']); ?></span>
+                                                <span class="text-xs text-gray-400 ml-2">(<?php echo e($detailRows->count()); ?> transaksi)</span>
+                                            </td>
+                                            <td class="px-4 py-2 text-right <?php echo e($itemNet >= 0 ? 'text-green-600' : 'text-red-600'); ?> font-medium">
+                                                <?php if($itemNet >= 0): ?>
+                                                    <?php echo e(number_format($itemNet, 0, ',', '.')); ?>
+
+                                                <?php else: ?>
+                                                    (<?php echo e(number_format(abs($itemNet), 0, ',', '.')); ?>)
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="px-4 py-2 w-32"></td>
+                                            <td class="px-4 py-2 w-16"></td>
+                                        </tr>
+                                        
+                                        
+                                        <tr x-show="expandedItems['<?php echo e($klasifikasiId); ?>']" x-cloak>
+                                            <td colspan="4" class="p-0">
+                                                <table class="w-full bg-gray-50 text-xs">
+                                                    <thead class="bg-gray-200">
+                                                        <tr>
+                                                            <th class="px-6 py-1 text-left w-24">Tanggal</th>
+                                                            <th class="px-2 py-1 text-left w-32">Source</th>
+                                                            <th class="px-2 py-1 text-left">Lawan Akun</th>
+                                                            <th class="px-2 py-1 text-left">Keterangan</th>
+                                                            <th class="px-2 py-1 text-right w-24">Cash In</th>
+                                                            <th class="px-2 py-1 text-right w-24">Cash Out</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php $__currentLoopData = $detailRows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $detail): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                                                <td class="px-6 py-1"><?php echo e(\Carbon\Carbon::parse($detail['tanggal'])->format('d/m/Y')); ?></td>
+                                                                <td class="px-2 py-1 text-blue-600"><?php echo e($detail['source']); ?></td>
+                                                                <td class="px-2 py-1"><?php echo e($detail['nama_lawan'] ?? ''); ?></td>
+                                                                <td class="px-2 py-1 text-gray-500"><?php echo e($detail['line_comment'] ?: $detail['keterangan']); ?></td>
+                                                                <td class="px-2 py-1 text-right text-green-600">
+                                                                    <?php if($detail['cash_in'] > 0): ?> <?php echo e(number_format($detail['cash_in'], 0, ',', '.')); ?> <?php endif; ?>
+                                                                </td>
+                                                                <td class="px-2 py-1 text-right text-red-600">
+                                                                    <?php if($detail['cash_out'] > 0): ?> <?php echo e(number_format($detail['cash_out'], 0, ',', '.')); ?> <?php endif; ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    
+                                    
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="px-6 py-2 text-gray-800" colspan="2">
+                                            <span class="ml-4">Arus Kas Bersih dari <?php echo e($akt['label']); ?></span>
+                                        </td>
+                                        <td class="px-4 py-2 text-right <?php echo e($aktNetFlow >= 0 ? 'text-green-700' : 'text-red-700'); ?>">
+                                            <?php if($aktNetFlow >= 0): ?>
+                                                <?php echo e(number_format($aktNetFlow, 0, ',', '.')); ?>
+
+                                            <?php else: ?>
+                                                (<?php echo e(number_format(abs($aktNetFlow), 0, ',', '.')); ?>)
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-4 py-2"></td>
+                                    </tr>
+                                    
+                                    
+                                    <tr><td colspan="4" class="py-2"></td></tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                
+                                
+                                <tr class="bg-green-100 font-bold border-t-2 border-green-300">
+                                    <td class="px-4 py-3 text-green-800" colspan="2">KENAIKAN/PENURUNAN BERSIH KAS</td>
+                                    <td class="px-4 py-3 text-right <?php echo e($netCashFlow >= 0 ? 'text-green-800' : 'text-red-800'); ?>">
+                                        <?php if($netCashFlow >= 0): ?>
+                                            <?php echo e(number_format($netCashFlow, 0, ',', '.')); ?>
+
+                                        <?php else: ?>
+                                            (<?php echo e(number_format(abs($netCashFlow), 0, ',', '.')); ?>)
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-4 py-3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg border">
+                        <h4 class="font-semibold text-gray-700 mb-3">Ringkasan Arus Kas</h4>
+                        <div class="grid grid-cols-3 gap-4 text-sm">
+                            <?php $__currentLoopData = $aktivitasData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $aktKey => $akt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php $aktNetFlow = $akt['cash_in'] - $akt['cash_out']; ?>
+                                <div class="p-3 rounded <?php echo e($aktNetFlow >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'); ?> border">
+                                    <div class="text-xs text-gray-600"><?php echo e($aktKey); ?></div>
+                                    <div class="font-bold <?php echo e($aktNetFlow >= 0 ? 'text-green-700' : 'text-red-700'); ?>">
+                                        Rp <?php echo e(number_format($aktNetFlow, 0, ',', '.')); ?>
+
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
                     </div>
                 <?php endif; ?>
 

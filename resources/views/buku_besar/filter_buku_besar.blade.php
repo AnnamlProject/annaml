@@ -96,7 +96,7 @@
                                             data-tipe="{{ strtolower($akun->tipe_akun) }}">
                                             <td class="px-2 py-1">
                                                 <input type="checkbox" class="account-checkbox form-checkbox"
-                                                    value="{{ $akun->kode_akun }} - {{ $akun->nama_akun }}">
+                                                    value="{{ $akun->kode_akun }}">
                                             </td>
                                             <td class="px-2 py-1">
                                                 {{ $akun->kode_akun }} - {{ $akun->nama_akun }}

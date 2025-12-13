@@ -200,6 +200,7 @@ Route::middleware(['auth'])->group(function () {
     // arus kas 
     Route::get('filter_arus_kas', [ReportController::class, 'aruskasFilter'])->name('arus_kas.filter_arus_kas')->middleware('permission:arus_kas.access');
     Route::get('arus_kas_report', [ReportController::class, 'reportArusKas'])->name('arus_kas.arus_kas_report');
+    Route::get('arus_kas_export', [ReportController::class, 'exportArusKas'])->name('arus_kas.export');
 
 
 

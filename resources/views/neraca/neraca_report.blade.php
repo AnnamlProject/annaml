@@ -94,10 +94,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @php
+                        // Grayscale color scheme for professional black-and-white look
                         $tipeConfig = [
-                            'Aset' => ['headerBg' => 'bg-blue-600', 'groupBg' => 'bg-blue-50', 'groupBorder' => 'border-blue-400', 'textColor' => 'text-blue-800', 'totalBg' => 'bg-blue-700'],
-                            'Kewajiban' => ['headerBg' => 'bg-amber-600', 'groupBg' => 'bg-amber-50', 'groupBorder' => 'border-amber-400', 'textColor' => 'text-amber-800', 'totalBg' => 'bg-amber-700'],
-                            'Ekuitas' => ['headerBg' => 'bg-purple-600', 'groupBg' => 'bg-purple-50', 'groupBorder' => 'border-purple-400', 'textColor' => 'text-purple-800', 'totalBg' => 'bg-purple-700'],
+                            'Aset' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
+                            'Kewajiban' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
+                            'Ekuitas' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
                         ];
                         $norm = fn($v) => strtoupper(trim((string) $v));
                     @endphp
@@ -176,7 +177,8 @@
                                                 \Illuminate\Support\Str::startsWith((string) $sub['kode_akun'], $parentPrefix)
                                         );
                                         $hasChild = $childAccounts->isNotEmpty();
-                                        $allAccounts = implode(',', array_merge([$akun['kode_akun']], $childAccounts->pluck('kode_akun')->all()));
+                                        // Only send account codes (not names) to keep URL short
+                                        $allAccountCodes = implode(',', array_merge([$akun['kode_akun']], $childAccounts->pluck('kode_akun')->all()));
                                         
                                         $total += $parentSaldo;
                                         $currentGroupTotal += $parentSaldo;
@@ -226,7 +228,7 @@
                                                 <a href="{{ route('buku_besar.buku_besar_report', [
                                                     'start_date' => request('start_date') ?? \Carbon\Carbon::parse($tanggalAkhir)->startOfYear()->toDateString(),
                                                     'end_date' => request('end_date') ?? $tanggalAkhir,
-                                                    'selected_accounts' => $allAccounts,
+                                                    'selected_accounts' => $allAccountCodes,
                                                 ]) }}"
                                                    class="text-gray-700 hover:text-blue-600 hover:underline">
                                                     {{ $showAccountNumber ? $akun['kode_akun'] . ' - ' . $akun['nama_akun'] : $akun['nama_akun'] }}
@@ -272,7 +274,7 @@
                                 <td class="py-3 px-4 font-bold">TOTAL {{ strtoupper($tipe) }}</td>
                                 <td></td>
                                 <td></td>
-                                <td class="py-3 px-4 text-right font-bold text-lg">
+                                <td class="py-3 px-4 text-right font-bold">
                                     @if ($tipe === 'Aset')
                                         {{ number_format($grandTotalAset, 2, ',', '.') }}
                                     @elseif ($tipe === 'Kewajiban')
@@ -289,11 +291,11 @@
                     @endforeach
 
                     {{-- RINGKASAN --}}
-                    <tr class="bg-gradient-to-r from-indigo-700 to-purple-800 text-white">
-                        <td class="py-4 px-4 font-bold text-base">TOTAL KEWAJIBAN DAN EKUITAS</td>
+                    <tr class="bg-gradient-to-r from-gray-800 to-black text-white">
+                        <td class="py-4 px-4 font-bold">TOTAL KEWAJIBAN DAN EKUITAS</td>
                         <td></td>
                         <td></td>
-                        <td class="py-4 px-4 text-right font-bold text-xl">{{ number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.') }}</td>
+                        <td class="py-4 px-4 text-right font-bold">{{ number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -301,9 +303,9 @@
 
         {{-- Legend --}}
         <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
-            <span class="flex items-center"><span class="w-3 h-3 bg-blue-200 rounded mr-1"></span> Aset</span>
-            <span class="flex items-center"><span class="w-3 h-3 bg-amber-200 rounded mr-1"></span> Kewajiban</span>
-            <span class="flex items-center"><span class="w-3 h-3 bg-purple-200 rounded mr-1"></span> Ekuitas</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-800 rounded mr-1"></span> Aset</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-600 rounded mr-1"></span> Kewajiban</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-400 rounded mr-1"></span> Ekuitas</span>
             <span class="flex items-center"><i class="fas fa-plus-square text-gray-400 mr-1"></i> Klik untuk expand/collapse</span>
         </div>
     </div>

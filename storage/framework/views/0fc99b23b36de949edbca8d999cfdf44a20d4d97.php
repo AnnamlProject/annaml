@@ -129,6 +129,11 @@
                                     class="form-radio text-blue-600 focus:ring-blue-500">
                                 <span class="ml-2 text-sm text-gray-700">Universal (Tabel Lengkap)</span>
                             </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="display_mode" value="direct"
+                                    class="form-radio text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm text-gray-700 font-semibold">Metode Langsung</span>
+                            </label>
                         </div>
                     </div>
 

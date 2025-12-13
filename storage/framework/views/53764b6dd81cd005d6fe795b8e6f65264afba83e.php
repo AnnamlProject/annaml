@@ -95,10 +95,11 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     <?php
+                        // Grayscale color scheme for professional black-and-white look
                         $tipeConfig = [
-                            'Aset' => ['headerBg' => 'bg-blue-600', 'groupBg' => 'bg-blue-50', 'groupBorder' => 'border-blue-400', 'textColor' => 'text-blue-800', 'totalBg' => 'bg-blue-700'],
-                            'Kewajiban' => ['headerBg' => 'bg-amber-600', 'groupBg' => 'bg-amber-50', 'groupBorder' => 'border-amber-400', 'textColor' => 'text-amber-800', 'totalBg' => 'bg-amber-700'],
-                            'Ekuitas' => ['headerBg' => 'bg-purple-600', 'groupBg' => 'bg-purple-50', 'groupBorder' => 'border-purple-400', 'textColor' => 'text-purple-800', 'totalBg' => 'bg-purple-700'],
+                            'Aset' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
+                            'Kewajiban' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
+                            'Ekuitas' => ['headerBg' => 'bg-gray-800', 'groupBg' => 'bg-gray-100', 'groupBorder' => 'border-gray-600', 'textColor' => 'text-gray-900', 'totalBg' => 'bg-gray-900'],
                         ];
                         $norm = fn($v) => strtoupper(trim((string) $v));
                     ?>
@@ -277,7 +278,7 @@
                                 <td class="py-3 px-4 font-bold">TOTAL <?php echo e(strtoupper($tipe)); ?></td>
                                 <td></td>
                                 <td></td>
-                                <td class="py-3 px-4 text-right font-bold text-lg">
+                                <td class="py-3 px-4 text-right font-bold">
                                     <?php if($tipe === 'Aset'): ?>
                                         <?php echo e(number_format($grandTotalAset, 2, ',', '.')); ?>
 
@@ -297,11 +298,11 @@
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     
-                    <tr class="bg-gradient-to-r from-indigo-700 to-purple-800 text-white">
-                        <td class="py-4 px-4 font-bold text-base">TOTAL KEWAJIBAN DAN EKUITAS</td>
+                    <tr class="bg-gradient-to-r from-gray-800 to-black text-white">
+                        <td class="py-4 px-4 font-bold">TOTAL KEWAJIBAN DAN EKUITAS</td>
                         <td></td>
                         <td></td>
-                        <td class="py-4 px-4 text-right font-bold text-xl"><?php echo e(number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.')); ?></td>
+                        <td class="py-4 px-4 text-right font-bold"><?php echo e(number_format($grandTotalKewajiban + $grandTotalEkuitas, 2, ',', '.')); ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -309,9 +310,9 @@
 
         
         <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
-            <span class="flex items-center"><span class="w-3 h-3 bg-blue-200 rounded mr-1"></span> Aset</span>
-            <span class="flex items-center"><span class="w-3 h-3 bg-amber-200 rounded mr-1"></span> Kewajiban</span>
-            <span class="flex items-center"><span class="w-3 h-3 bg-purple-200 rounded mr-1"></span> Ekuitas</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-800 rounded mr-1"></span> Aset</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-600 rounded mr-1"></span> Kewajiban</span>
+            <span class="flex items-center"><span class="w-3 h-3 bg-gray-400 rounded mr-1"></span> Ekuitas</span>
             <span class="flex items-center"><i class="fas fa-plus-square text-gray-400 mr-1"></i> Klik untuk expand/collapse</span>
         </div>
     </div>

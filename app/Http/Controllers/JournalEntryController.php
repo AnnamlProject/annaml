@@ -235,16 +235,19 @@ class JournalEntryController extends Controller
             'items.*.kode_fiscal' => 'nullable|string',
         ]);
 
-        // Validasi backyear: hanya boleh 1 tahun ke belakang
-        $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
-        $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
-        $minYear = $tahunAktif - 1; // Backyear 1 tahun
+        // Validasi backyear: hanya boleh 1 tahun ke belakang (Admin = unlimited)
+        $isAdmin = auth()->check() && auth()->user()->hasRole('Admin');
+        if (!$isAdmin) {
+            $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
+            $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+            $minYear = $tahunAktif - 1; // Backyear 1 tahun
 
-        $tahunInput = (int) date('Y', strtotime($request->tanggal));
-        if ($tahunInput < $minYear) {
-            return back()->withInput()->withErrors([
-                'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
-            ]);
+            $tahunInput = (int) date('Y', strtotime($request->tanggal));
+            if ($tahunInput < $minYear) {
+                return back()->withInput()->withErrors([
+                    'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
+                ]);
+            }
         }
 
         // Hitung total debit & kredit
@@ -464,16 +467,19 @@ class JournalEntryController extends Controller
             'items.*.kode_fiscal' => 'nullable|string',
         ]);
 
-        // Validasi backyear: hanya boleh 1 tahun ke belakang
-        $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
-        $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
-        $minYear = $tahunAktif - 1; // Backyear 1 tahun
+        // Validasi backyear: hanya boleh 1 tahun ke belakang (Admin = unlimited)
+        $isAdmin = auth()->check() && auth()->user()->hasRole('Admin');
+        if (!$isAdmin) {
+            $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
+            $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+            $minYear = $tahunAktif - 1; // Backyear 1 tahun
 
-        $tahunInput = (int) date('Y', strtotime($request->tanggal));
-        if ($tahunInput < $minYear) {
-            return back()->withInput()->withErrors([
-                'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
-            ]);
+            $tahunInput = (int) date('Y', strtotime($request->tanggal));
+            if ($tahunInput < $minYear) {
+                return back()->withInput()->withErrors([
+                    'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
+                ]);
+            }
         }
 
         // ===== Validasi manual tambahan =====

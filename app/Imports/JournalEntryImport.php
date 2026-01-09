@@ -131,20 +131,23 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
-                // === Validasi backyear: hanya boleh 1 tahun ke belakang ===
-                $periodeAktif = \DB::table('start_new_years')->where('status', 'Opening')->first();
-                $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
-                $minYear = $tahunAktif - 1; // Backyear 1 tahun
+                // === Validasi backyear: hanya boleh 1 tahun ke belakang (Admin = unlimited) ===
+                $isAdmin = auth()->check() && auth()->user()->hasRole('Admin');
+                if (!$isAdmin) {
+                    $periodeAktif = \DB::table('start_new_years')->where('status', 'Opening')->first();
+                    $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+                    $minYear = $tahunAktif - 1; // Backyear 1 tahun
 
-                [$source, $tanggal, $comment] = explode('|', $key);
-                $tanggalParsed = $this->transformDate($tanggal);
-                $tahunInput = $tanggalParsed ? (int) date('Y', strtotime($tanggalParsed)) : null;
+                    [$source, $tanggal, $comment] = explode('|', $key);
+                    $tanggalParsed = $this->transformDate($tanggal);
+                    $tahunInput = $tanggalParsed ? (int) date('Y', strtotime($tanggalParsed)) : null;
 
-                if ($tahunInput && $tahunInput < $minYear) {
-                    $this->skippedGroups[] = [
-                        'reason' => "Transaksi tanggal {$tanggalParsed} dilewati: backyear maksimal 1 tahun (minimal tahun {$minYear})."
-                    ];
-                    continue;
+                    if ($tahunInput && $tahunInput < $minYear) {
+                        $this->skippedGroups[] = [
+                            'reason' => "Transaksi tanggal {$tanggalParsed} dilewati: backyear maksimal 1 tahun (minimal tahun {$minYear})."
+                        ];
+                        continue;
+                    }
                 }
 
                 // === 3) Simpan JournalEntry master ===

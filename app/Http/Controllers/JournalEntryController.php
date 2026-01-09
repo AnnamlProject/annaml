@@ -7,6 +7,7 @@ use App\JournalEntry;
 use App\JournalEntryDetail;
 use App\Project;
 use App\StartNewYear;
+use App\Services\StartNewYearService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -234,6 +235,18 @@ class JournalEntryController extends Controller
             'items.*.kode_fiscal' => 'nullable|string',
         ]);
 
+        // Validasi backyear: hanya boleh 1 tahun ke belakang
+        $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
+        $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+        $minYear = $tahunAktif - 1; // Backyear 1 tahun
+
+        $tahunInput = (int) date('Y', strtotime($request->tanggal));
+        if ($tahunInput < $minYear) {
+            return back()->withInput()->withErrors([
+                'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
+            ]);
+        }
+
         // Hitung total debit & kredit
         $totalDebit = collect($cleanedItems)->sum(fn($i) => (float) $i['debits']);
         $totalKredit = collect($cleanedItems)->sum(fn($i) => (float) $i['credits']);
@@ -281,6 +294,10 @@ class JournalEntryController extends Controller
             }
 
             DB::commit();
+
+            // Auto-recalculate jurnal penutup jika backyear
+            $this->recalculateClosingIfBackyear($request->tanggal);
+
             return redirect()->route('journal_entry.index')
                 ->with('success', 'Journal entry berhasil disimpan.');
         } catch (\Exception $e) {
@@ -308,6 +325,7 @@ class JournalEntryController extends Controller
         try {
             // Temukan journal entry
             $entry = JournalEntry::findOrFail($id);
+            $tanggal = $entry->tanggal; // Simpan tanggal sebelum dihapus
 
             // Hapus detail terlebih dahulu
             JournalEntryDetail::where('journal_entry_id', $entry->id)->delete();
@@ -316,6 +334,9 @@ class JournalEntryController extends Controller
             $entry->delete();
 
             DB::commit();
+
+            // Auto-recalculate jurnal penutup jika backyear
+            $this->recalculateClosingIfBackyear($tanggal);
 
             return redirect()->route('journal_entry.index')
                 ->with('success', 'Journal entry berhasil dihapus.');
@@ -443,6 +464,17 @@ class JournalEntryController extends Controller
             'items.*.kode_fiscal' => 'nullable|string',
         ]);
 
+        // Validasi backyear: hanya boleh 1 tahun ke belakang
+        $periodeAktif = DB::table('start_new_years')->where('status', 'Opening')->first();
+        $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+        $minYear = $tahunAktif - 1; // Backyear 1 tahun
+
+        $tahunInput = (int) date('Y', strtotime($request->tanggal));
+        if ($tahunInput < $minYear) {
+            return back()->withInput()->withErrors([
+                'tanggal' => "Transaksi hanya bisa diinput untuk tahun {$minYear} atau lebih baru (backyear maksimal 1 tahun)."
+            ]);
+        }
 
         // ===== Validasi manual tambahan =====
         $totalDebit  = collect($cleanedItems)->sum(fn($i) => (float) $i['debits']);
@@ -495,6 +527,9 @@ class JournalEntryController extends Controller
 
             DB::commit();
 
+            // Auto-recalculate jurnal penutup jika backyear
+            $this->recalculateClosingIfBackyear($request->tanggal);
+
             return redirect()
                 ->route('journal_entry.index')
                 ->with('success', 'Journal entry berhasil diperbarui.');
@@ -504,6 +539,32 @@ class JournalEntryController extends Controller
             return back()
                 ->withInput()
                 ->with('error', 'Gagal update journal entry: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Auto-recalculate jurnal penutup jika transaksi adalah backyear
+     * Efisien: hanya 1 query untuk cek, dan recalculate hanya jika tahun sudah closing
+     */
+    private function recalculateClosingIfBackyear($tanggal)
+    {
+        $tahunTransaksi = (int) date('Y', strtotime($tanggal));
+
+        // Cek apakah tahun transaksi sudah di-closing (ada periode dengan status Closing)
+        $isClosed = DB::table('start_new_years')
+            ->where('tahun', $tahunTransaksi)
+            ->where('status', 'Closing')
+            ->exists();
+
+        // Hanya recalculate jika tahun tersebut sudah closing
+        if ($isClosed) {
+            try {
+                $service = new StartNewYearService();
+                $service->updateLabaTahunBerjalan($tahunTransaksi);
+            } catch (\Exception $e) {
+                // Log error tapi jangan gagalkan transaksi utama
+                Log::warning('Gagal recalculate closing entries: ' . $e->getMessage());
+            }
         }
     }
 }

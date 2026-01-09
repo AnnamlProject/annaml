@@ -7,9 +7,11 @@ use App\DepartemenAkun;
 use App\JournalEntry;
 use App\JournalEntryDetail;
 use App\Project;
+use App\Services\StartNewYearService;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -26,6 +28,7 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
 
     protected $grouped = [];
     protected $skippedGroups = [];
+    protected $importedYears = []; // Kumpulkan tahun untuk recalculate
 
     public function collection(Collection $rows)
     {
@@ -128,6 +131,22 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                     continue;
                 }
 
+                // === Validasi backyear: hanya boleh 1 tahun ke belakang ===
+                $periodeAktif = \DB::table('start_new_years')->where('status', 'Opening')->first();
+                $tahunAktif = $periodeAktif ? $periodeAktif->tahun : (int) date('Y');
+                $minYear = $tahunAktif - 1; // Backyear 1 tahun
+
+                [$source, $tanggal, $comment] = explode('|', $key);
+                $tanggalParsed = $this->transformDate($tanggal);
+                $tahunInput = $tanggalParsed ? (int) date('Y', strtotime($tanggalParsed)) : null;
+
+                if ($tahunInput && $tahunInput < $minYear) {
+                    $this->skippedGroups[] = [
+                        'reason' => "Transaksi tanggal {$tanggalParsed} dilewati: backyear maksimal 1 tahun (minimal tahun {$minYear})."
+                    ];
+                    continue;
+                }
+
                 // === 3) Simpan JournalEntry master ===
                 [$source, $tanggal, $comment] = explode('|', $key);
 
@@ -172,12 +191,18 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
                         'debits'             => $row['debit'] ?? 0,
                         'credits'            => $row['kredit'] ?? 0,
                         'comment'            => $row['comment_line'] ?? null,
-                        'project_id'         => $project ? $project->id : null, // ← tambahan
+                        'project_id'         => $project ? $project->id : null,
                     ]);
                 }
+
+                // Kumpulkan tahun untuk recalculate
+                $this->importedYears[$tahunInput] = true;
             }
 
-            // === 5) Feedback ===
+            // === 5) Auto-recalculate jurnal penutup untuk tahun yang sudah closing ===
+            $this->recalculateClosingForImportedYears();
+
+            // === 6) Feedback ===
             if (count($this->skippedGroups) > 0) {
                 $pesan = 'Beberapa transaksi dilewati: <br><ul>';
                 foreach ($this->skippedGroups as $group) {
@@ -258,6 +283,33 @@ class JournalEntryImport implements ToCollection, WithHeadingRow
         } catch (\Exception $e) {
             Log::warning('Gagal konversi tanggal: ' . $value);
             return null;
+        }
+    }
+
+    /**
+     * Auto-recalculate jurnal penutup untuk tahun yang sudah closing
+     * Efisien: hanya recalculate tahun yang unik dan sudah closing
+     */
+    private function recalculateClosingForImportedYears()
+    {
+        foreach (array_keys($this->importedYears) as $tahun) {
+            if (!$tahun) continue;
+
+            // Cek apakah tahun sudah di-closing
+            $isClosed = DB::table('start_new_years')
+                ->where('tahun', $tahun)
+                ->where('status', 'Closing')
+                ->exists();
+
+            if ($isClosed) {
+                try {
+                    $service = new StartNewYearService();
+                    $service->updateLabaTahunBerjalan($tahun);
+                    Log::info("Recalculated closing entries for year {$tahun}");
+                } catch (\Exception $e) {
+                    Log::warning('Gagal recalculate closing entries: ' . $e->getMessage());
+                }
+            }
         }
     }
 }

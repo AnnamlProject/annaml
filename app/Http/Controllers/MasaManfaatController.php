@@ -57,7 +57,7 @@ class MasaManfaatController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'masa_tahun' => 'nullable|string|max:255',
             'masa_bulan' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string|max:255'
@@ -65,7 +65,7 @@ class MasaManfaatController extends Controller
 
         $data = MasaManfaat::findOrFail($id);
 
-        $data->update($request->all());
+        $data->update($validated);
 
         return redirect()->route('masa_manfaat.index')->with('success', ' Data berhasil diperbarui.');
     }

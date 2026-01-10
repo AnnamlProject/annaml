@@ -75,7 +75,7 @@ class TargetWahanaController extends Controller
         ]);
 
         // Validasi setelah input dibersihkan
-        $request->validate([
+        $validated = $request->validate([
             'wahana_id' => 'required|exists:wahanas,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jenis_hari_id' => 'required|exists:jenis_haris,id',
@@ -85,7 +85,7 @@ class TargetWahanaController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
-        TargetWahana::create($request->all());
+        TargetWahana::create($validated);
 
         return redirect()->route('target_wahana.index')->with('success', 'Data Target Wahana berhasil ditambahkan');
     }
@@ -119,7 +119,7 @@ class TargetWahanaController extends Controller
             'target_harian' => str_replace('.', '', $request->target_harian),
         ]);
 
-        $request->validate([
+        $validated = $request->validate([
             'wahana_id' => 'required|exists:wahanas,id',
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'jenis_hari_id' => 'required|exists:jenis_haris,id',
@@ -129,7 +129,7 @@ class TargetWahanaController extends Controller
             'keterangan' => 'nullable|string'
         ]);
 
-        $target_wahana->update($request->all());
+        $target_wahana->update($validated);
 
         return redirect()->route('target_wahana.index')->with('success', 'Data Target Wahana berhasil diperbarui');
     }

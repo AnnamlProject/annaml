@@ -52,7 +52,7 @@ class CrewShiftKaryawanControlller extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string',
             'deskripsi' => 'nullable|string',
 
@@ -60,7 +60,7 @@ class CrewShiftKaryawanControlller extends Controller
 
         $crew_shift_karyawan = CrewShiftKaryawan::findOrFail($id);
 
-        $crew_shift_karyawan->update($request->all());
+        $crew_shift_karyawan->update($validated);
 
         return redirect()->route('crew_shift_karyawan.index')->with('success', 'Crew berhasil diperbarui.');
     }

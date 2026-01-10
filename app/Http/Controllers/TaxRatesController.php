@@ -30,14 +30,14 @@ class TaxRatesController extends Controller
         ]);
 
         // Validasi setelah input dibersihkan
-        $request->validate([
+        $validated = $request->validate([
             'ptkp_id' => 'required|exists:ptkps,id',
             'min_penghasilan' => 'required|numeric',
             'max_penghasilan' => 'required|numeric|gt:min_penghasilan',
             'tarif_ter' => 'required|numeric',
         ]);
 
-        TaxRates::create($request->all());
+        TaxRates::create($validated);
 
         return redirect()->route('tax_rates.index')->with('success', 'Data TER berhasil ditambahkan');
     }
@@ -70,14 +70,14 @@ class TaxRatesController extends Controller
             'max_penghasilan' => str_replace('.', '', $request->max_penghasilan),
         ]);
 
-        $request->validate([
+        $validated = $request->validate([
             'ptkp_id' => 'required|exists:ptkps,id',
             'min_penghasilan' => 'required|numeric',
             'max_penghasilan' => 'required|numeric|gt:min_penghasilan',
             'tarif_ter' => 'required|numeric',
         ]);
 
-        $taxRate->update($request->all());
+        $taxRate->update($validated);
 
         return redirect()->route('tax_rates.index')->with('success', 'Data TER berhasil diperbarui');
     }

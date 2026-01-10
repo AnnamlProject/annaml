@@ -30,7 +30,7 @@ class salesOptionsController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'aging_first_period' => 'required|integer|min:0',
             'aging_second_period' => 'required|integer|min:0',
             'aging_third_period' => 'required|integer|min:0',
@@ -42,7 +42,7 @@ class salesOptionsController extends Controller
             return redirect()->route('sales_option.index')->with('warning', 'Sales Option sudah pernah disimpan.');
         }
 
-        salesOption::create($request->all());
+        salesOption::create($validated);
 
         return redirect()->route('sales_option.index')->with('success', 'Pengaturan berhasil dibuat.');
     }
@@ -55,7 +55,7 @@ class salesOptionsController extends Controller
 
     public function update(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'aging_first_period' => 'required|integer|min:0',
             'aging_second_period' => 'required|integer|min:0',
             'aging_third_period' => 'required|integer|min:0',
@@ -63,7 +63,7 @@ class salesOptionsController extends Controller
         ]);
 
         $options = salesOption::first();
-        $options->update($request->all());
+        $options->update($validated);
 
         return redirect()->route('sales.options.index')->with('success', 'Pengaturan berhasil diperbarui.');
     }

@@ -84,7 +84,7 @@ class JenisHariController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'nama' => 'string|max:255',
             'deskripsi' => 'nullable|string',
@@ -97,7 +97,7 @@ class JenisHariController extends Controller
 
         $jenis_hari = JenisHari::findOrFail($id);
 
-        $jenis_hari->update($request->all());
+        $jenis_hari->update($validated);
 
         return redirect()->route('jenis_hari.index')->with('success', 'jenis hari update successfully.');
     }

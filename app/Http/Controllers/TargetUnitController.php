@@ -86,7 +86,7 @@ class TargetUnitController extends Controller
         ]);
 
         // Validasi setelah input dibersihkan
-        $request->validate([
+        $validated = $request->validate([
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'level_karyawan_id' => 'required|exists:level_karyawans,id',
             'komponen_penghasilan_id' => 'required|exists:komponen_penghasilans,id',
@@ -96,7 +96,7 @@ class TargetUnitController extends Controller
             'tahun' => 'required|integer',
         ]);
 
-        Targetunit::create($request->all());
+        Targetunit::create($validated);
 
         return redirect()->route('target_unit.index')->with('success', 'Data Target Unit berhasil ditambahkan');
     }
@@ -122,7 +122,7 @@ class TargetUnitController extends Controller
             'besaran_nominal' => str_replace('.', '', $request->besaran_nominal),
         ]);
 
-        $request->validate([
+        $validated = $request->validate([
             'unit_kerja_id' => 'required|exists:unit_kerjas,id',
             'level_karyawan_id' => 'required|exists:level_karyawans,id',
             'komponen_penghasilan_id' => 'required|exists:komponen_penghasilans,id',
@@ -132,7 +132,7 @@ class TargetUnitController extends Controller
             'tahun' => 'required|integer',
         ]);
 
-        $target_unit->update($request->all());
+        $target_unit->update($validated);
 
         return redirect()->route('target_unit.index')->with('success', 'Data Target Unit berhasil diperbarui');
     }

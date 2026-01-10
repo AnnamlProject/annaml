@@ -46,14 +46,14 @@ class MetodePenyusutanController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama_metode' => 'required|string',
             'deskripsi' => 'nullable|string',
         ]);
 
         $data = MetodePenyusutan::findOrFail($id);
 
-        $data->update($request->all());
+        $data->update($validated);
 
         return redirect()->route('metode_penyusutan.index')->with('success', 'Data berhasil diperbarui.');
     }

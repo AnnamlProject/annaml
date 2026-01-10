@@ -134,7 +134,7 @@
                             @forelse($data as $item)
                                 <tr class="hover:bg-gray-50 transition-colors duration-150">
                                     <td class="px-2 py-1 text-center whitespace-nowrap text-sm text-gray-500">
-                                        {{ $loop->iteration }}
+                                        {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
                                     </td>
                                     <td class="px-2 py-1 text-center whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">{{ $item->source }}</div>
@@ -197,6 +197,17 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Pagination --}}
+                <div class="px-6 py-4 border-t border-gray-100">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <span class="text-sm text-gray-600">
+                            Menampilkan {{ $data->firstItem() ?? 0 }} - {{ $data->lastItem() ?? 0 }}
+                            dari {{ $data->total() }} data
+                        </span>
+                        {{ $data->links() }}
+                    </div>
                 </div>
             </div>
         </div>

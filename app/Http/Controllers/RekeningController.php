@@ -38,14 +38,14 @@ class RekeningController extends Controller
     public function update(Request $request, $id)
     {
 
-        $request->validate([
+        $validated = $request->validate([
             'atas_nama' => 'nullable|string|max:255',
             'nama_bank' => 'nullable|string|max:255',
             'no_rek' => 'nullable|string|max:255'
         ]);
         $rekening = Rekening::findOrFail($id);
 
-        $rekening->update($request->all());
+        $rekening->update($validated);
 
         return redirect()->route('rekening.index')->with('success', 'Rekening created successfully.');
     }

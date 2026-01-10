@@ -64,14 +64,14 @@ class ApprovalStepController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'jabatan_id' => 'required|exists:jabatans,id',
             'step_order' => 'required|numeric|min:1',
         ]);
 
         $approval_step = ApprovalStep::findOrFail($id);
 
-        $approval_step->update($request->all());
+        $approval_step->update($validated);
 
         return redirect()->route('approval_step.index')->with('success', 'Approval step berhasil diperbarui.');
     }

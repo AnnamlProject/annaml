@@ -20,14 +20,14 @@ class PtkpController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string',
             'kategori' => 'nullable|string',
             'nilai' => 'nullable|integer'
 
         ]);
 
-        Ptkp::create($request->all());
+        Ptkp::create($validated);
 
         return redirect()->route('ptkp.index')->with('success', 'PTKP berhasil ditambahkan.');
     }
@@ -46,7 +46,7 @@ class PtkpController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string',
             'kategori' => 'nullable|string',
             'nilai' => 'nullable|integer'
@@ -54,7 +54,7 @@ class PtkpController extends Controller
 
         $ptkp = Ptkp::findOrFail($id);
 
-        $ptkp->update($request->all());
+        $ptkp->update($validated);
 
         return redirect()->route('ptkp.index')->with('success', 'ptkp berhasil diperbarui.');
     }

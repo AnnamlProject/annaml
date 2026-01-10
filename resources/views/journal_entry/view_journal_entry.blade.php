@@ -122,6 +122,15 @@
                         </table>
                     </div>
 
+                    @if (!empty($has_more))
+                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p class="text-sm text-yellow-800">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Menampilkan 100 data pertama. Gunakan filter yang lebih spesifik untuk melihat semua data.
+                            </p>
+                        </div>
+                    @endif
+
                     <div class="mt-4 text-right">
                         <button @click="open = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
                             Tutup

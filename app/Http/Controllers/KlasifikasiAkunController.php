@@ -33,7 +33,7 @@ class KlasifikasiAkunController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'kode_klasifikasi' => 'required|string|unique:klasifikasi_akuns,kode_klasifikasi',
             'nama_klasifikasi' => 'required|string',
             'numbering_account_id' => 'required|exists:numbering_accounts,id',
@@ -43,7 +43,7 @@ class KlasifikasiAkunController extends Controller
             'aktif' => 'required|boolean',
         ]);
 
-        KlasifikasiAkun::create($request->all());
+        KlasifikasiAkun::create($validated);
 
         return redirect()->route('klasifikasiAkun.index')->with('success', 'Klasifikasi Akun berhasil ditambahkan.');
     }
@@ -63,7 +63,7 @@ class KlasifikasiAkunController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'kode_klasifikasi' => 'required|string|max:50',
             'nama_klasifikasi' => 'required|string|max:100',
             'numbering_account_id' => 'required|exists:numbering_accounts,id',
@@ -74,7 +74,7 @@ class KlasifikasiAkunController extends Controller
         ]);
 
         $klasifikasi = KlasifikasiAkun::findOrFail($id);
-        $klasifikasi->update($request->all());
+        $klasifikasi->update($validated);
 
         return redirect()->route('klasifikasiAkun.index')->with('success', 'Klasifikasi Akun berhasil diperbarui.');
     }

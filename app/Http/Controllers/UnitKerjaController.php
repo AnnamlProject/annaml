@@ -77,7 +77,7 @@ class UnitKerjaController extends Controller
     {
 
         // dd($request->all());
-        $request->validate([
+        $validated = $request->validate([
             'group_unit_id' => 'required|exists:group_units,id',
             'kode_unit' => 'required|string',
             'nama_unit' => 'required|string',
@@ -88,7 +88,7 @@ class UnitKerjaController extends Controller
 
         $unit_kerja = UnitKerja::findOrFail($id);
 
-        $unit_kerja->update($request->all());
+        $unit_kerja->update($validated);
 
         return redirect()->route('unit_kerja.index')->with('success', 'Unit Kerja berhasil diperbarui.');
     }

@@ -54,7 +54,7 @@ class FiscalAccountController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'kode_akun' => 'required|string',
             'nama_akun' => 'required|string',
 
@@ -62,7 +62,7 @@ class FiscalAccountController extends Controller
 
         $fiscal_account = FiscalAccount::findOrFail($id);
 
-        $fiscal_account->update($request->all());
+        $fiscal_account->update($validated);
 
         return redirect()->route('fiscal_account.index')->with('success', 'FiscalAccount berhasil diperbarui.');
     }

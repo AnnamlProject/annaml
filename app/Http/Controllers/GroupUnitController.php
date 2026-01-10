@@ -53,7 +53,7 @@ class GroupUnitController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama' => 'required|string',
             'deskripsi' => 'nullable|string',
 
@@ -61,7 +61,7 @@ class GroupUnitController extends Controller
 
         $group_unit = GroupUnit::findOrFail($id);
 
-        $group_unit->update($request->all());
+        $group_unit->update($validated);
 
         return redirect()->route('group_unit.index')->with('success', 'Crew berhasil diperbarui.');
     }

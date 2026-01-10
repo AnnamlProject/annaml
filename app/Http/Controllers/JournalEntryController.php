@@ -43,8 +43,8 @@ class JournalEntryController extends Controller
         }
 
 
-        // Eksekusi query sekali di akhir
-        $data = $query->get();
+        // Eksekusi query dengan pagination
+        $data = $query->paginate(15)->appends(request()->query());
 
         return view('journal_entry.index', compact('data', 'tahunList'));
     }
@@ -394,11 +394,12 @@ class JournalEntryController extends Controller
             $query->where('source', $request->source);
         }
 
-        $entries = $query->get();
+        $entries = $query->limit(100)->get();
 
         return view('journal_entry.view_journal_entry', [
             'entries' => $entries,
             'not_found' => $entries->isEmpty() ? 'Data tidak ditemukan untuk filter yang dipilih.' : null,
+            'has_more' => $query->count() > 100, // Indicate if there are more records
         ]);
     }
     public function edit($id)

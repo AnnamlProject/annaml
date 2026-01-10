@@ -20,13 +20,13 @@ class LevelKaryawanController extends Controller
     }
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama_level' => 'required|string',
             'deskripsi' => 'nullable|string',
 
         ]);
 
-        LevelKaryawan::create($request->all());
+        LevelKaryawan::create($validated);
 
         return redirect()->route('LevelKaryawan.index')->with('success', 'Level Karyawan berhasil ditambahkan.');
     }
@@ -45,14 +45,14 @@ class LevelKaryawanController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama_level' => 'required|string',
             'deskripsi' => 'nullable|string',
         ]);
 
         $levelKaryawan = LevelKaryawan::findOrFail($id);
 
-        $levelKaryawan->update($request->all());
+        $levelKaryawan->update($validated);
 
         return redirect()->route('LevelKaryawan.index')->with('success', 'Level Karyawan berhasil diperbarui.');
     }
